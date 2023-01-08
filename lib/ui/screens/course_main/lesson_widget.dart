@@ -13,7 +13,7 @@ class LessonWidget  extends StatelessWidget {
   Widget build(BuildContext context) {
     return  Column(
       children: [
-        const Text('שיעור'),
+        const Text('שיעור test'),
         Text(lesson.name),
       ],
     ) ;
