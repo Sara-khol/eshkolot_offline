@@ -8,7 +8,7 @@ class  Lesson {
   Id id = Isar.autoIncrement;
   late String name;
   // Questionnaire? questionnaire;
-  final questionnaire = IsarLink<Questionnaire>();
+  final questionnaire = IsarLinks<Questionnaire>();
 
 }
 

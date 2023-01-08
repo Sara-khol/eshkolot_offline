@@ -47,7 +47,7 @@ const SubjectSchema = CollectionSchema(
       id: -5076065259254387669,
       name: r'questionnaire',
       target: r'Questionnaire',
-      single: true,
+      single: false,
     )
   },
   embeddedSchemas: {},
@@ -460,9 +460,56 @@ extension SubjectQueryLinks
     });
   }
 
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> questionnaireIsNull() {
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      questionnaireLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> questionnaireIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(r'questionnaire', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      questionnaireIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      questionnaireLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      questionnaireLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      questionnaireLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'questionnaire', lower, includeLower, upper, includeUpper);
     });
   }
 }

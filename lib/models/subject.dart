@@ -15,7 +15,7 @@ class Subject {
 
   final lessons = IsarLinks<Lesson>();
    // List<Questionnaire>? questionnaires;
-  final questionnaire = IsarLink<Questionnaire>();
+  final questionnaire = IsarLinks<Questionnaire>();
 
 
 }

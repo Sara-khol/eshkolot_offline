@@ -40,7 +40,7 @@ initData() async {
       List<Lesson> lessons = [
         Lesson()
           ..name = 'מבוא ואותיות ניקוד'
-          ..questionnaire.value = questionnaires.first,
+          ..questionnaire.add(questionnaires.first),
         Lesson()..name = 'אותיות עיצור א',
         Lesson()..name = 'אותיות עיצור ב',
         Lesson()..name = 'אותיות עיצור ג',
@@ -60,7 +60,7 @@ initData() async {
         Subject()
           ..name = 'חוקי קריאה והגיה'
           ..lessons.addAll(lessons)
-          ..questionnaire.value=questionnaires[1],
+          ..questionnaire.add(questionnaires[1]),
         Subject()
           ..name = 'מבנה המשפט התיאורי'
           //..lessons.add(lessons[0])

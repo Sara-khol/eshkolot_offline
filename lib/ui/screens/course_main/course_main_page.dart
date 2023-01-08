@@ -82,13 +82,12 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                             onTap: () => setState(() =>
                                                 mainWidget = LessonWidget(
                                                     lesson: currentLesson))),
-                                        if (currentLesson.questionnaire.value !=
-                                            null)
+                                        if (currentLesson.questionnaire.isNotEmpty)
                                           GestureDetector(
                                             onTap: () => setState(() {
                                               mainWidget = QuestionnaireWidget(
                                                   questionnaire: currentLesson
-                                                      .questionnaire.value!);
+                                                      .questionnaire.elementAt(0));
                                             }),
                                             child: Container(
                                               color:
@@ -96,19 +95,19 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                               child: ListTile(
                                                   title: Text(currentLesson
                                                       .questionnaire
-                                                      .value!
+                                                      .elementAt(0)
                                                       .question!)),
                                             ),
                                           ),
                                       ],
                                     ));
                                   }),
-                              if (currentSubject.questionnaire.value != null)
+                              if (currentSubject.questionnaire.isNotEmpty)
                                 GestureDetector(
                                   onTap: () => setState(() {
                                     mainWidget = QuestionnaireWidget(
                                         questionnaire: currentSubject
-                                            .questionnaire.value!);
+                                            .questionnaire.elementAt(0));
                                   }),
                                   child: Container(
                                     width: double.infinity,
@@ -116,7 +115,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                     color: Colors.black26,
                                     child: Center(
                                       child: Text(currentSubject
-                                          .questionnaire.value!.question!),
+                                          .questionnaire.elementAt(0).question!),
                                     ),
                                   ),
                                 )
