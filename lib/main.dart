@@ -2,7 +2,6 @@ import 'package:eshkolot_offline/isar_service.dart';
 import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/course_main_page.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
 
 import 'models/course.dart';
 import 'models/lesson.dart';
@@ -12,7 +11,7 @@ late Course? course;
 
 Future<void> main() async {
   IsarService.instance.init();
-  initData();
+ await initData();
   runApp(MyApp());
 }
 
@@ -89,26 +88,25 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // getEnglishCourse();
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: FutureBuilder<Course?>(
-          future: getEnglishCourse(),
+          future: getFirstEnglishCourse(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               course = snapshot.data;
               return CourseMainPage(course: course!);
             }
+            print('wait...');
             return const CircularProgressIndicator();
           }),
     );
   }
 
-  Future<Course?> getEnglishCourse() async {
+  Future<Course?> getFirstEnglishCourse() async {
     return await IsarService.instance.getFirstCourse();
-    print('jjjjjjjjjjj');
   }
 }
