@@ -20,7 +20,7 @@ initData() async {
     if (list.isEmpty) {
       List<Questionnaire> questionnaires = [
         Questionnaire()
-          ..question = 'שאלה לשיעור מבוא ואותיות ניקוד'
+          ..question = 'שאלת אפשרות יחידה'
           ..optionA = 'אופציה א'
           ..optionB = 'אופציה ב'
           ..optionC = 'אופציה ג'
@@ -28,7 +28,7 @@ initData() async {
           ..ans = ['אופציה ג']
           ..type = QType.oneOption,
         Questionnaire()
-          ..question = 'שאלה לנושא חוקי קריאה והגיה'
+          ..question = 'שאלת בחירה מרובה'
           ..optionA = 'אופציה א'
           ..optionB = 'אופציה ב'
           ..optionC = 'אופציה ג'

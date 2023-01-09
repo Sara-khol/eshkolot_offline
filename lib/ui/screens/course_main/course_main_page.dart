@@ -86,8 +86,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                           GestureDetector(
                                             onTap: () => setState(() {
                                               mainWidget = QuestionnaireWidget(
-                                                  questionnaire: currentLesson
-                                                      .questionnaire.elementAt(0));
+                                                  questionnaires: currentLesson
+                                                      .questionnaire);
                                             }),
                                             child: Container(
                                               color:
@@ -106,8 +106,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                 GestureDetector(
                                   onTap: () => setState(() {
                                     mainWidget = QuestionnaireWidget(
-                                        questionnaire: currentSubject
-                                            .questionnaire.elementAt(0));
+                                        questionnaires: currentSubject
+                                            .questionnaire);
                                   }),
                                   child: Container(
                                     width: double.infinity,
