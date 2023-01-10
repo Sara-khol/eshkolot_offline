@@ -130,23 +130,23 @@ class IsarService {
       // // coursesList[0].subjects.elementAt(0).lessons.save();
       // // await linda.teachers.save();
     });
-     isar.writeTxnSync(()  {
-       isar.courses.putAllSync(coursesList);
+    isar.writeTxnSync(() {
+      isar.lessons.putAllSync(lessonList);
+      isar.subjects.putAllSync(subjectList);
+      isar.courses.putAllSync(coursesList);
     });
   }
 
-
-  Future<List<Course?>> getAllCourses() async {
+  Future<bool> checkIfDBisEmpty() async {
     final isar = await db;
     IsarCollection<Course> coursesCollection = isar.collection<Course>();
-    List<Course?> courses = await coursesCollection.where().findAll();
-    return courses;
+    return await coursesCollection.count()==0;
   }
 
   Future<Course?> getFirstCourse() async {
     final isar = await db;
     IsarCollection<Course> coursesCollection = isar.collection<Course>();
-    Course?  course = await coursesCollection.where().findFirst();
+    Course? course = await coursesCollection.where().findFirst();
     return course;
   }
 
@@ -156,8 +156,6 @@ class IsarService {
         .where()
         .watch(fireImmediately: true /*initialReturn: true*/);
   }
-
-
 
 // insertFresh(List<Email> emailList) async {
 //   await isarInstance.writeTxn(() async {

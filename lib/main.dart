@@ -16,8 +16,7 @@ Future<void> main() async {
 }
 
 initData() async {
-  await IsarService.instance.getAllCourses().then((list) async {
-    if (list.isEmpty) {
+ if(await IsarService.instance.checkIfDBisEmpty()) {
       List<Questionnaire> questionnaires = [
         Questionnaire()
           ..question = 'שאלת אפשרות יחידה'
@@ -78,8 +77,7 @@ initData() async {
           .initCourses(myCourses, subjects, lessons, questionnaires);
       course = await IsarService.instance.getFirstCourse();
     } else
-      print('length ${list.length}');
-  });
+      print('data is filled');
 }
 
 class MyApp extends StatelessWidget {
