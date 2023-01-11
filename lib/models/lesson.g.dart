@@ -17,8 +17,13 @@ const LessonSchema = CollectionSchema(
   name: r'Lesson',
   id: 6343151657775798464,
   properties: {
-    r'name': PropertySchema(
+    r'isCompleted': PropertySchema(
       id: 0,
+      name: r'isCompleted',
+      type: IsarType.bool,
+    ),
+    r'name': PropertySchema(
+      id: 1,
       name: r'name',
       type: IsarType.string,
     )
@@ -60,7 +65,8 @@ void _lessonSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.name);
+  writer.writeBool(offsets[0], object.isCompleted);
+  writer.writeString(offsets[1], object.name);
 }
 
 Lesson _lessonDeserialize(
@@ -71,7 +77,8 @@ Lesson _lessonDeserialize(
 ) {
   final object = Lesson();
   object.id = id;
-  object.name = reader.readString(offsets[0]);
+  object.isCompleted = reader.readBool(offsets[0]);
+  object.name = reader.readString(offsets[1]);
   return object;
 }
 
@@ -83,6 +90,8 @@ P _lessonDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readBool(offset)) as P;
+    case 1:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -227,6 +236,16 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> isCompletedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isCompleted',
+        value: value,
       ));
     });
   }
@@ -426,6 +445,18 @@ extension LessonQueryLinks on QueryBuilder<Lesson, Lesson, QFilterCondition> {
 }
 
 extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByIsCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByIsCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -452,6 +483,18 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByIsCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByIsCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -466,6 +509,12 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
 }
 
 extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByIsCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isCompleted');
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -478,6 +527,12 @@ extension LessonQueryProperty on QueryBuilder<Lesson, Lesson, QQueryProperty> {
   QueryBuilder<Lesson, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Lesson, bool, QQueryOperations> isCompletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isCompleted');
     });
   }
 

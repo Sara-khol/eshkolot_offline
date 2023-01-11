@@ -157,6 +157,17 @@ class IsarService {
         .watch(fireImmediately: true /*initialReturn: true*/);
   }
 
+  updateLesson(int id) async
+  {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      Lesson? lesson= await isar.lessons.get(id);
+      lesson!.isCompleted = true;
+      await isar.lessons.put(lesson);
+    });
+  }
+
+
 // insertFresh(List<Email> emailList) async {
 //   await isarInstance.writeTxn(() async {
 //     await isarInstance.clear();

@@ -6,9 +6,12 @@
 
 #include "generated_plugin_registrant.h"
 
+#include <flutter_platform_alert/flutter_platform_alert_plugin.h>
 #include <isar_flutter_libs/isar_flutter_libs_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
+  FlutterPlatformAlertPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterPlatformAlertPlugin"));
   IsarFlutterLibsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("IsarFlutterLibsPlugin"));
 }

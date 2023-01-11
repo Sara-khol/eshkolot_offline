@@ -2,6 +2,7 @@ import 'package:eshkolot_offline/ui/screens/course_main/lesson_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 
 import '../../../isar_service.dart';
 import '../../../models/course.dart';
@@ -19,10 +20,12 @@ class CourseMainPage extends StatefulWidget {
 
 class _CourseMainPageState extends State<CourseMainPage> {
   Widget mainWidget = Container();
+  late Size screenSize;
+  int lessonPickedIndex = -1;
 
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
+    screenSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(title: const Text('Isar DB Tutorial'), actions: [
         IconButton(
@@ -33,140 +36,142 @@ class _CourseMainPageState extends State<CourseMainPage> {
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: Row(
-          children: [
-            Container(
-              color: Colors.grey.shade100,
-              width: screenSize.width * 0.25,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 60,
-                    color: Colors.blueAccent,
-                    child: Center(
-                      child: Text(
-                        widget.course.title,
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
+          children: [menuWidget(), Expanded(child: mainWidget)],
+        ),
+      ),
+    );
+  }
+
+
+  Widget menuWidget() {
+    return Container(
+      color: Colors.grey.shade100,
+      width: screenSize.width * 0.25,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Container(
+            width: double.infinity,
+            height: 60,
+            color: Colors.blueAccent,
+            child: Center(
+              child: Text(
+                widget.course.title,
+                style: TextStyle(color: Colors.white, fontSize: 25),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.course.subjects.length,
+                itemBuilder: (ctx, sIndex) {
+                  Subject currentSubject =
+                      widget.course.subjects.elementAt(sIndex);
+                  return Column(
+                    children: [
+                      Container(
+                          padding: const EdgeInsets.all(10.0),
+                          height: 50,
+                          width: double.infinity,
+                          color: Colors.cyan,
+                          child: Text(currentSubject.name)),
+                      ListView.builder(
                         shrinkWrap: true,
-                        itemCount: widget.course.subjects.length,
-                        itemBuilder: (ctx, sIndex) {
-                          Subject currentSubject =
-                              widget.course.subjects.elementAt(sIndex);
-                          return Column(
+                        itemCount: currentSubject.lessons.length,
+                        itemBuilder: (ctx, lIndex) {
+                          Lesson currentLesson =
+                              currentSubject.lessons.elementAt(lIndex);
+                          return Center(
+                              child: Column(
                             children: [
-                              Container(
-                                  padding: const EdgeInsets.all(10.0),
-                                  height: 50,
-                                  width: double.infinity,
-                                  color: Colors.cyan,
-                                  child: Text(currentSubject.name)),
-                              ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: currentSubject.lessons.length,
-                                  itemBuilder: (ctx, lIndex) {
-                                    Lesson currentLesson = currentSubject
-                                        .lessons
-                                        .elementAt(lIndex);
-                                    return Center(
-                                        child: Column(
-                                      children: [
-                                        ListTile(
-                                            title: Text(currentLesson.name),
-                                            onTap: () => setState(() =>
-                                                mainWidget = LessonWidget(
-                                                    lesson: currentLesson))),
-                                        if (currentLesson.questionnaire.isNotEmpty)
-                                          GestureDetector(
-                                            onTap: () => setState(() {
-                                              mainWidget = QuestionnaireWidget(
-                                                  questionnaires: currentLesson
-                                                      .questionnaire);
-                                            }),
-                                            child: Container(
-                                              color:
-                                                  Colors.greenAccent.shade100,
-                                              child: ListTile(
-                                                  title: Text(currentLesson
-                                                      .questionnaire
-                                                      .elementAt(0)
-                                                      .question!)),
-                                            ),
-                                          ),
-                                      ],
-                                    ));
+                              ListTile(
+                                  title: Text(currentLesson.name,
+                                      style: lessonPickedIndex == lIndex
+                                          ? TextStyle(
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            )
+                                          : null),
+                                  leading: Visibility(
+                                      visible: currentLesson.isCompleted,
+                                      maintainSize: true,
+                                      maintainAnimation: true,
+                                      maintainState: true,
+                                      child: const Icon(Icons.add_task)),
+                                  onTap: () {
+                                    if (lIndex == 0 ||
+                                        currentSubject.lessons
+                                            .elementAt(lIndex - 1)
+                                            .isCompleted) {
+                                      setState(() => mainWidget =
+                                          LessonWidget(lesson: currentLesson,notifyParent: refresh));
+                                      lessonPickedIndex = lIndex;
+                                    } else {
+                                      showAlert();
+                                    }
                                   }),
-                              if (currentSubject.questionnaire.isNotEmpty)
+                              const Divider(height: 1, color: Colors.black12),
+                              if (currentLesson.questionnaire.isNotEmpty)
                                 GestureDetector(
                                   onTap: () => setState(() {
                                     mainWidget = QuestionnaireWidget(
-                                        questionnaires: currentSubject
-                                            .questionnaire);
+                                        questionnaires:
+                                            currentLesson.questionnaire);
                                   }),
                                   child: Container(
-                                    width: double.infinity,
-                                    height: 40,
-                                    color: Colors.black26,
-                                    child: Center(
-                                      child: Text(currentSubject
-                                          .questionnaire.elementAt(0).question!),
-                                    ),
+                                    color: Colors.greenAccent.shade100,
+                                    child: ListTile(
+                                        title: Center(
+                                      child: Text(currentLesson.questionnaire
+                                          .elementAt(0)
+                                          .question!),
+                                    )),
                                   ),
-                                )
+                                ),
                             ],
-                          );
-                        }),
-                  )
+                          ));
+                        },
+                      ),
+                      if (currentSubject.questionnaire.isNotEmpty)
+                        GestureDetector(
+                          onTap: () => setState(() {
+                            mainWidget = QuestionnaireWidget(
+                                questionnaires: currentSubject.questionnaire);
+                          }),
+                          child: Container(
+                            width: double.infinity,
+                            height: 40,
+                            color: Colors.black26,
+                            child: Center(
+                              child: Text(currentSubject.questionnaire
+                                  .elementAt(0)
+                                  .question!),
+                            ),
+                          ),
+                        )
+                    ],
+                  );
+                }),
+          )
 
-                  //   Text(course.subjects.first.name),
-                  //  Text(course.subjects.first.lessons!.first.name),
-                ],
-              ),
-            ),
-            Expanded(child: mainWidget)
-          ],
-        ),
-        // ElevatedButton(
-        //   onPressed: () {
-        //     showModalBottomSheet(
-        //         context: context,
-        //         builder: (context) {
-        //           return CourseModal(service);
-        //         });
-        //   },
-        //   child: const Text("Add Course"),
-        // ),
-        // const SizedBox(height: 8),
-        // ElevatedButton(
-        //   onPressed: () {
-        //     showModalBottomSheet(
-        //         context: context,
-        //         builder: (context) {
-        //           return StudentModal(service);
-        //         });
-        //   },
-        //   child: const Text("Add Student"),
-        // ),
-        // const SizedBox(height: 8),
-        // ElevatedButton(
-        //   onPressed: () {
-        //     showModalBottomSheet(
-        //         context: context,
-        //         builder: (context) {
-        //           return TeacherModal(service);
-        //         });
-        //   },
-        //   child: const Text("Add Teacher"),
-        // ),
-        // const SizedBox(height: 8),
-        //],
+          //   Text(course.subjects.first.name),
+          //  Text(course.subjects.first.lessons!.first.name),
+        ],
       ),
+    );
+  }
+
+  refresh() {
+    setState(() {});
+  }
+
+  void showAlert() async {
+    await FlutterPlatformAlert.showCustomAlert(
+      windowTitle: 'לא ניתן לעבור לשיעור הבא כל עוד השיעור הקודם לא הושלם',
+      text: '',
+      //iconStyle: IconStyle.information,
     );
   }
 }

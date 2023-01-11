@@ -9,6 +9,7 @@ class  Lesson {
   late String name;
   // Questionnaire? questionnaire;
   final questionnaire = IsarLinks<Questionnaire>();
+  late bool isCompleted=false;
 
 }
 
