@@ -25,7 +25,7 @@ initData() async {
           ..optionC = 'אופציה ג'
           ..optionD = 'אופציה ד'
           ..ans = ['אופציה ג']
-          ..type = QType.oneOption,
+          ..type = QType.radio,
         Questionnaire()
           ..question = 'שאלת בחירה מרובה'
           ..optionA = 'אופציה א'
@@ -33,7 +33,11 @@ initData() async {
           ..optionC = 'אופציה ג'
           ..optionD = 'אופציה ד'
           ..ans = ['אופציה ג', 'אופציה א']
-          ..type = QType.manyOptions
+          ..type = QType.checkbox,
+        Questionnaire()
+          ..question = 'שאלת בחירה חופשית'
+          ..ans = ['אופציה ג', 'אופציה א']
+          ..type = QType.freeChoice
       ];
 
       List<Lesson> lessons = [
@@ -59,7 +63,7 @@ initData() async {
         Subject()
           ..name = 'חוקי קריאה והגיה'
           ..lessons.addAll(lessons)
-          ..questionnaire.add(questionnaires[1]),
+          ..questionnaire.addAll(questionnaires),
         Subject()
           ..name = 'מבנה המשפט התיאורי'
           //..lessons.add(lessons[0])

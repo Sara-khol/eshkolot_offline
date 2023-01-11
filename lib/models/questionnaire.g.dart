@@ -110,12 +110,7 @@ int _questionnaireEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  {
-    final value = object.question;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.question.length * 3;
   return bytesCount;
 }
 
@@ -147,10 +142,10 @@ Questionnaire _questionnaireDeserialize(
   object.optionB = reader.readStringOrNull(offsets[2]);
   object.optionC = reader.readStringOrNull(offsets[3]);
   object.optionD = reader.readStringOrNull(offsets[4]);
-  object.question = reader.readStringOrNull(offsets[5]);
+  object.question = reader.readString(offsets[5]);
   object.type =
       _QuestionnairetypeValueEnumMap[reader.readByteOrNull(offsets[6])] ??
-          QType.oneOption;
+          QType.radio;
   return object;
 }
 
@@ -172,24 +167,28 @@ P _questionnaireDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
       return (_QuestionnairetypeValueEnumMap[reader.readByteOrNull(offset)] ??
-          QType.oneOption) as P;
+          QType.radio) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 const _QuestionnairetypeEnumValueMap = {
-  'oneOption': 0,
-  'manyOptions': 1,
-  'freeOption': 2,
+  'radio': 0,
+  'checkbox': 1,
+  'fillIn': 2,
+  'freeChoice': 3,
+  'openQ': 4,
 };
 const _QuestionnairetypeValueEnumMap = {
-  0: QType.oneOption,
-  1: QType.manyOptions,
-  2: QType.freeOption,
+  0: QType.radio,
+  1: QType.checkbox,
+  2: QType.fillIn,
+  3: QType.freeChoice,
+  4: QType.openQ,
 };
 
 Id _questionnaireGetId(Questionnaire object) {
@@ -1202,26 +1201,8 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      questionIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'question',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      questionIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'question',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
       questionEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1235,7 +1216,7 @@ extension QuestionnaireQueryFilter
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
       questionGreaterThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1251,7 +1232,7 @@ extension QuestionnaireQueryFilter
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
       questionLessThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1267,8 +1248,8 @@ extension QuestionnaireQueryFilter
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
       questionBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -1669,7 +1650,7 @@ extension QuestionnaireQueryProperty
     });
   }
 
-  QueryBuilder<Questionnaire, String?, QQueryOperations> questionProperty() {
+  QueryBuilder<Questionnaire, String, QQueryOperations> questionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'question');
     });

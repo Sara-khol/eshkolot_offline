@@ -15,7 +15,7 @@ class QuestionnaireWidget  extends StatelessWidget {
     return  Column(
       children: [
         const Text('שאלון'),
-        Text(questionnaires.elementAt(0).question??''),
+        Text(questionnaires.elementAt(0).question??'')
       ]);
   }
 }
