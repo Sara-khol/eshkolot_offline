@@ -1,10 +1,8 @@
-import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'dart:convert';
 
-//TODO:create a dynamic fill-in question with unknown number of blanks
 
 class FillIn extends StatefulWidget {
   final Questionnaire question;
