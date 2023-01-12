@@ -42,7 +42,7 @@ class _RadioCheckState extends State<RadioCheck> {
     return Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(children: <Widget>[
-          item.type == check ? getCheckBoxWidget(item) : getRadioWidget(item),
+          item.type == QType.checkbox ? getCheckBoxWidget(item) : getRadioWidget(item),
           SizedBox(
             height: 30.0,
           ),
@@ -59,9 +59,7 @@ class _RadioCheckState extends State<RadioCheck> {
             child: Text(
               item.question,
               textAlign: TextAlign.left,
-
-            ),
-          ),
+            )),
           RadioListTile<String?>(
             title: Text(item.optionA!),
             value: item.optionA,
@@ -189,7 +187,7 @@ class _RadioCheckState extends State<RadioCheck> {
   onVerifyClick() {
     var msg = "";
     final answers=[] ;
-    if (item.type == radio) {
+    if (item.type == QType.radio) {
       if (_character  == item.ans![0] )
       {
         // if (_character == AppEnum.optionA && item.optionA == item.ans[0] ||
@@ -210,11 +208,12 @@ class _RadioCheckState extends State<RadioCheck> {
         answers.add(item.optionC);
       if(_isSelectedD)
         answers.add(item.optionD);
-      Function eq = const ListEquality().equals;
+      Function eq = const DeepCollectionEquality.unordered().equals;
       print('answers${answers}');
       print('item.ans${item.ans}');
 
-      if (eq(answers,item.ans)){
+      if (eq(answers,item.ans))
+      {
         msg = "Correct";
       } else {
         msg = "Incorrect";

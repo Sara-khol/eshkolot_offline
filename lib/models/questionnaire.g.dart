@@ -22,33 +22,38 @@ const QuestionnaireSchema = CollectionSchema(
       name: r'ans',
       type: IsarType.stringList,
     ),
-    r'optionA': PropertySchema(
+    r'fillInQuestion': PropertySchema(
       id: 1,
+      name: r'fillInQuestion',
+      type: IsarType.string,
+    ),
+    r'optionA': PropertySchema(
+      id: 2,
       name: r'optionA',
       type: IsarType.string,
     ),
     r'optionB': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'optionB',
       type: IsarType.string,
     ),
     r'optionC': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'optionC',
       type: IsarType.string,
     ),
     r'optionD': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'optionD',
       type: IsarType.string,
     ),
     r'question': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'question',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'type',
       type: IsarType.byte,
       enumMap: _QuestionnairetypeEnumValueMap,
@@ -87,6 +92,12 @@ int _questionnaireEstimateSize(
     }
   }
   {
+    final value = object.fillInQuestion;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.optionA;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -121,12 +132,13 @@ void _questionnaireSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeStringList(offsets[0], object.ans);
-  writer.writeString(offsets[1], object.optionA);
-  writer.writeString(offsets[2], object.optionB);
-  writer.writeString(offsets[3], object.optionC);
-  writer.writeString(offsets[4], object.optionD);
-  writer.writeString(offsets[5], object.question);
-  writer.writeByte(offsets[6], object.type.index);
+  writer.writeString(offsets[1], object.fillInQuestion);
+  writer.writeString(offsets[2], object.optionA);
+  writer.writeString(offsets[3], object.optionB);
+  writer.writeString(offsets[4], object.optionC);
+  writer.writeString(offsets[5], object.optionD);
+  writer.writeString(offsets[6], object.question);
+  writer.writeByte(offsets[7], object.type.index);
 }
 
 Questionnaire _questionnaireDeserialize(
@@ -137,14 +149,15 @@ Questionnaire _questionnaireDeserialize(
 ) {
   final object = Questionnaire();
   object.ans = reader.readStringList(offsets[0]);
+  object.fillInQuestion = reader.readStringOrNull(offsets[1]);
   object.id = id;
-  object.optionA = reader.readStringOrNull(offsets[1]);
-  object.optionB = reader.readStringOrNull(offsets[2]);
-  object.optionC = reader.readStringOrNull(offsets[3]);
-  object.optionD = reader.readStringOrNull(offsets[4]);
-  object.question = reader.readString(offsets[5]);
+  object.optionA = reader.readStringOrNull(offsets[2]);
+  object.optionB = reader.readStringOrNull(offsets[3]);
+  object.optionC = reader.readStringOrNull(offsets[4]);
+  object.optionD = reader.readStringOrNull(offsets[5]);
+  object.question = reader.readString(offsets[6]);
   object.type =
-      _QuestionnairetypeValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+      _QuestionnairetypeValueEnumMap[reader.readByteOrNull(offsets[7])] ??
           QType.radio;
   return object;
 }
@@ -167,8 +180,10 @@ P _questionnaireDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (_QuestionnairetypeValueEnumMap[reader.readByteOrNull(offset)] ??
           QType.radio) as P;
     default:
@@ -527,6 +542,160 @@ extension QuestionnaireQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fillInQuestion',
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fillInQuestion',
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fillInQuestion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fillInQuestion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fillInQuestion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fillInQuestion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'fillInQuestion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'fillInQuestion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'fillInQuestion',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'fillInQuestion',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fillInQuestion',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      fillInQuestionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'fillInQuestion',
+        value: '',
+      ));
     });
   }
 
@@ -1400,6 +1569,20 @@ extension QuestionnaireQueryLinks
 
 extension QuestionnaireQuerySortBy
     on QueryBuilder<Questionnaire, Questionnaire, QSortBy> {
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy>
+      sortByFillInQuestion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fillInQuestion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy>
+      sortByFillInQuestionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fillInQuestion', Sort.desc);
+    });
+  }
+
   QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionA() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'optionA', Sort.asc);
@@ -1476,6 +1659,20 @@ extension QuestionnaireQuerySortBy
 
 extension QuestionnaireQuerySortThenBy
     on QueryBuilder<Questionnaire, Questionnaire, QSortThenBy> {
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy>
+      thenByFillInQuestion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fillInQuestion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy>
+      thenByFillInQuestionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fillInQuestion', Sort.desc);
+    });
+  }
+
   QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1570,6 +1767,14 @@ extension QuestionnaireQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Questionnaire, Questionnaire, QDistinct>
+      distinctByFillInQuestion({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fillInQuestion',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByOptionA(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1623,6 +1828,13 @@ extension QuestionnaireQueryProperty
   QueryBuilder<Questionnaire, List<String>?, QQueryOperations> ansProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'ans');
+    });
+  }
+
+  QueryBuilder<Questionnaire, String?, QQueryOperations>
+      fillInQuestionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fillInQuestion');
     });
   }
 

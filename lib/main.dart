@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'models/course.dart';
 import 'models/lesson.dart';
 import 'models/questionnaire.dart';
+import 'dart:convert';
+
 
 late Course? course;
 
@@ -17,6 +19,14 @@ Future<void> main() async {
 
 initData() async {
  if(await IsarService.instance.checkIfDBisEmpty()) {
+
+   Map<String, List<String>> fillInQ = {
+     'ab': ['c'],
+     'd e f': ['g'],
+     'h': []
+   };
+
+
       List<Questionnaire> questionnaires = [
         Questionnaire()
           ..question = 'שאלת אפשרות יחידה'
@@ -32,12 +42,16 @@ initData() async {
           ..optionB = 'אופציה ב'
           ..optionC = 'אופציה ג'
           ..optionD = 'אופציה ד'
-          ..ans = ['אופציה ג', 'אופציה א']
+          ..ans = ['אופציה ג','אופציה א']
           ..type = QType.checkbox,
         Questionnaire()
           ..question = 'שאלת בחירה חופשית'
-          ..ans = ['אופציה ג', 'אופציה א']
-          ..type = QType.freeChoice
+          ..ans = ['אופציה ג','אופציה א']
+          ..type = QType.freeChoice,
+        Questionnaire()
+          ..question = 'שאלה מלא את החסר'
+          ..fillInQuestion=json.encode(fillInQ)
+          ..type = QType.fillIn
       ];
 
       List<Lesson> lessons = [

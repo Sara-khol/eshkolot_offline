@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:isar/isar.dart';
 
 part 'questionnaire.g.dart';
@@ -10,7 +12,8 @@ class Questionnaire {
   late String? optionB='';
   late String? optionC='';
   late String? optionD='';
-  late List<String>? ans;
+  late List<String>? ans=[];
+  late String? fillInQuestion='';
   @enumerated
   late QType type;
 
