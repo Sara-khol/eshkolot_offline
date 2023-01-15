@@ -117,6 +117,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                 GestureDetector(
                                   onTap: () => setState(() {
                                     mainWidget = QuestionnaireWidget(
+                                      key:  UniqueKey(),
                                         questionnaires:
                                             currentLesson.questionnaire);
                                   }),
@@ -126,7 +127,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                         title: Center(
                                       child: Text(currentLesson.questionnaire
                                           .elementAt(0)
-                                          .question!),
+                                          .question),
                                     )),
                                   ),
                                 ),
@@ -138,6 +139,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                         GestureDetector(
                           onTap: () => setState(() {
                             mainWidget = QuestionnaireWidget(
+                              key: UniqueKey(),
                                 questionnaires: currentSubject.questionnaire);
                           }),
                           child: Container(
@@ -147,7 +149,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                             child: Center(
                               child: Text(currentSubject.questionnaire
                                   .elementAt(0)
-                                  .question!),
+                                  .question),
                             ),
                           ),
                         )

@@ -1,33 +1,24 @@
-import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/checkbox_widget.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'package:collection/collection.dart';
 
-
 class RadioCheck extends StatefulWidget {
   Questionnaire question;
-  CarouselController buttonCarouselController;
 
-  RadioCheck(
-      this.question,
-      this.buttonCarouselController, {
-        super.key,
-      });
+  RadioCheck(this.question, {super.key});
 
   @override
-  _RadioCheckState createState() => _RadioCheckState(question, buttonCarouselController);
+  _RadioCheckState createState() => _RadioCheckState(question);
 }
 
 class _RadioCheckState extends State<RadioCheck> {
-  _RadioCheckState(this.item, this.buttonCarouselController);
-
-  CarouselController buttonCarouselController;
+  _RadioCheckState(this.item);
 
   Questionnaire item;
 
   // AppEnum _character = AppEnum.NON;
-  String _character='';
+  String _character = '';
 
   bool _isSelectedA = false;
   bool _isSelectedB = false;
@@ -42,7 +33,9 @@ class _RadioCheckState extends State<RadioCheck> {
     return Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(children: <Widget>[
-          item.type == QType.checkbox ? getCheckBoxWidget(item) : getRadioWidget(item),
+          item.type == QType.checkbox
+              ? getCheckBoxWidget(item)
+              : getRadioWidget(item),
           SizedBox(
             height: 30.0,
           ),
@@ -55,11 +48,11 @@ class _RadioCheckState extends State<RadioCheck> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              item.question,
-              textAlign: TextAlign.left,
-            )),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                item.question,
+                textAlign: TextAlign.left,
+              )),
           RadioListTile<String?>(
             title: Text(item.optionA!),
             value: item.optionA,
@@ -112,7 +105,6 @@ class _RadioCheckState extends State<RadioCheck> {
             child: Text(
               item.question,
               textAlign: TextAlign.left,
-
             ),
           ),
           CheckBoxWidget(
@@ -155,8 +147,7 @@ class _RadioCheckState extends State<RadioCheck> {
               });
             },
           ),
-        ]
-    );
+        ]);
   }
 
   Widget actionButton() {
@@ -165,20 +156,11 @@ class _RadioCheckState extends State<RadioCheck> {
       children: <Widget>[
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF167F67)),
-          child: Text("Verify",
+          child: Text(
+            "Verify",
             style: TextStyle(color: Colors.white),
           ),
           onPressed: () => onVerifyClick(),
-        ),
-        SizedBox(
-          width: 20.0,
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF167F67)),
-          child: Text("Next",
-            style: TextStyle(color: Colors.white),
-          ),
-          onPressed: () => onNextClick(),
         ),
       ],
     );
@@ -186,10 +168,9 @@ class _RadioCheckState extends State<RadioCheck> {
 
   onVerifyClick() {
     var msg = "";
-    final answers=[] ;
+    final answers = [];
     if (item.type == QType.radio) {
-      if (_character  == item.ans![0] )
-      {
+      if (_character == item.ans![0]) {
         // if (_character == AppEnum.optionA && item.optionA == item.ans[0] ||
         //     _character == AppEnum.optionB && item.optionB == item.ans[0] ||
         //     _character == AppEnum.optionC && item.optionC == item.ans[0] ||
@@ -198,35 +179,26 @@ class _RadioCheckState extends State<RadioCheck> {
       } else {
         msg = "Incorrect";
       }
-    }
-    else {
-      if(_isSelectedA)
-        answers.add(item.optionA);
-      if(_isSelectedB)
-        answers.add(item.optionB);
-      if(_isSelectedC)
-        answers.add(item.optionC);
-      if(_isSelectedD)
-        answers.add(item.optionD);
+    } else {
+      if (_isSelectedA) answers.add(item.optionA);
+      if (_isSelectedB) answers.add(item.optionB);
+      if (_isSelectedC) answers.add(item.optionC);
+      if (_isSelectedD) answers.add(item.optionD);
       Function eq = const DeepCollectionEquality.unordered().equals;
       print('answers${answers}');
       print('item.ans${item.ans}');
 
-      if (eq(answers,item.ans))
-      {
+      if (eq(answers, item.ans)) {
         msg = "Correct";
       } else {
         msg = "Incorrect";
       }
     }
-    showDialog(context: context, builder: (context) {
-
-      return AlertDialog(content: Text(msg),backgroundColor: Colors.green);
-    },);
-  }
-
-  onNextClick() {
-    buttonCarouselController.nextPage(
-        duration: Duration(milliseconds: 300), curve: Curves.linear);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(content: Text(msg), backgroundColor: Colors.green);
+      },
+    );
   }
 }
