@@ -7,6 +7,8 @@ import 'models/course.dart';
 import 'models/lesson.dart';
 import 'models/questionnaire.dart';
 import 'dart:convert';
+import 'package:dio/dio.dart';
+
 
 
 late Course? course;
@@ -14,6 +16,7 @@ late Course? course;
 Future<void> main() async {
   IsarService.instance.init();
  await initData();
+ await connectToVimoe();
   runApp(MyApp());
 }
 
@@ -97,6 +100,23 @@ initData() async {
     } else
       print('data is filled');
 }
+
+connectToVimoe() async
+ {
+   // String token='fb7f92745521f268deae101b7e3abbc4';
+   String token='4eda357f555a3eef86e254b9bf012d85';//privet
+   int videoId=789969851;
+   Dio dio =  Dio();
+   dio.options.headers['content-Type'] = 'application/json';
+   dio.options.headers["authorization"] = "bearer ${token}";
+   // Response response = await dio.get('https://api.vimeo.com/apps/1bba3dc3af2a22c466bfcd4f15817a600b0284e7');
+   Response response = await dio.get('https://api.vimeo.com/videos/${videoId}');
+   print("data ${response.data}");
+   print("headers ${response.headers}");
+   print("requestOptions ${response.requestOptions}");
+   print("statusCode ${response.statusCode}");
+;
+ }
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});

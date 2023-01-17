@@ -112,8 +112,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                         builder: (
                             BuildContext context,
                             List<dynamic> accepted,
-                            List<dynamic> rejected,
-                            ) {
+                            List<dynamic> rejected) {
                           return DottedBorder(
                             borderType: BorderType.RRect,
                             radius: Radius.circular(12),
@@ -128,10 +127,10 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                                 height: 50,
                                 width: 80,
                                 margin: EdgeInsets.all(10.0),
-                                color: question.isDropped[question.items[i]]! ? Colors.pinkAccent[100] : null,
+                                color:  question.ans[i]=='' ||!question.isDropped[question.ans[i]]!  ? null:Colors.pinkAccent[100] ,
                                 child: Center(
                                     child: Text(
-                                      !question.isDropped[question.items[i]]! ? 'Drop' :
+                                      question.ans[i]=='' ||!question.isDropped[question.ans[i]]! ? 'Drop' :
                                       question.ans[i],
                                       textScaleFactor: 2,
                                     )),
@@ -151,7 +150,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                           });
                         },
                         onLeave: (data) {
-                          //showSnackBarGlobal(context, 'Missed');
+                    print('bjkhk');
                         },
                       ),
                       ],
