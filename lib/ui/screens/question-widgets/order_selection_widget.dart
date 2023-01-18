@@ -1,7 +1,9 @@
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'package:eshkolot_offline/models/dragging_question.dart';
+//import 'package:flutter/foundation.dart';
 
 void main() {
   runApp(MyApp());
@@ -49,119 +51,132 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
 
     print('build ${question.isDropped}');
     return Scaffold(
-        body: Container(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        for(var q in question.items)...[
-                          Draggable<String>(
-                            // Data is the value this Draggable stores.
-                            data: q,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      for(var q in question.items)...[
+                        Draggable<String>(
+                          // Data is the value this Draggable stores.
+                          data: q,
+                          child: Container(
+                            height: 50.0,
+                            width: 80.0,
+                            color: Colors.pinkAccent[100],
+                            margin: EdgeInsets.all(10.0),
+                            child: Center(
+                              child: Text(
+                                q,
+                                textScaleFactor: 2,
+                              ),
+                            ),
+                          ),
+                          feedback: Material(
                             child: Container(
                               height: 50.0,
                               width: 80.0,
-                              color: Colors.pinkAccent[100],
-                              margin: EdgeInsets.all(10.0),
-                              child: Center(
+
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent,
+                              ),
+                              child:  Center(
                                 child: Text(
                                   q,
                                   textScaleFactor: 2,
                                 ),
                               ),
                             ),
-                            feedback: Material(
-                              child: Container(
-                                height: 50.0,
-                                width: 80.0,
+                          ),
+                          childWhenDragging: Container(
+                            height: 50.0,
+                            width: 80.0,
+                            margin: EdgeInsets.all(10.0),
+                          ),
+                        ),
+                      ],
+                ],
+              ),
 
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent,
-                                ),
-                                child:  Center(
-                                  child: Text(
-                                    q,
-                                    textScaleFactor: 2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            childWhenDragging: Container(
-                              height: 50.0,
-                              width: 80.0,
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.15,
+              ),
+
+                Row(
+                  children: [
+                    for(int i=0;i< question.items.length;i++)...[
+                    DragTarget<String>(
+                      builder: (
+                          BuildContext context,
+                          List<dynamic> accepted,
+                          List<dynamic> rejected) {
+                        return DottedBorder(
+                          borderType: BorderType.RRect,
+                          radius: Radius.circular(12),
+                          padding: EdgeInsets.all(6),
+                          color: Colors.grey,
+                          strokeWidth: 2,
+                          dashPattern: [8],
+
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            child: Container(
+                              height: 50,
+                              width: 80,
                               margin: EdgeInsets.all(10.0),
+                              color:  question.ans[i]=='' ||!question.isDropped[question.ans[i]]!  ? null:Colors.pinkAccent[100],
+                              child: Center(
+                                  child: Text(
+                                    question.ans[i]=='' ||!question.isDropped[question.ans[i]]! ? 'Drop' :
+                                    question.ans[i],
+                                    textScaleFactor: 2,
+                                  )),
                             ),
                           ),
-                        ],
-                  ],
-                ),
-
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.15,
-                ),
-
-
-                  Row(
-                    children: [
-                      for(int i=0;i< question.items.length;i++)...[
-                      DragTarget<String>(
-                        builder: (
-                            BuildContext context,
-                            List<dynamic> accepted,
-                            List<dynamic> rejected) {
-                          return DottedBorder(
-                            borderType: BorderType.RRect,
-                            radius: Radius.circular(12),
-                            padding: EdgeInsets.all(6),
-                            color: Colors.grey,
-                            strokeWidth: 2,
-                            dashPattern: [8],
-
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
-                              child: Container(
-                                height: 50,
-                                width: 80,
-                                margin: EdgeInsets.all(10.0),
-                                color:  question.ans[i]=='' ||!question.isDropped[question.ans[i]]!  ? null:Colors.pinkAccent[100] ,
-                                child: Center(
-                                    child: Text(
-                                      question.ans[i]=='' ||!question.isDropped[question.ans[i]]! ? 'Drop' :
-                                      question.ans[i],
-                                      textScaleFactor: 2,
-                                    )),
-                              ),
-                            ),
-                          );
-                        },
-                        onAccept: (data) {
-                          debugPrint(data);
-                          setState(() {
-                            //showSnackBarGlobal(context, 'Dropped successfully!');
-                            question.isDropped[data] = true;
-                            question.ans[i]=data;
-                            print('onAccept${question.isDropped}');
-                            print('onAccept${question.ans}');
-                            print('data${data}');
-                          });
-                        },
-                        onLeave: (data) {
-                    print('bjkhk');
-                        },
-                      ),
-                      ],
+                        );
+                      },
+                      onAccept: (data) {
+                        debugPrint(data);
+                        setState(() {
+                          //showSnackBarGlobal(context, 'Dropped successfully!');
+                          question.isDropped[data] = true;
+                          question.ans[i]=data;
+                          print('onAccept${question.isDropped}');
+                          print('onAccept${question.ans}');
+                          print('data $data');
+                        });
+                      },
+                      onLeave: (data) {
+                        //question.isDropped[data!] = false;
+                        print('$data is left');
+                      },
+                    ),
                     ],
-                  ),
                   ],
                 ),
-              ],
-          ),
-        )
-      )
+                ],
+              ),
+            ],
+        ),
+        ),
+        floatingActionButton: FloatingActionButton(
+
+          onPressed: () {
+            print('${question.ans} ${ question.positions}');
+            showDialog(context: context, builder: (context) {
+              if (listEquals(question.ans,question.positions)) {
+                return const AlertDialog(content: Text('Correct'));
+              }
+              else {
+                return const AlertDialog(content: Text('Incorrect'));
+              }
+            },);
+          },
+          child: const Icon(Icons.check),
+        ),
     );
   }
 }
