@@ -7,7 +7,7 @@ import Foundation
 
 import flutter_platform_alert
 import isar_flutter_libs
-import path_provider_macos
+import path_provider_foundation
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterPlatformAlertPlugin.register(with: registry.registrar(forPlugin: "FlutterPlatformAlertPlugin"))
