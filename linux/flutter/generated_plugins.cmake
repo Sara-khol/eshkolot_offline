@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  dart_vlc
   flutter_platform_alert
   isar_flutter_libs
 )

@@ -3,8 +3,9 @@ import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dar
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../isar_service.dart';
+import '../../../services/isar_service.dart';
 import '../../../models/course.dart';
 import '../../../models/lesson.dart';
 import '../../../models/subject.dart';
@@ -53,12 +54,12 @@ class _CourseMainPageState extends State<CourseMainPage> {
         children: [
           Container(
             width: double.infinity,
-            height: 60,
+            height: 60.h,
             color: Colors.blueAccent,
             child: Center(
               child: Text(
                 widget.course.title,
-                style: TextStyle(color: Colors.white, fontSize: 25),
+                style: TextStyle(color: Colors.white, fontSize: 25.sp),
               ),
             ),
           ),
@@ -72,11 +73,11 @@ class _CourseMainPageState extends State<CourseMainPage> {
                   return Column(
                     children: [
                       Container(
-                          padding: const EdgeInsets.all(10.0),
-                          height: 50,
+                          //padding:  EdgeInsets.all(10.w),
+                          height: 50.h,
                           width: double.infinity,
                           color: Colors.cyan,
-                          child: Text(currentSubject.name)),
+                          child: Center(child: Text(currentSubject.name))),
                       ListView.builder(
                         shrinkWrap: true,
                         itemCount: currentSubject.lessons.length,
@@ -144,7 +145,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                           }),
                           child: Container(
                             width: double.infinity,
-                            height: 40,
+                            height: 50.h,
                             color: Colors.black26,
                             child: Center(
                               child: Text(currentSubject.questionnaire

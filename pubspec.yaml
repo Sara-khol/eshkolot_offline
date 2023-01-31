@@ -33,13 +33,16 @@ dependencies:
     sdk: flutter
   isar: ^3.0.5
   isar_flutter_libs: ^3.0.5
-  path_provider: ^2.0.11
+  path_provider: ^2.0.12
   flutter_platform_alert: ^0.3.0
   carousel_slider: ^4.2.1
   dio: ^4.0.6
   json_annotation: ^4.7.0
   flutter_draggable_gridview: ^0.0.7
   drag_and_drop_lists: ^0.3.3
+  dart_vlc: ^0.4.0
+  flutter_screenutil: ^5.6.1
+
 
 
 
