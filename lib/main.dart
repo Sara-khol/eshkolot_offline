@@ -1,7 +1,7 @@
 
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/models/subject.dart';
-import 'package:eshkolot_offline/services/vimoe_service.dart';
+//import 'package:eshkolot_offline/services/vimoe_service.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/course_main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

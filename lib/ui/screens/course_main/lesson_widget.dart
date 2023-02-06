@@ -1,4 +1,4 @@
-import 'package:eshkolot_offline/isar_service.dart';
+import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:flutter/material.dart';
 
 import '../../../models/lesson.dart';

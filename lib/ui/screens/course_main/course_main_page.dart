@@ -100,7 +100,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                       maintainSize: true,
                                       maintainAnimation: true,
                                       maintainState: true,
-                                      child: const Icon(Icons.add_task)),
+                                      child: const Icon(Icons.check_circle,color: Color(0xFF2D2828),)),
                                   onTap: () {
                                     if (lIndex == 0 ||
                                         currentSubject.lessons
