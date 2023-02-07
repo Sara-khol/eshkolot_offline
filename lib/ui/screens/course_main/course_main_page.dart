@@ -37,7 +37,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: Row(
-          children: [menuWidget(), Expanded(child: mainWidget)],
+          children: [menuWidget(),Expanded(child: mainWidget)],
         ),
       ),
     );
@@ -54,12 +54,12 @@ class _CourseMainPageState extends State<CourseMainPage> {
         children: [
           Container(
             width: double.infinity,
-            height: 60.h,
+            height: 80.h,
             color: Colors.blueAccent,
             child: Center(
               child: Text(
                 widget.course.title,
-                style: TextStyle(color: Colors.white, fontSize: 25.sp),
+                style: TextStyle(color: Colors.white, fontSize: 25),
               ),
             ),
           ),
@@ -165,6 +165,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
       ),
     );
   }
+
 
   refresh() {
     setState(() {});

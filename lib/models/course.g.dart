@@ -17,8 +17,13 @@ const CourseSchema = CollectionSchema(
   name: r'Course',
   id: -5832084671214696602,
   properties: {
-    r'title': PropertySchema(
+    r'isDownloaded': PropertySchema(
       id: 0,
+      name: r'isDownloaded',
+      type: IsarType.bool,
+    ),
+    r'title': PropertySchema(
+      id: 1,
       name: r'title',
       type: IsarType.string,
     )
@@ -60,7 +65,8 @@ void _courseSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.title);
+  writer.writeBool(offsets[0], object.isDownloaded);
+  writer.writeString(offsets[1], object.title);
 }
 
 Course _courseDeserialize(
@@ -71,7 +77,8 @@ Course _courseDeserialize(
 ) {
   final object = Course();
   object.id = id;
-  object.title = reader.readString(offsets[0]);
+  object.isDownloaded = reader.readBool(offsets[0]);
+  object.title = reader.readString(offsets[1]);
   return object;
 }
 
@@ -83,6 +90,8 @@ P _courseDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readBool(offset)) as P;
+    case 1:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -226,6 +235,16 @@ extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> isDownloadedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDownloaded',
+        value: value,
       ));
     });
   }
@@ -422,6 +441,18 @@ extension CourseQueryLinks on QueryBuilder<Course, Course, QFilterCondition> {
 }
 
 extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsDownloaded() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownloaded', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsDownloadedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownloaded', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -448,6 +479,18 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsDownloaded() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownloaded', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsDownloadedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownloaded', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -462,6 +505,12 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
 }
 
 extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
+  QueryBuilder<Course, Course, QDistinct> distinctByIsDownloaded() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDownloaded');
+    });
+  }
+
   QueryBuilder<Course, Course, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -474,6 +523,12 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
   QueryBuilder<Course, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Course, bool, QQueryOperations> isDownloadedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDownloaded');
     });
   }
 

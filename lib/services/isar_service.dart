@@ -1,6 +1,5 @@
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
-import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -164,6 +163,16 @@ class IsarService {
       Lesson? lesson= await isar.lessons.get(id);
       lesson!.isCompleted = true;
       await isar.lessons.put(lesson);
+    });
+  }
+
+  updateDownloadCourse(int id) async
+  {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      Course? course= await isar.courses.get(id);
+      course!.isDownloaded = true;
+      await isar.courses.put(course);
     });
   }
 
