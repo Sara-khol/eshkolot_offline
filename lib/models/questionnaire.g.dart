@@ -27,33 +27,18 @@ const QuestionnaireSchema = CollectionSchema(
       name: r'fillInQuestion',
       type: IsarType.string,
     ),
-    r'optionA': PropertySchema(
+    r'options': PropertySchema(
       id: 2,
-      name: r'optionA',
-      type: IsarType.string,
-    ),
-    r'optionB': PropertySchema(
-      id: 3,
-      name: r'optionB',
-      type: IsarType.string,
-    ),
-    r'optionC': PropertySchema(
-      id: 4,
-      name: r'optionC',
-      type: IsarType.string,
-    ),
-    r'optionD': PropertySchema(
-      id: 5,
-      name: r'optionD',
-      type: IsarType.string,
+      name: r'options',
+      type: IsarType.stringList,
     ),
     r'question': PropertySchema(
-      id: 6,
+      id: 3,
       name: r'question',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 7,
+      id: 4,
       name: r'type',
       type: IsarType.byte,
       enumMap: _QuestionnairetypeEnumValueMap,
@@ -98,27 +83,15 @@ int _questionnaireEstimateSize(
     }
   }
   {
-    final value = object.optionA;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.optionB;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.optionC;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.optionD;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+    final list = object.options;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += value.length * 3;
+        }
+      }
     }
   }
   bytesCount += 3 + object.question.length * 3;
@@ -133,12 +106,9 @@ void _questionnaireSerialize(
 ) {
   writer.writeStringList(offsets[0], object.ans);
   writer.writeString(offsets[1], object.fillInQuestion);
-  writer.writeString(offsets[2], object.optionA);
-  writer.writeString(offsets[3], object.optionB);
-  writer.writeString(offsets[4], object.optionC);
-  writer.writeString(offsets[5], object.optionD);
-  writer.writeString(offsets[6], object.question);
-  writer.writeByte(offsets[7], object.type.index);
+  writer.writeStringList(offsets[2], object.options);
+  writer.writeString(offsets[3], object.question);
+  writer.writeByte(offsets[4], object.type.index);
 }
 
 Questionnaire _questionnaireDeserialize(
@@ -151,13 +121,10 @@ Questionnaire _questionnaireDeserialize(
   object.ans = reader.readStringList(offsets[0]);
   object.fillInQuestion = reader.readStringOrNull(offsets[1]);
   object.id = id;
-  object.optionA = reader.readStringOrNull(offsets[2]);
-  object.optionB = reader.readStringOrNull(offsets[3]);
-  object.optionC = reader.readStringOrNull(offsets[4]);
-  object.optionD = reader.readStringOrNull(offsets[5]);
-  object.question = reader.readString(offsets[6]);
+  object.options = reader.readStringList(offsets[2]);
+  object.question = reader.readString(offsets[3]);
   object.type =
-      _QuestionnairetypeValueEnumMap[reader.readByteOrNull(offsets[7])] ??
+      _QuestionnairetypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
           QType.radio;
   return object;
 }
@@ -174,16 +141,10 @@ P _questionnaireDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
-    case 4:
-      return (reader.readStringOrNull(offset)) as P;
-    case 5:
-      return (reader.readStringOrNull(offset)) as P;
-    case 6:
       return (reader.readString(offset)) as P;
-    case 7:
+    case 4:
       return (_QuestionnairetypeValueEnumMap[reader.readByteOrNull(offset)] ??
           QType.radio) as P;
     default:
@@ -754,31 +715,31 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAIsNull() {
+      optionsIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'optionA',
+        property: r'options',
       ));
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAIsNotNull() {
+      optionsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'optionA',
+        property: r'options',
       ));
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAEqualTo(
-    String? value, {
+      optionsElementEqualTo(
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionA',
+        property: r'options',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -786,15 +747,15 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAGreaterThan(
-    String? value, {
+      optionsElementGreaterThan(
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'optionA',
+        property: r'options',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -802,15 +763,15 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionALessThan(
-    String? value, {
+      optionsElementLessThan(
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'optionA',
+        property: r'options',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -818,16 +779,16 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionABetween(
-    String? lower,
-    String? upper, {
+      optionsElementBetween(
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'optionA',
+        property: r'options',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -838,13 +799,13 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAStartsWith(
+      optionsElementStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'optionA',
+        property: r'options',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -852,13 +813,13 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAEndsWith(
+      optionsElementEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'optionA',
+        property: r'options',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -866,10 +827,10 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAContains(String value, {bool caseSensitive = true}) {
+      optionsElementContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'optionA',
+        property: r'options',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -877,10 +838,10 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAMatches(String pattern, {bool caseSensitive = true}) {
+      optionsElementMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'optionA',
+        property: r'options',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -888,484 +849,111 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAIsEmpty() {
+      optionsElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionA',
+        property: r'options',
         value: '',
       ));
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionAIsNotEmpty() {
+      optionsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'optionA',
+        property: r'options',
         value: '',
       ));
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBIsNull() {
+      optionsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'optionB',
-      ));
+      return query.listLength(
+        r'options',
+        length,
+        true,
+        length,
+        true,
+      );
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBIsNotNull() {
+      optionsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'optionB',
-      ));
+      return query.listLength(
+        r'options',
+        0,
+        true,
+        0,
+        true,
+      );
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+      optionsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionB',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.listLength(
+        r'options',
+        0,
+        false,
+        999999,
+        true,
+      );
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBGreaterThan(
-    String? value, {
+      optionsLengthLessThan(
+    int length, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'optionB',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.listLength(
+        r'options',
+        0,
+        true,
+        length,
+        include,
+      );
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBLessThan(
-    String? value, {
+      optionsLengthGreaterThan(
+    int length, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'optionB',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.listLength(
+        r'options',
+        length,
+        include,
+        999999,
+        true,
+      );
     });
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBBetween(
-    String? lower,
-    String? upper, {
+      optionsLengthBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'optionB',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'optionB',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'optionB',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'optionB',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'optionB',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionB',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionBIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'optionB',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'optionC',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'optionC',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionC',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'optionC',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'optionC',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'optionC',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'optionC',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'optionC',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'optionC',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'optionC',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionC',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionCIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'optionC',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'optionD',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'optionD',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionD',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'optionD',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'optionD',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'optionD',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'optionD',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'optionD',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'optionD',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'optionD',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'optionD',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
-      optionDIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'optionD',
-        value: '',
-      ));
+      return query.listLength(
+        r'options',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1583,54 +1171,6 @@ extension QuestionnaireQuerySortBy
     });
   }
 
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionA() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionA', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionADesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionA', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionB() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionB', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionBDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionB', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionC() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionC', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionCDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionC', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionD() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionD', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByOptionDDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionD', Sort.desc);
-    });
-  }
-
   QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByQuestion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'question', Sort.asc);
@@ -1685,54 +1225,6 @@ extension QuestionnaireQuerySortThenBy
     });
   }
 
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionA() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionA', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionADesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionA', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionB() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionB', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionBDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionB', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionC() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionC', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionCDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionC', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionD() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionD', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByOptionDDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'optionD', Sort.desc);
-    });
-  }
-
   QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByQuestion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'question', Sort.asc);
@@ -1775,31 +1267,9 @@ extension QuestionnaireQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByOptionA(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByOptions() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'optionA', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByOptionB(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'optionB', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByOptionC(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'optionC', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByOptionD(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'optionD', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'options');
     });
   }
 
@@ -1838,27 +1308,10 @@ extension QuestionnaireQueryProperty
     });
   }
 
-  QueryBuilder<Questionnaire, String?, QQueryOperations> optionAProperty() {
+  QueryBuilder<Questionnaire, List<String>?, QQueryOperations>
+      optionsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'optionA');
-    });
-  }
-
-  QueryBuilder<Questionnaire, String?, QQueryOperations> optionBProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'optionB');
-    });
-  }
-
-  QueryBuilder<Questionnaire, String?, QQueryOperations> optionCProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'optionC');
-    });
-  }
-
-  QueryBuilder<Questionnaire, String?, QQueryOperations> optionDProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'optionD');
+      return query.addPropertyName(r'options');
     });
   }
 

@@ -31,8 +31,7 @@ class OrderSelectionWidget extends StatefulWidget {
       });
 
   @override
-  _OrderSelectionWidgetState createState() =>
-      _OrderSelectionWidgetState(question);
+  State<OrderSelectionWidget> createState() => _OrderSelectionWidgetState(question);
 }
 
 class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {

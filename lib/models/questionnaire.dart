@@ -8,10 +8,11 @@ part 'questionnaire.g.dart';
 class Questionnaire {
   Id id = Isar.autoIncrement;
   late String question;
-  late String? optionA='';
-  late String? optionB='';
-  late String? optionC='';
-  late String? optionD='';
+  late List<String>? options=[];
+  // late String? optionA='';
+  // late String? optionB='';
+  // late String? optionC='';
+  // late String? optionD='';
   late List<String>? ans=[];
   late String? fillInQuestion='';
   @enumerated

@@ -33,18 +33,20 @@ initData() async {
       List<Questionnaire> questionnaires = [
         Questionnaire()
           ..question = 'שאלת אפשרות יחידה'
-          ..optionA = 'אופציה א'
-          ..optionB = 'אופציה ב'
-          ..optionC = 'אופציה ג'
-          ..optionD = 'אופציה ד'
+          ..options=['אופציה ד','אופציה ג','אופציה ב','אופציה א']
+          // ..optionA =
+          // ..optionB =
+          // ..optionC =
+          // ..optionD =
           ..ans = ['אופציה ג']
           ..type = QType.radio,
         Questionnaire()
           ..question = 'שאלת בחירה מרובה'
-          ..optionA = 'אופציה א'
-          ..optionB = 'אופציה ב'
-          ..optionC = 'אופציה ג'
-          ..optionD = 'אופציה ד'
+          ..options=['אופציה ד','אופציה ג','אופציה ב','אופציה א']
+          // ..optionA = 'אופציה א'
+          // ..optionB = 'אופציה ב'
+          // ..optionC = 'אופציה ג'
+          // ..optionD = 'אופציה ד'
           ..ans = ['אופציה ג','אופציה א']
           ..type = QType.checkbox,
         Questionnaire()
@@ -100,9 +102,6 @@ initData() async {
     } else
       print('data is filled');
 }
-
-
-
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});

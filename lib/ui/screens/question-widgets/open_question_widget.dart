@@ -7,7 +7,7 @@ class OpenQuestion extends StatefulWidget {
   OpenQuestion(this.question,{super.key,});
   
   @override
-  _OpenQuestionState createState() => _OpenQuestionState(question);
+  State<OpenQuestion> createState() => _OpenQuestionState(question);
 
 }
 
@@ -35,8 +35,16 @@ class _OpenQuestionState extends State<OpenQuestion> {
         children:[
           //Spacer(),
           Text(question.question),
-          TextField(
-            controller: myController,
+          
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            child: TextField(
+              
+              controller: myController,
+            ),
           )],),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

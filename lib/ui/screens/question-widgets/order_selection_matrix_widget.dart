@@ -1,10 +1,10 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/dragging_question.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 import 'package:drag_and_drop_lists/drag_and_drop_lists.dart';
-  import 'package:flutter/foundation.dart';
-
+import 'package:flutter/foundation.dart';
 
 void main() {
   runApp(MyApp());
@@ -37,21 +37,21 @@ class OrderSelectionWidget extends StatefulWidget {
   });
 
   @override
-  _OrderSelectionWidgetState createState() =>
-      _OrderSelectionWidgetState(question);
+  State<OrderSelectionWidget> createState() => _OrderSelectionWidgetState();
 }
 
 class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
-  _OrderSelectionWidgetState(this.question);
+  //_OrderSelectionWidgetState(this.question);
 
-  DragQ question;
+  //DragQ question;
   //late List<DragAndDropList> _contents;
-  List<int> maxSimultaneousDrags=[];
+  List<int> maxSimultaneousDrags = [];
 
   @override
   void initState() {
     // Generate a list
-     maxSimultaneousDrags=List<int>.generate(question.items.length, (index) =>1);
+    maxSimultaneousDrags =
+        List<int>.generate(widget.question.items.length, (index) => 1);
     // _contents = List.generate(5, (index) {
     //   return DragAndDropList(
     //     header: Text('Header $index'),
@@ -73,144 +73,238 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print('build ${question.isDropped}');
+    print('build ${widget.question.isDropped}');
+    return ScreenUtilInit(
+        designSize: const Size(1920, 1080),
+        minTextAdapt:true,
+        builder: (BuildContext context, Widget? child) {
     return Scaffold(
-        body: Container(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Row(
-                        children: [
-                          for (int i = 0; i < question.items.length; i++) ...[
-                            Draggable<String>(
-                              maxSimultaneousDrags: maxSimultaneousDrags[i],
-                              // Data is the value this Draggable stores.
-                              data: question.items[i],
-                              child: Container(
-                                height: 50.0,
-                                width: 80.0,
-                                color: maxSimultaneousDrags[i]>0?Colors.pinkAccent[100]:Colors.grey[300],
-                                margin: EdgeInsets.all(10.0),
-                                child: Center(
-                                  child: Text(
-                                    question.items[i],
-                                    textScaleFactor: 2,
-                                  ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                Row(
+                  children: [
+                    for (int i = 0; i < widget.question.items.length; i++) ...[
+                      Draggable<String>(
+                        maxSimultaneousDrags: maxSimultaneousDrags[i],
+                        // Data is the value this Draggable stores.
+                        data: widget.question.items[i],
+                        feedback: Material(
+                          child: Container(
+                          height: 40.h,
+                          width: 80.w,
+                          decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              border: Border.all(
+                                  color:
+                                  const Color.fromARGB(255, 45, 40, 40))),
+                          //margin: EdgeInsets.all(10.0),
+                          child: Center(
+                            child: Row(
+                              children: [
+                                Icon(Icons.menu),
+                                Text(
+                                  widget.question.items[i],
+                                  textScaleFactor: 2.w,
+                                  textAlign:  TextAlign.center,
                                 ),
-                              ),
-                              feedback: Material(
-                                child: Container(
-                                  height: 50.0,
-                                  width: 80.0,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.pinkAccent,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      question.items[i],
-                                      textScaleFactor: 2,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              childWhenDragging: Container(
-                                height: 50.0,
-                                width: 80.0,
-                                color: maxSimultaneousDrags[i]>0?Colors.pinkAccent[100]:Colors.grey[200],
-                                margin: EdgeInsets.all(10.0),
-                                child: Center(
-                                  child: Text(
-                                    question.items[i],
-                                    textScaleFactor: 2,
-                                  ),
-                                ),
-                              ),
-                              onDragCompleted: (){
-                                maxSimultaneousDrags[i]=0;
-                                setState(() {
-                                  Container(
-                                    height: 50.0,
-                                    width: 80.0,
-                                    margin: EdgeInsets.all(10.0),
-                                    color: Colors.pinkAccent[50],
-                                  );
-                                });
-                              },
+                              ],
                             ),
-                          ],
-                        ],
+                          ),
+                        ),
+                        ),
+                        childWhenDragging: Container(
+                          height: 40.h,
+                          width: 80.w,
+                         /*color: maxSimultaneousDrags[i] > 0
+                              ? Colors.pinkAccent[100]
+                              : Colors.grey[200],*/
+                          margin: EdgeInsets.all(10.0),
+                          child: Center(
+                            child: Row(
+                              children: [
+                                Icon(Icons.menu),
+                                Text(
+                                  widget.question.items[i],
+                                  textScaleFactor: 2.w,
+                                  textAlign:  TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        onDragCompleted: () {
+                          maxSimultaneousDrags[i] = 0;
+                          setState(() {
+                            Container(
+                              height: 40.h,
+                              width: 80.w,
+                              decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  border: Border.all(
+                                      color:
+                                      const Color.fromARGB(255, 45, 40, 40))),
+                              margin: EdgeInsets.all(10.0),
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.menu),
+                                    Text(
+                                      widget.question.items[i],
+                                      textScaleFactor: 2.w,
+                                      textAlign:  TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          });
+                        },
+                        child: Container(
+                          height: 40.h,
+                          width: 80.w,
+                          decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              border: Border.all(
+                                  color:
+                                      const Color.fromARGB(255, 45, 40, 40))),
+                          margin: EdgeInsets.all(10.0),
+                          child: Center(
+                            child: Row(
+                              children: [
+                                Icon(Icons.menu),
+                                Text(
+                                  widget.question.items[i],
+                                  textScaleFactor: 2.w,
+                                  textAlign:  TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.15,
+                    ],
+                  ],
+                ),
+              ],
+            ),
+
+            for (int i = 0; i < widget.question.items.length; i++) ...[
+              Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: SizedBox(
+                  height: 50.h,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 70.w,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color.fromARGB(255, 200, 201, 206)),
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width-70.w,
+                        height: 50.h,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color.fromARGB(255, 200, 201, 206)),
+                          color: Colors.transparent,
+                        ),
+                        //TODO: child: DragTarget(onAccept: ,),
+                        child: DragTarget<String>(
+                          builder: (
+                            BuildContext context,
+                            List<dynamic> accepted,
+                            List<dynamic> rejected,
+                          ){
+                            return ClipRRect(
+                              child: Text(
+                                widget.question.isDropped[widget.question.items[i]]!?widget.question.ans[i]:'drop',
+                              ),
+                            );
+                          },
+                          onAccept: (data){
+                            print(data);
+                            setState(() {
+                              widget.question.isDropped[data] = true;
+                              widget.question.ans[i] = data;
+                            });
+                          },
+                        ),
+
+
                       ),
                     ],
                   ),
-                  SizedBox(height: 30,),
-                  Expanded(
-                    child: ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      children:_listOfItems(),
-                      onReorder: (int start, int current) {
-                        // dragging from top to bottom
+                ),
+              )
+            ]
+            /*  Expanded(
+                child: ReorderableListView(
+                  buildDefaultDragHandles: false,
+                  children:_listOfItems(),
+                  onReorder: (int start, int current) {
+                    // dragging from top to bottom
 
-                        if (start < current) {
-                          int end = current - 1;
-                          String startItem = question.ans[start];
-                          int i = 0;
-                          int local = start;
-                          do {
-                            question.ans[local] = question.ans[++local];
-                            i++;
-                          } while (i < end - start);
-                          question.ans[end] = startItem;
-                        }
-                        // dragging from bottom to top
-                        else if (start > current) {
-                          String startItem = question.ans[start];
-                          for (int i = start; i > current; i--) {
-                            question.ans[i] = question.ans[i - 1];
-                          }
-                          question.ans[current] = startItem;
-                        }
-                        setState(() {});
-                      },
-                    ),
-                  )
-                ],
-              ),
-            )
+                    if (start < current) {
+                      int end = current - 1;
+                      String startItem = question.ans[start];
+                      int i = 0;
+                      int local = start;
+                      do {
+                        question.ans[local] = question.ans[++local];
+                        i++;
+                      } while (i < end - start);
+                      question.ans[end] = startItem;
+                    }
+                    // dragging from bottom to top
+                    else if (start > current) {
+                      String startItem = question.ans[start];
+                      for (int i = start; i > current; i--) {
+                        question.ans[i] = question.ans[i - 1];
+                      }
+                      question.ans[current] = startItem;
+                    }
+                    setState(() {});
+                  },
+                ),
+              )*/
+          ],
         ),
-        floatingActionButton: FloatingActionButton(
-
-          onPressed: () {
-            print('${question.ans} ${ question.positions}');
-            showDialog(context: context, builder: (context) {
-              if (listEquals(question.ans,question.positions)) {
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print('${widget.question.ans} ${widget.question.positions}');
+          showDialog(
+            context: context,
+            builder: (context) {
+              if (listEquals(widget.question.ans, widget.question.positions)) {
                 return const AlertDialog(content: Text('Correct'));
-              }
-              else {
+              } else {
                 return const AlertDialog(content: Text('Incorrect'));
               }
-            },);
-          },
-            child: const Icon(Icons.check),
-        ),
+            },
+          );
+        },
+        child: const Icon(Icons.check),
+      ),
     );
+    });
   }
 
   _listOfItems() {
     return [
-      for (int i = 0; i < question.items.length; i++) ...[
+      for (int i = 0; i < widget.question.items.length; i++) ...[
         Container(
           color: Colors.black12,
           // key: Key("${_list[i]}"),
-          key: Key(question.items[i]),
+          key: Key(widget.question.items[i]),
           child: ReorderableDragStartListener(
               index: i,
-             // key: Key("${_list[i]}"),
+              // key: Key("${_list[i]}"),
               child: DragTarget<String>(
                 builder: (BuildContext context, List<dynamic> accepted,
                     List<dynamic> rejected) {
@@ -227,16 +321,17 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                         height: 50,
                         width: 80,
                         margin: EdgeInsets.all(10.0),
-                        color: question.ans[i] == '' ||
-                                !question.isDropped[question.ans[i]]!
+                        color: widget.question.ans[i] == '' ||
+                                !widget.question.isDropped[widget.question.ans[i]]!
                             ? null
                             : Colors.pinkAccent[100],
                         child: Center(
                             child: Text(
-                          question.ans[i] == '' ||
-                                  !question.isDropped[question.ans[i]]!
+                          widget.question.ans[i] == '' ||
+                                  !widget.question
+                                      .isDropped[widget.question.ans[i]]!
                               ? 'Drop'
-                              : question.ans[i],
+                              : widget.question.ans[i],
                           textScaleFactor: 2,
                         )),
                       ),
@@ -246,16 +341,14 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                 onAccept: (data) {
                   debugPrint(data);
                   setState(() {
-                    question.isDropped[data] = true;
-                    question.ans[i] = data;
-                    print('onAccept${question.isDropped}');
-                    print('onAccept${question.ans}');
+                    widget.question.isDropped[data] = true;
+                    widget.question.ans[i] = data;
+                    print('onAccept${widget.question.isDropped}');
+                    print('onAccept${widget.question.ans}');
                     print('data${data}');
-                  }
-                );
-              },
-            )
-          ),
+                  });
+                },
+              )),
         )
       ]
     ];

@@ -7,7 +7,7 @@ class FreeChoice extends StatefulWidget {
   FreeChoice(this.question,{super.key,});
 
   @override
-  _FreeChoiceState createState() => _FreeChoiceState(question);
+  State<FreeChoice> createState() => _FreeChoiceState(question);
 
 }
 
