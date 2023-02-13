@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../services/isar_service.dart';
 import '../../../models/course.dart';
@@ -46,7 +47,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
 
   Widget menuWidget() {
     return Container(
-      color: Colors.grey.shade100,
+      color: Color.fromARGB(255, 249, 249, 249),
       width: screenSize.width * 0.25,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,13 +55,26 @@ class _CourseMainPageState extends State<CourseMainPage> {
         children: [
           Container(
             width: double.infinity,
-            height: 80.h,
-            color: Colors.blueAccent,
-            child: Center(
-              child: Text(
-                widget.course.title,
-                style: TextStyle(color: Colors.white, fontSize: 25),
-              ),
+            height: 74.h,
+            color: Color.fromARGB(255, 110, 112, 114),
+            child: Row(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: FaIcon(
+                    FontAwesomeIcons.file,
+                    size: 15.w,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  widget.course.title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600),
+                ),
+              ]
             ),
           ),
           Expanded(
@@ -74,47 +88,72 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     children: [
                       Container(
                           //padding:  EdgeInsets.all(10.w),
-                          height: 50.h,
+                          height: 96.h,
                           width: double.infinity,
-                          color: Colors.cyan,
-                          child: Center(child: Text(currentSubject.name))),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: currentSubject.lessons.length,
-                        itemBuilder: (ctx, lIndex) {
+                          color: Color.fromARGB(255, 249, 249, 249),
+                          child: Center(
+                              child: Row(
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.all(10.0),
+                                    child: Icon(Icons.circle_outlined, size: 15),
+                                  ),
+                                  Text(
+                                    currentSubject.name,
+                                    style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 16),
+                                    ),
+                                  ],
+                              )
+                          )
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 55.w),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: currentSubject.lessons.length,
+                          itemBuilder: (ctx, lIndex) {
                           Lesson currentLesson =
-                              currentSubject.lessons.elementAt(lIndex);
+                          currentSubject.lessons.elementAt(lIndex);
                           return Center(
-                              child: Column(
-                            children: [
-                              ListTile(
+                            child: Column(
+                              children: [
+                                ListTile(
                                   title: Text(currentLesson.name,
-                                      style: lessonPickedIndex == lIndex
-                                          ? TextStyle(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                            )
-                                          : null),
-                                  leading: Visibility(
-                                      visible: currentLesson.isCompleted,
-                                      maintainSize: true,
-                                      maintainAnimation: true,
-                                      maintainState: true,
-                                      child: const Icon(Icons.check_circle,color: Color(0xFF2D2828),)),
+                                    style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: lessonPickedIndex == lIndex ? FontWeight.w600 : FontWeight.w400,
+                                    )
+                                  ),
+                                  leading: currentLesson.isCompleted
+                                  ? Visibility(
+                                    visible: currentLesson.isCompleted,
+                                    maintainSize: true,
+                                    maintainAnimation: true,
+                                    maintainState: true,
+                                    child: const Icon(
+                                      Icons.check_circle,
+                                      color: Color.fromARGB(255, 45, 40, 40),size: 14,)
+                                  )
+                                  : const Visibility(
+                                    maintainSize: true,
+                                    maintainAnimation: true,
+                                    maintainState: true,
+                                    child: Icon(Icons.circle_outlined, color: Color.fromARGB(255, 228, 230, 233),size: 15,)
+                                  ),
                                   onTap: () {
-                                    if (lIndex == 0 ||
-                                        currentSubject.lessons
-                                            .elementAt(lIndex - 1)
-                                            .isCompleted) {
-                                      setState(() => mainWidget =
-                                          LessonWidget(lesson: currentLesson,notifyParent: refresh));
+                                    if (lIndex == 0 || currentSubject.lessons.elementAt(lIndex - 1).isCompleted) {
+                                    setState(() => mainWidget =
+                                      LessonWidget(lesson: currentLesson,notifyParent: refresh));
                                       lessonPickedIndex = lIndex;
-                                    } else {
+                                    }
+                                    else {
                                       showAlert();
                                     }
-                                  }),
-                              const Divider(height: 1, color: Colors.black12),
-                              if (currentLesson.questionnaire.isNotEmpty)
+                                  }
+                                ),
+                                //const Divider(height: 1, color: Colors.black12),
+                                if (currentLesson.questionnaire.isNotEmpty)
                                 GestureDetector(
                                   onTap: () => setState(() {
                                     mainWidget = QuestionnaireWidget(
@@ -123,18 +162,25 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                             currentLesson.questionnaire);
                                   }),
                                   child: Container(
-                                    color: Colors.greenAccent.shade100,
+                                    color: Color.fromARGB(255, 249, 249, 249),
                                     child: ListTile(
-                                        title: Center(
-                                      child: Text(currentLesson.questionnaire
-                                          .elementAt(0)
-                                          .question),
-                                    )),
+                                      title: Center(
+                                        child: Row(children: [
+                                          Icon(
+                                            Icons.create,
+                                            color: currentLesson.isCompleted ? Color.fromARGB(255, 45, 40, 40) : Color.fromARGB(255, 228, 230, 233),
+                                            size: 20,
+                                          ),
+                                          Text('תרגול - ${currentLesson.name}',
+                                              style: TextStyle(decoration: TextDecoration.underline)),
+                                        ]),
+                                      )),
                                   ),
                                 ),
                             ],
                           ));
                         },
+                      ),
                       ),
                       if (currentSubject.questionnaire.isNotEmpty)
                         GestureDetector(
@@ -148,9 +194,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                             height: 50.h,
                             color: Colors.black26,
                             child: Center(
-                              child: Text(currentSubject.questionnaire
-                                  .elementAt(0)
-                                  .question),
+                              child: Text(currentSubject.questionnaire.elementAt(0).question),
                             ),
                           ),
                         )
@@ -158,9 +202,6 @@ class _CourseMainPageState extends State<CourseMainPage> {
                   );
                 }),
           )
-
-          //   Text(course.subjects.first.name),
-          //  Text(course.subjects.first.lessons!.first.name),
         ],
       ),
     );
