@@ -27,19 +27,11 @@ initData() async {
       Questionnaire()
         ..question = 'שאלת אפשרות יחידה'
         ..options=['אופציה א','אופציה ב','אופציה ג','אופציה ד']
-        // ..optionA =
-        // ..optionB =
-        // ..optionC =
-        // ..optionD =
         ..ans = ['אופציה ג']
         ..type = QType.radio,
       Questionnaire()
         ..question = 'שאלת בחירה מרובה'
         ..options=['אופציה א','אופציה ב','אופציה ג','אופציה ד']
-        // ..optionA = 'אופציה א'
-        // ..optionB = 'אופציה ב'
-        // ..optionC = 'אופציה ג'
-        // ..optionD = 'אופציה ד'
         ..ans = ['אופציה ג', 'אופציה א']
         ..type = QType.checkbox,
       Questionnaire()
@@ -70,36 +62,6 @@ initData() async {
       Lesson()..name = 'אותיות עיצור ל',
       Lesson()..name = 'אותיות עיצור מ',
     ];
-
-
-      /*List<Questionnaire> questionnaires = [
-        Questionnaire()
-          ..question = 'שאלת אפשרות יחידה'
-          ..options=['אופציה ד','אופציה ג','אופציה ב','אופציה א']
-          // ..optionA =
-          // ..optionB =
-          // ..optionC =
-          // ..optionD =
-          ..ans = ['אופציה ג']
-          ..type = QType.radio,
-        Questionnaire()
-          ..question = 'שאלת בחירה מרובה'
-          ..options=['אופציה ד','אופציה ג','אופציה ב','אופציה א']
-          // ..optionA = 'אופציה א'
-          // ..optionB = 'אופציה ב'
-          // ..optionC = 'אופציה ג'
-          // ..optionD = 'אופציה ד'
-          ..ans = ['אופציה ג','אופציה א']
-          ..type = QType.checkbox,
-        Questionnaire()
-          ..question = 'שאלת בחירה חופשית'
-          ..ans = ['אופציה ג','אופציה א']
-          ..type = QType.freeChoice,
-        Questionnaire()
-          ..question = 'שאלה מלא את החסר'
-          ..fillInQuestion=json.encode(fillInQ)
-          ..type = QType.fillIn
-      ];*/
 
     final List<Subject> subjects = [
       Subject()
