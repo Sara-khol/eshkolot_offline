@@ -24,6 +24,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
   Widget mainWidget = Container();
   late Size screenSize;
   int lessonPickedIndex = -1;
+  int qIndex=-1;
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +147,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                     setState(() => mainWidget =
                                       LessonWidget(lesson: currentLesson,notifyParent: refresh));
                                       lessonPickedIndex = lIndex;
+                                      qIndex=-1;
                                     }
                                     else {
                                       showAlert();
@@ -156,6 +158,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                 if (currentLesson.questionnaire.isNotEmpty)
                                 GestureDetector(
                                   onTap: () => setState(() {
+                                    lessonPickedIndex=-1;
+                                    qIndex=lIndex;
                                     mainWidget = QuestionnaireWidget(
                                       key:  UniqueKey(),
                                         questionnaires:
@@ -172,7 +176,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                             size: 20,
                                           ),
                                           Text('תרגול - ${currentLesson.name}',
-                                              style: TextStyle(decoration: TextDecoration.underline)),
+                                              style: TextStyle(decoration: TextDecoration.underline,
+                                                  fontWeight: qIndex == lIndex ? FontWeight.w600 : FontWeight.w400)),
                                         ]),
                                       )),
                                   ),
@@ -183,8 +188,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
                       ),
                       ),
                       if (currentSubject.questionnaire.isNotEmpty)
+
                         GestureDetector(
                           onTap: () => setState(() {
+                            print('currentSubject.questionnaire ${currentSubject.questionnaire}');
                             mainWidget = QuestionnaireWidget(
                               key: UniqueKey(),
                                 questionnaires: currentSubject.questionnaire);
@@ -216,7 +223,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
     await FlutterPlatformAlert.showCustomAlert(
       windowTitle: 'לא ניתן לעבור לשיעור הבא כל עוד השיעור הקודם לא הושלם',
       text: '',
-      //iconStyle: IconStyle.information,
+      iconStyle: IconStyle.information,
     );
   }
 }
