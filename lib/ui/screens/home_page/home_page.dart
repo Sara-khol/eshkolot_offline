@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../models/course.dart';
-import '../../services/isar_service.dart';
-import 'course_main/course_main_page.dart';
+import '../../../models/course.dart';
+import '../../../services/isar_service.dart';
+import '../course_main/course_main_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -15,36 +15,41 @@ class HomePage extends StatelessWidget {
     return ChangeNotifierProvider<VimoeService>(
         create: (_) => VimoeService(),
         lazy: false,
-      child: Scaffold(
-        body: FutureBuilder<Course?>(
-            future: getFirstEnglishCourse(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                Course? course = snapshot.data;
-                if (!course!.isDownloaded) {
-                  context.read<VimoeService>().connectToVimoe();
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          body: FutureBuilder<Course?>(
+              future: getFirstEnglishCourse(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  Course? course = snapshot.data;
+                  if (!course!.isDownloaded) {
+                    context.read<VimoeService>().connectToVimoe();
 
-                  return Consumer<VimoeService>(
-                      builder: (context, vimoeResult, child) {
-                    switch (vimoeResult.downloadStatus) {
-                      case DownloadStatus.downloading:
-                        return displayLoadingDialog(false, context, false);
-                      case DownloadStatus.blockError:
-                        return displayLoadingDialog(true, context, true);
-                      case DownloadStatus.error:
-                        return displayLoadingDialog(false, context, false);
-                      case DownloadStatus.downloaded:
-                        updateDownload(course.id);
-                        return CourseMainPage(course: course);
-                    }
-                  });
-                } else {
-                  return CourseMainPage(course: course);
+                    return Consumer<VimoeService>(
+                        builder: (context, vimoeResult, child) {
+                      switch (vimoeResult.downloadStatus) {
+                        case DownloadStatus.downloading:
+                          return displayLoadingDialog(false, context, false);
+                        case DownloadStatus.blockError:
+                          return displayLoadingDialog(true, context, true);
+                        case DownloadStatus.error:
+                          return displayLoadingDialog(false, context, false);
+                        case DownloadStatus.downloaded:
+                          updateDownload(course.id);
+                          return CourseMainPage(course: course);
+                          // return  HomeMainWidget();
+                      }
+                    });
+                  } else {
+                    return CourseMainPage(course: course);
+                    // return HomeMainWidget();
+                  }
                 }
-              }
-              print('wait...');
-              return Center(child: const CircularProgressIndicator());
-            }),
+                print('wait...');
+                return Center(child: const CircularProgressIndicator());
+              }),
+        ),
       ),
     );
   }

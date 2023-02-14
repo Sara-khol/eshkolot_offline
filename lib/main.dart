@@ -1,9 +1,11 @@
+import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/models/subject.dart';
-import 'package:eshkolot_offline/ui/screens/home_page.dart';
+import 'package:eshkolot_offline/ui/screens/home_page/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'models/course.dart';
+import 'models/knowledge.dart';
 import 'models/lesson.dart';
 import 'models/questionnaire.dart';
 import 'dart:convert';
@@ -74,15 +76,44 @@ initData() async {
 
 
     final List<Course> myCourses = [
-      (Course()
-        ..title = 'אנגלית בסיסית א'
-        ..subjects.addAll(subjects)),
-      (Course()..title = 'אנגלית בסיסית ב')
+      // (Course()
+      //   ..title = 'אנגלית בסיסית א'..serverId=3
+      //   ..subjects.addAll(subjects)),
+      // (Course()..title = 'אנגלית בסיסית ב'..serverId=4)
     ];
 
+    myCourses.add((Course()
+      ..title = 'אנגלית בסיסית א'
+      ..subjects.addAll(subjects)..serverId=3..status=Status.middle));
+    myCourses.add(Course()..title = 'אנגלית בסיסית ב'..serverId=4..status=Status.finish);
+
+    List<Knowledge> knowledgeList = [
+      Knowledge()
+        ..title = 'אנגלית'
+        ..color = 0xff32D489
+        ..iconPath = 'english'
+        ..courses.addAll(myCourses),
+      Knowledge()
+        ..title = 'מתמטיקה'
+        ..color = 0xff5956DA
+        ..iconPath = 'math'
+        ..courses.add(Course()..title='אלגברה בסיסית א’'..serverId=1..status=Status.synchronized),
+      Knowledge()
+        ..title = 'פיזיקה'
+        ..color = 0xffFF317B
+        ..iconPath = 'math'
+        ..courses.add(Course()..title='פיזיקה רעיונית א’'..serverId=2)];
+
+   // User user= User()..courses.addAll(myCourses);
+  final List<User> users=[User()..name='שמואל'..knowledgeList.addAll(knowledgeList)];
+  // final List<User> users=[User()..courses.addAll([UserCourse()..courseId=myCourses[0].id..status=Status.middle
+  //   ..lessonStopId=myCourses[0].subjects.elementAt(0).lessons.elementAt(0).id,
+  //   UserCourse()..courseId=myCourses[1].id..status=Status.start,
+  //   UserCourse()..courseId=myCourses[0].id..status=Status.start]
+ // )];
     print('filling!!');
     await IsarService.instance
-        .initCourses(myCourses, subjects, lessons, questionnaires);
+        .initCourses(myCourses, subjects, lessons, questionnaires,knowledgeList,users);
     // course = await IsarService.instance.getFirstCourse();
   } else
     print('data is filled');
@@ -95,16 +126,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-          designSize: const Size(1920, 1080),
-          minTextAdapt: true,
-          builder: (BuildContext context, Widget? child) {
-            return MaterialApp(
-                title: 'Flutter Demo',
-                theme: ThemeData(
-                  primarySwatch: Colors.blue,
-                ),
-                home: HomePage());
-          });
+        designSize: const Size(1920, 1080),
+        minTextAdapt: true,
+        builder: (BuildContext context, Widget? child) {
+          return MaterialApp(
+              title: 'Flutter Demo',
+              theme: ThemeData(
+                primarySwatch: Colors.blue,
+              ),
+              home: HomePage());
+        });
   }
-
 }

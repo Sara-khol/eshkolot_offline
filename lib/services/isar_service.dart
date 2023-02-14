@@ -1,5 +1,7 @@
+import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/user.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -30,7 +32,7 @@ class IsarService {
     final dir = await getApplicationDocumentsDirectory();
     if (Isar.instanceNames.isEmpty) {
       return await Isar.open(
-          [CourseSchema, SubjectSchema, LessonSchema, QuestionnaireSchema],
+          [CourseSchema, SubjectSchema, LessonSchema, QuestionnaireSchema,KnowledgeSchema,UserSchema],
           inspector: true, directory: dir.path);
     }
     return Future.value(Isar.getInstance());
@@ -60,6 +62,8 @@ class IsarService {
     List<Subject> subjectList,
     List<Lesson> lessonList,
     List<Questionnaire> qList,
+    List<Knowledge> knowledgeList,
+    List<User> usersList,
   ) async {
     final isar = await db;
     // await isar.writeTxn(() async {
@@ -133,7 +137,12 @@ class IsarService {
       isar.lessons.putAllSync(lessonList);
       isar.subjects.putAllSync(subjectList);
       isar.courses.putAllSync(coursesList);
+      isar.knowledges.putAllSync(knowledgeList);
+      isar.users.putAllSync(usersList);
+
     });
+
+
   }
 
   Future<bool> checkIfDBisEmpty() async {
@@ -147,6 +156,24 @@ class IsarService {
     IsarCollection<Course> coursesCollection = isar.collection<Course>();
     Course? course = await coursesCollection.where().findFirst();
     return course;
+  }
+
+  Future<List<Knowledge>> getAllKnowledge() async {
+    final isar = await db;
+    List<Knowledge> knowledgeCollection =await isar.knowledges.where().findAll();
+    return knowledgeCollection;
+  }
+
+  Future<User?> getUser() async {
+    final isar = await db;
+    User? user =await isar.users.where().findFirst();
+    return user;
+  }
+
+  Future<List<User>> getUsers() async {
+    final isar = await db;
+    List<User> users =await isar.users.where().findAll();
+    return users;
   }
 
   Stream<List<Course>> listenToCourses() async* {

@@ -1,5 +1,7 @@
 
 
+import 'package:flutter/material.dart';
+
 class CourseLd
 {
  late int id;
@@ -9,4 +11,16 @@ class CourseLd
  late String steps;// לינק לנושאים
  late String users;// לינק למשתמשים
  late String groups;// לינק לקבוצות המשתמשים , לבדוק אם צריך..
+}
+
+
+class KnowledgeLd
+{
+ late int id;
+ late String title;
+ late IconData  icon;
+ late int color;
+ late List<CourseLd> courses;
+
+ KnowledgeLd(this.id, this.title, this.icon, this.color,this.courses);
 }

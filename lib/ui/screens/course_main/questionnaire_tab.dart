@@ -30,6 +30,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   void initState(){
     displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
     print(widget.questionnaire.elementAt(0).question);
+    super.initState();
   }
 
   getQuestionnaireByType(Questionnaire item) {
@@ -62,7 +63,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             ),
             child: Row(
               children: [
-                for(int i = 1; i <= widget.questionnaire.length + 1; i++)...[
+                for(int i = 1; i <= widget.questionnaire.length /*+ 1*/; i++)...[
                   Align(
                     alignment: Alignment.centerRight,
                     child: ClipRRect(
