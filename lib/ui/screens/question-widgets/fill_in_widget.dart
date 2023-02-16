@@ -37,8 +37,7 @@ class _FillInState extends State<FillIn> {
   @override
   Widget build(BuildContext context) {
     var english = RegExp(r'[a-zA-Z]');
-    return Scaffold(
-      body: Padding(
+    return  Padding(
         padding: const EdgeInsets.only(top: 25),
         child: Column(
           children: [
@@ -60,26 +59,30 @@ class _FillInState extends State<FillIn> {
                 children: buildDisplay(),
               ),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          if (validAnswer())
+                            return const AlertDialog(
+                                content: Text('Correct'), backgroundColor: Colors.green);
+                          else {
+                            return const AlertDialog(
+                                content: Text('Incorrect'), backgroundColor: Colors.red);
+                          }
+                        });
+                  },
+                  child: const Text('ans'), //Icon(Icons.search),
+                ),
+              ],
+            ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                if (validAnswer())
-                  return const AlertDialog(
-                      content: Text('Correct'), backgroundColor: Colors.green);
-                else {
-                  return const AlertDialog(
-                      content: Text('Incorrect'), backgroundColor: Colors.red);
-                }
-              });
-        },
-        child: const Text('ans'), //Icon(Icons.search),
-      ),
-    );
+      );
   }
 
   buildDisplay() {

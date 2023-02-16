@@ -26,32 +26,28 @@ class _FreeChoiceState extends State<FreeChoice> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quiz'),
-      ),
-      body: Column(
+    return Column(
         children:[
           //Spacer(),
           Text(question.question),
           TextField(
             controller: myController,
-          )],),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(context: context, builder: (context) {
-            if (question.ans!.contains(myController.text)) {
-              return AlertDialog(content: Text('Correct'),backgroundColor: Colors.green);
-            }
-            else {
-              return AlertDialog(content: Text('Incorrect'),backgroundColor: Colors.red);
-            }
+          ),
+        Row(mainAxisAlignment: MainAxisAlignment.end,
+          children: [FloatingActionButton(
+          onPressed: () {
+            showDialog(context: context, builder: (context) {
+              if (question.ans!.contains(myController.text)) {
+                return AlertDialog(content: Text('Correct'),backgroundColor: Colors.green);
+              }
+              else {
+                return AlertDialog(content: Text('Incorrect'),backgroundColor: Colors.red);
+              }
             },);
           },
-        child: const Icon(Icons.check),
-      ),
+          child: const Icon(Icons.check),
+        ),],)],);
 
-    );
 
   }
 }
