@@ -70,6 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                         EdgeInsets.symmetric(horizontal: 0, vertical: 15),
                     hintStyle: TextStyle(
                         fontSize: 18.sp, color: Color(0xff6E7072)),
+
                     hintText: 'תעודת זהות',
                   )),
             ),
@@ -112,6 +113,8 @@ class _LoginPageState extends State<LoginPage> {
           Visibility(visible:isError ,
               child: Text('התעודת זהות שהזנת שגויה',style: TextStyle(fontSize: 20.sp,color: Colors.red)))
         ]),
+          floatingActionButton: FloatingActionButton(
+              onPressed: () => IsarService.instance.cleanDb())
       ),
     );
   }

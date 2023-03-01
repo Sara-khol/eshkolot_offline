@@ -164,9 +164,7 @@ class _HomePageState extends State<HomePage> {
         //  }
         //}
         //  )
-        ,
-        floatingActionButton: FloatingActionButton(
-            onPressed: () => IsarService.instance.cleanDb()));
+        );
   }
 
   topInformation(IconData iconData, String s) {
