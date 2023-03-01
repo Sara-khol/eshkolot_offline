@@ -3,10 +3,12 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  bitsdojo_window_linux
   dart_vlc
   flutter_platform_alert
   isar_flutter_libs
   url_launcher_linux
+  window_size
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

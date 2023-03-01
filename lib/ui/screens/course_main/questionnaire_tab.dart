@@ -11,6 +11,7 @@ import '../question-widgets/radio_check_widget.dart';
 class QuestionnaireTab extends StatefulWidget {
 
   const QuestionnaireTab({super.key, required this.questionnaire});
+
   final IsarLinks<Questionnaire> questionnaire;
 
   @override
@@ -27,7 +28,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
 
   @override
   void initState(){
-    //displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
+    displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
     print(widget.questionnaire.elementAt(0).question);
     super.initState();
   }
@@ -38,7 +39,8 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
       case QType.checkbox:
         return RadioCheck(item);
       case QType.radio:
-        return RadioCheck(item);
+        return
+          RadioCheck(item);
       case QType.freeChoice:
         return FreeChoice(item);
       case QType.fillIn:
@@ -61,7 +63,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             ),
             child: Row(
               children: [
-                for(int i = 1; i <= widget.questionnaire.length; i++)...[
+                for(int i = 1; i <= widget.questionnaire.length /*+ 1*/; i++)...[
                   Align(
                     alignment: Alignment.centerRight,
                     child: ClipRRect(
@@ -89,7 +91,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                                   //displayWidget=questionnaire();
                                   selected = i;
                                   index=i-1;
-                                  //displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
+                                  displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
                                 });
                                 print('question $selected selected');
                               },
@@ -173,7 +175,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
 
         Align(
           alignment: Alignment.centerRight,
-          child: Text('Question $selected of ${widget.questionnaire.length}',
+          child: Text('Question 1 of ${widget.questionnaire.length}',
             style: const TextStyle(color: Color.fromARGB(255,110, 112, 114)),
           )
         ),
@@ -185,7 +187,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Visibility(
-                  visible: selected!=1,
+                  visible: _currentIndex!=0,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
                     child: const Text(
@@ -195,44 +197,62 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                     onPressed: () => onBackClick(),
                   ),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
-                  child: Text(
-                    selected == widget.questionnaire.length?
-                    "סיום שאלון":
-                    "הבא",
-                    style: TextStyle(color: Colors.white),
+                Visibility(
+                  visible: _currentIndex != widget.questionnaire.length - 1,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
+                    child: const Text(
+                      "הבא",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () => onNextClick(),
                   ),
-                  onPressed: () => selected == widget.questionnaire.length? onFinishClick() :onNextClick(),
                 ),
               ],
             )
+
           ],
         ),
 
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Visibility(
+              visible:_currentIndex!=0,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
+                child: const Text(
+                  "חזרה",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () => onBackClick(),
+              ),
+            ),
+            Visibility(
+              visible: _currentIndex != widget.questionnaire.length - 1,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
+                child: const Text(
+                  "הבא",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () => onNextClick(),
+              ),
+            ),
+          ],
+        )
       ],
     );
   }
 
   onNextClick() {
     print('next click');
-    // buttonCarouselController.nextPage(
-    //     duration: const Duration(milliseconds: 300), curve: Curves.linear);
-    setState(() {
-      index++;
-      selected++;
-    });
-  }
-
-  onFinishClick(){
-    //TODO:
+    buttonCarouselController.nextPage(
+        duration: const Duration(milliseconds: 300), curve: Curves.linear);
   }
 
   onBackClick() {
-    setState(() {
-      index--;
-      selected--;
-    });
-
+    buttonCarouselController.previousPage(
+        duration: const Duration(milliseconds: 300), curve: Curves.linear);
   }
 }

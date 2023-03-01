@@ -7,11 +7,15 @@ import 'package:path_provider/path_provider.dart';
 import '../models/vimoe_download.dart';
 import 'package:collection/src/iterable_extensions.dart';
 
+import 'isar_service.dart';
+
 
 class VimoeService with ChangeNotifier {
   String token = '1234e6802e12410d1130b9fa774d4cd0'; //privet video files
 
-  int projectId = 2567060;//english
+  int projectId = 0;//english
+  int numCourses=0;
+  int numCoursesDownloaded=0;
   // int projectId = 10390152; //
   Dio dio = Dio();
 
@@ -29,6 +33,7 @@ class VimoeService with ChangeNotifier {
   }
 
   connectToVimoe({String url = '', bool notify = false}) async {
+    print('idddddd $projectId');
     downloadStatus = DownloadStatus.downloading;
     if (notify) notifyListeners();
     if (url == '') videoList = [];
@@ -50,7 +55,6 @@ class VimoeService with ChangeNotifier {
     if (result['paging']['next'] != null) {
       connectToVimoe(url: result['paging']['next']);
     } else {
-      print('finish!!');
       int vimoeLength = videoList.length;
       print('length ${vimoeLength}');
       dio.interceptors.add(InterceptorsWrapper(
@@ -110,6 +114,12 @@ class VimoeService with ChangeNotifier {
           if (numDownloadFiles == videosLength) {
             print('alllllllllll downloaded');
             downloadStatus = DownloadStatus.downloaded;
+            numCoursesDownloaded++;
+            updateDownload(projectId);
+            if(numCoursesDownloaded==numCourses)
+              {
+                downloadStatus = DownloadStatus.allDownloaded;
+              }
             notifyListeners();
           } else if (blockLinks.length + numDownloadFiles == videosLength) {
             print('blocked linksssssssssss');
@@ -123,6 +133,11 @@ class VimoeService with ChangeNotifier {
       downloadStatus = DownloadStatus.error;
       notifyListeners();
     }
+  }
+
+  Future<void> updateDownload(int id) async {
+    print('updateDownload $id');
+    await IsarService.instance.updateDownloadCourse(id);
   }
 
   getCourseSteps() async {
@@ -183,4 +198,5 @@ enum DownloadStatus {
   downloading,
   downloaded,
   error,
+  allDownloaded
 }

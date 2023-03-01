@@ -1,4 +1,5 @@
 import 'package:eshkolot_offline/models/knowledge.dart';
+import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'package:eshkolot_offline/models/user.dart';
@@ -31,9 +32,15 @@ class IsarService {
   Future<Isar> openDB() async {
     final dir = await getApplicationDocumentsDirectory();
     if (Isar.instanceNames.isEmpty) {
-      return await Isar.open(
-          [CourseSchema, SubjectSchema, LessonSchema, QuestionnaireSchema,KnowledgeSchema,UserSchema],
-          inspector: true, directory: dir.path);
+      return await Isar.open([
+        CourseSchema,
+        SubjectSchema,
+        LessonSchema,
+        QuestionnaireSchema,
+        KnowledgeSchema,
+        UserSchema,
+        LearnPathSchema
+      ], inspector: true, directory: dir.path);
     }
     return Future.value(Isar.getInstance());
   }
@@ -58,13 +65,13 @@ class IsarService {
   // }
 
   Future<void> initCourses(
-    List<Course> coursesList,
-    List<Subject> subjectList,
-    List<Lesson> lessonList,
-    List<Questionnaire> qList,
-    List<Knowledge> knowledgeList,
-    List<User> usersList,
-  ) async {
+      List<Course> coursesList,
+      List<Subject> subjectList,
+      List<Lesson> lessonList,
+      List<Questionnaire> qList,
+      List<Knowledge> knowledgeList,
+      List<User> usersList,
+      List<LearnPath> pathList) async {
     final isar = await db;
     // await isar.writeTxn(() async {
     //    await isar.clear();
@@ -139,16 +146,14 @@ class IsarService {
       isar.courses.putAllSync(coursesList);
       isar.knowledges.putAllSync(knowledgeList);
       isar.users.putAllSync(usersList);
-
+      isar.learnPaths.putAllSync(pathList);
     });
-
-
   }
 
   Future<bool> checkIfDBisEmpty() async {
     final isar = await db;
     IsarCollection<Course> coursesCollection = isar.collection<Course>();
-    return await coursesCollection.count()==0;
+    return await coursesCollection.count() == 0;
   }
 
   Future<Course?> getFirstCourse() async {
@@ -160,20 +165,67 @@ class IsarService {
 
   Future<List<Knowledge>> getAllKnowledge() async {
     final isar = await db;
-    List<Knowledge> knowledgeCollection =await isar.knowledges.where().findAll();
+    List<Knowledge> knowledgeCollection =
+        await isar.knowledges.where().anyId().findAll();
     return knowledgeCollection;
   }
 
   Future<User?> getUser() async {
     final isar = await db;
-    User? user =await isar.users.where().findFirst();
+    User? user = await isar.users.where().findFirst();
+    if (user != null) {
+      for (int knowledgeId in user.knowledgeIds) {
+        Knowledge? knowledge = await getKnowledgeById(knowledgeId,isar);
+        if (knowledge != null) {
+          user.knowledgeList.add(knowledge);
+        }
+      }
+      for (int pathId in user.pathIds) {
+        LearnPath? path = await getPathById(pathId,isar);
+        if (path != null) {
+          user.pathList.add(path);
+        }
+      }
+    }
+    return user;
+  }
+
+  Future<User?> getUserByTz(String tz) async {
+    final isar = await db;
+    User? user = await isar.users.where().tzEqualTo(tz).findFirst();
+
+    if (user != null) {
+      for (int knowledgeId in user.knowledgeIds) {
+        Knowledge? knowledge = await getKnowledgeById(knowledgeId,isar);
+        if (knowledge != null) {
+          user.knowledgeList.add(knowledge);
+        }
+      }
+      for (int pathId in user.pathIds) {
+        LearnPath? path = await getPathById(pathId,isar);
+        if (path != null) {
+          user.pathList.add(path);
+        }
+      }
+    }
     return user;
   }
 
   Future<List<User>> getUsers() async {
     final isar = await db;
-    List<User> users =await isar.users.where().findAll();
+    List<User> users = await isar.users.where().findAll();
     return users;
+  }
+
+  Future<Knowledge?> getKnowledgeById(int id, Isar isar,) async {
+    Knowledge? knowledge = await isar.knowledges.get(id);
+    return knowledge;
+  }
+
+  Future<LearnPath?> getPathById(int id,Isar isar) async {
+    final isar = await db;
+    LearnPath? path = await isar.learnPaths.get(id);
+    return path;
   }
 
   Stream<List<Course>> listenToCourses() async* {
@@ -183,26 +235,23 @@ class IsarService {
         .watch(fireImmediately: true /*initialReturn: true*/);
   }
 
-  updateLesson(int id) async
-  {
+  updateLesson(int id) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      Lesson? lesson= await isar.lessons.get(id);
+      Lesson? lesson = await isar.lessons.get(id);
       lesson!.isCompleted = true;
       await isar.lessons.put(lesson);
     });
   }
 
-  updateDownloadCourse(int id) async
-  {
+  updateDownloadCourse(int id) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      Course? course= await isar.courses.get(id);
+      Course? course = await isar.courses.getByServerId(id);
       course!.isDownloaded = true;
       await isar.courses.put(course);
     });
   }
-
 
 // insertFresh(List<Email> emailList) async {
 //   await isarInstance.writeTxn(() async {

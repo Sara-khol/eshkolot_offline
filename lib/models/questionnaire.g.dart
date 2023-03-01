@@ -27,18 +27,23 @@ const QuestionnaireSchema = CollectionSchema(
       name: r'fillInQuestion',
       type: IsarType.string,
     ),
-    r'options': PropertySchema(
+    r'isComplete': PropertySchema(
       id: 2,
+      name: r'isComplete',
+      type: IsarType.bool,
+    ),
+    r'options': PropertySchema(
+      id: 3,
       name: r'options',
       type: IsarType.stringList,
     ),
     r'question': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'question',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'type',
       type: IsarType.byte,
       enumMap: _QuestionnairetypeEnumValueMap,
@@ -106,9 +111,10 @@ void _questionnaireSerialize(
 ) {
   writer.writeStringList(offsets[0], object.ans);
   writer.writeString(offsets[1], object.fillInQuestion);
-  writer.writeStringList(offsets[2], object.options);
-  writer.writeString(offsets[3], object.question);
-  writer.writeByte(offsets[4], object.type.index);
+  writer.writeBool(offsets[2], object.isComplete);
+  writer.writeStringList(offsets[3], object.options);
+  writer.writeString(offsets[4], object.question);
+  writer.writeByte(offsets[5], object.type.index);
 }
 
 Questionnaire _questionnaireDeserialize(
@@ -121,10 +127,11 @@ Questionnaire _questionnaireDeserialize(
   object.ans = reader.readStringList(offsets[0]);
   object.fillInQuestion = reader.readStringOrNull(offsets[1]);
   object.id = id;
-  object.options = reader.readStringList(offsets[2]);
-  object.question = reader.readString(offsets[3]);
+  object.isComplete = reader.readBool(offsets[2]);
+  object.options = reader.readStringList(offsets[3]);
+  object.question = reader.readString(offsets[4]);
   object.type =
-      _QuestionnairetypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
+      _QuestionnairetypeValueEnumMap[reader.readByteOrNull(offsets[5])] ??
           QType.radio;
   return object;
 }
@@ -141,10 +148,12 @@ P _questionnaireDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readStringList(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (_QuestionnairetypeValueEnumMap[reader.readByteOrNull(offset)] ??
           QType.radio) as P;
     default:
@@ -715,6 +724,16 @@ extension QuestionnaireQueryFilter
   }
 
   QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
+      isCompleteEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isComplete',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterFilterCondition>
       optionsIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1171,6 +1190,19 @@ extension QuestionnaireQuerySortBy
     });
   }
 
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByIsComplete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isComplete', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy>
+      sortByIsCompleteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isComplete', Sort.desc);
+    });
+  }
+
   QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> sortByQuestion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'question', Sort.asc);
@@ -1225,6 +1257,19 @@ extension QuestionnaireQuerySortThenBy
     });
   }
 
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByIsComplete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isComplete', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy>
+      thenByIsCompleteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isComplete', Sort.desc);
+    });
+  }
+
   QueryBuilder<Questionnaire, Questionnaire, QAfterSortBy> thenByQuestion() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'question', Sort.asc);
@@ -1267,6 +1312,12 @@ extension QuestionnaireQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByIsComplete() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isComplete');
+    });
+  }
+
   QueryBuilder<Questionnaire, Questionnaire, QDistinct> distinctByOptions() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'options');
@@ -1305,6 +1356,12 @@ extension QuestionnaireQueryProperty
       fillInQuestionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fillInQuestion');
+    });
+  }
+
+  QueryBuilder<Questionnaire, bool, QQueryOperations> isCompleteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isComplete');
     });
   }
 

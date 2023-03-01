@@ -13,10 +13,11 @@ class Course {
 
   late String title;
 
-  @Index(unique: true,replace: true)
+  @Index(unique: true, replace: true)
   late int serverId;
 
   bool isDownloaded = false;
+
   // @Backlink(to: "course")
   final subjects = IsarLinks<Subject>();
 
@@ -25,15 +26,13 @@ class Course {
 
   //not suppose to be here, for meanwhile
   @enumerated
-  Status status=Status.start;
-  late int lessonStopId=0;
-  late String diplomaPath='';
-
-
+  Status status = Status.start;
+  late int lessonStopId = 0;
+  late String diplomaPath = '';
+  @Ignore()
+  bool isSelected = false;
+  @Ignore()
+  late bool isFullyDisplayed = true;
 
 // final questionnaires = IsarLinks<Questionnaire>();
-
-
 }
-
-

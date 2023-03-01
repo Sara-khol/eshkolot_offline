@@ -17,9 +17,24 @@ const UserSchema = CollectionSchema(
   name: r'User',
   id: -7838171048429979076,
   properties: {
-    r'name': PropertySchema(
+    r'knowledgeIds': PropertySchema(
       id: 0,
+      name: r'knowledgeIds',
+      type: IsarType.longList,
+    ),
+    r'name': PropertySchema(
+      id: 1,
       name: r'name',
+      type: IsarType.string,
+    ),
+    r'pathIds': PropertySchema(
+      id: 2,
+      name: r'pathIds',
+      type: IsarType.longList,
+    ),
+    r'tz': PropertySchema(
+      id: 3,
+      name: r'tz',
       type: IsarType.string,
     )
   },
@@ -28,15 +43,22 @@ const UserSchema = CollectionSchema(
   deserialize: _userDeserialize,
   deserializeProp: _userDeserializeProp,
   idName: r'id',
-  indexes: {},
-  links: {
-    r'knowledgeList': LinkSchema(
-      id: -6906774653242933038,
-      name: r'knowledgeList',
-      target: r'Knowledge',
-      single: false,
+  indexes: {
+    r'tz': IndexSchema(
+      id: 2166409964335084001,
+      name: r'tz',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'tz',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
     )
   },
+  links: {},
   embeddedSchemas: {},
   getId: _userGetId,
   getLinks: _userGetLinks,
@@ -50,7 +72,10 @@ int _userEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.knowledgeIds.length * 8;
   bytesCount += 3 + object.name.length * 3;
+  bytesCount += 3 + object.pathIds.length * 8;
+  bytesCount += 3 + object.tz.length * 3;
   return bytesCount;
 }
 
@@ -60,7 +85,10 @@ void _userSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.name);
+  writer.writeLongList(offsets[0], object.knowledgeIds);
+  writer.writeString(offsets[1], object.name);
+  writer.writeLongList(offsets[2], object.pathIds);
+  writer.writeString(offsets[3], object.tz);
 }
 
 User _userDeserialize(
@@ -71,7 +99,10 @@ User _userDeserialize(
 ) {
   final object = User();
   object.id = id;
-  object.name = reader.readString(offsets[0]);
+  object.knowledgeIds = reader.readLongList(offsets[0]) ?? [];
+  object.name = reader.readString(offsets[1]);
+  object.pathIds = reader.readLongList(offsets[2]) ?? [];
+  object.tz = reader.readString(offsets[3]);
   return object;
 }
 
@@ -83,6 +114,12 @@ P _userDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -94,13 +131,65 @@ Id _userGetId(User object) {
 }
 
 List<IsarLinkBase<dynamic>> _userGetLinks(User object) {
-  return [object.knowledgeList];
+  return [];
 }
 
 void _userAttach(IsarCollection<dynamic> col, Id id, User object) {
   object.id = id;
-  object.knowledgeList
-      .attach(col, col.isar.collection<Knowledge>(), r'knowledgeList', id);
+}
+
+extension UserByIndex on IsarCollection<User> {
+  Future<User?> getByTz(String tz) {
+    return getByIndex(r'tz', [tz]);
+  }
+
+  User? getByTzSync(String tz) {
+    return getByIndexSync(r'tz', [tz]);
+  }
+
+  Future<bool> deleteByTz(String tz) {
+    return deleteByIndex(r'tz', [tz]);
+  }
+
+  bool deleteByTzSync(String tz) {
+    return deleteByIndexSync(r'tz', [tz]);
+  }
+
+  Future<List<User?>> getAllByTz(List<String> tzValues) {
+    final values = tzValues.map((e) => [e]).toList();
+    return getAllByIndex(r'tz', values);
+  }
+
+  List<User?> getAllByTzSync(List<String> tzValues) {
+    final values = tzValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'tz', values);
+  }
+
+  Future<int> deleteAllByTz(List<String> tzValues) {
+    final values = tzValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'tz', values);
+  }
+
+  int deleteAllByTzSync(List<String> tzValues) {
+    final values = tzValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'tz', values);
+  }
+
+  Future<Id> putByTz(User object) {
+    return putByIndex(r'tz', object);
+  }
+
+  Id putByTzSync(User object, {bool saveLinks = true}) {
+    return putByIndexSync(r'tz', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByTz(List<User> objects) {
+    return putAllByIndex(r'tz', objects);
+  }
+
+  List<Id> putAllByTzSync(List<User> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'tz', objects, saveLinks: saveLinks);
+  }
 }
 
 extension UserQueryWhereSort on QueryBuilder<User, User, QWhere> {
@@ -176,6 +265,49 @@ extension UserQueryWhere on QueryBuilder<User, User, QWhereClause> {
       ));
     });
   }
+
+  QueryBuilder<User, User, QAfterWhereClause> tzEqualTo(String tz) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'tz',
+        value: [tz],
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterWhereClause> tzNotEqualTo(String tz) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tz',
+              lower: [],
+              upper: [tz],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tz',
+              lower: [tz],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tz',
+              lower: [tz],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'tz',
+              lower: [],
+              upper: [tz],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
 }
 
 extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
@@ -228,6 +360,144 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsElementEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'knowledgeIds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      knowledgeIdsElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'knowledgeIds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'knowledgeIds',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'knowledgeIds',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'knowledgeIds',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'knowledgeIds',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'knowledgeIds',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'knowledgeIds',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'knowledgeIds',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> knowledgeIdsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'knowledgeIds',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -358,68 +628,276 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
       ));
     });
   }
-}
 
-extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {}
-
-extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
-  QueryBuilder<User, User, QAfterFilterCondition> knowledgeList(
-      FilterQuery<Knowledge> q) {
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsElementEqualTo(
+      int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'knowledgeList');
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pathIds',
+        value: value,
+      ));
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> knowledgeListLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'knowledgeList', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> knowledgeListIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'knowledgeList', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> knowledgeListIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'knowledgeList', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> knowledgeListLengthLessThan(
-    int length, {
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsElementGreaterThan(
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'knowledgeList', 0, true, length, include);
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'pathIds',
+        value: value,
+      ));
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition>
-      knowledgeListLengthGreaterThan(
-    int length, {
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsElementLessThan(
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'knowledgeList', length, include, 999999, true);
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'pathIds',
+        value: value,
+      ));
     });
   }
 
-  QueryBuilder<User, User, QAfterFilterCondition> knowledgeListLengthBetween(
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsElementBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'knowledgeList', lower, includeLower, upper, includeUpper);
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'pathIds',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pathIds',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pathIds',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pathIds',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pathIds',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pathIds',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> pathIdsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pathIds',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tz',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'tz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'tz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'tz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzMatches(String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'tz',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tz',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> tzIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'tz',
+        value: '',
+      ));
     });
   }
 }
+
+extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {}
+
+extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {}
 
 extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByName() {
@@ -431,6 +909,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByTz() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tz', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByTzDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tz', Sort.desc);
     });
   }
 }
@@ -459,13 +949,44 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByTz() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tz', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByTzDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'tz', Sort.desc);
+    });
+  }
 }
 
 extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
+  QueryBuilder<User, User, QDistinct> distinctByKnowledgeIds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'knowledgeIds');
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<User, User, QDistinct> distinctByPathIds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'pathIds');
+    });
+  }
+
+  QueryBuilder<User, User, QDistinct> distinctByTz(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tz', caseSensitive: caseSensitive);
     });
   }
 }
@@ -477,9 +998,27 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
     });
   }
 
+  QueryBuilder<User, List<int>, QQueryOperations> knowledgeIdsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'knowledgeIds');
+    });
+  }
+
   QueryBuilder<User, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<User, List<int>, QQueryOperations> pathIdsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pathIds');
+    });
+  }
+
+  QueryBuilder<User, String, QQueryOperations> tzProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tz');
     });
   }
 }

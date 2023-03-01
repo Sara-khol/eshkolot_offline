@@ -1,16 +1,29 @@
 import 'package:eshkolot_offline/models/knowledge.dart';
+import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:isar/isar.dart';
-
-
-
 part 'user.g.dart';
 
 @Collection()
 class User {
   Id id= Isar.autoIncrement;
   late String name;
-  //not suppose to be here
-  final knowledgeList = IsarLinks<Knowledge>();
+  @Index(unique: true,replace: true,name:'tz')
+  late String tz;
+
+  // //not suppose to be here
+  // final knowledgeList = IsarLinks<Knowledge>();
+
+  List<int> knowledgeIds=[];
+
+  @Ignore()
+  List<Knowledge> knowledgeList=[];
+
+  List<int> pathIds=[];
+
+  @Ignore()
+  List<LearnPath> pathList=[];
+
+  // final learnPathList = IsarLinks<LearnPath>();
 
   //List<UserCourse> courses=[];
   // final courses= IsarLinks<Course>();
