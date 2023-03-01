@@ -7,15 +7,13 @@ class FreeChoice extends StatefulWidget {
   FreeChoice(this.question,{super.key,});
 
   @override
-  State<FreeChoice> createState() => _FreeChoiceState(question);
+  State<FreeChoice> createState() => _FreeChoiceState();
 
 }
 
 class _FreeChoiceState extends State<FreeChoice> {
-  _FreeChoiceState(this.question);
-  //final myList=['a','b','c','d','e','f','g'];
+
   final myController = TextEditingController();
-  Questionnaire question;
 
   @override
   void dispose() {
@@ -27,27 +25,30 @@ class _FreeChoiceState extends State<FreeChoice> {
   @override
   Widget build(BuildContext context) {
     return Column(
-        children:[
-          //Spacer(),
-          Text(question.question),
-          TextField(
-            controller: myController,
-          ),
-        Row(mainAxisAlignment: MainAxisAlignment.end,
-          children: [FloatingActionButton(
-          onPressed: () {
-            showDialog(context: context, builder: (context) {
-              if (question.ans!.contains(myController.text)) {
-                return AlertDialog(content: Text('Correct'),backgroundColor: Colors.green);
-              }
-              else {
-                return AlertDialog(content: Text('Incorrect'),backgroundColor: Colors.red);
-              }
-            },);
-          },
-          child: const Icon(Icons.check),
-        ),],)],);
-
+      children:[
+        Text(widget.question.question),
+        TextField(
+          controller: myController,
+        ),
+        /*Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                showDialog(context: context, builder: (context) {
+                  if (widget.question.ans!.contains(myController.text)) {
+                    return AlertDialog(content: Text('Correct'),backgroundColor: Colors.green);
+                  }
+                  else {
+                    return AlertDialog(content: Text('Incorrect'),backgroundColor: Colors.red);
+                  }
+                },);
+              },
+              child: const Icon(Icons.check),
+            ),
+          ],
+        )*/],
+    );
 
   }
 }

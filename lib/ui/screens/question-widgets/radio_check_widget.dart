@@ -10,13 +10,10 @@ class RadioCheck extends StatefulWidget {
   Questionnaire question;
 
   @override
-  State<RadioCheck> createState() => _RadioCheckState(question);
+  State<RadioCheck> createState() => _RadioCheckState(/*question*/);
 }
 
 class _RadioCheckState extends State<RadioCheck> {
-  _RadioCheckState(this.item);
-
-  Questionnaire item;
 
   String _character = '';
 
@@ -24,7 +21,7 @@ class _RadioCheckState extends State<RadioCheck> {
 
   void initState(){
 
-    for(int i=0;i<item.options!.length;i++){
+    for(int i=0;i<widget.question.options!.length;i++){
       _isSelected.add(false);
     }
     print(_isSelected);
@@ -43,9 +40,9 @@ class _RadioCheckState extends State<RadioCheck> {
     return Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(children: <Widget>[
-           item.type == QType.checkbox
-              ? getCheckBoxWidget(item)
-              : getRadioWidget(item),
+           widget.question.type == QType.checkbox
+              ? getCheckBoxWidget(widget.question)
+              : getRadioWidget(widget.question),
           SizedBox(
             height: 30.h,
           ),
@@ -184,25 +181,22 @@ class _RadioCheckState extends State<RadioCheck> {
   onVerifyClick() {
     var msg = "";
     final answers = [];
-    if (item.type == QType.radio) {
-      if (_character == item.ans![0]) {
+    if (widget.question.type == QType.radio) {
+      if (_character == widget.question.ans![0]) {
         msg = "Correct";
       } else {
         msg = "Incorrect";
       }
     }
     else {
-      for(int i=0;i<item.options!.length;i++){
-        if (_isSelected[i]) answers.add(item.options![i]);
+      for(int i=0;i<widget.question.options!.length;i++){
+        if (_isSelected[i]) answers.add(widget.question.options![i]);
       }
-      // if (_isSelectedB) answers.add(item.optionB);
-      // if (_isSelectedC) answers.add(item.optionC);
-      // if (_isSelectedD) answers.add(item.optionD);
       Function eq = const DeepCollectionEquality.unordered().equals;
       print('answers${answers}');
-      print('item.ans${item.ans}');
+      print('widget.question.ans${widget.question.ans}');
 
-      if (eq(answers, item.ans)) {
+      if (eq(answers, widget.question.ans)) {
         msg = "Correct";
       } else {
         msg = "Incorrect";

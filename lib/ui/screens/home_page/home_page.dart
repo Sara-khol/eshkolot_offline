@@ -1,10 +1,12 @@
 import 'package:eshkolot_offline/services/vimoe_service.dart';
+import 'package:eshkolot_offline/ui/screens/course_main/main.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/course.dart';
 import '../../../services/isar_service.dart';
+import '../course_main/subject_main_page.dart';
 import '../course_main/course_main_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -23,9 +25,10 @@ class HomePage extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   Course? course = snapshot.data;
+
+                  course!.isDownloaded=true;
                   if (!course!.isDownloaded) {
                     context.read<VimoeService>().connectToVimoe();
-
                     return Consumer<VimoeService>(
                         builder: (context, vimoeResult, child) {
                       switch (vimoeResult.downloadStatus) {
@@ -37,12 +40,12 @@ class HomePage extends StatelessWidget {
                           return displayLoadingDialog(false, context, false);
                         case DownloadStatus.downloaded:
                           updateDownload(course.id);
-                          return CourseMainPage(course: course);
+                          return SubjectMainPage(course: course);
                           // return  HomeMainWidget();
                       }
                     });
                   } else {
-                    return CourseMainPage(course: course);
+                    return MainPageChild(course: course);
                     // return HomeMainWidget();
                   }
                 }
@@ -60,7 +63,7 @@ class HomePage extends StatelessWidget {
       color: Colors.black12,
       child: isError
           ? SimpleDialog(
-              contentPadding: EdgeInsets.all(30),
+          contentPadding: EdgeInsets.all(30),
               title: Center(child: Text('!ישנה בעיה')),
               children: <Widget>[
                   if (blockError)

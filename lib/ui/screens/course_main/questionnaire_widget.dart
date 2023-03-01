@@ -73,7 +73,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerPr
 
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.only(top: 100.h,right: 210.w,left: 360.w,bottom: 60.h),
+        padding: EdgeInsets.only(/*top: 100.h,right: 210.w,*/left: 360.w,bottom: 60.h),
         child: Column(
           children: [
             Padding(

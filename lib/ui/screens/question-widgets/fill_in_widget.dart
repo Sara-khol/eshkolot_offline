@@ -59,27 +59,27 @@ class _FillInState extends State<FillIn> {
                 children: buildDisplay(),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          if (validAnswer())
-                            return const AlertDialog(
-                                content: Text('Correct'), backgroundColor: Colors.green);
-                          else {
-                            return const AlertDialog(
-                                content: Text('Incorrect'), backgroundColor: Colors.red);
-                          }
-                        });
-                  },
-                  child: const Text('ans'), //Icon(Icons.search),
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.end,
+            //   children: [
+            //     FloatingActionButton(
+            //       onPressed: () {
+            //         showDialog(
+            //             context: context,
+            //             builder: (context) {
+            //               if (validAnswer())
+            //                 return const AlertDialog(
+            //                     content: Text('Correct'), backgroundColor: Colors.green);
+            //               else {
+            //                 return const AlertDialog(
+            //                     content: Text('Incorrect'), backgroundColor: Colors.red);
+            //               }
+            //             });
+            //       },
+            //       child: const Text('ans'), //Icon(Icons.search),
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       );
@@ -118,6 +118,8 @@ class _FillInState extends State<FillIn> {
             )));
   }
 
+
+  ///Check answer's correctness
   bool validAnswer() {
     int i = 0;
     for (var ans in fillInQ.values) {

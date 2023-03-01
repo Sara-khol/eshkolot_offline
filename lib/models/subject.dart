@@ -17,6 +17,9 @@ class Subject {
    // List<Questionnaire>? questionnaires;
   final questionnaire = IsarLinks<Questionnaire>();
 
+  @Ignore()
+  bool isTapped=false;
+
 
 }
 
