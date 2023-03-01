@@ -171,16 +171,19 @@ class _MainPageChildState extends State<MainPageChild> {
                   return Column(
                     children: [
                       ListTile(
-                        title: Container(
-                          height: 96.h,
-                          width: double.infinity,
-                          color: Colors.transparent,
-                          child:
-                            Text(
-                               currentSubject.name,
-                               style: TextStyle(
-                                   fontWeight: FontWeight.w600, fontSize: 16.sp),
-                             ),
+                        title: Padding(
+                          padding: EdgeInsets.only(top:25.h),
+                          child: Container(
+                            //height: 96.h,
+                            width: double.infinity,
+                            color: Colors.transparent,
+                            child:
+                              Text(
+                                 currentSubject.name,
+                                 style: TextStyle(
+                                     fontWeight: FontWeight.w600, fontSize: 16.sp),
+                               ),
+                          ),
                         ),
                         mouseCursor: SystemMouseCursors.click,
                         textColor: Color(0xFF6E7072),
@@ -267,35 +270,40 @@ class _MainPageChildState extends State<MainPageChild> {
                                            ),
                                          ),
                                        ),
+
                                    ],
                                ));
                              },
                            ),
                          ),
-                      ),//;
+                      ),
 
                       if (currentSubject.questionnaire.isNotEmpty)
-                        GestureDetector(
-                          onTap: () => setState(() {
-                            print('currentSubject.questionnaire ${currentSubject.questionnaire}');
-                            _bodyWidget = QuestionnaireWidget(
-                              key: UniqueKey(),
-                              questionnaires: currentSubject.questionnaire);
-                          }),
-                          child: Container(
-                            width: double.infinity,
-                            height: 50.h,
-                            //color: Color(0xFF6E7072),
-                            child: Center(
-                              child: Row(
-                                children: [
-                                  Icon(Icons.stars_rounded,size: 35.sp,color: Color(0xFFACAEAF),),
-                                  Text('תרגול מסכם - ${widget.course.title}',style: TextStyle(fontSize: 16.sp,color: Color(0xFF6E7072),),),
-                                ],
+                        Visibility(
+                          visible: currentSubject.isTapped,
+                          child: GestureDetector(
+                            onTap: () => setState(() {
+                              print('currentSubject.questionnaire ${currentSubject.questionnaire}');
+                              _bodyWidget = QuestionnaireWidget(
+                                key: UniqueKey(),
+                                questionnaires: currentSubject.questionnaire);
+                            }),
+                            child: Container(
+                              width: double.infinity,
+                              height: 50.h,
+                              //color: Color(0xFF6E7072),
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.stars_rounded,size: 35.sp,color: Color(0xFFACAEAF),),
+                                    Text('תרגול מסכם - ${currentSubject.name}',style: TextStyle(fontSize: 16.sp,color: Color(0xFF6E7072),),),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         )
+
                     ],
                   );///רשימת נושאים בתוך קורס
                 }),

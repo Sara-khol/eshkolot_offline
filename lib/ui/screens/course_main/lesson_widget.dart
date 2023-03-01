@@ -1,7 +1,7 @@
 import 'package:eshkolot_offline/models/course.dart';
 import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
-import 'package:eshkolot_offline/ui/screens/course_main/main.dart';
+import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/subject_main_page.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/video_widget.dart';

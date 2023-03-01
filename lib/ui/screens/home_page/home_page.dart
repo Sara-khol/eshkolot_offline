@@ -1,5 +1,5 @@
 import 'package:eshkolot_offline/services/vimoe_service.dart';
-import 'package:eshkolot_offline/ui/screens/course_main/main.dart';
+import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';

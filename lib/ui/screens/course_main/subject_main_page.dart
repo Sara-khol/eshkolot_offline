@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../models/course.dart';
-import 'main.dart';
+import 'main_page_child.dart';
 
 class SubjectMainPage extends StatefulWidget {
   const SubjectMainPage({super.key, required this.course});
