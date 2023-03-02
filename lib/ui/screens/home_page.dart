@@ -1,6 +1,5 @@
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
-import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:flutter/material.dart';
@@ -400,7 +399,7 @@ class _HomePageState extends State<HomePage> {
                                   builder: (context) =>
                                       MainPageChild(course: course)));
                         },
-                        child: Text('${course.title} ${i.toString()}',
+                        child: Text('${course.title}',
                             style: TextStyle(fontSize: 18.sp)),
                       )),
                   //  SizedBox(width: 63.w),
