@@ -181,7 +181,6 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                           print(widget.subject.lessons
                                               .elementAt(i)
                                               .name);
-                                          //todo check...
                                           MainPageChild.of(context)
                                               ?.bodyWidget = LessonWidget(
                                             lessonIndex: i,
