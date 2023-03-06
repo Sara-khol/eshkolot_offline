@@ -37,7 +37,7 @@ class _MainPageChildState extends State<MainPageChild> {
 
   @override
   void initState(){
-    _bodyWidget= CourseMainPage(key: UniqueKey());
+    _bodyWidget= CourseMainPage(key: UniqueKey(),course: widget.course,);
     currentStep=1;
   }
 
@@ -155,7 +155,7 @@ class _MainPageChildState extends State<MainPageChild> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _bodyWidget = CourseMainPage(key: UniqueKey());
+                        _bodyWidget = CourseMainPage(key: UniqueKey(),course: widget.course);
                       });
                     }
                   ),
@@ -296,7 +296,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                 child: Row(
                                   children: [
                                     Icon(Icons.stars_rounded,size: 35.sp,color: Color(0xFFACAEAF),),
-                                    Text('תרגול מסכם - ${currentSubject.name}',style: TextStyle(fontSize: 16.sp,color: Color(0xFF6E7072),),),
+                                    Text('תרגול מסכם - ${currentSubject.name}',style: TextStyle(fontSize: 16.sp,color: Color(0xFF6E7072)))
                                   ],
                                 ),
                               ),

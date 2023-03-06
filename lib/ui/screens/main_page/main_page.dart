@@ -265,11 +265,11 @@ class _MainPageState extends State<MainPage> {
           TitleBarWidget(),
           Expanded(
               child: Row(children: [
-            SideMenuWidget(myUser: widget.user),
-            Expanded(
-                child: Column(children: [
-              TopBarUserWidget(),
-              Expanded(child: _mainWidget)
+                SideMenuWidget(myUser: widget.user),
+                Expanded(
+                    child: Column(children: [
+                      TopBarUserWidget(),
+                      Expanded(child: _mainWidget)
             ]))
           ]))
         ]);
