@@ -17,7 +17,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   Color myColor = const Color(0xff2D2828);
 
-  TextEditingController controller = TextEditingController();
+  //todo remove text
+  TextEditingController controller = TextEditingController(text: '123456789');
 
   bool isError=false;
 

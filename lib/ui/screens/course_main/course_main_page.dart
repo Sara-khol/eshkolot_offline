@@ -1,3 +1,4 @@
+
 import 'package:eshkolot_offline/ui/screens/course_main/subject_main_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,10 +6,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../models/course.dart';
+import 'main_page_child.dart';
 
 
 class CourseMainPage extends StatefulWidget {
-  final Course course;
+ final Course course;
   const CourseMainPage({super.key, required this.course});
 
   @override
@@ -17,13 +19,17 @@ class CourseMainPage extends StatefulWidget {
 
 class _CourseMainPageState extends State<CourseMainPage> {
 
-  late Widget displayWidget;
+
 
   @override
   void initState(){
     super.initState();
+  }
 
-    displayWidget= Column(
+
+  @override
+  Widget build(BuildContext context) {
+    return     Column(
       children: [
         Row(
           children: [
@@ -120,9 +126,11 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                 textStyle: TextStyle(fontSize: 20.sp,fontWeight: FontWeight.w400),
                               ),
                               onPressed: () {
-                                setState(() {
-                                  displayWidget=SubjectMainPage(course: widget.course);
-                                });
+                                //todo change to place where stopped
+                                  MainPageChild.of(context)?.bodyWidget=SubjectMainPage(
+                                  subject:widget.course.subjects.first);
+                                  MainPageChild.of(context)?.subjectPickedIndex=0;
+
                               },
                               child: Text('המשך מהמקום בו עצרת', style: TextStyle(fontSize: 20.sp)),
                             ),
@@ -152,9 +160,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
                               textStyle: TextStyle(fontSize: 20.sp,fontWeight: FontWeight.w400),
                             ),
                             onPressed: () {
-                              setState(() {
-                                displayWidget=SubjectMainPage(course: widget.course);
-                              });
+                                MainPageChild.of(context)?.bodyWidget=SubjectMainPage(
+                                    subject:widget.course.subjects.first);
+                                MainPageChild.of(context)?.subjectPickedIndex=0;
+
                             },
                             child: Text('עבור אל הנושא הראשון', style: TextStyle(fontSize: 20.sp)),
                           ),
@@ -169,12 +178,6 @@ class _CourseMainPageState extends State<CourseMainPage> {
         )
       ],
     );
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return displayWidget;
   }
 
 }
