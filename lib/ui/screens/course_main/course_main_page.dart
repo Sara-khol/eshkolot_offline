@@ -127,6 +127,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                               ),
                               onPressed: () {
                                 //todo change to place where stopped
+
                                   MainPageChild.of(context)?.bodyWidget=SubjectMainPage(
                                   subject:widget.course.subjects.first);
                                   MainPageChild.of(context)?.subjectPickedIndex=0;

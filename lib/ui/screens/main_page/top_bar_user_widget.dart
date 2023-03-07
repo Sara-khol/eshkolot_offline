@@ -59,8 +59,10 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
               SizedBox(width: 12.w),
               InkWell(
                 onTap: () {
-                  SyncEndDialog(context,MainPage.of(context)?.widget.user);
+                  // SyncEndDialog(context,MainPage.of(context)?.widget.user);
                   // SyncDialog(context,controller);
+                  //OfflineSyncDialog(context);
+                  CourseCompleteDialog(context, MainPage.of(context)?.widget.user, /*course,*/ controller);
                 },
                 child: Container(
                   height: 40.h,
