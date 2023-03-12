@@ -1,4 +1,5 @@
 import 'package:eshkolot_offline/models/knowledge.dart';
+import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:isar/isar.dart';
@@ -23,6 +24,9 @@ class Course {
 
   @Backlink(to: "courses")
   final knowledge = IsarLink<Knowledge>();
+
+  final questionnaire = IsarLinks<Questionnaire>();
+
 
   //not suppose to be here, for meanwhile
   @enumerated

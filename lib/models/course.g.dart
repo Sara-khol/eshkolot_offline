@@ -82,6 +82,12 @@ const CourseSchema = CollectionSchema(
       target: r'Knowledge',
       single: true,
       linkName: r'courses',
+    ),
+    r'questionnaire': LinkSchema(
+      id: -1575972599652728065,
+      name: r'questionnaire',
+      target: r'Questionnaire',
+      single: false,
     )
   },
   embeddedSchemas: {},
@@ -178,7 +184,7 @@ Id _courseGetId(Course object) {
 }
 
 List<IsarLinkBase<dynamic>> _courseGetLinks(Course object) {
-  return [object.subjects, object.knowledge];
+  return [object.subjects, object.knowledge, object.questionnaire];
 }
 
 void _courseAttach(IsarCollection<dynamic> col, Id id, Course object) {
@@ -186,6 +192,8 @@ void _courseAttach(IsarCollection<dynamic> col, Id id, Course object) {
   object.subjects.attach(col, col.isar.collection<Subject>(), r'subjects', id);
   object.knowledge
       .attach(col, col.isar.collection<Knowledge>(), r'knowledge', id);
+  object.questionnaire
+      .attach(col, col.isar.collection<Questionnaire>(), r'questionnaire', id);
 }
 
 extension CourseByIndex on IsarCollection<Course> {
@@ -967,6 +975,66 @@ extension CourseQueryLinks on QueryBuilder<Course, Course, QFilterCondition> {
   QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(r'knowledge', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> questionnaire(
+      FilterQuery<Questionnaire> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'questionnaire');
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      questionnaireLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> questionnaireIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      questionnaireIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      questionnaireLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      questionnaireLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      questionnaireLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'questionnaire', lower, includeLower, upper, includeUpper);
     });
   }
 }
