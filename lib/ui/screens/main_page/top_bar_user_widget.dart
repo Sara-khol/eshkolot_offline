@@ -1,4 +1,6 @@
+import 'package:eshkolot_offline/ui/screens/dialogs/dialogs.dart';
 import 'package:eshkolot_offline/ui/screens/login_page.dart';
+import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -7,7 +9,33 @@ class TopBarUserWidget extends StatefulWidget {
   State<TopBarUserWidget> createState() => _TopBarUserWidgetState();
 }
 
-class _TopBarUserWidgetState extends State<TopBarUserWidget> {
+class _TopBarUserWidgetState extends State<TopBarUserWidget>
+    with TickerProviderStateMixin {
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    controller = AnimationController(
+
+      /// [AnimationController]s can be created with `vsync: this` because of
+      /// [TickerProviderStateMixin].
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )
+      ..addListener(() {
+        setState(() {});
+      });
+    //controller.isCompleted
+    super.initState();
+  }
+
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,39 +59,8 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget> {
               SizedBox(width: 12.w),
               InkWell(
                 onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Expanded(
-                          child: Column(
-                        children: [
-                          SizedBox(height: 44.h,),
-                          Text(
-                            'אנחנו מסנכרנים את התקדמות הלמידה שלכם',
-                            style: TextStyle(
-                                fontSize: 36.sp, fontWeight: FontWeight.w600),
-                          )
-                        ],
-                      )
-                          // AlertDialog(
-                          //   title: Text('Welcome'),
-                          //   content: Text('GeeksforGeeks'),
-                          //   actions: [
-                          //     TextButton(
-                          //     //  textColor: Colors.black,
-                          //       onPressed: () {},
-                          //       child: Text('CANCEL'),
-                          //     ),
-                          //     TextButton(
-                          //       // textColor: Colors.black,
-                          //       onPressed: () {},
-                          //       child: Text('ACCEPT'),
-                          //     ),
-                          //   ],
-                          // ),
-                          );
-                    },
-                  );
+                  SyncEndDialog(context,MainPage.of(context)?.widget.user);
+                  // SyncDialog(context,controller);
                 },
                 child: Container(
                   height: 40.h,
@@ -115,4 +112,11 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget> {
           )),
     );
   }
+
+
+
+
+
 }
+
+
