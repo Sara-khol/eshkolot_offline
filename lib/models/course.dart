@@ -15,7 +15,7 @@ class Course {
   late String title;
 
   @Index(unique: true, replace: true)
-  late int serverId;
+  late int serverId=0;
 
   bool isDownloaded = false;
 
