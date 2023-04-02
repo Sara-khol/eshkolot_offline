@@ -222,7 +222,7 @@ class VimoeService with ChangeNotifier {
         notifyListeners();
       }
       for (VideoIsar v in isarVideoList) {
-        print('i $i');
+       // print('i $i');
         i++;
         if(wasNetWorkProblem) {
           print('awaittttttttt');

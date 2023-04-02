@@ -403,16 +403,23 @@ class _MyAppState extends State<MyApp> {
                                 },
                                 child: Text('נסה שנית'))
                           ])
-                    : SimpleDialog(
-                        title: Center(child: Text('הנתונים נטענים')),
-                        children: <Widget>[
-                            Center(child: CircularProgressIndicator()),
-                            // SizedBox(height: 17.h),
-                            // Row(mainAxisAlignment: MainAxisAlignment.center,
-                            //   children: [Text('${context.read<VimoeService>().numOfAllVideos}'),
-                            //   Text('/'),
-                            //   Text('${context.read<VimoeService>().numDownloadFiles}')],)
-                          ]),
+                    : !isNetWorkError
+                        ? const SimpleDialog(
+                            title: Center(child: Text('הנתונים נטענים')),
+                            children: <Widget>[
+                                Center(child: CircularProgressIndicator()),
+                                // Text(context
+                                //     .read<VimoeService>()
+                                //     .numCoursesDownloaded
+                                //     .toString())
+                              ])
+                        : const SimpleDialog(
+                            title: Center(child: Text('אין חיבור לאינטרנט')),
+                            children: <Widget>[
+                                Center(
+                                    child: Text(
+                                        'נא בדוק את החיבורים על מנת שנוכל להמשיך בהורדת הנתונים')),
+                              ]),
               ),
             ),
           ],
