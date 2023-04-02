@@ -31,22 +31,28 @@ class _LoginPageState extends State<LoginPage> {
           TitleBarWidget(),
           Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-            SizedBox(height: 248.h),
+            SizedBox(height: 235.h),
+            Image.asset('assets/images/login.jpg',height: 190.h,),
+            SizedBox(height: 62.h),
             Text('ברוך הבא לאשכולות אופליין',
-                style: TextStyle(
-                    color: myColor,
-                    fontSize: 36.sp,
-                    fontWeight: FontWeight.w600)),
-            SizedBox(height: 88.h),
+            style: TextStyle(
+                color: myColor,
+                fontSize: 36.sp,
+                fontWeight: FontWeight.w600)),
+            SizedBox(height: 30.h),
             Text('הזן ת"ז להתחברות',
-                textAlign: TextAlign.end,
+                textAlign: TextAlign.center,
                 style: TextStyle(color: myColor, fontSize: 18.sp)),
             SizedBox(height: 23.h),
             Container(
               height: 50.h,
               width: 389.w,
+              decoration: BoxDecoration(
+                color: Color(0xFFF4F4F3),
+                borderRadius: BorderRadius.all(Radius.circular(30))
+              ),
               child: TextField(
                 keyboardType:TextInputType.number ,
                   // maxLength: 9,
@@ -56,27 +62,22 @@ class _LoginPageState extends State<LoginPage> {
                     FilteringTextInputFormatter.digitsOnly
                   ], // Only numbers can be entered,max 9 digits
                   // autofocus: true,
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.right,
                   cursorColor: Colors.black,
                   style: TextStyle(
                     fontSize: 18.sp,
                   ),
                   decoration: InputDecoration(
-
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xff5956DA))),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xff5956DA))),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 0, vertical: 15),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Color(0xffF4F4F3))),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Color(0xffF4F4F3))),
+                    //contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 15),
                     hintStyle: TextStyle(
                         fontSize: 18.sp, color: Color(0xff6E7072)),
-
                     hintText: 'תעודת זהות',
                   )),
             ),
            // Row(children: [Text('לא מצליחים להכנס?',style: TextStyle(fontSize: 15.sp),)],),
-                SizedBox(height: 42.h),
+                SizedBox(height: 62.h),
           ]),
           InkWell(
             onTap: () async {
@@ -94,18 +95,25 @@ class _LoginPageState extends State<LoginPage> {
               }*/
             },
             child: Container(
-              height: 50.h,
-              width: 207.w,
+              height: 40.h,
+              width: 171.w,
               decoration: BoxDecoration(
                   color: myColor,
-                  borderRadius: BorderRadius.all(Radius.circular(3))),
+                  borderRadius: BorderRadius.all(Radius.circular(30))),
               child: Center(
-                child: Text(
-                  'התחברות',
-                  style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'התחברות ',
+                      style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white),
+                    ),
+                    Icon(Icons.arrow_forward,size: 15.sp,color: Colors.white,),
+                  ],
                 ),
               ),
             ),

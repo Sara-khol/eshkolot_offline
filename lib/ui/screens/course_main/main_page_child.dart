@@ -58,8 +58,8 @@ class _MainPageChildState extends State<MainPageChild> {
             progressBar(),
             Expanded(
                 child: Padding(
-              padding: EdgeInsets.only(top: 60.h, right: 138.w),
-              child: _bodyWidget,
+                  padding: EdgeInsets.only(top: 60.h, right: 138.w),
+                  child: _bodyWidget,
             )),
           ],
         ),
