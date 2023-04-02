@@ -14,8 +14,8 @@ class VideoWidget extends StatelessWidget
     videoInit();
     return  Video(
       player: player,
-      height: 425.h,
-      width: 760.w,
+      height: 515.h,
+      width: 914.w,
       scale: 1.0, // default
       showControls: true, // default
     );

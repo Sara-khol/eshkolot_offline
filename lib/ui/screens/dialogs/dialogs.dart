@@ -13,23 +13,13 @@ void SyncDialog(BuildContext context,AnimationController controller){
     builder: (BuildContext context) {
       return Center(
         child: AlertDialog(
-          content: Container(
-            height: 484.h,
+          content: SizedBox(
+            height: 640.h,
             width: 656.w,
             child: Column(
               children: [
                 Align(
                   alignment: Alignment.topRight,
-                  /*child: CloseButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),*/
-                  /*child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Image.asset('assets/images/X.jpg',height: 16.h),),*/
                   child: TextButton(
                     child: Image.asset('assets/images/X.jpg',height: 18.h),
                     onPressed: () {
@@ -38,12 +28,14 @@ void SyncDialog(BuildContext context,AnimationController controller){
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 45.h,right: 70.w,left: 70.w),
+                  padding: EdgeInsets.only(/*top: 45.h,*/right: 70.w,left: 70.w),
                   child: Column(
                     children: [
+                      Image.asset('assets/images/sync.jpg',height: 153.h),
+                      SizedBox(height: 40.h,),
                       Text('אנחנו מסנכרנים את התקדמות הלמידה שלכם',
                         style: TextStyle(
-                            fontSize: 32.sp, fontWeight: FontWeight.w600),
+                            fontSize: 36.sp, fontWeight: FontWeight.w600),
                         textDirection: TextDirection.rtl,
                         textAlign:TextAlign.center,
                       ),
@@ -63,9 +55,9 @@ void SyncDialog(BuildContext context,AnimationController controller){
                         style: TextStyle(
                             fontSize: 18.sp
                         ),),
-                      SizedBox(height: 40.h,),
+                      SizedBox(height: 30.h,),
                       LinearProgressIndicator(
-                        color: Color(0xFFB9FFDD),
+                        color: Color(0xFFFFDA6C),
                         backgroundColor: Color(0xFFE4E6E9),
                         minHeight: 9.h,
                         value: controller.value+0.3,
@@ -94,22 +86,12 @@ void SyncEndDialog(BuildContext context,User? user){
       return Center(
         child: AlertDialog(
           content: Container(
-            height: 484.h,
+            height: 640.h,
             width: 656.w,
             child: Column(
               children: [
                 Align(
                   alignment: Alignment.topRight,
-                    /*child: CloseButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),*/
-                  /*child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Image.asset('assets/images/X.jpg',height: 16.h),),*/
                   child: TextButton(
                     child: Image.asset('assets/images/X.jpg',height: 18.h),
                     onPressed: () {
@@ -117,14 +99,15 @@ void SyncEndDialog(BuildContext context,User? user){
                     },
                   ),
                 ),
-                        //child: Image.asset('assets/images/X.jpg',height: 16.h))),
                 Padding(
-                  padding: EdgeInsets.only(top: 44.h,right: 70.w,left: 70.w),
+                  padding: EdgeInsets.only(/*top: 44.h,*/right: 70.w,left: 70.w),
                   child: Column(
                     children: [
+                      Image.asset('assets/images/sync_done.jpg',height: 153.h),
+                      SizedBox(height: 40.h,),
                       Text('מצוין! המערכת סיימה לסנכרן את נתוני הלמידה',
                         style: TextStyle(
-                            fontSize: 32.sp, fontWeight: FontWeight.w600),
+                            fontSize: 36.sp, fontWeight: FontWeight.w600),
                         textDirection: TextDirection.rtl,
                         textAlign:TextAlign.center,
                       ),
@@ -141,16 +124,26 @@ void SyncEndDialog(BuildContext context,User? user){
                             fontSize: 18.sp
                         ),
                         textDirection: TextDirection.rtl,),
-                      SizedBox(height: 70.h,),
+                      SizedBox(height: 63.h,),
                       Container(
-                        color: Color(0xFF2D2828),
-                        height: 50.h,width: 193.w,
+                        
+                        height: 40.h,width: 171.w,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2D2828),
+                          borderRadius: BorderRadius.all(Radius.circular(30))
+                        ),
                         child: TextButton(
-                          child: Text(' להמשך למידה ',style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white
-                          ),),
+                          child: Row(
+                            children: [
+                              Icon(Icons.arrow_back,color: Colors.white,size: 15.sp,),
+                              Text(' להמשך למידה ',style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white
+                              ),),
+
+                            ],
+                          ),
                           onPressed: () {
                             MainPage.of(context)?.mainWidget= HomePage(user: user!);
                             Navigator.pop(context);
@@ -183,16 +176,6 @@ void OfflineSyncDialog(BuildContext context){
               children: [
                 Align(
                   alignment: Alignment.topRight,
-                  /*child: CloseButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),*/
-                  /*child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Image.asset('assets/images/X.jpg',height: 16.h),),*/
                   child: TextButton(
                     child: Image.asset('assets/images/X.jpg',height: 18.h),
                     onPressed: () {
@@ -201,12 +184,14 @@ void OfflineSyncDialog(BuildContext context){
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 45.h, right: 70.w,left: 70.w),
+                  padding: EdgeInsets.only(/*top: 45.h,*/ right: 70.w,left: 70.w),
                   child: Column(
                     children: [
+                      Image.asset('assets/images/offline.jpg',height: 153.h),
+                      SizedBox(height: 70.h,),
                       Text('הנך במצב לא מקוון',
                         style: TextStyle(
-                            fontSize: 32.sp, fontWeight: FontWeight.w600),
+                            fontSize: 36.sp, fontWeight: FontWeight.w600),
                         textDirection: TextDirection.rtl,
                         textAlign:TextAlign.center,
                       ),
@@ -226,10 +211,13 @@ void OfflineSyncDialog(BuildContext context){
                         textDirection: TextDirection.rtl,),
                       SizedBox(height: 40.h,),
                       Container(
-                        color: Color(0xFF2D2828),
-                        height: 50.h,width: 360.w,
+                        height: 40.h,width: 171.w,
+                        decoration: BoxDecoration(
+                            color: Color(0xFF2D2828),
+                            borderRadius: BorderRadius.all(Radius.circular(30))
+                        ),
                         child: TextButton(
-                          child: Text(' הבנתי תודה ',style: TextStyle(
+                          child: Text(' הבנתי, תודה! ',style: TextStyle(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w600,
                               color: Colors.white
@@ -274,16 +262,19 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
                 ),
                 //child: Image.asset('assets/images/X.jpg',height: 16.h))),
                 Padding(
-                  padding: EdgeInsets.only(top: 44.h,right: 70.w,left: 70.w),
+                  padding: EdgeInsets.only(/*top: 44.h,*/right: 70.w,left: 70.w),
                   child: Column(
                     children: [
+                      Image.asset('assets/images/course_done.jpg',height: 159.h),
+                      SizedBox(height: 35.h,),
                       Text('כל הכבוד!',
                         style: TextStyle(
-                            fontSize: 32.sp, fontWeight: FontWeight.w600),
+                            fontSize: 36.sp, fontWeight: FontWeight.w600),
                         textDirection: TextDirection.rtl,
                         textAlign:TextAlign.center,
                       ),
-                      Text('סיימת קורס ${user!.name/*course.title*/} !',
+                      //Text('סיימת קורס ${course.title} !',
+                      Text('סיימת קורס !',
                         style: TextStyle(
                             fontSize: 32.sp, fontWeight: FontWeight.w600),
                         textDirection: TextDirection.rtl,
@@ -306,14 +297,24 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
                       Row(
                         children: [
                           Container(
-                            color: Color(0xFF2D2828),
-                            height: 50.h,width: 193.w,
+
+                            height: 40.h,width: 163.w,
+                            decoration: BoxDecoration(
+                              border: Border.all(color:  Color(0xFF2D2828),),
+                              borderRadius: BorderRadius.all(Radius.circular(30))
+                            ),
                             child: TextButton(
-                              child: Text(' לסנכרון נתונים ',style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white
-                              ),),
+                              child: Row(
+                                children: [
+
+                                  Text(' סנכרון נתונים ',style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color:  Color(0xFF2D2828),
+                                  ),),
+                                  Icon(Icons.refresh,color:  Color(0xFF2D2828),size: 18.sp,),
+                                ],
+                              ),
                               onPressed: () {
                                 //MainPage.of(context)?.mainWidget= HomePage(user: user!);
                                 SyncDialog(context, controller);
@@ -323,14 +324,22 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
                           ),
                           SizedBox(width: 53.w,),
                           Container(
-                            color: Color(0xFF2D2828),
-                            height: 50.h,width: 193.w,
+                            height: 40.h,width: 171.w,
+                            decoration: BoxDecoration(
+                                color: Color(0xFF2D2828),
+                                borderRadius: BorderRadius.all(Radius.circular(30))
+                            ),
                             child: TextButton(
-                              child: Text(' להמשך למידה ',style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white
-                              ),),
+                              child: Row(
+                                children: [Icon(Icons.arrow_back,color: Colors.white,size: 15.sp,),
+                                  Text(' להמשך למידה ',style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white
+                                  ),),
+
+                                ],
+                              ),
                               onPressed: () {
                                 MainPage.of(context)?.mainWidget= HomePage(user: user!);
                                 Navigator.pop(context);

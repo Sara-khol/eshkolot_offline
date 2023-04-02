@@ -47,16 +47,12 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   visibility_detector: ^0.3.3
   bitsdojo_window: ^0.1.5
+  archive: ^3.1.2
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
 #  window_manager: ^0.3.1
-
-
-
-
-
 
 
 
@@ -68,6 +64,7 @@ dependencies:
   dotted_border: ^2.0.0+3
   font_awesome_flutter: ^10.3.0
   percent_indicator: ^4.2.2
+  open_iconic_flutter: ^0.3.0
 
 
 
@@ -96,6 +93,17 @@ flutter:
   assets:
     - assets/
     - assets/images/
+
+  fonts:
+    - family: RAG-Sans
+      fonts:
+        - asset: assets/fonts/RAG-Sans1.0-Black.ttf
+        - asset: assets/fonts/RAG-Sans1.0-ExtraLight.ttf
+        - asset: assets/fonts/RAG-Sans1.0-Regular.ttf
+        - asset: assets/fonts/RAG-Sans1.0-SemiBold.ttf
+
+
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

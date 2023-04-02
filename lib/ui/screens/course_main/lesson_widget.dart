@@ -1,5 +1,7 @@
 
+import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
+import 'package:eshkolot_offline/ui/screens/course_main/course_main_page.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/video_widget.dart';
@@ -52,172 +54,197 @@ late  Lesson lesson;
   }
 
   Widget bodyWidget() {
-    return SizedBox(
-      width: 760.w,
-      child: Column(
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 624.h,
+          width: 950.w,
+          decoration: BoxDecoration(
+            border: Border.all(color: Color(0xFFE4E6E9)),
+            borderRadius: BorderRadius.all(Radius.circular(10))
+          ),
+          child: Column(
             children: [
-              Icon(
-                Icons.videocam,
-                size: 28.sp,
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 11.w, left: 11.w),
-                child: Text(
-                 lesson.name,
-                  style:
-                      TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600),
-                ),
-              ),
-              Icon(
-                Icons.access_time,
-                size: 15.sp,
-              ),
-              Text(
-                ' 10min ',
-                style: TextStyle(fontSize: 16.sp),
-              ),
-              Spacer(),
-              Container(
-                height: 20.h,
-                width: 70.w,
-                decoration: BoxDecoration(
-                    color: Color(0xFFF4F4F3),
-                    border: Border.all(color: Color(0xFFC8C9CE))),
-                child: TextButton(
-                  onPressed: () async {
-                    if (!lesson.isCompleted) {
-                      lesson.isCompleted = true;
-                      print('pressed id ${lesson.id}');
-                      await IsarService.instance.updateLesson(lesson.id);
-                      setState(() {});
-                    }
-                  },
-                  child: Text(
-                    '  הושלם  ',
-                    style: TextStyle(fontSize: 12.sp, color: Color(0xFFACAEAF)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(width: 19.w,),
+                  Icon(
+                    Icons.videocam,
+                    size: 28.sp,
                   ),
-                ),
-              )
+                  SizedBox(width: 23.w,),
+                  Text(lesson.name, style: TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(width: 32.w,),
+                  Icon(
+                    Icons.access_time,
+                    size: 15.sp,
+                  ),
+                  SizedBox(width: 7.w,),
+                  Text(
+                    "10 דק'",
+                    style: TextStyle(fontSize: 16.sp,color: Color(0xFF2D2828)),
+                  ),
+                  Spacer(),
+                  Container(
+                    height: 20.h,
+                    width: 70.w,
+                    decoration: BoxDecoration(
+                        color: Color(0xFF62FFB8),
+                        borderRadius: BorderRadius.all(Radius.circular(10))
+                        ),
+                    child: TextButton(
+                      onPressed: () async {
+                        if (!lesson.isCompleted) {
+                          lesson.isCompleted = true;
+                          print('pressed id ${lesson.id}');
+                          await IsarService.instance.updateLesson(lesson.id);
+                          setState(() {
+
+                          });
+                        }
+                      },
+                      child: Text(
+                        '  הושלם  ',
+                        style: TextStyle(fontSize: 13.sp, color: Colors.white),
+                      ),
+                    ),
+
+                  ),
+                  SizedBox(width: 18.w,),
+                ],
+              ),
+              SizedBox(
+                height: 27.h,
+              ),
+              VideoWidget(),
             ],
           ),
-          SizedBox(
-            height: 34.h,
+        ),
+        SizedBox(height: 17.h,),
+        Container(
+          width: 950.w,
+          height: 66.h,
+          decoration: BoxDecoration(
+              border: Border.all(color: Color(0xFFE4E6E9)),
+              borderRadius: BorderRadius.all(Radius.circular(10))
           ),
-          VideoWidget(),
-          SizedBox(
-            height: 32.h,
-          ),
-          Container(
-            color: Color(0xFFF4F4F3),
-            height: 100.h,
+          child: Center(
             child: Padding(
-              padding: EdgeInsets.only(top: 22.h, right: 35.w, left: 30.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: EdgeInsets.only(left: 18.w,right: 18.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Icon(Icons.create,size: 19.sp,),
+                  SizedBox(width: 33.w,),
                   Text(
                     'תרגול - ${lesson.name}',
-                    style: TextStyle(fontSize: 18.sp),
+                    style: TextStyle(fontSize: 22.sp,fontWeight: FontWeight.w600),
                   ),
-                  SizedBox(height: 14.h),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.create,
-                        size: 20.sp,
-                      ),
-                      SizedBox(
-                        width: 18.w,
-                      ),
-                      Icon(
-                        Icons.access_time,
-                        size: 14.sp,
-                      ),
-                      Text(
-                        ' 30min ',
-                        style: TextStyle(fontSize: 16.sp),
-                      ),
-                      Container(
-                        height: 20.h,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Color(0xFFC8C9CE))),
-                        child: TextButton(
-                          child: Text(
-                            '  לתרגול >  ',
+                  SizedBox(width: 65.h),
+                  Icon(
+                    Icons.access_time,
+                    size: 14.sp,
+                  ),
+                  Text("  30 דק'  " ,style: TextStyle(fontSize: 16.sp),
+                  ),
+                  Spacer(),
+                  Container(
+                    height: 20.h,
+                    //width: 70.w,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      color: Color(0xFFF4F4F3)
+                    ),
+                    child: TextButton(
+                      child: Row(
+                        children: [
+                          Text(
+                            '  לתרגול ',
                             style: TextStyle(
-                                fontSize: 12.sp, color: Color(0xFFACAEAF)),
+                                fontSize: 12.sp,fontWeight: FontWeight.w600, color: Color(0xFF2D2828)),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              MainPageChild.of(context)?.bodyWidget =
-                                  QuestionnaireWidget(
-                                    title: 'תרגול - ${lesson.name}',
-                                      questionnaires:
-                                         lesson.questionnaire);
-                            });
-                            // QuestionnaireWidget(key: UniqueKey(),questionnaires: widget.subject.lessons.elementAt(lessonIndex).questionnaire);
-                          },
-                        ),
+                          Icon(Icons.arrow_forward,size: 10.sp,color: Color(0xFF2D2828),)
+                        ],
                       ),
-                    ],
+                      onPressed: () {
+                        setState(() {
+                          MainPageChild.of(context)?.bodyWidget =
+                              QuestionnaireWidget(
+                                title: 'תרגול - ${lesson.name}',
+                                  questionnaires:
+                                     lesson.questionnaire);
+                        });
+                        // QuestionnaireWidget(key: UniqueKey(),questionnaires: widget.subject.lessons.elementAt(lessonIndex).questionnaire);
+                      },
+                    ),
                   )
                 ],
               ),
             ),
           ),
-          SizedBox(
-            height: 40.h,
-          ),
-          Row(
-            children: [
-              Container(
+        ),
+        SizedBox(
+          height: 62.h,
+        ),
+        Row(
+          children: [
+            // Container(
+            //   height: 40.h,
+            //   color: Color(0xFFE4E6E9),
+            //   child: TextButton(
+            //     child: Text(
+            //       '  חזרה לנושא  ',
+            //       style: TextStyle(color: Color(0xFF6E7072), fontSize: 20.sp),
+            //     ),
+            //     onPressed: () {
+            //       widget.backToSubject(context);
+            //       // setState(() {
+            //       //   MainPageChild.of(context)?.bodyWidget =SubjectMainPage(subject: subject);
+            //       // });
+            //       //SubjectMainPage(course:,)
+            //     },
+            //   ),
+            // ),
+            Spacer(),
+           Visibility(
+             visible: widget.lessonIndex+1<widget.lessons.length,
+             child: Container(
                 height: 40.h,
-                color: Color(0xFFE4E6E9),
+               decoration: BoxDecoration(
+                   borderRadius: BorderRadius.all(Radius.circular(30)),
+                   color: Color(0xFF32D489)
+               ),
                 child: TextButton(
-                  child: Text(
-                    '  חזרה לנושא  ',
-                    style: TextStyle(color: Color(0xFF6E7072), fontSize: 20.sp),
+                  child: Row(
+                    children: [
+                      Text(
+                        '  לשיעור הבא ',
+                        style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.w600),
+                      ),
+                      Icon(Icons.arrow_forward,size: 16.sp,color: Colors.white,)
+                    ],
                   ),
                   onPressed: () {
-                    widget.backToSubject(context);
-                    // setState(() {
-                    //   MainPageChild.of(context)?.bodyWidget =SubjectMainPage(subject: subject);
-                    // });
-                    //SubjectMainPage(course:,)
+
+                      // widget.lessonIndex=widget.lessonIndex+1;
+                      // lesson=widget.lessons.elementAt(widget.lessonIndex);
+                      MainPageChild.of(context)?.bodyWidget = LessonWidget(
+                        lessonIndex: widget.lessonIndex + 1, lessons: widget.lessons,
+                        backToSubject: widget.backToSubject,
+                      );
+
+
                   },
                 ),
               ),
-              Spacer(),
-             Visibility(
-               visible: widget.lessonIndex+1<widget.lessons.length,
-               child: Container(
-                  height: 40.h,
-                  color: Color(0xFF6E7072),
-                  child: TextButton(
-                    child: Text(
-                      '  השיעור הבא >  ',
-                      style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 20.sp),
-                    ),
-                    onPressed: () {
-
-                        // widget.lessonIndex=widget.lessonIndex+1;
-                        // lesson=widget.lessons.elementAt(widget.lessonIndex);
-                        MainPageChild.of(context)?.bodyWidget = LessonWidget(
-                          lessonIndex: widget.lessonIndex + 1, lessons: widget.lessons,
-                          backToSubject: widget.backToSubject,
-                        );
-
-
-                    },
-                  ),
-                ),
-             ),
-            ],
-          )
-        ],
-      ),
+           ),
+            SizedBox(width: 244.w,),
+          ],
+        )
+      ],
     );
   }
 }

@@ -52,129 +52,100 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SizedBox(
-          height: 45,
-          child: Container(
-            decoration: BoxDecoration(
-                border: Border.all(
-                    color: const Color.fromARGB(255, 200, 201, 206))
-            ),
-            child: Row(
-              children: [
-                for(int i = 1; i <= widget.questionnaire.length; i++)...[
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ClipRRect(
-                      child: Stack(
-                        children: <Widget>[
-                          Container(
-                            decoration: BoxDecoration(
-                              color: i == selected ? const Color.fromARGB(
-                                  255, 45, 40, 40) : Colors.transparent,
-                            ),
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.center,
-                                foregroundColor: i == selected
-                                    ? Colors.white
-                                    : const Color.fromARGB(255, 45, 40, 40),
-                                textStyle: TextStyle(fontSize: 18.w,
-                                    fontWeight: FontWeight.w400),
-                              ),
-
-                              onPressed: () {
-                                print('selected question:  $i');
-                                print('current question: $selected');
-                                setState(() {
-                                  //displayWidget=questionnaire();
-                                  selected = i;
-                                  index=i-1;
-                                  //displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
-                                });
-                                print('question $selected selected');
-                              },
-                              child: Text(
-                                  '$i', style: TextStyle(fontSize: 18.w)),
-                            ),
-                          ),
-                        ],
+        SizedBox(height: 60.h,),
+        Container(
+          height: 45.h,
+          //width: 45.w,
+          child: Row(
+            children: [
+              for(int i = 1; i <= widget.questionnaire.length; i++)...[
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    width: 45.w,
+                    decoration: BoxDecoration(
+                      color: i == selected ? Color((0xFF5956DA)) : Colors.transparent,
+                    ),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        alignment: Alignment.center,
+                        foregroundColor: i == selected
+                            ? Colors.white
+                            : Color((0xFF2D2828)),
+                        textStyle: TextStyle(fontSize: 18.w),
                       ),
+                      onPressed: () {
+                        print('selected question:  $i');
+                        print('current question: $selected');
+                        setState(() {
+                          selected = i;
+                          index=i-1;
+                        });
+                        print('question $selected selected');
+                      },
+                      child: Text(
+                          '$i', style: TextStyle(fontSize: 18.w)),
                     ),
                   ),
-                ]
-              ],
-            ),
+                ),
+              ]
+            ],
           ),
         ),
 
         Padding(
           padding: EdgeInsets.only(top: 15.h,bottom: 30.h),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.square, color: Color.fromARGB(255, 45, 40, 40),
-                size: 12.w,),
-              Text('הנוכחי', style: TextStyle(fontSize: 16.w)),
-              Padding(padding: EdgeInsets.only(left: 11.w)),
-              Icon(Icons.square, color: Color.fromARGB(255, 110, 112, 114),
-                  size: 12.w),
-              Text('ביקורת', style: TextStyle(fontSize: 16.w)),
-              Padding(padding: EdgeInsets.only(left: 11.w)),
-              Icon(Icons.square, color: Color.fromARGB(255, 172, 174, 175),
-                  size: 12.w),
-              Text('נענו', style: TextStyle(fontSize: 16.w)),
-              Padding(padding: EdgeInsets.only(left: 11.w)),
-              Icon(Icons.square, color: Color.fromARGB(255, 200, 201, 206),
-                  size: 12.w),
-              Text('לא נכון', style: TextStyle(fontSize: 16.w)),
+              Icon(Icons.square, color: Color(0xFF5956DA), size: 15.sp,),
+              Text(' הנוכחי', style: TextStyle(fontSize: 16.w)),
+              SizedBox(width: 11.w,),
+              Icon(Icons.square, color: Color(0xFFACAEAF), size: 15.sp),
+              Text(' ביקורת', style: TextStyle(fontSize: 16.w)),
+              SizedBox(width: 11.w,),
+              Icon(Icons.square, color: Color(0xFF62FFB8), size: 15.sp),
+              Text(' נענו', style: TextStyle(fontSize: 16.w)),
+              SizedBox(width: 11.w,),
+              Icon(Icons.square, color: Color(0xFFF97575), size: 15.sp),
+              Text(' לא נכון', style: TextStyle(fontSize: 16.w)),
 
               const Spacer(),
 
-              Row(
-                children: [
-                  SizedBox(
-                    height: 23.h,
-                    width: 91.w,
-                  ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: ClipRRect(
-                      child: Stack(
-                        children: <Widget>[
-                          Container(
-                            decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                border: Border.all(color: const Color.fromARGB(
-                                    255, 200, 201, 206))),
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.center,
-                                foregroundColor: const Color.fromARGB(
-                                    255, 172, 174, 175),
-                                textStyle: TextStyle(
-                                    fontSize: 12.w,
-                                    fontWeight: FontWeight.w400),
-                              ),
-                              onPressed: () {},
-                              child: Text('סקור שאלה',
-                                  style: TextStyle(fontSize: 12.w)),
-                            ),
-                          ),
-                        ],
-                      ),
+              Container(
+                height: 20.h,
+                width: 100.w,
+                decoration: BoxDecoration(
+                    color: Color(0xFFF4F4F3),
+                  borderRadius: BorderRadius.all(Radius.circular(10))
                     ),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    alignment: Alignment.center,
+                    foregroundColor: Color(0xFF2D2828),
+                    textStyle: TextStyle(
+                        fontSize: 12.w,
+                        fontWeight: FontWeight.w600),
                   ),
-                ],
+                  onPressed: () {},
+                  child: Row(
+                    children: [
+                      Text('סקור שאלה', style: TextStyle(fontSize: 12.w)),
+                      Icon(Icons.arrow_forward,size: 10.sp,)
+                    ],
+                  ),
+                ),
               )
             ],
           ),
         ),
 
-        const Divider(color: Color.fromARGB(255, 228, 230, 233)),
+        Divider(color: Color.fromARGB(255, 228, 230, 233)),
 
         Align(
           alignment: Alignment.centerRight,
-          child: Text('Question $selected of ${widget.questionnaire.length}',
-            style: const TextStyle(color: Color.fromARGB(255,110, 112, 114)),
+          child: Text('שאלה $selected מתוך ${widget.questionnaire.length}',
+            style: TextStyle(color: Color(0xFF6E7072),fontSize: 18.sp),
           )
         ),
 
