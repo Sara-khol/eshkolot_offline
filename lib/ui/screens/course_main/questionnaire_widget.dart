@@ -47,82 +47,103 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerPr
 
     return SingleChildScrollView(
       controller: scrollController,
-      child: Padding(
-        padding: EdgeInsets.only(/*top: 100.h,right: 210.w,*/left: 360.w,bottom: 60.h),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(bottom: 5.h),
-              child: Row(
+      child: Container(
+        width: 950.w,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          border: Border.all(color: Color(0xFFE4E6E9))
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(20.sp),
+          child: Column(
+            children: [
+              Row(
                 children: [
                   Icon(Icons.create,size: 30.w),
-                  Padding(padding: EdgeInsets.only(left: 11.w,right: 14.w),
-                    child: Text(widget.title, style: TextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.w600, fontSize: 36.w)),
-                  ),
-                  Icon(Icons.access_time_outlined,size: 22.w,),
-                  const Text('30min')
-                ],
-              ),
-            ),
-
-            TabBar(
-              labelColor: const Color.fromARGB(255,45, 40, 40),
-              unselectedLabelColor: const Color.fromARGB(255,172, 174, 175),
-              indicatorColor: const Color.fromARGB(255,45, 40, 40),
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicatorWeight: 3.0,
-              indicatorPadding: EdgeInsets.only(bottom: 2.h),
-              labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-              controller: _tabController1,
-              tabs: [
-                Tab(
-                  child: Row(
-                    children:  [
-                      const FaIcon(FontAwesomeIcons.file),
-                      Padding(
-                        padding: EdgeInsets.only(right: 8.w),
-                        child: const Text('שאלון'),
-                      )
-                    ],
-                  ),
-                ),
-                Tab(
-                  child: Row(
-                    children: [
-                      const Icon(Icons.folder_outlined),
-                      Padding(
-                        padding: EdgeInsets.only(right: 8.w),
-                        child: const Text('חומרי למידה'),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: TabBarView(
-                controller: _tabController1,
-                children: <Widget>[
-                  Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: 27.h, bottom: 50),
-                        child: Row(
-                          children: [
-                            const FaIcon(FontAwesomeIcons.handPointLeft),
-                            Text('בשאלון זה מומלץ להעזר בלשונית "חומרי למידה"',style: TextStyle(fontStyle: FontStyle.normal, fontWeight: FontWeight.w400, fontSize: 18.w))
-                          ],
-                        ),
+                  SizedBox(width: 23.w,),
+                  Text(widget.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 36.sp)),
+                  SizedBox(width: 30.w,),
+                  Icon(Icons.access_time_outlined,size: 15.sp,),
+                  Text("  30 דק' ",style: TextStyle(fontSize: 16.sp)),
+                  Spacer(),
+                  Container(
+                    height: 20.h,
+                    width: 70.w,
+                    decoration: BoxDecoration(
+                        color: Color(0xFF62FFB8),
+                        borderRadius: BorderRadius.all(Radius.circular(10))
+                    ),
+                    child: TextButton(
+                      onPressed: () async {
+                        /*if (!lesson.isCompleted) {
+                          lesson.isCompleted = true;
+                          print('pressed id ${lesson.id}');
+                          await IsarService.instance.updateLesson(lesson.id);
+                          setState(() {
+                          });
+                        }*/
+                      },
+                      child: Text(
+                        '  הושלם  ',
+                        style: TextStyle(fontSize: 13.sp, color: Colors.white),
                       ),
-                      displayWidget
-                    ],
+                    ),
+
                   ),
-                  Text('חומרי למידה'),
                 ],
               ),
-            ),
-          ],
+              SizedBox(height: 17.h,),
+              Row(
+                children: [
+                  Image.asset('assets/images/hand.jpg'),
+                  Text("  בשאלון זה מומלץ להעזר בלשונית 'חומרי למידה'",style: TextStyle(fontSize: 18.sp))
+                ],
+              ),
+              TabBar(
+                labelColor: const Color.fromARGB(255,45, 40, 40),
+                unselectedLabelColor: const Color.fromARGB(255,172, 174, 175),
+                indicatorColor: const Color.fromARGB(255,45, 40, 40),
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicatorWeight: 3.0,
+                indicatorPadding: EdgeInsets.only(bottom: 2.h),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
+                controller: _tabController1,
+                tabs: [
+                  Tab(
+                    child: Row(
+                      children:  [
+                        Icon(Icons.create_outlined, size: 22.sp,),
+                        Text('  שאלון ',style: TextStyle(fontSize: 22.sp))
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Row(
+                      children: [
+                        Icon(Icons.folder_outlined ,size: 22.sp,),
+                        Text('  חומרי למידה',style: TextStyle(fontSize: 22.sp))
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height,
+                child: TabBarView(
+                  controller: _tabController1,
+                  children: <Widget>[
+                    Column(
+                      children: [
+
+                        displayWidget
+                      ],
+                    ),
+                    Text('חומרי למידה'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -133,30 +154,37 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerPr
   {
     return Column(
         children: [
-          SizedBox(height: 40.h,width: 176.w,),
+          SizedBox(height: 43.h),
           widget.questionnaires.isNotEmpty?    Align(
             alignment: Alignment.centerRight,
             child: Container(
+              height: 40.h,
+              width: 171.w,
               decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  border: Border.all(color: Colors.black)
+                  color: Color(0xFFF4F4F3),
+                  borderRadius: BorderRadius.all(Radius.circular(30))
               ),
               child: TextButton(
                 style: TextButton.styleFrom(
                   alignment: Alignment.center,
                   foregroundColor: Colors.black,
-                  padding: EdgeInsets.only(left: 45.w,right: 45.w,top: 20.h,bottom: 22.h),
-                  textStyle: TextStyle(fontSize: 22.h,fontWeight: FontWeight.w400),
+                  //padding: EdgeInsets.only(left: 45.w,right: 45.w,top: 20.h,bottom: 22.h),
+                  textStyle: TextStyle(fontSize: 20.sp),
                 ),
                 onPressed: () {
                   setState(() {
                     displayWidget=QuestionnaireTab(questionnaire: widget.questionnaires);
                   });
                 },
-                child: Text('התחל שאלון', style: TextStyle(fontSize: 22.w)),
+                child: Row(
+                  children: [
+                    Text(' התחל שאלון ', style: TextStyle(fontSize: 20.sp,color: Color(0xFF2D2828),fontFamily: 'RAG-Sans')),
+                    Icon(Icons.arrow_forward,size: 15.sp,color: Color(0xFF2D2828),)
+                  ],
+                ),
               ),
             ),
-          ):Text('לא נמצאו שאלונים',  style: TextStyle(fontSize: 22.h,fontWeight: FontWeight.w400)),
+          ):Text('לא נמצאו שאלונים',  style: TextStyle(fontSize: 22.h)),
         ]);
   }
 }

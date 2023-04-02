@@ -60,27 +60,28 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
               InkWell(
                 onTap: () {
                   SyncEndDialog(context,MainPage.of(context)?.widget.user);
-                  // SyncDialog(context,controller);
+                  SyncDialog(context,controller);
+                  //OfflineSyncDialog(context);
+                  //CourseCompleteDialog(context, MainPage.of(context)?.widget.user, /*course,*/ controller);
                 },
                 child: Container(
                   height: 40.h,
                   width: 154.w,
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.all(Radius.circular(3))),
+                      borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(
+                      Icons.refresh,
+                      size: 20.sp,
+                    ),
                       Text(
-                        'סנכרון נתונים',
+                        '  סינכרון נתונים  ',
                         style: TextStyle(
                             fontSize: 18.sp, fontWeight: FontWeight.w600),
                       ),
-                      SizedBox(width: 10.w),
-                      Icon(
-                        Icons.sync,
-                        size: 18.h,
-                      )
                     ],
                   ),
                 ),
@@ -93,18 +94,22 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                 },
                 child: Container(
                   height: 40.h,
-                  width: 154.w,
+                  width: 175.w,
                   decoration: BoxDecoration(
                       color: Colors.black,
-                      borderRadius: BorderRadius.all(Radius.circular(3))),
-                  child: Center(
-                    child: Text(
-                      'החלפת משתמש',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16.sp),
-                    ),
+                      borderRadius: BorderRadius.all(Radius.circular(50))),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.person_outline,size: 20.sp,color: Colors.white,),
+                      Text(
+                        ' החלפת משתמש  ',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18.sp),
+                      ),
+                    ],
                   ),
                 ),
               )

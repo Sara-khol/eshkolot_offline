@@ -7,6 +7,7 @@ import '../../../models/course.dart';
 import '../../../models/knowledge.dart';
 import '../../../models/learn_path.dart';
 import '../home_page.dart';
+import '../how_to_learn.dart';
 import 'main_page.dart';
 
 class SideMenuWidget extends StatefulWidget {
@@ -85,6 +86,8 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
           GestureDetector(
             onTap: () {
               setState(() {
+                MainPage.of(context)?.mainWidget =
+                    HowToLearn();
                 sIndex = 2;
               });
             },
