@@ -26,6 +26,11 @@ const LessonSchema = CollectionSchema(
       id: 1,
       name: r'name',
       type: IsarType.string,
+    ),
+    r'vimoeId': PropertySchema(
+      id: 2,
+      name: r'vimoeId',
+      type: IsarType.long,
     )
   },
   estimateSize: _lessonEstimateSize,
@@ -67,6 +72,7 @@ void _lessonSerialize(
 ) {
   writer.writeBool(offsets[0], object.isCompleted);
   writer.writeString(offsets[1], object.name);
+  writer.writeLong(offsets[2], object.vimoeId);
 }
 
 Lesson _lessonDeserialize(
@@ -79,6 +85,7 @@ Lesson _lessonDeserialize(
   object.id = id;
   object.isCompleted = reader.readBool(offsets[0]);
   object.name = reader.readString(offsets[1]);
+  object.vimoeId = reader.readLong(offsets[2]);
   return object;
 }
 
@@ -93,6 +100,8 @@ P _lessonDeserializeProp<P>(
       return (reader.readBool(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -378,6 +387,59 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vimoeId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'vimoeId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'vimoeId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'vimoeId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension LessonQueryObject on QueryBuilder<Lesson, Lesson, QFilterCondition> {}
@@ -468,6 +530,18 @@ extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVimoeId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vimoeId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVimoeIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vimoeId', Sort.desc);
+    });
+  }
 }
 
 extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
@@ -506,6 +580,18 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVimoeId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vimoeId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVimoeIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vimoeId', Sort.desc);
+    });
+  }
 }
 
 extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
@@ -519,6 +605,12 @@ extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByVimoeId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'vimoeId');
     });
   }
 }
@@ -539,6 +631,12 @@ extension LessonQueryProperty on QueryBuilder<Lesson, Lesson, QQueryProperty> {
   QueryBuilder<Lesson, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<Lesson, int, QQueryOperations> vimoeIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'vimoeId');
     });
   }
 }

@@ -10,6 +10,7 @@ class  Lesson {
   // Questionnaire? questionnaire;
   final questionnaire = IsarLinks<Questionnaire>();
   bool isCompleted=false;
+  int vimoeId=0;
 
 }
 

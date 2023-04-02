@@ -137,7 +137,7 @@ class VimoeService with ChangeNotifier {
         courses = await IsarService.instance.getAllCourses();
       }
       for (Course course in courses) {
-        if (course.serverId != 0) {
+        if (course.serverId > 1000) {
           projectId = course.serverId;
           await connectToVimoe();
         }

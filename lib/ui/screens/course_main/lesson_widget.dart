@@ -119,7 +119,7 @@ late  Lesson lesson;
               SizedBox(
                 height: 27.h,
               ),
-              VideoWidget(),
+              VideoWidget(vimoeId: lesson.vimoeId),
             ],
           ),
         ),

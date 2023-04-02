@@ -57,21 +57,21 @@ Future<void> main() async {
 
       List<Lesson> lessons = [
         Lesson()
-          ..name = 'מבוא ואותיות ניקוד'
+          ..name = 'מבוא ואותיות ניקוד'..vimoeId=467058608
           ..questionnaire.add(questionnaires.first),
-        Lesson()..name = 'אותיות עיצור א',
-        Lesson()..name = 'אותיות עיצור ב',
-        Lesson()..name = 'אותיות עיצור ג',
-        Lesson()..name = 'אותיות עיצור ד',
-        Lesson()..name = 'אותיות עיצור ה',
-        Lesson()..name = 'אותיות עיצור ו',
-        Lesson()..name = 'אותיות עיצור ז',
-        Lesson()..name = 'אותיות עיצור ח',
-        Lesson()..name = 'אותיות עיצור ט',
-        Lesson()..name = 'אותיות עיצור י',
-        Lesson()..name = 'אותיות עיצור כ',
-        Lesson()..name = 'אותיות עיצור ל',
-        Lesson()..name = 'אותיות עיצור מ',
+        Lesson()..name = 'אותיות עיצור א'..vimoeId=458427089,
+        Lesson()..name = 'אותיות עיצור ב'..vimoeId=458427439,
+        Lesson()..name = 'אותיות עיצור ג'..vimoeId=458427853,
+        Lesson()..name = 'אותיות עיצור ד'..vimoeId=458428550,
+        Lesson()..name = 'אותיות עיצור ה'..vimoeId=458429636,
+        Lesson()..name = 'אותיות עיצור ו'..vimoeId=458429870,
+        Lesson()..name = 'אותיות עיצור ז'..vimoeId=458431017,
+        Lesson()..name = 'אותיות עיצור ח'..vimoeId=458484739,
+        Lesson()..name = 'אותיות עיצור ט'..vimoeId=458486785,
+        Lesson()..name = 'אותיות עיצור י'..vimoeId=458487712,
+        Lesson()..name = 'אותיות עיצור כ'..vimoeId=458488614,
+        Lesson()..name = 'אותיות עיצור ל'..vimoeId=458493015,
+        Lesson()..name = 'אותיות עיצור מ'..vimoeId=458587389,
       ];
 
       final List<Subject> subjects = [
@@ -83,12 +83,7 @@ Future<void> main() async {
         //..lessons.add(lessons[0])
       ];
 
-      myCourses = [
-        // (Course()
-        //   ..title = 'אנגלית בסיסית א'..serverId=3
-        //   ..subjects.addAll(subjects)),
-        // (Course()..title = 'אנגלית בסיסית ב'..serverId=4)
-      ];
+
 
       myCourses.add((Course()
         ..title = 'אנגלית בסיסית א'
@@ -99,58 +94,75 @@ Future<void> main() async {
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
         // ..serverId = 2782842
+        ..serverId = 1
         ..status = Status.finish);
 
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 2
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 3
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 4
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 5
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 6
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 7
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 8
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 9
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 10
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 11
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 12
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 13
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 14
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 15
         ..status = Status.finish);
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
+        ..serverId = 16
         ..status = Status.finish);
 
       Course algebraCourse = Course()
         ..title = 'אלגברה בסיסית א’'
+        ..serverId = 17
         ..status = Status.synchronized;
-      Course phCourse = Course()..title = 'פיזיקה רעיונית א’';
+      Course phCourse = Course()..title = 'פיזיקה רעיונית א’'..serverId = 18;
       List<Knowledge> knowledgeList = [
         Knowledge()
           ..title = 'אנגלית'
@@ -178,9 +190,11 @@ Future<void> main() async {
         algebraCourse,
         Course()
           ..title = 'אלגברה בסיסית ב’'
+          ..serverId = 19
           ..status = Status.synchronized,
         Course()
           ..title = 'קורס גאומטריה בסיסית'
+          ..serverId = 20
           ..status = Status.synchronized
       ];
 

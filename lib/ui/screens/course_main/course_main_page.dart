@@ -119,7 +119,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                             MainPageChild.of(context)?.subjectPickedIndex=0;
 
                         },
-                        child: Text('המשך מהמקום שעצרת ${widget.course.subjects.elementAt(0).lessons.elementAt(widget.course.lessonStopId).name}',
+                        child: Text('המשך מהמקום שעצרת ${widget.course.subjects.isNotEmpty?widget.course.subjects.elementAt(0).lessons.elementAt(widget.course.lessonStopId).name:''}',
                             style: TextStyle(fontSize: 18.sp,fontFamily: 'RAG-Sans'),),
                       ),
                     ),
