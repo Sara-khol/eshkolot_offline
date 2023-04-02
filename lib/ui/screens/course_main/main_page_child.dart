@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-
 import '../../../models/course.dart';
 import '../../../models/lesson.dart';
 import '../../../models/subject.dart';
@@ -59,9 +58,9 @@ class _MainPageChildState extends State<MainPageChild> {
             progressBar(),
             Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(top: 60.h, right: 165.w),
-                  child: _bodyWidget,
-                )),
+              padding: EdgeInsets.only(top: 60.h, right: 138.w),
+              child: _bodyWidget,
+            )),
           ],
         ),
       )
@@ -90,7 +89,8 @@ class _MainPageChildState extends State<MainPageChild> {
                           style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF2D2828)),
+                              color:
+                                  Color(widget.course.knowledge.value!.color)),
                         ),
                         SizedBox(
                           width: 18.w,
@@ -108,7 +108,7 @@ class _MainPageChildState extends State<MainPageChild> {
                   LinearPercentIndicator(
                     /* width: 765.w,*/
                     backgroundColor: Color(0xFFF4F4F3),
-                    progressColor: Color(0xFF2D2828),
+                    progressColor: Color(0xFF62FFB8),
                     lineHeight: 5,
                     percent: currentStep / totalSteps,
                     isRTL: true,
@@ -121,7 +121,7 @@ class _MainPageChildState extends State<MainPageChild> {
             width: 395.w,
             height: 74.h,
             decoration:
-            BoxDecoration(border: Border.all(color: Color(0xFFE4E6E9))),
+                BoxDecoration(border: Border.all(color: Color(0xFFE4E6E9))),
             child: Visibility(
               visible: widget.course.subjects.length > subjectPickedIndex + 1,
               child: TextButton(
@@ -149,37 +149,27 @@ class _MainPageChildState extends State<MainPageChild> {
   }
 
   Widget menuWidget() {
-    return Container(
+    return SizedBox(
       width: 350.w,
       child: Column(
         children: [
           Container(
             width: double.infinity,
             height: 74.h,
-            color: Color(0xFF6E7072),
-            child: Row(children: [
-              Padding(
-                padding: EdgeInsets.all(12.w),
-                child: FaIcon(
-                  FontAwesomeIcons.file,
-                  size: 15.w,
-                  color: Colors.white,
+            color: Color(0xFF32D489),
+            child: TextButton(
+                child: Text(
+                  widget.course.title,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600),
                 ),
-              ),
-              TextButton(
-                  child: Text(
-                    widget.course.title,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _bodyWidget = CourseMainPage(course: widget.course);
-                    });
-                  }),
-            ]),
+                onPressed: () {
+                  setState(() {
+                    _bodyWidget = CourseMainPage(course: widget.course);
+                  });
+                }),
           ),
 
           ///כותרת של הקורס
@@ -187,205 +177,218 @@ class _MainPageChildState extends State<MainPageChild> {
             child: Row(
               children: [
                 Expanded(
-                  // color: const Color(0xFFF0F0F0),
-                  // width: 350.w,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
                     children: [
-                      // Container(
-                      //   width: double.infinity,
-                      //   height: 74.h,
-                      //   color: Color(0xFF6E7072),
-                      //   child: Row(children: [
-                      //     Padding(
-                      //       padding: EdgeInsets.all(12.w),
-                      //       child: FaIcon(
-                      //         FontAwesomeIcons.file,
-                      //         size: 15.w,
-                      //         color: Colors.white,
-                      //       ),
-                      //     ),
-                      //     TextButton(
-                      //         child: Text(
-                      //           widget.course.title,
-                      //           style: TextStyle(
-                      //               color: Colors.white,
-                      //               fontSize: 18.sp,
-                      //               fontWeight: FontWeight.w600),
-                      //         ),
-                      //         onPressed: () {
-                      //           setState(() {
-                      //             _bodyWidget = CourseMainPage(
-                      //                 course: widget.course);
-                      //           });
-                      //         }),
-                      //   ]),
-                      // ),
                       SizedBox(height: 20.h),
                       Expanded(
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: widget.course.subjects.length,
-                            itemBuilder: (ctx, sIndex) {
-                              Subject currentSubject =
-                              widget.course.subjects.elementAt(sIndex);
-
-                              return Column(
-                                children: [
-                                  ListTile(
-                                    title:
-                                    // Padding(padding: EdgeInsets.only(top: 25.h),
-                                    //   child:
-                                    Container(
-                                      //height: 96.h,
-                                      width: double.infinity,
-                                      color: Colors.transparent,
-                                      child: Text(
-                                        currentSubject.name,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16.sp),
-                                      ),
-                                    ),
-                                    // ),
-                                    mouseCursor: SystemMouseCursors.click,
-                                    textColor: Color(0xFF6E7072),
-                                    leading:
-                                    currentSubject.lessons.isNotEmpty &&
-                                        currentSubject.lessons.last.isCompleted
-                                        ? Icon(Icons.circle_outlined,
-                                        color: Color(0xFF6E7072),
-                                        size: 22.sp)
-                                        : Icon(Icons.circle_outlined,
-                                        color: Color(0xFFE4E6E9),
-                                        size: 22.sp),
-                                    onTap: () {
-                                      setState(() {
-                                        currentSubject.isTapped =
-                                        !currentSubject.isTapped;
-                                        subjectPickedIndex = sIndex;
-                                        _bodyWidget = SubjectMainPage(
-                                            subject: currentSubject);
-                                      });
-                                    },
-                                  ),
-                                  Visibility(
-                                    visible: currentSubject.isTapped,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                          left: 24.w, right: 40.w),
-                                      child: ListView.builder(
-                                        shrinkWrap: true,
-                                        itemCount:
-                                        currentSubject.lessons.length,
-                                        itemBuilder: (ctx, lIndex) {
-                                          Lesson currentLesson = currentSubject
-                                              .lessons
-                                              .elementAt(lIndex);
-                                          return Center(
-                                              child: Column(
-                                                children: [
-                                                  ListTile(
-                                                      title: Text(
-                                                          currentLesson.name,
-                                                          style: TextStyle(
-                                                              decoration: TextDecoration.underline,
-                                                              fontWeight: lessonPickedIndex == lIndex ? FontWeight.w600 : FontWeight.w400,
-                                                              fontSize: 16.sp)),
-                                                      trailing: currentSubject.lessons.isNotEmpty &&
-                                                          currentSubject.lessons.last.isCompleted
-                                                          ? Icon(Icons.check_circle, color: Color(0xFF2D2828), size: 22.sp,)
-                                                          : Icon(Icons.circle_outlined, color: Color(0xFFE4E6E9), size: 22.sp,),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              ListView.separated(
+                                  separatorBuilder: (context, index) {
+                                    return Divider(
+                                      color: Color(0xFFE4E6E9),
+                                    );
+                                  },
+                                  shrinkWrap: true,
+                                  itemCount: widget.course.subjects.length,
+                                  itemBuilder: (ctx, sIndex) {
+                                    Subject currentSubject = widget
+                                        .course.subjects
+                                        .elementAt(sIndex);
+                                    return Column(
+                                      children: [
+                                        ListTile(
+                                          title: Container(
+                                            width: double.infinity,
+                                            color: Colors.transparent,
+                                            child: Row(
+                                              children: [
+                                                currentSubject.lessons.isNotEmpty && currentSubject.lessons.last.isCompleted
+                                                    ? Icon(Icons.circle_outlined, color: Color(0xFF62FFB8), size: 20.sp)
+                                                    : Icon(Icons.circle_outlined, color:Color(0xFFE4E6E9), size: 20.sp),
+                                                SizedBox(width: 25.w,),
+                                                Icon(Icons.book, size: 13.h,),
+                                                SizedBox(width: 8.w,),
+                                                Text(currentSubject.name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
+                                                Spacer(),
+                                                Icon(Icons.arrow_drop_down_sharp)
+                                              ],
+                                            ),
+                                          ),
+                                          mouseCursor: SystemMouseCursors.click,
+                                          textColor: Color(0xFF2D2828),
+                                          onTap: () {
+                                            setState(() {
+                                              currentSubject.isTapped = !currentSubject.isTapped;
+                                              subjectPickedIndex = sIndex;
+                                              _bodyWidget = SubjectMainPage(
+                                                  subject: currentSubject);
+                                            });
+                                          },
+                                        ),
+                                        Visibility(
+                                          visible: currentSubject.isTapped,
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount: currentSubject.lessons.length,
+                                            itemBuilder: (ctx, lIndex) {
+                                            Lesson currentLesson = currentSubject.lessons.elementAt(lIndex);
+                                              return Center(
+                                                child: Column(
+                                                  children: [
+                                                    ListTile(
+                                                      minLeadingWidth: 30.w,
+                                                      title: Row(
+                                                        children: [
+                                                          Icon(Icons.videocam_outlined, size: 22.sp, color: Colors.black,),
+                                                          SizedBox(width: 14.w),
+                                                          Text(currentLesson.name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
+                                                        ],
+                                                      ),
+                                                      leading: Stack(
+                                                        alignment: AlignmentDirectional.center,
+                                                        children: [
+                                                          VerticalDivider(
+                                                            color: currentLesson.isCompleted? Color(0xFF62FFB8): Color(0xFFE4E6E9),
+                                                            thickness: 3.w,
+                                                            indent: lIndex == 0 ? 25.h : null,
+                                                            endIndent: lIndex == currentSubject.lessons.length - 1 ? 20.h : null,
+                                                          ),
+                                                          //currentSubject.lessons.isNotEmpty &&
+                                                          currentLesson.isCompleted
+                                                            ? Icon(Icons.check_circle, color: Color(0xFF62FFB8), size: 20.sp,)
+                                                            : Container(
+                                                                height: 18.h,
+                                                                width: 18.w,
+                                                                decoration: BoxDecoration(shape: BoxShape.circle,
+                                                                    border: Border.all(color: Color(0xFFE4E6E9),
+                                                                    width: 3.w), color: Color(0xFFFAFAFA)),
+                                                              )
+                                                        ],
+                                                      ),
                                                       onTap: () {
                                                         setState(() {
                                                           lessonPickedIndex = lIndex;
                                                           qIndex--;
-                                                          _bodyWidget = LessonWidget(
-                                                              lessonIndex: lessonPickedIndex,
+                                                          _bodyWidget = LessonWidget(lessonIndex: lessonPickedIndex,
                                                               lessons: currentSubject.lessons,
-                                                              backToSubject:  (BuildContext context)=> bodyWidget=SubjectMainPage(subject: currentSubject)
-                                                          );
+                                                              backToSubject: (BuildContextcontext) =>
+                                                                  bodyWidget = SubjectMainPage(subject: currentSubject));
                                                           // nextLesson:currentSubject.lessons.length>lessonPickedIndex+1 ?setNextLesson(currentSubject.lessons,lessonPickedIndex+1):null);
                                                         });
                                                         print(lIndex);
                                                       }),
                                                   if (currentLesson.questionnaire.isNotEmpty)
-                                                    Container(
-                                                      // color:
-                                                      //     Color.fromARGB(255, 249, 249, 249),
-                                                      child: ListTile(
-                                                        title: Text('תרגול - ${currentLesson.name}', style: TextStyle(
-                                                            decoration: TextDecoration.underline,
-                                                            fontWeight: qIndex == lIndex ? FontWeight.w600 : FontWeight.w400, fontSize: 16.sp)),
-                                                        trailing: Icon(
-                                                          Icons.create,
-                                                          color: currentLesson.questionnaire.last.isComplete
-                                                              ? Color.fromARGB(255, 45, 40, 40)
-                                                              : Color.fromARGB(255, 228, 230, 233),
-                                                          size: 20.sp,
-                                                        ),
-                                                        onTap: () => setState(() {
-                                                          print(currentLesson.questionnaire.length);
-                                                          lessonPickedIndex = -1;
-                                                          qIndex = lIndex;
-                                                          _bodyWidget =
-                                                              QuestionnaireWidget(
-                                                                  title:'תרגול - ${currentLesson.name}',
-                                                                  questionnaires: currentLesson.questionnaire);
-                                                        }),
+                                                    ListTile(
+                                                      minLeadingWidth: 30.w,
+                                                      title: Row(
+                                                        children: [
+                                                          Icon(Icons.create_outlined, color: Colors.black, size: 20.sp,),
+                                                          SizedBox(width: 14.w,),
+                                                          Text('תרגול - ${currentLesson.name}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
+                                                        ],
                                                       ),
+                                                      leading: Stack(
+                                                        alignment: AlignmentDirectional.center,
+                                                        children: [
+                                                          VerticalDivider(
+                                                            color: Color(0xFFE4E6E9),
+                                                            thickness: 3.w,
+                                                          ),
+                                                          currentSubject.lessons.isNotEmpty && currentSubject.lessons.last.isCompleted
+                                                            ? Icon(Icons.check_circle, color: Color(0xFF62FFB8), size: 25.sp,)
+                                                            : Container(
+                                                                height: 18.h,
+                                                                width: 18.w,
+                                                                decoration: BoxDecoration(
+                                                                    shape: BoxShape.circle,
+                                                                    border: Border.all(
+                                                                    color: Color(0xFFE4E6E9),
+                                                                    width: 3.w),
+                                                                    color: Color(0xFFFAFAFA)
+                                                                ),
+                                                              )
+                                                        ],
+                                                      ),
+                                                      onTap: () => setState(() {
+                                                        print(currentLesson.questionnaire.length);
+                                                        lessonPickedIndex = -1;
+                                                        qIndex = lIndex;
+                                                        _bodyWidget =
+                                                            QuestionnaireWidget(title: 'תרגול - ${currentLesson.name}', questionnaires: currentLesson.questionnaire);
+                                                      }),
                                                     ),
                                                 ],
                                               ));
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  if (currentSubject.questionnaire.isNotEmpty)
-                                    Visibility(
-                                      visible: currentSubject.isTapped,
-                                      child: GestureDetector(
-                                        onTap: () => setState(() {
-                                          print(
-                                              'currentSubject.questionnaire ${currentSubject.questionnaire}');
-                                          _bodyWidget = QuestionnaireWidget(
-                                              title:  'תרגול מסכם - ${currentSubject.name}',
-                                              questionnaires:
-                                              currentSubject.questionnaire);
-                                        }),
-                                        child: Container(
-                                          width: double.infinity,
-                                          padding: EdgeInsets.only(right: 40.h),
-                                          height: 50.h,
-
-                                          //color: Color(0xFF6E7072),
-                                          child: Center(
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.stars_rounded,
-                                                  size: 35.sp,
-                                                  color: Color(0xFFACAEAF),
-                                                ),
-                                                Text(
-                                                  'תרגול מסכם - ${currentSubject.name}',
-                                                  style: TextStyle(
-                                                    fontSize: 16.sp,
-                                                    color: Color(0xFF6E7072),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                            },
                                           ),
                                         ),
-                                      ),
-                                    )
-                                ],
-                              );
-                              ///רשימת נושאים בתוך קורס
-                            }),
-                      )
+                                        if (currentSubject.questionnaire.isNotEmpty)
+                                          Visibility(
+                                            visible: currentSubject.isTapped,
+                                            child: GestureDetector(
+                                              onTap: () => setState(() {
+                                                print('currentSubject.questionnaire ${currentSubject.questionnaire}');
+                                                _bodyWidget = QuestionnaireWidget(
+                                                    title: 'תרגיל מסכם - ${currentSubject.name}',
+                                                    questionnaires: currentSubject.questionnaire);
+                                              }),
+                                              child: Container(
+                                                width: double.infinity,
+                                                padding: EdgeInsets.only(right: 40.h),
+                                                height: 50.h,
+                                                child: Center(
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.star_border, size: 20.sp, color: Colors.black,),
+                                                      SizedBox(width: 14.w,),
+                                                      Text('תרגיל מסכם - ${currentSubject.name}', style: TextStyle(fontSize: 16.sp, color: Color(0xFF2D2828))),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        Visibility(
+                                          visible: sIndex == widget.course.subjects.length - 1,
+                                          child: GestureDetector(
+                                            onTap: () => setState(() {
+                                              _bodyWidget = QuestionnaireWidget(
+                                                  title: 'תרגול מסכם - ${widget.course.title}', questionnaires: widget.course.questionnaire);
+                                            }),
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding:
+                                                  EdgeInsets.only(right: 10.w),
+                                              height: 50.h,
+                                              //color: Color(0xFF6E7072),
+                                              child: Center(
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.star_border,
+                                                      size: 20.sp,
+                                                      color: Colors.black,
+                                                    ),
+                                                    SizedBox(width: 14.w,),
+                                                    Text('תרגיל מסכם - קורס ${widget.course.title}', style: TextStyle(fontSize: 16.sp, color: Color(0xFF2D2828))),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    );
+
+                                    ///רשימת נושאים בתוך קורס
+                                  }),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -394,7 +397,7 @@ class _MainPageChildState extends State<MainPageChild> {
                     height: double.infinity,
                     child: Align(
                         alignment: Alignment.centerLeft,
-                        child: Container(width: 1.h, color: Color(0xff6E7072))))
+                        child: Container(width: 1.h, color: Color(0xFFE4E6E9))))
               ],
             ),
           ),
@@ -402,14 +405,4 @@ class _MainPageChildState extends State<MainPageChild> {
       ),
     );
   }
-
-// setNextLesson(IsarLinks<Lesson> lessons, int lessonPickedIndex) {
-//   print('lll ${lessons.length}');
-//   print('lessonPickedIndex ${lessonPickedIndex}');
-//   MainPageChild.of(context)?.bodyWidget = LessonWidget(
-//       lessonIndex: lessonPickedIndex,
-//       notLastLesson:lessons.length>lessonPickedIndex,
-//       lesson:lessons.elementAt(lessonPickedIndex), nextLesson:lessons.length>lessonPickedIndex+1?
-//   setNextLesson(lessons, lessonPickedIndex+1):null);
-// }
 }

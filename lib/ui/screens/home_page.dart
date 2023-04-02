@@ -127,23 +127,23 @@ class _HomePageState extends State<HomePage> {
               Container(
                   height: 51.h,
                   decoration: const BoxDecoration(
-                      color: Colors.black12,
+                      color: Color(0xFFF4F4F3),
                       borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        topInformation(Icons.check_circle, 'הושלם 2'),
+                        topInformation(Icons.check, 'הושלם 2'),
                         Container(
                             height: 27.h,
                             width: 1.w,
                             color: const Color(0xFF2D2828)),
-                        topInformation(Icons.update, 'ממתין לסינכרון 1'),
+                        topInformation(Icons.refresh, 'ממתין לסינכרון 1'),
                         Container(
                             height: 27.h,
                             width: 1.w,
                             color: const Color(0xFF2D2828)),
-                        topInformation(Icons.offline_pin, ' תעודות 1'),
+                        topInformation(Icons.star_outlined, ' תעודות 1'),
                       ])),
               SizedBox(height: 35.h),
               Row(
@@ -183,7 +183,9 @@ class _HomePageState extends State<HomePage> {
         height: 610.h,
         padding:
             EdgeInsets.only(top: 30.h, right: 42.w, left: 42.w, bottom: 30.h),
-        decoration: BoxDecoration(border: Border.all(color: Color(0xffE4E6E9))),
+        decoration: BoxDecoration(
+            border: Border.all(color: Color(0xffE4E6E9)),
+            borderRadius: BorderRadius.all(Radius.circular(10))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -87,11 +87,11 @@ class _LoginPageState extends State<LoginPage> {
                     MaterialPageRoute(builder: (context) => MainPage(user: user)));
                 }
               }
-              else {
+              /*else {
             setState(() {
               isError=true;
             });
-              }
+              }*/
             },
             child: Container(
               height: 50.h,
