@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flowder/flowder.dart';
 import 'package:isar/isar.dart';
 
 part 'videoIsar.g.dart';
@@ -12,7 +11,6 @@ class VideoIsar {
   @Ignore()
  late RequestOptions? requestOptions;
  late String name ;
-  @Ignore()
-   DownloaderCore? core;
+
 
 }

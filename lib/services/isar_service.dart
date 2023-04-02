@@ -4,7 +4,6 @@ import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/models/videoIsar.dart';
-import 'package:flowder/flowder.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -173,14 +172,7 @@ class IsarService {
     });
   }
 
-  setCoreIsarVideo(int id,DownloaderCore  core) async {
-    final isar = await db;
-    await isar.writeTxn(() async {
-      VideoIsar? vi = await isar.videoIsars.get(id);
-      vi!.core = core;
-      await isar.videoIsars.put(vi);
-    });
-  }
+
 
   Future<VideoIsar?> getVideoById(int id) async {
     final isar = await db;
