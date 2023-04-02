@@ -8,10 +8,9 @@ class VimoeVideo
 {
   late String link;
   late String uri;
-  late List<VimoeDownload> download;
- // late List<VimoeDownload> files;
+  late List<VimoeFile> files;
 
-  VimoeVideo(this.link,this.uri,this.download/*,this.files*/);
+  VimoeVideo(this.link,this.uri,this.files/*,this.files*/);
 
   factory VimoeVideo.fromJson(Map<String, dynamic> json) => _$VimoeVideoFromJson(json);
 
@@ -19,14 +18,13 @@ class VimoeVideo
 }
 
 @JsonSerializable()
-class VimoeDownload
+class VimoeFile
 {
   late String? quality;
   late String? rendition;
   late String? type;
   late int? width;
   late int? height;
-  late String? expires;
   late  String? link;
   late String? created_time;
   late int? fps;
@@ -36,13 +34,13 @@ class VimoeDownload
   late String? size_short;
 
 
-  VimoeDownload(
+
+  VimoeFile(
       this.quality,
       this.rendition,
       this.type,
       this.width,
       this.height,
-      this.expires,
       this.link,
       this.created_time,
       this.fps,
@@ -51,7 +49,7 @@ class VimoeDownload
       this.public_name,
       this.size_short);
 
-  factory VimoeDownload.fromJson(Map<String, dynamic> json) => _$VimoeDownloadFromJson(json);
+  factory VimoeFile.fromJson(Map<String, dynamic> json) => _$VimoeFileFromJson(json);
 
-  Map<String, dynamic> toJson() => _$VimoeDownloadToJson(this);
+  Map<String, dynamic> toJson() => _$VimoeFileToJson(this);
 }

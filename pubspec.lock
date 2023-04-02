@@ -337,6 +337,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  flowder:
+    dependency: "direct main"
+    description:
+      name: flowder
+      sha256: ec90f4fbd551e334f8d992088212b29ad257f0877dcdbffea4bfbdb9c800fb5a
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   flutter:
     dependency: "direct main"
     description: flutter

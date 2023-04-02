@@ -22,29 +22,24 @@ const CourseSchema = CollectionSchema(
       name: r'diplomaPath',
       type: IsarType.string,
     ),
-    r'isDownloaded': PropertySchema(
-      id: 1,
-      name: r'isDownloaded',
-      type: IsarType.bool,
-    ),
     r'lessonStopId': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'lessonStopId',
       type: IsarType.long,
     ),
     r'serverId': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'serverId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'status',
       type: IsarType.byte,
       enumMap: _CoursestatusEnumValueMap,
     ),
     r'title': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'title',
       type: IsarType.string,
     )
@@ -115,11 +110,10 @@ void _courseSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.diplomaPath);
-  writer.writeBool(offsets[1], object.isDownloaded);
-  writer.writeLong(offsets[2], object.lessonStopId);
-  writer.writeLong(offsets[3], object.serverId);
-  writer.writeByte(offsets[4], object.status.index);
-  writer.writeString(offsets[5], object.title);
+  writer.writeLong(offsets[1], object.lessonStopId);
+  writer.writeLong(offsets[2], object.serverId);
+  writer.writeByte(offsets[3], object.status.index);
+  writer.writeString(offsets[4], object.title);
 }
 
 Course _courseDeserialize(
@@ -131,13 +125,12 @@ Course _courseDeserialize(
   final object = Course();
   object.diplomaPath = reader.readString(offsets[0]);
   object.id = id;
-  object.isDownloaded = reader.readBool(offsets[1]);
-  object.lessonStopId = reader.readLong(offsets[2]);
-  object.serverId = reader.readLong(offsets[3]);
+  object.lessonStopId = reader.readLong(offsets[1]);
+  object.serverId = reader.readLong(offsets[2]);
   object.status =
-      _CoursestatusValueEnumMap[reader.readByteOrNull(offsets[4])] ??
+      _CoursestatusValueEnumMap[reader.readByteOrNull(offsets[3])] ??
           Status.start;
-  object.title = reader.readString(offsets[5]);
+  object.title = reader.readString(offsets[4]);
   return object;
 }
 
@@ -151,15 +144,13 @@ P _courseDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
       return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
-    case 4:
       return (_CoursestatusValueEnumMap[reader.readByteOrNull(offset)] ??
           Status.start) as P;
-    case 5:
+    case 4:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -606,16 +597,6 @@ extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Course, Course, QAfterFilterCondition> isDownloadedEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isDownloaded',
-        value: value,
-      ));
-    });
-  }
-
   QueryBuilder<Course, Course, QAfterFilterCondition> lessonStopIdEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1052,18 +1033,6 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
     });
   }
 
-  QueryBuilder<Course, Course, QAfterSortBy> sortByIsDownloaded() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDownloaded', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Course, Course, QAfterSortBy> sortByIsDownloadedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDownloaded', Sort.desc);
-    });
-  }
-
   QueryBuilder<Course, Course, QAfterSortBy> sortByLessonStopId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lessonStopId', Sort.asc);
@@ -1138,18 +1107,6 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Course, Course, QAfterSortBy> thenByIsDownloaded() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDownloaded', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Course, Course, QAfterSortBy> thenByIsDownloadedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDownloaded', Sort.desc);
-    });
-  }
-
   QueryBuilder<Course, Course, QAfterSortBy> thenByLessonStopId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lessonStopId', Sort.asc);
@@ -1207,12 +1164,6 @@ extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
     });
   }
 
-  QueryBuilder<Course, Course, QDistinct> distinctByIsDownloaded() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isDownloaded');
-    });
-  }
-
   QueryBuilder<Course, Course, QDistinct> distinctByLessonStopId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lessonStopId');
@@ -1249,12 +1200,6 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
   QueryBuilder<Course, String, QQueryOperations> diplomaPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'diplomaPath');
-    });
-  }
-
-  QueryBuilder<Course, bool, QQueryOperations> isDownloadedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isDownloaded');
     });
   }
 

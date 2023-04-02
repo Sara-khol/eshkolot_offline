@@ -3,6 +3,8 @@ import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'package:eshkolot_offline/models/user.dart';
+import 'package:eshkolot_offline/models/videoIsar.dart';
+import 'package:flowder/flowder.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -39,7 +41,8 @@ class IsarService {
         QuestionnaireSchema,
         KnowledgeSchema,
         UserSchema,
-        LearnPathSchema
+        LearnPathSchema,
+        VideoIsarSchema
       ], inspector: true, directory: dir.path);
     }
     return Future.value(Isar.getInstance());
@@ -147,7 +150,42 @@ class IsarService {
       isar.knowledges.putAllSync(knowledgeList);
       isar.users.putAllSync(usersList);
       isar.learnPaths.putAllSync(pathList);
+
+      isar.videoIsars.clearSync();
+
     });
+  }
+
+  addIsarVideo(VideoIsar videoIsar) async
+  {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.videoIsars.put(videoIsar);
+    });
+  }
+
+  updateIsarVideo(int id) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      VideoIsar? vi = await isar.videoIsars.get(id);
+      vi!.isDownload = true;
+      await isar.videoIsars.put(vi);
+    });
+  }
+
+  setCoreIsarVideo(int id,DownloaderCore  core) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      VideoIsar? vi = await isar.videoIsars.get(id);
+      vi!.core = core;
+      await isar.videoIsars.put(vi);
+    });
+  }
+
+  Future<VideoIsar?> getVideoById(int id) async {
+    final isar = await db;
+    VideoIsar? videoIsar = await isar.videoIsars.get(id);
+    return videoIsar;
   }
 
   Future<bool> checkIfDBisEmpty() async {
@@ -156,11 +194,43 @@ class IsarService {
     return await coursesCollection.count() == 0;
   }
 
+  Future<bool> checkIfVideoIsarIsEmpty() async {
+    final isar = await db;
+    IsarCollection<VideoIsar> v = isar.collection<VideoIsar>();
+    return await v.count() == 0;
+  }
+
+ Future<List<VideoIsar>> getAllVideosDownloaded() async
+  {
+    final isar = await db;
+    final result = await isar.videoIsars.filter().isDownloadEqualTo(false).findAll();
+    return result;
+  }
+
+  checkIfAllVideosAreDownloaded() async {
+    bool b=false;
+    if (await checkIfVideoIsarIsEmpty()) {
+      return b;
+    }
+  await getAllVideosDownloaded().then((value) {
+    b= value.isEmpty;
+  });
+    return b;
+
+  }
+
+
   Future<Course?> getFirstCourse() async {
     final isar = await db;
     IsarCollection<Course> coursesCollection = isar.collection<Course>();
     Course? course = await coursesCollection.where().findFirst();
     return course;
+  }
+
+  Future<List<Course>> getAllCourses() async {
+    final isar = await db;
+    IsarCollection<Course> coursesCollection = isar.collection<Course>();
+    return await coursesCollection.where().findAll();
   }
 
   Future<List<Knowledge>> getAllKnowledge() async {
@@ -244,14 +314,7 @@ class IsarService {
     });
   }
 
-  updateDownloadCourse(int id) async {
-    final isar = await db;
-    await isar.writeTxn(() async {
-      Course? course = await isar.courses.getByServerId(id);
-      course!.isDownloaded = true;
-      await isar.courses.put(course);
-    });
-  }
+
 
 // insertFresh(List<Email> emailList) async {
 //   await isarInstance.writeTxn(() async {

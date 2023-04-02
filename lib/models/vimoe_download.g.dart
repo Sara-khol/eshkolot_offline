@@ -9,8 +9,8 @@ part of 'vimoe_download.dart';
 VimoeVideo _$VimoeVideoFromJson(Map<String, dynamic> json) => VimoeVideo(
       json['link'] as String,
       json['uri'] as String,
-      (json['download'] as List<dynamic>)
-          .map((e) => VimoeDownload.fromJson(e as Map<String, dynamic>))
+      (json['files'] as List<dynamic>)
+          .map((e) => VimoeFile.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -18,17 +18,15 @@ Map<String, dynamic> _$VimoeVideoToJson(VimoeVideo instance) =>
     <String, dynamic>{
       'link': instance.link,
       'uri': instance.uri,
-      'download': instance.download,
+      'files': instance.files,
     };
 
-VimoeDownload _$VimoeDownloadFromJson(Map<String, dynamic> json) =>
-    VimoeDownload(
+VimoeFile _$VimoeFileFromJson(Map<String, dynamic> json) => VimoeFile(
       json['quality'] as String?,
       json['rendition'] as String?,
       json['type'] as String?,
       json['width'] as int?,
       json['height'] as int?,
-      json['expires'] as String?,
       json['link'] as String?,
       json['created_time'] as String?,
       json['fps'] as int?,
@@ -38,14 +36,12 @@ VimoeDownload _$VimoeDownloadFromJson(Map<String, dynamic> json) =>
       json['size_short'] as String?,
     );
 
-Map<String, dynamic> _$VimoeDownloadToJson(VimoeDownload instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$VimoeFileToJson(VimoeFile instance) => <String, dynamic>{
       'quality': instance.quality,
       'rendition': instance.rendition,
       'type': instance.type,
       'width': instance.width,
       'height': instance.height,
-      'expires': instance.expires,
       'link': instance.link,
       'created_time': instance.created_time,
       'fps': instance.fps,

@@ -17,7 +17,6 @@ class Course {
   @Index(unique: true, replace: true)
   late int serverId=0;
 
-  bool isDownloaded = false;
 
   // @Backlink(to: "course")
   final subjects = IsarLinks<Subject>();

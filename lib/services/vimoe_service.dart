@@ -1,94 +1,153 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:eshkolot_offline/models/course.dart';
+import 'package:eshkolot_offline/models/videoIsar.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 import '../models/vimoe_download.dart';
 import 'package:collection/src/iterable_extensions.dart';
-
 import 'isar_service.dart';
+import 'network_check.dart';
 
 class VimoeService with ChangeNotifier {
   String token = '1234e6802e12410d1130b9fa774d4cd0'; //privet video files
 
   int projectId = 0; //english
-  int numCoursesDownloaded = 0;
-  int numCoursesVimoe = 0;
 
   Dio dio = Dio();
 
   List<VimoeVideo> videoList = [];
+  List<VideoIsar> isarVideoList = [];
   int numDownloadFiles = 0;
-  late DownloadStatus downloadStatus;
+  late DownloadStatus downloadStatus, lastDownLoadStatus;
   late String currentLink;
   List<String> blockLinks = [];
+  List<String> errorLinks = [];
+  int errorTries = 0;
   List<Course> courses = [];
   int numOfAllVideos = 0;
-  int coursesLength=0;
+  CancelToken cancelToken = CancelToken();
+  late String path;
+  bool finishConnectToVimoe=false;
+  Map _source = {ConnectivityResult.none: false};
+  final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
+  late bool isNetWorkConnection;
 
   VimoeService() {
     print("VimoeService");
+
     dio.options.headers['content-Type'] = 'application/json;charset=UTF-8';
     dio.options.headers['authorization'] = "bearer ${token}";
+    dio.options.headers['Connection'] = "keep-alive";
+
+    _networkConnectivity.initialise();
+    _networkConnectivity.myStream.listen((source) async {
+      _source = source;
+      print('source $_source');
+      if (_source.keys.toList()[0] == ConnectivityResult.none) {
+        if (downloadStatus != DownloadStatus.netWorkError) {
+          isNetWorkConnection=false;
+          downloadStatus = DownloadStatus.netWorkError;
+          notifyListeners();
+          if(finishConnectToVimoe) {
+            print('cancel');
+            cancelToken.cancel('wwwwwww');
+          }
+        }
+      } else {
+        if (downloadStatus == DownloadStatus.netWorkError) {
+          downloadStatus = lastDownLoadStatus;
+          notifyListeners();
+          isNetWorkConnection=true;
+          //if in middle to download videos
+          if(finishConnectToVimoe) {
+
+            print('jjjj ${getAllDownloaded().map((v) => v.id)}');
+            print('jjjj ${getAllDownloaded().length}');
+
+            print('aaaaagain');
+            if (cancelToken.isCancelled) {
+              cancelToken = CancelToken();
+            }
+            startDownLoading(wasNetWorkProblem: true);
+          }
+          else{
+            print('start');
+            start();
+          }
+        }
+      }
+    });
+
 
     dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        print("::: Api Url : ${options.uri}");
+        //print("::: Api header : ${options.headers}");
+        isarVideoList
+            .firstWhereOrNull((iv) => iv.downloadLink == options.path)
+            ?.requestOptions = options;
+
+        return handler.next(options);
+        // super.onRequest(options, handler);
+      },
+      // onResponse: (response, handler) {
+      //   // print("::: response : ${response.data.toString()}");
+      //   return handler.next(response);
+      // },
       onError: (error, handler) async {
         if (error.response?.statusCode == 418) {
-          downloadStatus = DownloadStatus.blockError;
           String url = error.requestOptions.path;
-
-          String start='download/';
+          String start = 'download/';
           final startIndex = url.indexOf(start);
           final endIndex = url.indexOf('/', startIndex + start.length);
-          String vimoeId= url.substring(startIndex + start.length, endIndex);
+          String vimoeId = url.substring(startIndex + start.length, endIndex);
           blockLinks.add('https://vimeo.com/$vimoeId');
-         // print('errorLinks $blockLinks');
         } else {
-          blockLinks.add('');
-          downloadStatus = DownloadStatus.error;
-          notifyListeners();
+          print('my error ${error}');
+          // if(error.error is SocketException) {
+          //   print('SocketException');
+          errorLinks.add(error.requestOptions.path);
         }
-        if (coursesLength == numCoursesVimoe &&
-            blockLinks.length + numDownloadFiles == numOfAllVideos) {
-          print('blocked linksssssssssss');
-          downloadStatus = DownloadStatus.blockError;
-          notifyListeners();
-        }
+        checkErrors();
         handler.reject(
             error); // Added this line to let error propagate outside the interceptor
       },
     ));
+
   }
 
   start({bool notify = false}) async {
-    downloadStatus = DownloadStatus.downloading;
-    numOfAllVideos=0;
-     numCoursesVimoe = 0;
-    numDownloadFiles = 0;
-    blockLinks = [];
-    coursesLength=0;
+    if(isNetWorkConnection) {
+      downloadStatus = DownloadStatus.downloading;
+      lastDownLoadStatus = DownloadStatus.downloading;
+      numOfAllVideos = 0;
+      numDownloadFiles = 0;
+      blockLinks = [];
+      errorLinks = [];
+      finishConnectToVimoe = false;
 
-    if(notify) notifyListeners();
-    for (Course course in courses) {
-      if (course.serverId != null && course.serverId!=0 ) {
-        projectId = course.serverId;
-        coursesLength++;
-
-        if (!course.isDownloaded) {
+      if (notify) notifyListeners();
+      if (courses.isEmpty) {
+        courses = await IsarService.instance.getAllCourses();
+      }
+      for (Course course in courses) {
+        if (course.serverId != 0) {
+          projectId = course.serverId;
           await connectToVimoe();
-          numCoursesVimoe++;
-          next();
-        } else {
-          numCoursesDownloaded++;
-          numCoursesVimoe++;
-          if (numCoursesDownloaded == coursesLength) {
-            downloadStatus = DownloadStatus.downloaded;
-            notifyListeners();
-          }
         }
       }
+      next();
+    }
+    else{
+      downloadStatus=DownloadStatus.netWorkError;
+      lastDownLoadStatus=DownloadStatus.netWorkError;
+      print('no network');
     }
   }
 
@@ -96,12 +155,16 @@ class VimoeService with ChangeNotifier {
     print('idddddd $projectId');
     downloadStatus = DownloadStatus.downloading;
     if (notify) notifyListeners();
-    if (url == '') videoList = [];
+
+    // url = url == ''
+    //     ? 'https://api.vimeo.com/me/projects/${projectId}/videos'
+    //         '?fields=uri,link,download.link,download.size_short,download.height,'
+    //         'download.width,download.rendition,download.quality'
 
     url = url == ''
         ? 'https://api.vimeo.com/me/projects/${projectId}/videos'
-            '?fields=uri,link,download.link,download.size_short,download.height,'
-            'download.width,download.rendition,download.quality'
+        '?fields=uri,link,files.link,files.size_short,files.height,'
+        'files.width,files.rendition,files.quality'
         : 'https://api.vimeo.com${url}';
     Response response = await dio.get(url);
 
@@ -111,46 +174,82 @@ class VimoeService with ChangeNotifier {
         .map<VimoeVideo>((entry) => (VimoeVideo.fromJson(entry)))
         .toList());
 
+
     if (result['paging']['next'] != null) {
-      connectToVimoe(url: result['paging']['next']);
+      await connectToVimoe(url: result['paging']['next']);
     }
   }
 
-  next() {
-    numOfAllVideos = numOfAllVideos + videoList.length;
-    print('current length ${numOfAllVideos}');
-
-
-    //want to download only one for try
-    // downloadFile(videoList[0].download[0].link!,
-    //     videoList[0].uri.substring(videoList[0].uri.lastIndexOf('/'), videoList[0].uri.length),1);
-
+  next() async {
+    numOfAllVideos =videoList.length;
+    print('numOfAllVideos ${numOfAllVideos}');
+     finishConnectToVimoe=true;
     for (VimoeVideo v in videoList) {
-      VimoeDownload? download =
-          v.download.firstWhereOrNull((d) => d.rendition == '540p');
+      VimoeFile? download =
+          v.files.firstWhereOrNull((d) => d.rendition == '540p');
       currentLink = v.link;
       //not sepouse to be null
       if (download != null && download.link != null) {
-        // if(v.uri=='/videos/467074198')
-        //   await downloadFile('https://player.vimeo.com/progressive_redirect/download/707821702/container/d01890c4-df30-4dba-940d-0a6122b763fe/58988585/%D7%91%D7%98%D7%99%D7%97%D7%95%D7%AA_%D7%91%D7%A8%D7%97%D7%A6%D7%94_%D7%91%D7%91%D7%A8%D7%99%D7%9B%D7%94%20%28720p%29.mp4?expires=1675327220&loc=external&signature=40b5c811e0af7007bfeb001e0cc7a6ee944a9378696d7c169ef6feb7e10c5fa7',
-        //      'blockkkk',vimoeLength);
-        // else {
-        /*await*/ downloadFile(download.link!,
-            v.uri.substring(v.uri.lastIndexOf('/'), v.uri.length));
-        //  }
+        String name = v.uri.substring(v.uri.lastIndexOf('/'), v.uri.length);
+        isarVideoList.add(VideoIsar()
+          ..id = int.parse(name.substring(1))
+          ..downloadLink = download.link!
+          ..name = name);
+        await IsarService.instance.addIsarVideo(VideoIsar()
+          ..id = int.parse(name.substring(1))
+          ..downloadLink = download.link!..name = name);
+          /*await*/ downloadFile(download.link!, name, true);
       }
     }
   }
 
-  Future<void> downloadFile(
-      String url, String name /*, int videosLength*/) async {
-    String progress = '';
-    try {
-      var dir =
-          await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+  startDownLoading({bool wasNetWorkProblem=false}) async {
+    print('=====');
+    if(isNetWorkConnection) {
+      print('startDownLoading');
+      downloadStatus = DownloadStatus.downloading;
+      lastDownLoadStatus = DownloadStatus.downloading;
+      numDownloadFiles = 0;
+      blockLinks = [];
+      errorLinks = [];
+      int i = 0;
+      isarVideoList.removeWhere((item) => item.isDownload == true);
 
-      dio.download(
+      numOfAllVideos = isarVideoList.length;
+      print('numOfAllVideos $numOfAllVideos');
+      if (numOfAllVideos == 0) {
+        downloadStatus = DownloadStatus.downloaded;
+        notifyListeners();
+      }
+      for (VideoIsar v in isarVideoList) {
+        print('i $i');
+        i++;
+        if(wasNetWorkProblem) {
+          print('awaittttttttt');
+          await downloadFile(v.downloadLink, v.name, false);
+        }
+        else
+          {
+            print('nooo await');
+            downloadFile(v.downloadLink, v.name, false);
+          }
+      }
+    }
+    else {
+      downloadStatus = DownloadStatus.netWorkError;
+      lastDownLoadStatus = DownloadStatus.netWorkError;
+      print('no network');
+    }
+  }
+
+  Future<void> downloadFile(String url, String name, bool regular) async {
+    String progress = '';
+      var dir =
+      await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+      await dio.download(
         url,
+        cancelToken: cancelToken,
+
         '${dir.path}$name.mp4',
         onReceiveProgress: (rec, total) {
           progress = ((rec / total) * 100).toStringAsFixed(0);
@@ -160,41 +259,56 @@ class VimoeService with ChangeNotifier {
           numDownloadFiles++;
           print(
               "Video downloaded!!!!!!!!!! $name $numDownloadFiles $numOfAllVideos");
-          if (coursesLength == numCoursesVimoe &&
-              numDownloadFiles == numOfAllVideos) {
+          isarVideoList
+              .firstWhere((iv) => iv.id == int.parse(name.substring(1)))
+              .isDownload = true;
+          IsarService.instance.updateIsarVideo(int.parse(name.substring(1)));
+          if (numDownloadFiles == numOfAllVideos) {
             print('alllllllllll downloaded');
             downloadStatus = DownloadStatus.downloaded;
-
-            //todo check how to implement
-            numCoursesDownloaded++;
-            updateDownload(projectId);
-
-            // if (numCoursesDownloaded == coursesLength) {
-            //   downloadStatus = DownloadStatus.allDownloaded;
-            notifyListeners();
-          } else if (coursesLength == numCoursesVimoe &&
-              blockLinks.length + numDownloadFiles == numOfAllVideos) {
-            print('blocked linksssssssssss');
-            downloadStatus = DownloadStatus.blockError;
             notifyListeners();
           }
-        } else if (coursesLength == numCoursesVimoe &&
-            blockLinks.length + numDownloadFiles == numOfAllVideos) {
+          else {
+            checkErrors();
+          }
+
+        }
+      }).catchError((e) {
+        if (CancelToken.isCancel(e)) {
+          print( e.message);
+        }
+      });
+
+  }
+
+  checkErrors() {
+    if (blockLinks.length + numDownloadFiles + errorLinks.length == numOfAllVideos) {
+      print('problemmmmm');
+
+      if (errorLinks.isNotEmpty) {
+        print('errorrrr');
+        errorTries++;
+        if (errorTries < 3) {
+          print('error links start again');
+          startDownLoading();
+        } else {
+          downloadStatus = DownloadStatus.error;
+          notifyListeners();
+        }
+      } else {
+        if (blockLinks.isNotEmpty) {
           print('blocked linksssssssssss');
           downloadStatus = DownloadStatus.blockError;
           notifyListeners();
         }
-      });
-    } catch (e) {
-      print(e);
-      downloadStatus = DownloadStatus.error;
-      notifyListeners();
+      }
     }
   }
 
-  Future<void> updateDownload(int id) async {
-    print('updateDownload $id');
-    await IsarService.instance.updateDownloadCourse(id);
+  List<VideoIsar> getAllDownloaded() {
+    return isarVideoList
+        .where((element) => element.isDownload == true)
+        .toList();
   }
 
   getCourseSteps() async {
@@ -205,7 +319,6 @@ class VimoeService with ChangeNotifier {
       token = '';
       dio.options.headers['content-Type'] = 'application/json;charset=UTF-8';
       dio.options.headers['authorization'] = "bearer ${token}";
-      // String url = `https://yourserver.com/wp-json/ldlms/v2/sfwd-lessons?course=${id}`
       String url =
           'https://eshkolot.net/wp-json/ldlms/v1/sfwd-courses/71/steps';
 
@@ -248,6 +361,7 @@ class VimoeService with ChangeNotifier {
       print('error 222 $error');
     }
   }
+
 }
 
 enum DownloadStatus {
@@ -255,5 +369,6 @@ enum DownloadStatus {
   downloading,
   downloaded,
   error,
+  netWorkError,
   // allDownloaded
 }

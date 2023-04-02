@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
@@ -16,14 +17,17 @@ import 'models/lesson.dart';
 import 'models/questionnaire.dart';
 import 'dart:convert';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'models/videoIsar.dart';
 
 Future<void> main() async {
   List<Course> myCourses = [];
+  bool dataWasFilled = false;
 
   IsarService.instance.init();
 
   initData() async {
     if (await IsarService.instance.checkIfDBisEmpty()) {
+      dataWasFilled = true;
       Map<String, List<String>> fillInQ = {
         'ab': ['c'],
         'd e f': ['g'],
@@ -94,7 +98,7 @@ Future<void> main() async {
         ..questionnaire.addAll(questionnaires)));
       myCourses.add(Course()
         ..title = 'אנגלית בסיסית ב'
-        ..serverId = 2782842 /*3219278*/
+        // ..serverId = 2782842
         ..status = Status.finish);
 
       myCourses.add(Course()
@@ -223,7 +227,8 @@ Future<void> main() async {
   //   c2 = myCourses.firstWhere((item) => item.serverId == 2567060);
   // }
   runApp(MyApp(
-      courses: myCourses /*c1 == null || c2 == null ? myCourses : [c1, c2]*/));
+      courses: myCourses /*c1 == null || c2 == null ? myCourses : [c1, c2]*/
+      , dataWasFilled: dataWasFilled));
 
   doWhenWindowReady(() {
     setWindowVisibility(visible: true);
@@ -237,12 +242,31 @@ Future<void> main() async {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final List<Course> courses;
+  final bool dataWasFilled;
 
-  const MyApp({super.key, required this.courses});
+  MyApp({super.key, required this.courses, required this.dataWasFilled});
 
-  // IsarLinks<Course>? courses;
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late List<VideoIsar> vi;
+  late bool allDownloaded;
+  late Future myFuture;
+  bool firstTime=true;
+  final Connectivity _connectivity = Connectivity();
+ late bool isNetWorkConnection;
+
+
+  @override
+  void initState() {
+    myFuture = isVideosDownload();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -255,38 +279,76 @@ class MyApp extends StatelessWidget {
               theme: ThemeData(
                 primarySwatch: Colors.blue,
               ),
-              home: (courses.isNotEmpty)
-                  ? ChangeNotifierProvider<VimoeService>(
-                      create: (_) => VimoeService(),
-                      builder: (context, child) {
-                        {
-                          context.read<VimoeService>().courses = courses;
-                          context.read<VimoeService>().start();
-                          return Consumer<VimoeService>(
-                              builder: (context, vimoeResult, child) {
-                            switch (vimoeResult.downloadStatus) {
-                              case DownloadStatus.downloading:
-                                return displayLoadingDialog(
-                                    false, context, false);
-                              case DownloadStatus.blockError:
-                                return displayLoadingDialog(
-                                    true, context, true);
-                              case DownloadStatus.error:
-                                return displayLoadingDialog(
-                                    false, context, false);
-                              case DownloadStatus.downloaded:
-                                return LoginPage();
-                            }
-                          });
-                        }
-                      }
-                    )
-                  : LoginPage());
+              home: FutureBuilder(
+                  future: myFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      vi = snapshot.data ?? [];
+                      if (allDownloaded) return LoginPage();
+                      return (widget.dataWasFilled &&
+                                  (widget.courses.isNotEmpty)) ||
+                              !widget.dataWasFilled
+                          ? ChangeNotifierProvider<VimoeService>(
+                              create: (_) => VimoeService(),
+                              builder: (context, child) {
+                                {
+
+                                    if(firstTime) {
+                                      context.read<VimoeService>().isNetWorkConnection=isNetWorkConnection;
+                                      if (widget.courses.isNotEmpty || vi.isEmpty) {
+                                        context
+                                            .read<VimoeService>()
+                                            .courses = widget.courses;
+                                        context.read<VimoeService>().start();
+                                      } else {
+                                        context
+                                            .read<VimoeService>()
+                                            .isarVideoList =
+                                            vi;
+                                        context
+                                            .read<VimoeService>()
+                                            .startDownLoading();
+                                        context
+                                            .read<VimoeService>().finishConnectToVimoe=true;
+                                      }
+                                      firstTime=false;
+                                    }
+
+                                    return Consumer<VimoeService>(
+                                        builder: (context, vimoeResult, child) {
+
+
+                                          switch (vimoeResult.downloadStatus) {
+                                            case DownloadStatus.downloading:
+                                              return displayLoadingDialog(
+                                                  false, context, false, false);
+                                            case DownloadStatus.blockError:
+                                              return displayLoadingDialog(
+                                                  true, context, true, false);
+                                            case DownloadStatus.error:
+                                              return displayLoadingDialog(
+                                                  true, context, false, false);
+                                            case DownloadStatus.downloaded:
+                                              return LoginPage();
+                                            case DownloadStatus.netWorkError:
+                                              return displayLoadingDialog(
+                                                  false, context, false, true);
+                                          }
+                                        });
+
+                                }
+                              })
+                          : LoginPage();
+                    }
+                    return const Center(
+                      child: Scaffold(body: Center(child: CircularProgressIndicator())),
+                    );
+                  }));
         });
   }
 
-  Widget displayLoadingDialog(
-      bool isError, BuildContext context, bool blockError) {
+  Widget displayLoadingDialog(bool isError, BuildContext context,
+      bool blockError, bool isNetWorkError) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -296,7 +358,7 @@ class MyApp extends StatelessWidget {
             Expanded(
               child: Container(
                 color: Colors.black12,
-                child: isError
+                child: isError && !isNetWorkError
                     ? SimpleDialog(
                         contentPadding: EdgeInsets.all(30),
                         title: Center(child: Text('!ישנה בעיה')),
@@ -322,8 +384,7 @@ class MyApp extends StatelessWidget {
                             ElevatedButton(
                                 onPressed: () {
                                   context
-                                      .read<VimoeService>()
-                                      .start(notify: true);
+                                      .read<VimoeService>().startDownLoading();
                                 },
                                 child: Text('נסה שנית'))
                           ])
@@ -331,10 +392,11 @@ class MyApp extends StatelessWidget {
                         title: Center(child: Text('הנתונים נטענים')),
                         children: <Widget>[
                             Center(child: CircularProgressIndicator()),
-                            // Text(context
-                            //     .read<VimoeService>()
-                            //     .numCoursesDownloaded
-                            //     .toString())
+                            // SizedBox(height: 17.h),
+                            // Row(mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: [Text('${context.read<VimoeService>().numOfAllVideos}'),
+                            //   Text('/'),
+                            //   Text('${context.read<VimoeService>().numDownloadFiles}')],)
                           ]),
               ),
             ),
@@ -368,5 +430,23 @@ class MyApp extends StatelessWidget {
     if (!await launchUrl(uri)) {
       throw Exception('Could not launch $uri');
     }
+  }
+
+  Future<List<VideoIsar>> isVideosDownload() async {
+    isNetWorkConnection=await checkConnectivity();
+    allDownloaded = await IsarService.instance.checkIfAllVideosAreDownloaded();
+    if (!allDownloaded) {
+      return IsarService.instance.getAllVideosDownloaded();
+    }
+
+    return [];
+  }
+
+  Future<bool> checkConnectivity() async {
+    var connectivityResult = await _connectivity.checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      return false;
+    }
+    return true;
   }
 }
