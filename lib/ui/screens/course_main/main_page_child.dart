@@ -90,7 +90,9 @@ class _MainPageChildState extends State<MainPageChild> {
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color:
-                                  Color(widget.course.knowledge.value!.color)),
+                                  //todo change get color or from knowledge or from path
+                                  Color(widget.course.knowledge.value!=null?widget.course.knowledge.value!.color:0xff32D489)),
+                                  // Color(widget.course.knowledge.value??widget.course.knowledge.value!.color)),
                         ),
                         SizedBox(
                           width: 18.w,
