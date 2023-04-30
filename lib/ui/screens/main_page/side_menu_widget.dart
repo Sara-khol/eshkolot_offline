@@ -86,8 +86,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
           GestureDetector(
             onTap: () {
               setState(() {
-                MainPage.of(context)?.mainWidget =
-                    HowToLearn();
+                MainPage.of(context)?.mainWidget = HowToLearn();
                 sIndex = 2;
               });
             },
@@ -258,8 +257,6 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
       color: course.isSelected && sIndex == 0
           ? Color(0xFF6E7072)
           : Colors.transparent,
-      // width: 150.w,
-      // height:100,
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           // clipBehavior: Clip.none,
@@ -268,17 +265,29 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
             Flexible(
               flex: 2,
               child: GestureDetector(
-                onTap: () => setState(() {
-                  MainPage.of(context)?.mainWidget = MainPageChild(course: course);
-                  course.isSelected = true;
-                  sIndex = 0;
-                  //for first time
-                  if (lastCourseSelected != null &&
-                      lastCourseSelected != course) {
-                    lastCourseSelected!.isSelected = false;
-                  }
-                  lastCourseSelected = course;
-                }),
+                onTap: () {
+                  //  if(  MainPage.of(context)?.getMainWidget is MainPageChild)
+                  //  {
+                  // await   MainPage.of(context)?.setLastPositionCourse();
+                  //  }
+
+                  // if (MainPage.of(context)?.getMainWidget is MainPageChild) {
+                  //   (MainPage.of(context)?.getMainWidget as MainPageChild).of(context).bodyWidget=SubjectMainPage(subject: subject, subjectIndex: subjectIndex)
+                  // } else {
+                    setState(() {
+                      MainPage.of(context)?.mainWidget =
+                          MainPageChild(course: course);
+                      course.isSelected = true;
+                      sIndex = 0;
+                      //for first time
+                      if (lastCourseSelected != null &&
+                          lastCourseSelected != course) {
+                        lastCourseSelected!.isSelected = false;
+                      }
+                      lastCourseSelected = course;
+                    });
+                  //}
+                },
                 child: Text(course.title,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 16.sp, color: Colors.white)),
@@ -324,7 +333,8 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
           onTap: () => setState(() {
             path.isOpen = !path.isOpen;
             if (path.isOpen) {
-             MainPage.of(context)?.mainWidget= MainPageChild(course: path.courses.first);
+              MainPage.of(context)?.mainWidget =
+                  MainPageChild(course: path.courses.first);
               path.courses.first.isSelected = true;
               sIndex = 0;
               //for first time

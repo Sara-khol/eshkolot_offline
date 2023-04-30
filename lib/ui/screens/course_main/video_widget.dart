@@ -8,10 +8,11 @@ import 'package:path_provider/path_provider.dart';
 
 class VideoWidget extends StatelessWidget
 {
-  late var player;
+  final Player player;
   final int vimoeId;
 
-   VideoWidget({super.key, required this.vimoeId});
+  const VideoWidget({super.key, required this.vimoeId,required this.player});
+
   @override
   Widget build(BuildContext context) {
     videoInit();
@@ -20,19 +21,18 @@ class VideoWidget extends StatelessWidget
       height: 515.h,
       width: 914.w,
       scale: 1.0, // default
-      showControls: true, // default
+      showControls: true,
+
     );
   }
 
   videoInit() async
   {
-    DartVLC.initialize();
-     player = Player(id: 69420/*,  videoDimensions: const VideoDimensions(640, 360)*/);
     var dir =await getApplicationSupportDirectory();//C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
-    final myFile = Media.file(File('${dir.path}/${vimoeId}.mp4'));
+    final myFile = Media.file(File('${dir.path}/$vimoeId.mp4'));
     player.open(
       myFile,
-      autoStart: false, // default
+      autoStart: false// default
     );
   }
 }

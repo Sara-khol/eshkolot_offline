@@ -33,10 +33,12 @@ class VimoeService with ChangeNotifier {
   int numOfAllVideos = 0;
   CancelToken cancelToken = CancelToken();
   late String path;
-  bool finishConnectToVimoe=false;
+  bool finishConnectToVimoe = false;
   Map _source = {ConnectivityResult.none: false};
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   late bool isNetWorkConnection;
+  bool isDispose=false;
+ late StreamSubscription  subscription;
 
   VimoeService() {
     print("VimoeService");
@@ -46,15 +48,16 @@ class VimoeService with ChangeNotifier {
     dio.options.headers['Connection'] = "keep-alive";
 
     _networkConnectivity.initialise();
-    _networkConnectivity.myStream.listen((source) async {
+
+     subscription =_networkConnectivity.myStream.listen((source) async {
       _source = source;
       print('source $_source');
       if (_source.keys.toList()[0] == ConnectivityResult.none) {
         if (downloadStatus != DownloadStatus.netWorkError) {
-          isNetWorkConnection=false;
+          isNetWorkConnection = false;
           downloadStatus = DownloadStatus.netWorkError;
           notifyListeners();
-          if(finishConnectToVimoe) {
+          if (finishConnectToVimoe) {
             print('cancel');
             cancelToken.cancel('wwwwwww');
           }
@@ -63,10 +66,9 @@ class VimoeService with ChangeNotifier {
         if (downloadStatus == DownloadStatus.netWorkError) {
           downloadStatus = lastDownLoadStatus;
           notifyListeners();
-          isNetWorkConnection=true;
+          isNetWorkConnection = true;
           //if in middle to download videos
-          if(finishConnectToVimoe) {
-
+          if (finishConnectToVimoe) {
             print('jjjj ${getAllDownloaded().map((v) => v.id)}');
             print('jjjj ${getAllDownloaded().length}');
 
@@ -75,15 +77,13 @@ class VimoeService with ChangeNotifier {
               cancelToken = CancelToken();
             }
             startDownLoading(wasNetWorkProblem: true);
-          }
-          else{
+          } else {
             print('start');
             start();
           }
         }
       }
     });
-
 
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
@@ -103,7 +103,8 @@ class VimoeService with ChangeNotifier {
       onError: (error, handler) async {
         if (error.response?.statusCode == 418) {
           String url = error.requestOptions.path;
-          String start = 'download/';
+          // String start = 'download/';
+          String start = 'playback/';
           final startIndex = url.indexOf(start);
           final endIndex = url.indexOf('/', startIndex + start.length);
           String vimoeId = url.substring(startIndex + start.length, endIndex);
@@ -119,11 +120,10 @@ class VimoeService with ChangeNotifier {
             error); // Added this line to let error propagate outside the interceptor
       },
     ));
-
   }
 
   start({bool notify = false}) async {
-    if(isNetWorkConnection) {
+    if (isNetWorkConnection) {
       downloadStatus = DownloadStatus.downloading;
       lastDownLoadStatus = DownloadStatus.downloading;
       numOfAllVideos = 0;
@@ -134,7 +134,7 @@ class VimoeService with ChangeNotifier {
 
       if (notify) notifyListeners();
       if (courses.isEmpty) {
-        courses = await IsarService.instance.getAllCourses();
+        courses = await IsarService().getAllCourses();
       }
       for (Course course in courses) {
         if (course.serverId > 1000) {
@@ -143,10 +143,9 @@ class VimoeService with ChangeNotifier {
         }
       }
       next();
-    }
-    else{
-      downloadStatus=DownloadStatus.netWorkError;
-      lastDownLoadStatus=DownloadStatus.netWorkError;
+    } else {
+      downloadStatus = DownloadStatus.netWorkError;
+      lastDownLoadStatus = DownloadStatus.netWorkError;
       print('no network');
     }
   }
@@ -163,8 +162,8 @@ class VimoeService with ChangeNotifier {
 
     url = url == ''
         ? 'https://api.vimeo.com/me/projects/${projectId}/videos'
-        '?fields=uri,link,files.link,files.size_short,files.height,'
-        'files.width,files.rendition,files.quality'
+            '?fields=uri,link,files.link,files.size_short,files.height,'
+            'files.width,files.rendition,files.quality'
         : 'https://api.vimeo.com${url}';
     Response response = await dio.get(url);
 
@@ -174,16 +173,15 @@ class VimoeService with ChangeNotifier {
         .map<VimoeVideo>((entry) => (VimoeVideo.fromJson(entry)))
         .toList());
 
-
     if (result['paging']['next'] != null) {
       await connectToVimoe(url: result['paging']['next']);
     }
   }
 
   next() async {
-    numOfAllVideos =videoList.length;
+    numOfAllVideos = videoList.length;
     print('numOfAllVideos ${numOfAllVideos}');
-     finishConnectToVimoe=true;
+    finishConnectToVimoe = true;
     for (VimoeVideo v in videoList) {
       VimoeFile? download =
           v.files.firstWhereOrNull((d) => d.rendition == '540p');
@@ -195,24 +193,27 @@ class VimoeService with ChangeNotifier {
           ..id = int.parse(name.substring(1))
           ..downloadLink = download.link!
           ..name = name);
-        await IsarService.instance.addIsarVideo(VideoIsar()
+        await IsarService().addIsarVideo(VideoIsar()
           ..id = int.parse(name.substring(1))
-          ..downloadLink = download.link!..name = name);
-          /*await*/ downloadFile(download.link!, name, true);
+          ..downloadLink = download.link!
+          ..name = name);
+        /*await*/
+        downloadFile(download.link!, name, true);
       }
     }
   }
 
-  startDownLoading({bool wasNetWorkProblem=false}) async {
+  startDownLoading(
+      {bool wasNetWorkProblem = false, bool notify = false}) async {
     print('=====');
-    if(isNetWorkConnection) {
+    if (isNetWorkConnection) {
       print('startDownLoading');
       downloadStatus = DownloadStatus.downloading;
       lastDownLoadStatus = DownloadStatus.downloading;
+      if (notify) notifyListeners();
       numDownloadFiles = 0;
       blockLinks = [];
       errorLinks = [];
-      int i = 0;
       isarVideoList.removeWhere((item) => item.isDownload == true);
 
       numOfAllVideos = isarVideoList.length;
@@ -222,67 +223,62 @@ class VimoeService with ChangeNotifier {
         notifyListeners();
       }
       for (VideoIsar v in isarVideoList) {
-       // print('i $i');
-        i++;
-        if(wasNetWorkProblem) {
+        // print('i $i');
+        //i++;
+        if (wasNetWorkProblem) {
           print('awaittttttttt');
           await downloadFile(v.downloadLink, v.name, false);
+        } else {
+          print('nooo await');
+          downloadFile(v.downloadLink, v.name, false);
         }
-        else
-          {
-            print('nooo await');
-            downloadFile(v.downloadLink, v.name, false);
-          }
       }
-    }
-    else {
+    } else {
       downloadStatus = DownloadStatus.netWorkError;
       lastDownLoadStatus = DownloadStatus.netWorkError;
+      if (notify) notifyListeners();
       print('no network');
     }
   }
 
   Future<void> downloadFile(String url, String name, bool regular) async {
     String progress = '';
-      var dir =
-      await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
-      await dio.download(
-        url,
-        cancelToken: cancelToken,
-
-        '${dir.path}$name.mp4',
-        onReceiveProgress: (rec, total) {
-          progress = ((rec / total) * 100).toStringAsFixed(0);
-        },
-      ).then((_) {
-        if (progress == '100') {
-          numDownloadFiles++;
-          print(
-              "Video downloaded!!!!!!!!!! $name $numDownloadFiles $numOfAllVideos");
-          isarVideoList
-              .firstWhere((iv) => iv.id == int.parse(name.substring(1)))
-              .isDownload = true;
-          IsarService.instance.updateIsarVideo(int.parse(name.substring(1)));
-          if (numDownloadFiles == numOfAllVideos) {
-            print('alllllllllll downloaded');
-            downloadStatus = DownloadStatus.downloaded;
-            notifyListeners();
-          }
-          else {
-            checkErrors();
-          }
-
+    var dir =
+        await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+    await dio.download(
+      url,
+      cancelToken: cancelToken,
+      '${dir.path}$name.mp4',
+      onReceiveProgress: (rec, total) {
+        progress = ((rec / total) * 100).toStringAsFixed(0);
+      },
+    ).then((_) {
+      if (progress == '100') {
+        numDownloadFiles++;
+        print(
+            "Video downloaded!!!!!!!!!! $name $numDownloadFiles $numOfAllVideos");
+        isarVideoList
+            .firstWhere((iv) => iv.id == int.parse(name.substring(1)))
+            .isDownload = true;
+        IsarService().updateIsarVideo(int.parse(name.substring(1)));
+        if (numDownloadFiles == numOfAllVideos) {
+          print('alllllllllll downloaded');
+          downloadStatus = DownloadStatus.downloaded;
+          notifyListeners();
+        } else {
+          checkErrors();
         }
-      }).catchError((e) {
-        if (CancelToken.isCancel(e)) {
-          print( e.message);
-        }
-      });
-
+      }
+    }).catchError((e) {
+      if (CancelToken.isCancel(e)) {
+        print(e.message);
+      }
+    });
   }
 
   checkErrors() {
-    if (blockLinks.length + numDownloadFiles + errorLinks.length == numOfAllVideos) {
+    if (blockLinks.length + numDownloadFiles + errorLinks.length ==
+        numOfAllVideos) {
       print('problemmmmm');
 
       if (errorLinks.isNotEmpty) {
@@ -292,8 +288,8 @@ class VimoeService with ChangeNotifier {
           print('error links start again');
           startDownLoading();
         } else {
-          downloadStatus = DownloadStatus.error;
-          notifyListeners();
+        downloadStatus = DownloadStatus.error;
+        notifyListeners();
         }
       } else {
         if (blockLinks.isNotEmpty) {
@@ -362,6 +358,15 @@ class VimoeService with ChangeNotifier {
     }
   }
 
+  @override
+  void dispose() {
+    if(!isDispose) {
+      print('disssss');
+      isDispose=true;
+      subscription.cancel();
+      super.dispose();
+    }
+  }
 }
 
 enum DownloadStatus {

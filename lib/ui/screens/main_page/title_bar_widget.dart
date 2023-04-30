@@ -1,14 +1,16 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 
-class TitleBarWidget extends StatefulWidget
-{
+class TitleBarWidget extends StatefulWidget {
+  final void Function()? updateLastPosition;
+
+  const TitleBarWidget({super.key,  this.updateLastPosition});
+
   @override
   State<TitleBarWidget> createState() => _TitleBarWidgetState();
 }
 
 class _TitleBarWidgetState extends State<TitleBarWidget> {
-
   final buttonColors = WindowButtonColors(
     iconNormal: Colors.white,
     mouseOver: Colors.grey.withOpacity(0.3),
@@ -36,14 +38,21 @@ class _TitleBarWidgetState extends State<TitleBarWidget> {
             MinimizeWindowButton(colors: buttonColors),
             appWindow.isMaximized
                 ? RestoreWindowButton(
-              colors: buttonColors,
-              onPressed: maximizeOrRestore,
-            )
+                    colors: buttonColors,
+                    onPressed: maximizeOrRestore,
+                  )
                 : MaximizeWindowButton(
-              colors: buttonColors,
-              onPressed: maximizeOrRestore,
-            ),
-            CloseWindowButton(colors: closeButtonColors),
+                    colors: buttonColors,
+                    onPressed: maximizeOrRestore,
+                  ),
+            CloseWindowButton(
+                colors: closeButtonColors,
+                onPressed: () {
+                  if (widget.updateLastPosition != null) {
+                    widget.updateLastPosition!();
+                  }
+                 appWindow.close();
+                }),
           ],
         ),
       ),

@@ -25,16 +25,24 @@ class User {
 
   // final learnPathList = IsarLinks<LearnPath>();
 
-  //List<UserCourse> courses=[];
+  List<UserCourse> courses=[];
   // final courses= IsarLinks<Course>();
 }
 @Embedded()
 class UserCourse {
-  late int courseId;
+
+  late int courseId=0;
   @enumerated
-   Status status=Status.start;
- late int lessonStopId;
- late String diplomaPath;
+ Status status=Status.start;
+ late int lessonStopId=0;
+ late int subjectStopId=0;
+ late int questionnaireStopId=0;
+ bool isQuestionnaire=false;
+ late String diplomaPath='';
+ @ignore
+  late int subjectIndex;
+  @ignore
+  late int lessonIndex;
   // late Status status;
 }
 

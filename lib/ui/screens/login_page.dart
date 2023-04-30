@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
           ]),
           InkWell(
             onTap: () async {
-              User? user = await IsarService.instance.getUserByTz(controller.text);
+              User? user = await IsarService().getUserByTz(controller.text);
               if (user != null) {
                 if(mounted) {
                   Navigator.pushReplacement(context,
@@ -123,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Text('התעודת זהות שהזנת שגויה',style: TextStyle(fontSize: 20.sp,color: Colors.red)))
         ]),
           floatingActionButton: FloatingActionButton(
-              onPressed: () => IsarService.instance.cleanDb())
+              onPressed: () => IsarService().cleanDb())
       ),
     );
   }

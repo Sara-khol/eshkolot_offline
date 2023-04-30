@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
@@ -20,13 +21,14 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
 
 Future<void> main() async {
+   DartVLC.initialize();
   List<Course> myCourses = [];
   bool dataWasFilled = false;
 
-  IsarService.instance.init();
+  IsarService().init();
 
   initData() async {
-    if (await IsarService.instance.checkIfDBisEmpty()) {
+    if (await IsarService().checkIfDBisEmpty()) {
       dataWasFilled = true;
       Map<String, List<String>> fillInQ = {
         'ab': ['c'],
@@ -79,7 +81,9 @@ Future<void> main() async {
           ..name = 'חוקי קריאה והגיה'
           ..lessons.addAll(lessons)
           ..questionnaire.addAll(questionnaires),
-        Subject()..name = 'מבנה המשפט התיאורי'
+        Subject()..name = 'מבנה המשפט התיאורי'..lessons.addAll([Lesson()..name = '5555'..
+    vimoeId=458427089..questionnaire.addAll(questionnaires),Lesson()..name = '66666']),
+
         //..lessons.add(lessons[0])
       ];
 
@@ -219,7 +223,9 @@ Future<void> main() async {
           ..name = 'שמואל'
           ..knowledgeIds = [1, 2, 3]
           ..pathIds = [1, 2]
-          ..tz = '123456789'
+          ..tz = '123456789'..courses=[
+          //  UserCourse()..courseId=2567060..subjectStopId=1..lessonStopId=1
+        ]
       ];
       // final List<User> users=[User()..courses.addAll([UserCourse()..courseId=myCourses[0].id..status=Status.middle
       //   ..lessonStopId=myCourses[0].subjects.elementAt(0).lessons.elementAt(0).id,
@@ -227,7 +233,7 @@ Future<void> main() async {
       //   UserCourse()..courseId=myCourses[0].id..status=Status.start]
       // )];
       print('filling!!');
-      await IsarService.instance.initCourses(myCourses, subjects, lessons,
+      await IsarService().initCourses(myCourses, subjects, lessons,
           questionnaires, knowledgeList, users, paths);
       // course = await IsarService.instance.getFirstCourse();
     } else
@@ -331,8 +337,6 @@ class _MyAppState extends State<MyApp> {
 
                                     return Consumer<VimoeService>(
                                         builder: (context, vimoeResult, child) {
-
-
                                           switch (vimoeResult.downloadStatus) {
                                             case DownloadStatus.downloading:
                                               return displayLoadingDialog(
@@ -344,6 +348,7 @@ class _MyAppState extends State<MyApp> {
                                               return displayLoadingDialog(
                                                   true, context, false, false);
                                             case DownloadStatus.downloaded:
+                                              context.read<VimoeService>().dispose();
                                               return LoginPage();
                                             case DownloadStatus.netWorkError:
                                               return displayLoadingDialog(
@@ -399,7 +404,7 @@ class _MyAppState extends State<MyApp> {
                             ElevatedButton(
                                 onPressed: () {
                                   context
-                                      .read<VimoeService>().startDownLoading();
+                                      .read<VimoeService>().startDownLoading(notify: true);
                                 },
                                 child: Text('נסה שנית'))
                           ])
@@ -456,9 +461,9 @@ class _MyAppState extends State<MyApp> {
 
   Future<List<VideoIsar>> isVideosDownload() async {
     isNetWorkConnection=await checkConnectivity();
-    allDownloaded = await IsarService.instance.checkIfAllVideosAreDownloaded();
+    allDownloaded = await IsarService().checkIfAllVideosAreDownloaded();
     if (!allDownloaded) {
-      return IsarService.instance.getAllVideosDownloaded();
+      return IsarService().getAllVideosDownloaded();
     }
 
     return [];

@@ -8,9 +8,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'main_page_child.dart';
 
 class SubjectMainPage extends StatefulWidget {
-  const SubjectMainPage({super.key, required this.subject});
+  const SubjectMainPage({super.key, required this.subject, required this.subjectIndex,required this.onNext});
 
   final Subject subject;
+  final int subjectIndex;
+  final VoidCallback? onNext;
+
+
 
   @override
   State<SubjectMainPage> createState() => _SubjectMainPageState();
@@ -20,6 +24,8 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
 //    late int totalSteps=widget.course.subjects.first.lessons.length+1;
   late int totalSteps = widget.subject.lessons.length + 1;
   int currentStep = 1;
+  late var currentMainChild;
+
 
   @override
   void initState() {
@@ -36,36 +42,38 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
             textDirection: TextDirection.rtl,
             child: mainWidget(),
           ),
-          SizedBox(height: 14.h,),
-          Padding(
-            padding: EdgeInsets.only(left: 242.w),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: Container(
-                height: 40.h,
-                width: 175.w,
-                decoration: BoxDecoration(
-                  color: Color(0xFF32D489),
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
-                ),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    alignment: Alignment.center,
-                    foregroundColor: Colors.white,
-                    //padding: EdgeInsets.only(left: 45.w,right: 45.w,),
-                    textStyle: TextStyle(fontSize: 18.sp,fontWeight: FontWeight.w600),
+          SizedBox(height: 14.h),
+          Visibility(
+           visible: widget.onNext!=null,
+            child: Padding(
+              padding: EdgeInsets.only(left: 242.w),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  height: 40.h,
+                  width: 175.w,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF32D489),
+                    borderRadius: BorderRadius.all(Radius.circular(30)),
                   ),
-                  onPressed: () {
-                    MainPageChild.of(context)?.bodyWidget=SubjectMainPage(
-                        subject:widget.subject);
-                    MainPageChild.of(context)?.subjectPickedIndex=0;
-                  },
-                  child: Center(
-                    child: Row(
-                      children: [
-                        Text('    לנושא הבא ', style: TextStyle(fontSize: 18.sp,fontFamily: 'RAG-Sans'),textAlign: TextAlign.center,),
-                        Icon(Icons.arrow_forward,size: 15.sp,color: Colors.white,)
-                      ],
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      alignment: Alignment.center,
+                      foregroundColor: Colors.white,
+                      //padding: EdgeInsets.only(left: 45.w,right: 45.w,),
+                      textStyle: TextStyle(fontSize: 18.sp,fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: () {
+                      widget.onNext!();
+                    },
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('    לנושא הבא ', style: TextStyle(fontSize: 18.sp,fontFamily: 'RAG-Sans'),textAlign: TextAlign.center,),
+                          Icon(Icons.arrow_forward,size: 15.sp,color: Colors.white,)
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -268,17 +276,13 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                       print(widget.subject.lessons
                                           .elementAt(i)
                                           .name);
-                                      MainPageChild.of(context)
-                                          ?.bodyWidget = LessonWidget(
-                                        lessonIndex: i,
-                                        lessons: widget.subject.lessons,
-                                        backToSubject: (BuildContext context) =>
-                                            MainPageChild.of(context)
-                                                    ?.bodyWidget =
-                                                SubjectMainPage(
-                                                    subject:
-                                                        widget.subject)
-                                        // nextLesson: widget.subject.lessons.length>i+1?setNextLesson(widget.subject.lessons, i+1):null
+                                      currentMainChild?.lessonPickedIndex=i;
+                                     currentMainChild?.lastSubjectPickedIndex=widget.subjectIndex;
+                                      currentMainChild?.bodyWidget = LessonWidget(
+                                        lesson: widget.subject.lessons.elementAt(i),
+                                          onNext:i + 1 < widget.subject.lessons.length
+                                              ?()=>currentMainChild.goToNextLesson
+                                            (widget.subject,widget.subjectIndex,widget.subject.lessons.elementAt(i+1),i+1):null
                                       );
                                     });
                                   },
@@ -342,6 +346,8 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                   ),
                                   onPressed: () {
                                     setState(() {
+                                      currentMainChild?.lessonPickedIndex=i;
+                                      currentMainChild?.lastSubjectPickedIndex=widget.subjectIndex;
                                       MainPageChild.of(context)
                                               ?.bodyWidget =
                                           QuestionnaireWidget(
@@ -483,17 +489,13 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
     );
   }
 
-  backToSubject(Subject subject) {
-    MainPageChild.of(context)?.bodyWidget = SubjectMainPage(subject: subject);
-  }
+  // backToSubject(Subject subject) {
+  //   MainPageChild.of(context)?.bodyWidget = SubjectMainPage(subject: subject);
+  // }
 
-// setNextLesson(IsarLinks<Lesson> lessons, int lessonPickedIndex) {
-//   print('lll ${lessons.length}');
-//   print('lessonPickedIndex ${lessonPickedIndex}');
-//   MainPageChild.of(context)?.bodyWidget = LessonWidget(
-//       lessonIndex: lessonPickedIndex,
-//       notLastLesson:lessons.length>lessonPickedIndex,
-//       lesson:lessons.elementAt(lessonPickedIndex), nextLesson:lessons.length>lessonPickedIndex+1?
-//   setNextLesson(lessons, lessonPickedIndex+1):null);
-// }
+  @override
+  void didChangeDependencies() {
+    currentMainChild = MainPageChild.of(context);
+    super.didChangeDependencies();
+  }
 }
