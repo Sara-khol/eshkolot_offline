@@ -28,10 +28,10 @@ class _MainPageState extends State<MainPage> {
 
   late Widget _mainWidget;
   late List<Widget> menuWidgets;
-  int sIndex = 0;
   Course? lastCourseSelected;
   int coursesIndex = 0;
   void Function()? updateLastPosition;
+  void Function(int)? updateSideMenu;
 
 
   set mainWidget(Widget value) => setState(() => _mainWidget = value);
@@ -44,7 +44,6 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  // Widget get getMainWidget => _mainWidget;
 
   @override
   void initState() {
@@ -59,6 +58,7 @@ class _MainPageState extends State<MainPage> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        backgroundColor: Colors.white,
         body: Column(children: [
           TitleBarWidget(updateLastPosition: updateLastPosition),
           Expanded(

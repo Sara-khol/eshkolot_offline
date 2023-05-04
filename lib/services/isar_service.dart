@@ -15,8 +15,6 @@ import 'package:collection/collection.dart';
 class IsarService {
   late Future<Isar> db;
 
-
-
   IsarService._privateConstructor();
 
   static final IsarService _instance = IsarService._privateConstructor();
@@ -24,9 +22,6 @@ class IsarService {
   // static IsarService get instance => _instance;
 
   factory IsarService() => _instance;
-
-
-
 
   late User _user;
 

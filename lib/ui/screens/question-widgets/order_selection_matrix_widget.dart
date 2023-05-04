@@ -2,8 +2,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/dragging_question.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
-import 'package:drag_and_drop_lists/drag_and_drop_lists.dart';
 import 'package:flutter/foundation.dart';
 
 void main() {
@@ -76,6 +74,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
       minTextAdapt:true,
       builder: (BuildContext context, Widget? child) {
       return Scaffold(
+      backgroundColor:Colors.white,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

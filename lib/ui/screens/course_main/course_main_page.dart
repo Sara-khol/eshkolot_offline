@@ -170,9 +170,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     children: <Widget>[
                       Container(
                         height: 40.h,
-                        //width: 441.w,
-
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.black,
                           borderRadius:
                           BorderRadius.all(Radius.circular(30)),
@@ -186,6 +184,18 @@ class _CourseMainPageState extends State<CourseMainPage> {
                             textStyle: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w600),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                  'המשך מהמקום שעצרת $lastTextButton',
+                                  style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontFamily: 'RAG-Sans')),
+                              SizedBox(width: 4.w),
+                              Icon(Icons.arrow_forward,color: Colors.white,size:15.sp ,)
+                            ],
                           ),
                           onPressed: () {
                             if (!data!.isQuestionnaire) {
@@ -215,11 +225,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                   );
                             }
                           },
-                          child: Text(
-                              'המשך מהמקום שעצרת $lastTextButton',
-                              style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontFamily: 'RAG-Sans')),
+
                         ),
                       ),
                     ],

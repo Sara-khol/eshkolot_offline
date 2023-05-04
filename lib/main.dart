@@ -73,7 +73,7 @@ Future<void> main() async {
         Lesson()..name = 'אותיות עיצור י'..vimoeId=458487712,
         Lesson()..name = 'אותיות עיצור כ'..vimoeId=458488614,
         Lesson()..name = 'אותיות עיצור ל'..vimoeId=458493015,
-        Lesson()..name = 'אותיות עיצור מ'..vimoeId=458587389,
+        Lesson()..name = 'אותיות עיצור מ'..vimoeId=458587389..questionnaire.addAll(questionnaires),
       ];
 
       final List<Subject> subjects = [
@@ -361,7 +361,9 @@ class _MyAppState extends State<MyApp> {
                           : LoginPage();
                     }
                     return const Center(
-                      child: Scaffold(body: Center(child: CircularProgressIndicator())),
+                      child: Scaffold(
+                          backgroundColor: Colors.white,
+                          body: Center(child: CircularProgressIndicator())),
                     );
                   }));
         });

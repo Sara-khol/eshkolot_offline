@@ -2,6 +2,7 @@ import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
+import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,7 +15,7 @@ import '../../models/user.dart';
 class HomePage extends StatefulWidget {
   final User user;
 
-  HomePage({super.key, required this.user});
+  const HomePage({super.key, required this.user});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -105,58 +106,48 @@ class _HomePageState extends State<HomePage> {
       });
     }
     return Scaffold(
-        body: /*FutureBuilder(
-            future: IsarService.instance.getUser(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                User? user = snapshot.data;
-                if (user != null) {
-                  knowledgeList = user.knowledgeList;
-                  pathList = user.pathList;
-                  return */
-            Padding(
-          padding: EdgeInsets.only(
-              top: 78.h/*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
-          child: Column(
-            children: [
-              Center(
-                  child: Text('שלום ${widget.user.name}',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 32.sp))),
-              SizedBox(height: 26.h),
-              Container(
-                  height: 51.h,
-                  decoration: const BoxDecoration(
-                      color: Color(0xFFF4F4F3),
-                      borderRadius: BorderRadius.all(Radius.circular(50))),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        topInformation(Icons.check, 'הושלם 2'),
-                        Container(
-                            height: 27.h,
-                            width: 1.w,
-                            color: const Color(0xFF2D2828)),
-                        topInformation(Icons.refresh, 'ממתין לסינכרון 1'),
-                        Container(
-                            height: 27.h,
-                            width: 1.w,
-                            color: const Color(0xFF2D2828)),
-                        topInformation(Icons.star_outlined, ' תעודות 1'),
-                      ])),
-              SizedBox(height: 35.h),
-              Row(
+        backgroundColor: Colors.white,
+        body: Padding(
+      padding: EdgeInsets.only(
+          top: 78.h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
+      child: Column(
+        children: [
+          Center(
+              child: Text('שלום ${widget.user.name}',
+                  style: TextStyle(
+                      color: colors.blackColorApp,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 32.sp))),
+          SizedBox(height: 26.h),
+          Container(
+              height: 51.h,
+              decoration: BoxDecoration(
+                  border: Border.all(color: colors.blackColorApp, width: 1.h),
+                  borderRadius: BorderRadius.all(Radius.circular(50))),
+              child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    myCoursesWidget(false),
-                    SizedBox(width: 36.w),
-                    myCoursesWidget(true)
-                  ])
-            ],
-          ),
-        )
+                    topInformation(Icons.check, 'הושלם 2'),
+                    Container(
+                        height: 27.h, width: 1.w, color: colors.blackColorApp),
+                    topInformation(Icons.refresh, 'ממתין לסינכרון 1'),
+                    Container(
+                        height: 27.h, width: 1.w, color: colors.blackColorApp),
+                    topInformation(Icons.star_outlined, ' תעודות 1'),
+                  ])),
+          SizedBox(height: 35.h),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
+              children: [
+                myCoursesWidget(false),
+                SizedBox(width: 36.w),
+                myCoursesWidget(true)
+              ])
+        ],
+      ),
+    )
         //;
         //             }
         //             return Text('Error');
@@ -168,10 +159,14 @@ class _HomePageState extends State<HomePage> {
 
   topInformation(IconData iconData, String s) {
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      Padding(
-          padding: EdgeInsets.only(right: 20.w, left: 15.w),
-          child: Icon(iconData)),
-      Text(s, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w400)),
+      Container(
+          width: 14.h,
+          height: 14.h,
+          margin: EdgeInsets.only(right: 20.w, left: 15.w),
+          decoration:
+               BoxDecoration(shape: BoxShape.circle, color: colors.lightGrey1ColorApp),
+          child: Center(child: Icon(iconData, size: 12.sp))),
+      Text(s, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
       SizedBox(width: 25.w),
     ]);
   }
@@ -184,14 +179,14 @@ class _HomePageState extends State<HomePage> {
         padding:
             EdgeInsets.only(top: 30.h, right: 42.w, left: 42.w, bottom: 30.h),
         decoration: BoxDecoration(
-            border: Border.all(color: Color(0xffE4E6E9)),
-            borderRadius: BorderRadius.all(Radius.circular(10))),
+            border: Border.all(color: const Color(0xffE4E6E9)),
+            borderRadius:  const BorderRadius.all(Radius.circular(10))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               isPath ? 'מסלולי למידה' : 'הקורסים שלי',
-              style: TextStyle(fontSize: 32.sp),
+              style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w600,color: colors.blackColorApp ),
             ),
             SizedBox(height: 40.h),
             // positionsView,
@@ -207,10 +202,8 @@ class _HomePageState extends State<HomePage> {
                       controller: isPath
                           ? pathScrollController
                           : knowledgeScrollController,
-                      thumbVisibility:
-                      (isPath && enableScrollPath) ||
+                      thumbVisibility: (isPath && enableScrollPath) ||
                           (!isPath && enAbleScrollKnowledge),
-
 
                       // child: ScrollConfiguration(
                       //     behavior: ScrollConfiguration.of(context).copyWith(
@@ -295,7 +288,7 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(width: 9.w),
             Text(knowledge.title,
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18.sp)),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp,color: colors.blackColorApp)),
           ],
         ),
         SizedBox(height: 2.h),
@@ -355,8 +348,20 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(path.title,
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18.sp)),
+        Row(
+          children: [
+            Container(
+                height: 9.h,
+                width: 9.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xffFFDA6C),
+                )),
+            SizedBox(width: 11.w),
+            Text(path.title,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp,color: colors.blackColorApp)),
+          ],
+        ),
         SizedBox(height: 2.h),
         ListView.builder(
             shrinkWrap: true,
@@ -372,14 +377,17 @@ class _HomePageState extends State<HomePage> {
 
   courseItem(Course course, int color, String icon, int i) {
     return Container(
-      padding: EdgeInsets.only(top: 10.h, bottom: 10.h/*,left: 10*/),
+      padding: EdgeInsets.only(top: 10.h, bottom: 10.h /*,left: 10*/),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xffF4F4F3))),
+        border: Border(bottom: BorderSide(color: colors.lightGrey1ColorApp)),
       ),
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onTap: (){
-          MainPage.of(context)?.mainWidget=MainPageChild(course: course);
+        onTap: () {
+          MainPage.of(context)?.mainWidget = MainPageChild(course: course);
+          if( MainPage.of(context)?.updateSideMenu!=null) {
+            MainPage.of(context)?.updateSideMenu!(course.serverId);
+          }
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -388,11 +396,11 @@ class _HomePageState extends State<HomePage> {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  Icon(getIconByStatus(course.status), size: 16.w),
-                  // SizedBox(width: 11.w),
+                  getIconByStatus(course.status),
+                  // SizedBox(width: 12.w),
 
                   Positioned(
-                      right: 20.w,
+                      right: 32.w,
                       child: GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -402,7 +410,7 @@ class _HomePageState extends State<HomePage> {
                                       MainPageChild(course: course)));
                         },
                         child: Text('${course.title}',
-                            style: TextStyle(fontSize: 18.sp)),
+                            style: TextStyle(fontSize: 18.sp,color: colors.blackColorApp)),
                       )),
                   //  SizedBox(width: 63.w),
                   Positioned(
@@ -425,7 +433,7 @@ class _HomePageState extends State<HomePage> {
                                   (i + 1).toString(),
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 14.sp,
+                                      fontSize: 13.sp,
                                       color: Colors.white),
                                 )
                               ])))
@@ -440,11 +448,24 @@ class _HomePageState extends State<HomePage> {
   getIconByStatus(Status status) {
     switch (status) {
       case Status.start:
-        return Icons.circle_outlined;
+        return Container(
+            width: 15.h,
+            height: 15.h,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: colors.lightGrey1ColorApp, width: 3.sp)));
+        //return Icon(Icons.circle_outlined,color: colors.lightGrey1ColorApp,size: 20.sp,);
       case Status.middle:
-        return Icons.circle_rounded;
+        return Image.asset('assets/images/procces_circle.png');
       default:
-        return Icons.check_circle_outline;
+        return Container(
+          width: 15.h,
+          height: 15.h,
+          decoration: const BoxDecoration(
+              shape: BoxShape.circle, color: Color(0xff62FFB8)),
+          child: Center(
+              child: Icon(Icons.check, color: Colors.white, size: 12.sp)),
+        );
     }
   }
 
@@ -465,17 +486,24 @@ class _HomePageState extends State<HomePage> {
   statusWidget(String text, String buttonText) {
     return Row(children: [
       if (text != '')
-        Text(text, style: TextStyle(fontSize: 13.sp, color: Color(0xff6E7072))),
+        Text(text, style: TextStyle(fontSize: 14.sp, color: Color(0xff6E7072))),
       if (text != '') SizedBox(width: 7.w),
       Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Color(0xffACAEAF)),
+         color: colors.lightGrey1ColorApp,
+          borderRadius: BorderRadius.all(Radius.circular(30))
         ),
         padding:
             EdgeInsets.only(right: 11.w, left: 11.w, top: 5.h, bottom: 5.h),
-        child: Text(
-          buttonText,
-          style: TextStyle(fontSize: 13.sp),
+        child: Row(
+          children: [
+            Text(
+              buttonText,
+              style: TextStyle(fontSize: 14.sp,color: colors.blackColorApp),
+            ),
+            SizedBox(width: 3.w),
+            Icon(Icons.arrow_forward,size: 14.sp)
+          ],
         ),
       )
     ]);
@@ -487,4 +515,6 @@ class _HomePageState extends State<HomePage> {
     knowledgeScrollController.dispose();
     super.dispose();
   }
+
+
 }

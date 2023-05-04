@@ -11,6 +11,7 @@ import '../../../models/lesson.dart';
 import '../../../models/subject.dart';
 import 'lesson_widget.dart';
 import 'course_main_page.dart';
+import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 class MainPageChild extends StatefulWidget {
   const MainPageChild({super.key, required this.course});
@@ -22,7 +23,6 @@ class MainPageChild extends StatefulWidget {
 
   @override
   State<MainPageChild> createState() => _MainPageChildState();
-
 }
 
 class _MainPageChildState extends State<MainPageChild> {
@@ -42,8 +42,6 @@ class _MainPageChildState extends State<MainPageChild> {
 
   set bodyWidget(Widget value) => setState(() => _bodyWidget.value = value);
 
-
-
   @override
   void initState() {
     super.initState();
@@ -53,18 +51,17 @@ class _MainPageChildState extends State<MainPageChild> {
     currentStep = 1;
     _bodyWidget.addListener(doTaskWhenNotified);
     setNextData();
-    MainPage.of(context)?.setUpdate=saveLastUserPosition;
+    MainPage.of(context)?.setUpdate = saveLastUserPosition;
   }
 
   void doTaskWhenNotified() async {
     await saveLastUserPosition(refresh: true);
-    setNextData();
+    setNextData(refresh: true);
   }
 
   @override
   void didUpdateWidget(covariant MainPageChild oldWidget) {
     if (oldWidget.course != widget.course) {
-      print('lll');
       lastCourse = oldWidget.course;
     }
     _bodyWidget.value =
@@ -95,7 +92,8 @@ class _MainPageChildState extends State<MainPageChild> {
   Widget progressBar() {
     return Container(
       height: 74.h,
-      decoration: BoxDecoration(border: Border.all(color: Color(0xFFE4E6E9))),
+      decoration:
+          BoxDecoration(border: Border.all(color: colors.grey2ColorApp)),
       child: Row(
         children: [
           Expanded(
@@ -129,7 +127,7 @@ class _MainPageChildState extends State<MainPageChild> {
                           style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w400,
-                              color: Color(0xFF6E7072)),
+                              color: colors.grey1ColorApp),
                         )
                       ],
                     ),
@@ -147,12 +145,11 @@ class _MainPageChildState extends State<MainPageChild> {
             ),
           ),
           Container(
-            width: 395.w,
-            height: 74.h,
-            decoration:
-                BoxDecoration(border: Border.all(color: Color(0xFFE4E6E9))),
-            child:nextButton()
-          )
+              width: 395.w,
+              height: 74.h,
+              decoration: BoxDecoration(
+                  border: Border.all(color: colors.grey2ColorApp)),
+              child: nextButton())
         ],
       ),
     );
@@ -178,7 +175,6 @@ class _MainPageChildState extends State<MainPageChild> {
                 onPressed: () {
                   _bodyWidget.value = CourseMainPage(
                       course: widget.course, controller: myController);
-
                 }),
           ),
 
@@ -195,12 +191,7 @@ class _MainPageChildState extends State<MainPageChild> {
                         child: SingleChildScrollView(
                           child: Column(
                             children: [
-                              ListView.separated(
-                                  separatorBuilder: (context, index) {
-                                    return Divider(
-                                      color: Color(0xFFE4E6E9),
-                                    );
-                                  },
+                              ListView.builder(
                                   shrinkWrap: true,
                                   itemCount: widget.course.subjects.length,
                                   itemBuilder: (ctx, sIndex) {
@@ -209,372 +200,192 @@ class _MainPageChildState extends State<MainPageChild> {
                                         .elementAt(sIndex);
                                     return Column(
                                       children: [
-                                        ListTile(
-                                          title: Container(
-                                            width: double.infinity,
-                                            color: Colors.transparent,
-                                            child: Row(
-                                              children: [
-                                                currentSubject.lessons
-                                                            .isNotEmpty &&
+                                        subjectTitleDisplay(
+                                            currentSubject, sIndex),
+                                        Container(
+                                            color: colors.lightGrey1ColorApp,
+                                            height: 1.h),
+                                        Container(
+                                            color: colors.lightGrey2ColorApp,
+                                            child: Column(children: [
+                                              Visibility(
+                                                visible:
+                                                    currentSubject.isTapped,
+                                                child: ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount: currentSubject
+                                                      .lessons.length,
+                                                  itemBuilder: (ctx, lIndex) {
+                                                    Lesson currentLesson =
                                                         currentSubject.lessons
-                                                            .last.isCompleted
-                                                    ? Icon(
-                                                        Icons.circle_outlined,
-                                                        color:
-                                                            Color(0xFF62FFB8),
-                                                        size: 20.sp)
-                                                    : Icon(
-                                                        Icons.circle_outlined,
-                                                        color:
-                                                            Color(0xFFE4E6E9),
-                                                        size: 20.sp),
-                                                SizedBox(
-                                                  width: 25.w,
-                                                ),
-                                                Icon(
-                                                  Icons.book,
-                                                  size: 13.h,
-                                                ),
-                                                SizedBox(
-                                                  width: 8.w,
-                                                ),
-                                                Text(currentSubject.name,
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize: 18.sp)),
-                                                Spacer(),
-                                                Icon(
-                                                    Icons.arrow_drop_down_sharp)
-                                              ],
-                                            ),
-                                          ),
-                                          mouseCursor: SystemMouseCursors.click,
-                                          textColor: Color(0xFF2D2828),
-                                          onTap: () {
-                                            setState(() {
-                                              currentSubject.isTapped =
-                                                  !currentSubject.isTapped;
-                                              lastSubjectPickedIndex =
-                                                  subjectPickedIndex;
-                                              subjectPickedIndex = sIndex;
-                                              _bodyWidget.value =
-                                                  SubjectMainPage(
-                                                      subjectIndex:
-                                                          subjectPickedIndex,
-                                                      subject: currentSubject,
-                                                  onNext:  subjectPickedIndex + 1 <
-                                                      widget.course.subjects.length
-                                                      ? () => goToNextSubject(
-                                                      widget.course.subjects.elementAt(
-                                                          subjectPickedIndex + 1),
-                                                      subjectPickedIndex + 1)
-                                                      : null,);
-                                            });
-                                          },
-                                        ),
-                                        Visibility(
-                                          visible: currentSubject.isTapped,
-                                          child: ListView.builder(
-                                            shrinkWrap: true,
-                                            itemCount:
-                                                currentSubject.lessons.length,
-                                            itemBuilder: (ctx, lIndex) {
-                                              Lesson currentLesson =
-                                                  currentSubject.lessons
-                                                      .elementAt(lIndex);
-                                              return Center(
-                                                  child: Column(
-                                                children: [
-                                                  ListTile(
-                                                      minLeadingWidth: 30.w,
-                                                      title: Row(
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .videocam_outlined,
-                                                            size: 22.sp,
-                                                            color: Colors.black,
-                                                          ),
-                                                          SizedBox(width: 14.w),
-                                                          Text(
-                                                              currentLesson
-                                                                  .name,
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  fontSize:
-                                                                      16.sp)),
-                                                        ],
-                                                      ),
-                                                      leading: Stack(
-                                                        alignment:
-                                                            AlignmentDirectional
-                                                                .center,
-                                                        children: [
-                                                          VerticalDivider(
-                                                              color: currentLesson
-                                                                      .isCompleted
-                                                                  ? Color(
-                                                                      0xFF62FFB8)
-                                                                  : Color(
-                                                                      0xFFE4E6E9),
-                                                              thickness: 3.w,
-                                                              indent:
-                                                                  lIndex == 0
-                                                                      ? 25.h
-                                                                      : null,
-                                                              endIndent: lIndex ==
+                                                            .elementAt(lIndex);
+                                                    return Center(
+                                                        child: Column(
+                                                      children: [
+                                                        lessonOrQuestionnaireItem(
+                                                            true,
+                                                            currentLesson
+                                                                .isCompleted,
+                                                            currentLesson.questionnaire
+                                                                    .isEmpty &&
+                                                                lIndex ==
+                                                                    currentSubject
+                                                                            .lessons.length -
+                                                                        1,
+                                                            lIndex,
+                                                            currentLesson.name,
+                                                            lessonPickedIndex ==
+                                                                    lIndex &&
+                                                                subjectPickedIndex ==
+                                                                    sIndex &&
+                                                                _bodyWidget
+                                                                        .value
+                                                                    is LessonWidget,
+                                                            () {
+                                                          setState(() {
+                                                            lessonPickedIndex =
+                                                                lIndex;
+                                                            subjectPickedIndex =
+                                                                sIndex;
+                                                            _bodyWidget.value =
+                                                                LessonWidget(
+                                                              lesson: currentSubject
+                                                                  .lessons
+                                                                  .elementAt(
+                                                                      lessonPickedIndex),
+                                                              onNext: lessonPickedIndex +
+                                                                          1 <
+                                                                      currentSubject
+                                                                          .lessons
+                                                                          .length
+                                                                  ? () => goToNextLesson(
+                                                                      currentSubject,
+                                                                      subjectPickedIndex,
+                                                                      currentSubject
+                                                                          .lessons
+                                                                          .elementAt(lessonPickedIndex +
+                                                                              1),
+                                                                      lessonPickedIndex +
+                                                                          1)
+                                                                  : null,
+                                                            );
+                                                            // nextLesson:currentSubject.lessons.length>lessonPickedIndex+1 ?setNextLesson(currentSubject.lessons,lessonPickedIndex+1):null);
+                                                          });
+                                                        }),
+                                                        if (currentLesson
+                                                            .questionnaire
+                                                            .isNotEmpty)
+                                                          lessonOrQuestionnaireItem(
+                                                              false,
+                                                              false /*todo get question is complete*/,
+                                                              currentSubject
+                                                                      .questionnaire
+                                                                      .isEmpty &&
+                                                                  lIndex ==
                                                                       currentSubject
                                                                               .lessons
                                                                               .length -
-                                                                          1
-                                                                  ? 20.h
-                                                                  : null),
-                                                          //currentSubject.lessons.isNotEmpty &&
-                                                          currentLesson
-                                                                  .isCompleted
-                                                              ? Icon(
-                                                                  Icons
-                                                                      .check_circle,
-                                                                  color: Color(
-                                                                      0xFF62FFB8),
-                                                                  size: 20.sp,
-                                                                )
-                                                              : Container(
-                                                                  height: 18.h,
-                                                                  width: 18.w,
-                                                                  decoration: BoxDecoration(
-                                                                      shape: BoxShape
-                                                                          .circle,
-                                                                      border: Border.all(
-                                                                          color: Color(
-                                                                              0xFFE4E6E9),
-                                                                          width: 3
-                                                                              .w),
-                                                                      color: Color(
-                                                                          0xFFFAFAFA)),
-                                                                )
-                                                        ],
-                                                      ),
-                                                      onTap: () {
-                                                        setState(() {
-                                                          lessonPickedIndex =
-                                                              lIndex;
-                                                          subjectPickedIndex =
-                                                              sIndex;
-                                                          _bodyWidget.value =
-                                                              LessonWidget(
-                                                            lesson: currentSubject
-                                                                .lessons
-                                                                .elementAt(
-                                                                    lessonPickedIndex),
-                                                            onNext: lessonPickedIndex +
-                                                                        1 <
-                                                                    currentSubject
-                                                                        .lessons
-                                                                        .length
-                                                                ? () => goToNextLesson(
-                                                                    currentSubject,
-                                                                    subjectPickedIndex,
-                                                                    currentSubject
-                                                                        .lessons
-                                                                        .elementAt(
-                                                                            lessonPickedIndex +
-                                                                                1),
-                                                                    lessonPickedIndex +
-                                                                        1)
-                                                                : null,
-                                                          );
-                                                          // nextLesson:currentSubject.lessons.length>lessonPickedIndex+1 ?setNextLesson(currentSubject.lessons,lessonPickedIndex+1):null);
-                                                        });
-                                                      }),
-                                                  if (currentLesson
-                                                      .questionnaire.isNotEmpty)
-                                                    ListTile(
-                                                      minLeadingWidth: 30.w,
-                                                      title: Row(
-                                                        children: [
-                                                          Icon(
-                                                            Icons
-                                                                .create_outlined,
-                                                            color: Colors.black,
-                                                            size: 20.sp,
-                                                          ),
-                                                          SizedBox(
-                                                            width: 14.w,
-                                                          ),
-                                                          Text(
+                                                                          1,
+                                                              lIndex,
                                                               'תרגול - ${currentLesson.name}',
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  fontSize:
-                                                                      16.sp)),
-                                                        ],
-                                                      ),
-                                                      leading: Stack(
-                                                        alignment:
-                                                            AlignmentDirectional
-                                                                .center,
-                                                        children: [
-                                                          VerticalDivider(
-                                                            color: Color(
-                                                                0xFFE4E6E9),
-                                                            thickness: 3.w,
-                                                          ),
-                                                          currentSubject.lessons
-                                                                      .isNotEmpty &&
-                                                                  currentSubject
-                                                                      .lessons
-                                                                      .last
-                                                                      .isCompleted
-                                                              ? Icon(
-                                                                  Icons
-                                                                      .check_circle,
-                                                                  color: Color(
-                                                                      0xFF62FFB8),
-                                                                  size: 25.sp,
-                                                                )
-                                                              : Container(
-                                                                  height: 18.h,
-                                                                  width: 18.w,
-                                                                  decoration: BoxDecoration(
-                                                                      shape: BoxShape
-                                                                          .circle,
-                                                                      border: Border.all(
-                                                                          color: Color(
-                                                                              0xFFE4E6E9),
-                                                                          width: 3
-                                                                              .w),
-                                                                      color: Color(
-                                                                          0xFFFAFAFA)),
-                                                                )
-                                                        ],
-                                                      ),
-                                                      onTap: () => setState(() {
-                                                        print(currentLesson
-                                                            .questionnaire
-                                                            .length);
-                                                        lessonPickedIndex =
-                                                            lIndex;
-                                                        subjectPickedIndex =
-                                                            sIndex;
+                                                              lessonPickedIndex ==
+                                                                      lIndex &&
+                                                                  subjectPickedIndex ==
+                                                                      sIndex
+                                                                  &&
+                                                                  _bodyWidget
+                                                                      .value
+                                                                  is QuestionnaireWidget,
+                                                              () =>
+                                                                  setState(() {
+                                                                    print(currentLesson
+                                                                        .questionnaire
+                                                                        .length);
+                                                                    lessonPickedIndex =
+                                                                        lIndex;
+                                                                    subjectPickedIndex =
+                                                                        sIndex;
 
-                                                        _bodyWidget.value =
-                                                            QuestionnaireWidget(
-                                                                title:
-                                                                    'תרגול - ${currentLesson.name}',
-                                                                questionnaires:
-                                                                    currentLesson
-                                                                        .questionnaire);
-                                                      }),
-                                                    ),
-                                                ],
-                                              ));
-                                            },
-                                          ),
-                                        ),
-                                        if (currentSubject
-                                            .questionnaire.isNotEmpty)
-                                          Visibility(
-                                            visible: currentSubject.isTapped,
-                                            child: GestureDetector(
-                                              onTap: () => setState(() {
-                                                print(
-                                                    'currentSubject.questionnaire ${currentSubject.questionnaire}');
-                                                subjectPickedIndex = sIndex;
-                                                lessonPickedIndex = -1;
-                                                _bodyWidget.value =
-                                                    QuestionnaireWidget(
-                                                        title:
+                                                                    _bodyWidget.value = QuestionnaireWidget(
+                                                                        title:
+                                                                            'תרגול - ${currentLesson.name}',
+                                                                        questionnaires:
+                                                                            currentLesson.questionnaire);
+                                                                  }))
+                                                      ],
+                                                    ));
+                                                  },
+                                                ),
+                                              ),
+                                              if (currentSubject
+                                                  .questionnaire.isNotEmpty)
+                                                Visibility(
+                                                    visible:
+                                                        currentSubject.isTapped,
+                                                    child:
+                                                        lessonOrQuestionnaireItem(
+                                                            false,
+                                                            false /*todo get question is complete*/,
+                                                            true,
+                                                            -1,
                                                             'תרגיל מסכם - ${currentSubject.name}',
-                                                        questionnaires:
-                                                            currentSubject
-                                                                .questionnaire);
-                                              }),
-
-                                              child: Container(
-                                                width: double.infinity,
-                                                padding: EdgeInsets.only(
-                                                    right: 40.h),
-                                                height: 50.h,
-                                                child: Center(
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.star_border,
-                                                        size: 20.sp,
-                                                        color: Colors.black,
-                                                      ),
-                                                      SizedBox(
-                                                        width: 14.w,
-                                                      ),
-                                                      Text(
-                                                          'תרגיל מסכם - ${currentSubject.name}',
-                                                          style: TextStyle(
-                                                              fontSize: 16.sp,
-                                                              color: Color(
-                                                                  0xFF2D2828))),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-
-                                            ),
-                                          ),
-                                        Visibility(
-                                          visible: sIndex ==
-                                              widget.course.subjects.length - 1,
-                                          child: GestureDetector(
-                                            onTap: () => setState(() {
-                                              subjectPickedIndex = -1;
-                                              lessonPickedIndex = -1;
-                                              _bodyWidget.value =
-                                                  QuestionnaireWidget(
-                                                      title:
-                                                          'תרגול מסכם - ${widget.course.title}',
-                                                      questionnaires: widget
-                                                          .course
-                                                          .questionnaire);
-                                            }),
-                                            child: Container(
-                                              width: double.infinity,
-                                              padding:
-                                                  EdgeInsets.only(right: 10.w),
-                                              height: 50.h,
-                                              //color: Color(0xFF6E7072),
-                                              child: Center(
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.star_border,
-                                                      size: 20.sp,
-                                                      color: Colors.black,
-                                                    ),
-                                                    SizedBox(
-                                                      width: 14.w,
-                                                    ),
-                                                    Text(
-                                                        'תרגיל מסכם - קורס ${widget.course.title}',
-                                                        style: TextStyle(
-                                                            fontSize: 16.sp,
-                                                            color: Color(
-                                                                0xFF2D2828))),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        )
+                                                            lessonPickedIndex ==
+                                                                    -1 &&
+                                                                subjectPickedIndex ==
+                                                                    sIndex,
+                                                            () => setState(() {
+                                                                  print(
+                                                                      'currentSubject.questionnaire ${currentSubject.questionnaire}');
+                                                                  subjectPickedIndex =
+                                                                      sIndex;
+                                                                  lessonPickedIndex =
+                                                                      -1;
+                                                                  _bodyWidget.value = QuestionnaireWidget(
+                                                                      title:
+                                                                          'תרגיל מסכם - ${currentSubject.name}',
+                                                                      questionnaires:
+                                                                          currentSubject
+                                                                              .questionnaire);
+                                                                })))
+                                            ])),
                                       ],
                                     );
 
                                     ///רשימת נושאים בתוך קורס
                                   }),
+                              // שאלון מסכם של הקורס
+                              //אם יש צורך אפשר להעביר לתוך הליסט של השיעורים ורק להציג באיבר האחרון
+                              if (widget.course.questionnaire.isNotEmpty)
+                                GestureDetector(
+                                    onTap: () => setState(() {
+                                          subjectPickedIndex = -1;
+                                          lessonPickedIndex = -1;
+                                          _bodyWidget.value = QuestionnaireWidget(
+                                              title:
+                                                  'תרגול מסכם - ${widget.course.title}',
+                                              questionnaires:
+                                                  widget.course.questionnaire);
+                                        }),
+                                    child: Container(
+                                        width: double.infinity,
+                                        padding: EdgeInsets.only(right: 10.w),
+                                        height: 50.h,
+                                        child: Center(
+                                            child: Row(children: [
+                                          Icon(
+                                            Icons.star_border,
+                                            size: 20.sp,
+                                            color: Colors.black,
+                                          ),
+                                          SizedBox(
+                                            width: 14.w,
+                                          ),
+                                          Text(
+                                              'תרגיל מסכם - קורס ${widget.course.title}',
+                                              style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                  color: Color(0xFF2D2828))),
+                                        ]))))
                             ],
                           ),
                         ),
@@ -582,12 +393,7 @@ class _MainPageChildState extends State<MainPageChild> {
                     ],
                   ),
                 ),
-                Container(
-                    width: 15.w,
-                    height: double.infinity,
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(width: 1.h, color: Color(0xFFE4E6E9))))
+                dividerSideMenu()
               ],
             ),
           ),
@@ -596,9 +402,151 @@ class _MainPageChildState extends State<MainPageChild> {
     );
   }
 
-  Widget nextButton()
-  {
-    return  Visibility(
+  subjectTitleDisplay(Subject currentSubject, int sIndex) {
+    return ListTile(
+      title: SizedBox(
+        width: double.infinity,
+        // color: Colors.transparent,
+        child: Row(
+          children: [
+            currentSubject.lessons.isNotEmpty &&
+                    currentSubject.lessons.last.isCompleted
+                ? Image.asset('assets/images/procces_circle.png')
+                : Icon(Icons.circle_outlined,
+                    color: colors.grey2ColorApp, size: 20.sp),
+            SizedBox(
+              width: 25.w,
+            ),
+            Icon(
+              Icons.book,
+              size: 13.h,
+            ),
+            SizedBox(
+              width: 8.w,
+            ),
+            Text(currentSubject.name,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
+            Spacer(),
+            Icon(Icons.arrow_drop_down_sharp)
+          ],
+        ),
+      ),
+      mouseCursor: SystemMouseCursors.click,
+      textColor: Color(0xFF2D2828),
+      onTap: () {
+        setState(() {
+          currentSubject.isTapped = !currentSubject.isTapped;
+          lastSubjectPickedIndex = subjectPickedIndex;
+          subjectPickedIndex = sIndex;
+          _bodyWidget.value = SubjectMainPage(
+            subjectIndex: subjectPickedIndex,
+            subject: currentSubject,
+            onNext: subjectPickedIndex + 1 < widget.course.subjects.length
+                ? () => goToNextSubject(
+                    widget.course.subjects.elementAt(subjectPickedIndex + 1),
+                    subjectPickedIndex + 1)
+                : null,
+          );
+        });
+      },
+    );
+  }
+
+  lessonOrQuestionnaireItem(
+      bool isLesson,
+      bool isLessonCompleted,
+      bool isLastLesson,
+      int lIndex,
+      String name,
+      bool isSelect,
+      VoidCallback onPress) {
+    return SizedBox(
+      height: 50.h,
+      child: Row(
+        children: [
+          SizedBox(width: 25.w),
+          Stack(
+            alignment: AlignmentDirectional.center,
+            children: [
+              VerticalDivider(
+                  color: isLessonCompleted
+                      ? const Color(0xFF62FFB8)
+                      : colors.grey2ColorApp,
+                  thickness: 3.w,
+                  indent: lIndex == 0 && isLesson ? 25.h : null,
+                  endIndent: isLastLesson ? 20.h : null),
+              //currentSubject.lessons.isNotEmpty &&
+              isLessonCompleted
+                  ? Icon(
+                      Icons.check_circle,
+                      color: const Color(0xFF62FFB8),
+                      size: 20.sp,
+                    )
+                  : circleNotCompletedIcon()
+            ],
+          ),
+          SizedBox(width: 11.w),
+          Expanded(
+            child: Material(
+              child: ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(vertical: -4),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  tileColor: isSelect
+                      ? colors.grey2ColorApp
+                      : Colors.transparent,
+                  contentPadding: EdgeInsets.only(right: 20.h),
+                  // hoverColor: colors.grey2ColorApp,
+                  title: Row(
+                    children: [
+                      Icon(
+                        isLesson
+                            ? Icons.videocam_outlined
+                            : lIndex == -1
+                                ? Icons.star_outline
+                                : Icons.create_outlined,
+                        size: 22.sp,
+                        color: Colors.black,
+                      ),
+                      SizedBox(width: 14.w),
+                      Text(name,
+                          style: TextStyle(
+                              fontWeight:
+                                  isLesson ? FontWeight.w600 : FontWeight.w400,
+                              fontSize: 16.sp)),
+                    ],
+                  ),
+                  onTap: onPress),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  circleNotCompletedIcon() {
+    return Container(
+      height: 18.h,
+      width: 18.w,
+      decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: colors.grey2ColorApp, width: 3.w),
+          color: Color(0xFFFAFAFA)),
+    );
+  }
+
+  dividerSideMenu() {
+    return SizedBox(
+        width: 15.w,
+        height: double.infinity,
+        child: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(width: 1.h, color: colors.grey2ColorApp)));
+  }
+
+  Widget nextButton() {
+    return Visibility(
       visible: doShowNext,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -634,21 +582,19 @@ class _MainPageChildState extends State<MainPageChild> {
                   //  setState(() {
                   //  int nextS=subjectPickedIndex+1;
                   if (_bodyWidget.value is LessonWidget) {
-                    Subject mySubject = widget.course.subjects
-                        .elementAt(subjectPickedIndex);
+                    Subject mySubject =
+                        widget.course.subjects.elementAt(subjectPickedIndex);
                     lessonPickedIndex = lessonPickedIndex + 1;
 
                     _bodyWidget.value = LessonWidget(
-                      lesson: mySubject.lessons
-                          .elementAt(lessonPickedIndex),
-                      onNext: lessonPickedIndex + 1 <
-                          mySubject.lessons.length
+                      lesson: mySubject.lessons.elementAt(lessonPickedIndex),
+                      onNext: lessonPickedIndex + 1 < mySubject.lessons.length
                           ? () => goToNextLesson(
-                          mySubject,
-                          subjectPickedIndex,
-                          mySubject.lessons
-                              .elementAt(lessonPickedIndex + 1),
-                          lessonPickedIndex + 1)
+                              mySubject,
+                              subjectPickedIndex,
+                              mySubject.lessons
+                                  .elementAt(lessonPickedIndex + 1),
+                              lessonPickedIndex + 1)
                           : null,
                     );
                   } else {
@@ -657,7 +603,7 @@ class _MainPageChildState extends State<MainPageChild> {
                       if (_bodyWidget.value is SubjectMainPage) {
                         subjectPickedIndex++;
                       } else //courseMainPage - go to first subject
-                          {
+                      {
                         subjectPickedIndex = 0;
                       }
                       _bodyWidget.value = SubjectMainPage(
@@ -665,11 +611,11 @@ class _MainPageChildState extends State<MainPageChild> {
                           subject: widget.course.subjects
                               .elementAt(subjectPickedIndex),
                           onNext: subjectPickedIndex + 1 <
-                              widget.course.subjects.length
+                                  widget.course.subjects.length
                               ? () => goToNextSubject(
-                              widget.course.subjects.elementAt(
-                                  subjectPickedIndex + 1),
-                              subjectPickedIndex + 1)
+                                  widget.course.subjects
+                                      .elementAt(subjectPickedIndex + 1),
+                                  subjectPickedIndex + 1)
                               : null);
                     }
                   }
@@ -682,11 +628,9 @@ class _MainPageChildState extends State<MainPageChild> {
 
   saveLastUserPosition({bool refresh = false}) async {
     if (_lastBodyWidget != null) {
-
       if ((_bodyWidget.value is! QuestionnaireWidget &&
               _bodyWidget.value is! LessonWidget) ||
           !refresh) {
-
         if (_lastBodyWidget is QuestionnaireWidget ||
             _lastBodyWidget is LessonWidget) {
           Course course = lastCourse != null ? lastCourse! : widget.course;
@@ -764,8 +708,9 @@ class _MainPageChildState extends State<MainPageChild> {
     super.dispose();
   }
 
-  setNextData() {
+  setNextData({bool refresh=false}) {
     switch (_bodyWidget.value.runtimeType) {
+
       case CourseMainPage:
         {
           nextButtonText = 'לנושא הראשון';
@@ -798,6 +743,9 @@ class _MainPageChildState extends State<MainPageChild> {
         }
         break;
     }
+  if(refresh) {
+    setState(() {});
+  }
   }
 }
 

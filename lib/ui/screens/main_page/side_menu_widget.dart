@@ -9,6 +9,9 @@ import '../../../models/learn_path.dart';
 import '../home_page.dart';
 import '../how_to_learn.dart';
 import 'main_page.dart';
+import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
+import 'package:collection/collection.dart';
+
 
 class SideMenuWidget extends StatefulWidget {
   final User myUser;
@@ -20,7 +23,7 @@ class SideMenuWidget extends StatefulWidget {
 }
 
 class _SideMenuWidgetState extends State<SideMenuWidget> {
-  int sIndex = 0;
+  int sIndex = 1;
   Course? lastCourseSelected;
 
   late List<LearnPath> pathList;
@@ -31,6 +34,14 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
     super.initState();
     knowledgeList = widget.myUser.knowledgeList;
     pathList = widget.myUser.pathList;
+  }
+
+  @override
+  void didChangeDependencies() {
+    MainPage
+        .of(context)
+        ?.updateSideMenu = updateByOuterEvent;
+    super.didChangeDependencies();
   }
 
   @override
@@ -45,28 +56,38 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(right: 20.w),
+            padding: EdgeInsets.only(right: 20.w, left: 20.w),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Image.asset('assets/images/eshkolot_icon.png'),
+                SizedBox(width: 6.w),
                 Text('אשכולות',
                     style: TextStyle(fontSize: 30.sp, color: Colors.white)),
-                Icon(Icons.menu_open_sharp, color: Colors.white),
+                const Spacer(),
+                Image.asset('assets/images/menu_icon.png'),
               ],
             ),
           ),
           SizedBox(height: 32.h),
-          Container(
-              height: 30.h,
-              color: sIndex == 1 ? Color(0xFF6E7072) : Colors.transparent,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    MainPage.of(context)?.mainWidget =
-                        HomePage(user: widget.myUser);
-                    sIndex = 1;
-                  });
-                },
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                MainPage
+                    .of(context)
+                    ?.mainWidget =
+                    HomePage(user: widget.myUser);
+                sIndex = 1;
+              });
+            },
+            child: Container(
+                height: 30.h,
+                margin: EdgeInsets.only(right: 10.w, left: 10.w),
+                decoration: BoxDecoration(
+                    color: sIndex == 1
+                        ? const Color(0xff403C3C)
+                        : Colors.transparent,
+                    borderRadius: const BorderRadius.all(Radius.circular(52))),
                 child: Row(
                   children: [
                     SizedBox(width: 21.w),
@@ -78,21 +99,28 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                     Text('בית',
                         style: TextStyle(color: Colors.white, fontSize: 18.sp))
                   ],
-                ),
-              )),
+                )),
+          ),
           SizedBox(
             height: 8.h,
           ),
           GestureDetector(
             onTap: () {
               setState(() {
-                MainPage.of(context)?.mainWidget = HowToLearn();
+                MainPage
+                    .of(context)
+                    ?.mainWidget = const HowToLearn();
                 sIndex = 2;
               });
             },
             child: Container(
                 height: 30.h,
-                color: sIndex == 2 ? Color(0xFF6E7072) : Colors.transparent,
+                margin: EdgeInsets.only(right: 10.w, left: 10.w),
+                decoration: BoxDecoration(
+                    color: sIndex == 2
+                        ? const Color(0xff403C3C)
+                        : Colors.transparent,
+                    borderRadius: const BorderRadius.all(Radius.circular(52))),
                 child: Row(
                   children: [
                     SizedBox(width: 21.w),
@@ -104,7 +132,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                 )),
           ),
           SizedBox(height: 34.h),
-          Divider(height: 1.h, color: Color(0xff6E7072)),
+          Divider(height: 1.h, color: colors.grey1ColorApp),
           SizedBox(height: 17.h),
           Expanded(
             child: SingleChildScrollView(
@@ -130,7 +158,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                         return knowledgeItem(knowledgeList[index]);
                       }),
                   SizedBox(height: 31.h),
-                  Divider(height: 1.h, color: Color(0xff6E7072)),
+                  Divider(height: 1.h, color: colors.grey1ColorApp),
                   if (pathList.isNotEmpty) ...[
                     Padding(
                         padding: EdgeInsets.only(
@@ -154,14 +182,15 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               ),
             ),
           ),
-          Divider(height: 1.h, color: Color(0xff6E7072)),
+          Divider(height: 1.h, color: colors.grey1ColorApp),
           SizedBox(
             height: 70.h,
             child: Row(
               children: [
                 Padding(
                     padding: EdgeInsets.only(left: 15.w, right: 24.w),
-                    child: Icon(Icons.question_mark, color: Color(0xffC8C9CE))),
+                    child: const Icon(
+                        Icons.question_mark, color: Color(0xffC8C9CE))),
                 Text(
                   'צריך עזרה ?',
                   style: TextStyle(
@@ -187,7 +216,9 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               knowledge.isOpen = !knowledge.isOpen;
               if (knowledge.isOpen) {
                 //make first course chosen
-                MainPage.of(context)?.mainWidget =
+                MainPage
+                    .of(context)
+                    ?.mainWidget =
                     MainPageChild(course: knowledge.courses.first);
                 knowledge.courses.first.isSelected = true;
                 sIndex = 0;
@@ -249,67 +280,56 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
 
   courseItem(Course course, int color, String icon, int cIndex) {
     return Container(
-      margin: EdgeInsets.only(top: 6.h, bottom: 6.h),
-      padding: EdgeInsets.only(top: 4.h, bottom: 4.h, right: 21.w, left: 19.w),
+      margin: EdgeInsets.only(top: 6.h, bottom: 6.h, right: 10.w, left: 10.w),
+      padding: EdgeInsets.only(top: 7.h, bottom: 7.h, right: 12.w, left: 12.w),
       // padding: EdgeInsets.only(right: 21.w, left: 19.w),
 
       // color:selectedIndex=='$topIndex,$cIndex'? Color(0xFF6E7072):Colors.transparent ,
-      color: course.isSelected && sIndex == 0
-          ? Color(0xFF6E7072)
+      decoration: BoxDecoration(color: course.isSelected && sIndex == 0
+          ? const Color(0xff403C3C)
           : Colors.transparent,
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          borderRadius: const BorderRadius.all(Radius.circular(52))),
+
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            MainPage
+                .of(context)
+                ?.mainWidget =
+                MainPageChild(course: course);
+        selectCourse(course);
+          });
+          //}
+        },
+        child: Row(
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
           // clipBehavior: Clip.none,
           // alignment: Alignment.center,
-          children: [
-            Flexible(
-              flex: 2,
-              child: GestureDetector(
-                onTap: () {
-                  //  if(  MainPage.of(context)?.getMainWidget is MainPageChild)
-                  //  {
-                  // await   MainPage.of(context)?.setLastPositionCourse();
-                  //  }
-
-                  // if (MainPage.of(context)?.getMainWidget is MainPageChild) {
-                  //   (MainPage.of(context)?.getMainWidget as MainPageChild).of(context).bodyWidget=SubjectMainPage(subject: subject, subjectIndex: subjectIndex)
-                  // } else {
-                    setState(() {
-                      MainPage.of(context)?.mainWidget =
-                          MainPageChild(course: course);
-                      course.isSelected = true;
-                      sIndex = 0;
-                      //for first time
-                      if (lastCourseSelected != null &&
-                          lastCourseSelected != course) {
-                        lastCourseSelected!.isSelected = false;
-                      }
-                      lastCourseSelected = course;
-                    });
-                  //}
-                },
+            children: [
+              SizedBox(
+                width: 110.w,
                 child: Text(course.title,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 16.sp, color: Colors.white)),
               ),
-            ),
-            // SizedBox(
-            //   width: 15.w,
-            // ),
-            Flexible(
-              flex: 1,
-              child: Container(
+              SizedBox(
+                width: 10.w,
+              ),
+              Container(
+                  width: 35.w,
+                  height: 17.h,
                   decoration: BoxDecoration(
                       color: Color(color),
-                      borderRadius: BorderRadius.all(Radius.circular(30))),
+                      borderRadius: const BorderRadius.all(
+                          Radius.circular(30))),
                   // margin: EdgeInsets.only(left: 15.w),
-                  padding: EdgeInsets.only(
-                      top: 5.h, bottom: 5.h, left: 9.w, right: 9.w),
+                  // padding: EdgeInsets.only(
+                  //     top: 5.h, bottom: 5.h, left: 9.w, right: 9.w),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset('assets/images/$icon.png'),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 7.w),
                         Text(
                           (cIndex + 1).toString(),
                           style: TextStyle(
@@ -317,10 +337,10 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                               fontSize: 14.sp,
                               color: Colors.white),
                         )
-                      ])),
-            )
-            // )
-          ]),
+                      ]))
+              // )
+            ]),
+      ),
     );
   }
 
@@ -330,28 +350,40 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
       children: [
         GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () => setState(() {
-            path.isOpen = !path.isOpen;
-            if (path.isOpen) {
-              MainPage.of(context)?.mainWidget =
-                  MainPageChild(course: path.courses.first);
-              path.courses.first.isSelected = true;
-              sIndex = 0;
-              //for first time
-              if (lastCourseSelected != null &&
-                  lastCourseSelected != path.courses.first) {
-                lastCourseSelected!.isSelected = false;
-              }
-              lastCourseSelected = path.courses.first;
-            }
-          }),
+          onTap: () =>
+              setState(() {
+                path.isOpen = !path.isOpen;
+                if (path.isOpen) {
+                  MainPage
+                      .of(context)
+                      ?.mainWidget =
+                      MainPageChild(course: path.courses.first);
+                  path.courses.first.isSelected = true;
+                  sIndex = 0;
+                  //for first time
+                  if (lastCourseSelected != null &&
+                      lastCourseSelected != path.courses.first) {
+                    lastCourseSelected!.isSelected = false;
+                  }
+                  lastCourseSelected = path.courses.first;
+                }
+              }),
           child: Padding(
             padding: EdgeInsets.only(right: 22.w, left: 19.w),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Container(
+                    height: 9.h,
+                    width: 9.h,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xffFFDA6C),
+                    )),
+                SizedBox(width: 12.w),
                 Text(path.title,
                     style: TextStyle(fontSize: 16.sp, color: Colors.white)),
+                const Spacer(),
                 SizedBox(
                     width: 6.w,
                     height: 6.5.h,
@@ -378,5 +410,43 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         SizedBox(height: 24.h),
       ],
     );
+  }
+
+  selectCourse(Course course)
+  {
+    course.isSelected = true;
+    sIndex = 0;
+    //for first time
+    if (lastCourseSelected != null &&
+        lastCourseSelected != course) {
+      lastCourseSelected!.isSelected = false;
+    }
+    lastCourseSelected = course;
+  }
+
+  updateByOuterEvent(int courseId) {
+    sIndex=0;
+    print('courseId $courseId');
+    setState(() {
+      Course? selectedCourse;
+      for (Knowledge knowledge in knowledgeList) {
+        selectedCourse = knowledge.courses.firstWhereOrNull((element) =>
+        element.serverId == courseId);
+        if (selectedCourse != null) {
+       selectCourse(selectedCourse);
+          break;
+        }}
+      if(selectedCourse==null)
+      {
+        for (LearnPath path in pathList) {
+          selectedCourse = path.courses.firstWhereOrNull((element) =>
+          element.serverId == courseId);
+          if (selectedCourse != null) {
+            selectCourse(selectedCourse);
+            break;
+          }}
+      }
+    });
+
   }
 }

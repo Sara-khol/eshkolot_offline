@@ -27,7 +27,8 @@ class _LoginPageState extends State<LoginPage> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        body: Column(children: [
+          backgroundColor: Colors.white,
+          body: Column(children: [
           TitleBarWidget(),
           Column(
               mainAxisSize: MainAxisSize.min,
