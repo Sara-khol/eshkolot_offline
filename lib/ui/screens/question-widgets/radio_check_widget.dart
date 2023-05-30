@@ -193,8 +193,8 @@ class _RadioCheckState extends State<RadioCheck> {
         if (_isSelected[i]) answers.add(widget.question.options![i]);
       }
       Function eq = const DeepCollectionEquality.unordered().equals;
-      print('answers${answers}');
-      print('widget.question.ans${widget.question.ans}');
+      debugPrint('answers${answers}');
+      debugPrint('widget.question.ans${widget.question.ans}');
 
       if (eq(answers, widget.question.ans)) {
         msg = "Correct";

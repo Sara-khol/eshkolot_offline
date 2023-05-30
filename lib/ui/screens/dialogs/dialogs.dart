@@ -1,11 +1,9 @@
-import 'package:eshkolot_offline/models/course.dart';
 import 'package:eshkolot_offline/ui/screens/home_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../models/user.dart';
-import '../../../services/isar_service.dart';
 
 void SyncDialog(BuildContext context,AnimationController controller){
   showDialog(
@@ -40,18 +38,18 @@ void SyncDialog(BuildContext context,AnimationController controller){
                         textAlign:TextAlign.center,
                       ),
                       SizedBox(height: 45.h,),
-                      Text('כדי שהאתר באונליין יהיה מעודכן בהתקדמות הלמידה שלכם וכדי שתוכלו לקבל תעודה והחזר על דמי הפיקדון חשוב לנו לסנכרן את נתוני הלמידה',
+                      Text('כדי שהאתר באונליין יהיה מעודכן בהתקדמות הלמידה שלכם\n וכדי שתוכלו לקבל תעודה והחזר על דמי הפיקדון\n חשוב לנו לסנכרן את נתוני הלמידה.',
                           style: TextStyle(
                               fontSize: 18.sp
                           ),
                           textDirection: TextDirection.rtl,
                           textAlign:TextAlign.center),
                       SizedBox(height: 36.h,),
-                      Text('השאר את הלשונית פתוחה',
+                      Text('יש להשאיר את הלשונית פתוחה',
                         style: TextStyle(
                             fontSize: 18.sp
                         ),),
-                      Text('ישלח אליך אימייל עידכון כשיסתיים הסינכרון',
+                      Text('אימייל עדכון ישלח בסיום תהליך הסנכרון',
                         style: TextStyle(
                             fontSize: 18.sp
                         ),),
@@ -112,7 +110,8 @@ void SyncEndDialog(BuildContext context,User? user){
                         textAlign:TextAlign.center,
                       ),
                       SizedBox(height: 45.h,),
-                      Text('במידה והשלמתם קורס התעודה מחכה לכם באזור האישי ותקבלו בחזרה את דמי הפיקדון',
+                      Text('במידה והשלמתם קורס התעודה מחכה לכם באזור האישי\n'
+                          ' ותוכלו לקבל בחזרה את דמי הפיקדון או להשתמש\n בהם כדי להוריד קורס נוסף',
                           style: TextStyle(
                               fontSize: 18.sp
                           ),
@@ -134,6 +133,7 @@ void SyncEndDialog(BuildContext context,User? user){
                         ),
                         child: TextButton(
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.arrow_back,color: Colors.white,size: 15.sp,),
                               Text(' להמשך למידה ',style: TextStyle(
@@ -170,7 +170,7 @@ void OfflineSyncDialog(BuildContext context){
       return Center(
         child: AlertDialog(
           content: Container(
-            height: 484.h,
+            height: 640.h,
             width: 656.w,
             child: Column(
               children: [
@@ -189,21 +189,21 @@ void OfflineSyncDialog(BuildContext context){
                     children: [
                       Image.asset('assets/images/offline.jpg',height: 153.h),
                       SizedBox(height: 70.h,),
-                      Text('הנך במצב לא מקוון',
+                      Text('המערכת במצב לא מקוון',
                         style: TextStyle(
                             fontSize: 36.sp, fontWeight: FontWeight.w600),
                         textDirection: TextDirection.rtl,
                         textAlign:TextAlign.center,
                       ),
                       SizedBox(height: 45.h,),
-                      Text('כדי לסנכרן את נתוני הלמידה באתר עליך להיות במצב מקוון.',
+                      Text('כדי לסנכרן את נתוני הלמידה באתר\n יש לעבוד במצב מקוון.',
                           style: TextStyle(
                               fontSize: 18.sp
                           ),
                           textDirection: TextDirection.rtl,
                           textAlign:TextAlign.center),
                       SizedBox(height: 35.h,),
-                      Text('תוכל גם לסנכרן נתונים ממחשב אחר שהוא מחובר לרשת באמצעות האונקי אליו הורדת את התוכנה (אם האונקי מחובר למחשב עליו התקנת את התוכנה).',
+                      Text('ניתן גם לסנכרן נתונים ממחשב אחר שמחובר לרשת\n באמצעות הדיסק און קי אליו הורדת את התוכנה\n (אם הדיסק און קי מחובר למחשב עליו מותקנת התוכנה).',
                         style: TextStyle(
                             fontSize: 18.sp
                         ),
@@ -247,7 +247,7 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
       return Center(
         child: AlertDialog(
           content: Container(
-            height: 484.h,
+            height: 640.h,
             width: 656.w,
             child: Column(
               children: [
@@ -281,12 +281,16 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
                         textAlign:TextAlign.center,
                       ),
                       SizedBox(height: 45.h,),
-                      Text('עכשיו הזמן לסנכרן את נתוני הלמידה באתר אשכולות כדי לקבל את התעודה המחכה לכם באזור האישי וכן את דמי הפיקדון ששילמתם',
-                          style: TextStyle(
-                              fontSize: 18.sp
-                          ),
-                          textDirection: TextDirection.rtl,
-                          textAlign:TextAlign.center),
+                      Container(
+                       // padding: EdgeInsets.only(right: 70.w,left: 70.w),
+                        child: Text('עכשיו הזמן לסנכרן את נתוני הלמידה באתר אשכולות\n כדי לקבל את התעודה המחכה לכם באזור האישי\n וכן את דמי הפיקדון ששילמתם',
+                            style: TextStyle(
+                                fontSize: 18.sp,
+
+                            ),
+                            textDirection: TextDirection.rtl,
+                            textAlign:TextAlign.center),
+                      ),
                       SizedBox(height: 35.h,),
                       Text('כל הכבוד על ההתמדה והלמידה!',
                         style: TextStyle(
@@ -295,6 +299,7 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
                         textDirection: TextDirection.rtl,),
                       SizedBox(height: 56.h,),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
 
@@ -305,6 +310,7 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
                             ),
                             child: TextButton(
                               child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
 
                                   Text(' סנכרון נתונים ',style: TextStyle(
@@ -331,6 +337,7 @@ void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/Anim
                             ),
                             child: TextButton(
                               child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [Icon(Icons.arrow_back,color: Colors.white,size: 15.sp,),
                                   Text(' להמשך למידה ',style: TextStyle(
                                       fontSize: 18.sp,

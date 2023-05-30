@@ -31,17 +31,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  isar: ^3.0.5
-  isar_flutter_libs: ^3.0.5
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
   path_provider: ^2.0.12
   flutter_platform_alert: ^0.3.0
   carousel_slider: ^4.2.1
-  dio: ^4.0.6
+  dio: ^5.1.1
   json_annotation: ^4.8.0
   flutter_draggable_gridview: ^0.0.7
   drag_and_drop_lists: ^0.3.3
   dart_vlc: ^0.4.0
-  flutter_screenutil: ^5.6.1
+  flutter_screenutil: ^5.8.1
   provider: ^6.0.5
   url_launcher: ^6.1.9
   scrollable_positioned_list: ^0.3.5
@@ -53,7 +53,9 @@ dependencies:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
-#  window_manager: ^0.3.1
+#  msix: ^3.13.1
+
+  #  window_manager: ^0.3.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -62,6 +64,38 @@ dependencies:
   dotted_border: ^2.0.0+3
   font_awesome_flutter: ^10.3.0
   percent_indicator: ^4.2.2
+  f_logs: ^2.0.1
+  permission_handler: ^10.2.0
+  sentry_flutter: ^7.5.1
+  sentry_dio: ^7.5.1
+#  sentry: ^7.5.1
+#  sentry_logging: ^7.5.1
+  shared_preferences: ^2.1.1
+
+
+
+
+#msix_config:
+#  display_name: Eshkolot Offline
+#  publisher_display_name: Go App
+#  app_installer: #<-- app installer configuration
+#    publish_folder_path: C:\Users\USER\GoAppProjects\eshkolot_offline\myPublishFolder
+##    hours_between_update_checks: 0
+##    automatic_background_task: true
+##    update_blocks_activation: true
+##    show_prompt: true
+##    force_update_from_any_version: false
+#  msix_version: 1.0.0.0
+#  identity_name: go.app.eshkolot
+#  logo_path: C:\Users\USER\GoAppProjects\eshkolot_offline\icon.ico
+#  certificate_path: C:\Program Files\OpenSSL-Win64\bin\mycrtname.pfx
+#  certificate_password: 1234
+#
+#  #  install_certificate: false
+#
+#  #  logo_path: C:\path\to\logo.png
+#  #  capabilities: internetClient, location, microphone, webcam
+
 
 
 

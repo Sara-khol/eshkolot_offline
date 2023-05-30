@@ -260,7 +260,7 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     if (index > lastOuterItem) {
                       lastOuterItem = index;
-                      print('lastOuterItem $lastOuterItem');
+                      debugPrint('lastOuterItem $lastOuterItem');
                     }
                   });
                 }

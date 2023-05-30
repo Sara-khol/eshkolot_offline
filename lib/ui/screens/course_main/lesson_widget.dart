@@ -1,5 +1,4 @@
 
-import 'package:dart_vlc/dart_vlc.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
@@ -22,7 +21,7 @@ class LessonWidget extends StatefulWidget {
 class _LessonWidgetState extends State<LessonWidget> {
   bool checkedValue = false;
   late Lesson lesson;
-  Player player = Player(id: 0);
+ // Player player = Player(id: 0);
 
   @override
   void initState() {
@@ -34,10 +33,12 @@ class _LessonWidgetState extends State<LessonWidget> {
   void didUpdateWidget(covariant LessonWidget oldWidget) {
     lesson = widget.lesson;
 
-    if (widget.lesson.id != oldWidget.lesson.id) {
-      player.dispose();
-      player = Player(id: widget.lesson.id);
-    }
+    // if (widget.lesson.id != oldWidget.lesson.id) {
+    //   player.dispose();
+    //   player = Player(id: widget.lesson.id);
+    // }
+    // Sentry.captureMessage(' didUpdateWidget player ${player.id}');
+    // print('player ${player.id}');
     super.didUpdateWidget(oldWidget);
   }
 
@@ -101,7 +102,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                       onPressed: () async {
                         if (!lesson.isCompleted) {
                           lesson.isCompleted = true;
-                          print('pressed id ${lesson.id}');
+                          debugPrint('pressed id ${lesson.id}');
                           await IsarService().updateLesson(lesson.id);
                           setState(() {});
                         }
@@ -121,8 +122,8 @@ class _LessonWidgetState extends State<LessonWidget> {
                 height: 27.h,
               ),
               /*videoWidget*/
-              VideoWidget(
-                  key: UniqueKey(), vimoeId: lesson.vimoeId, player: player)
+               VideoWidget(
+                  key: Key(lesson.vimoeId.toString()), vimoeId: lesson.vimoeId/*, player: player*/)
             ],
           ),
         ),
@@ -264,9 +265,10 @@ class _LessonWidgetState extends State<LessonWidget> {
     );
   }
 
+
   @override
   void dispose() {
-    player.stop();
+    // player.stop();
     super.dispose();
   }
 }

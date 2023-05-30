@@ -28,12 +28,11 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   @override
   void initState(){
     //displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
-    print(widget.questionnaire.elementAt(0).question);
+    debugPrint(widget.questionnaire.elementAt(0).question);
     super.initState();
   }
 
   getQuestionnaireByType(Questionnaire item) {
-    print(item.type);
     switch (item.type) {
       case QType.checkbox:
         return RadioCheck(item);
@@ -75,13 +74,13 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                         textStyle: TextStyle(fontSize: 18.w),
                       ),
                       onPressed: () {
-                        print('selected question:  $i');
-                        print('current question: $selected');
+                        debugPrint('selected question:  $i');
+                        debugPrint('current question: $selected');
                         setState(() {
                           selected = i;
                           index=i-1;
                         });
-                        print('question $selected selected');
+                        debugPrint('question $selected selected');
                       },
                       child: Text(
                           '$i', style: TextStyle(fontSize: 18.w)),
@@ -185,7 +184,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   }
 
   onNextClick() {
-    print('next click');
+    debugPrint('next click');
     // buttonCarouselController.nextPage(
     //     duration: const Duration(milliseconds: 300), curve: Curves.linear);
     setState(() {

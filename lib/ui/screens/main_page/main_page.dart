@@ -8,6 +8,7 @@ import '../../../models/course.dart';
 import '../../../models/knowledge.dart';
 import '../home_page.dart';
 
+
 typedef void changeMainWidget(Widget mainWidget);
 
 class MainPage extends StatefulWidget {
@@ -46,13 +47,12 @@ class _MainPageState extends State<MainPage> {
 
 
   @override
-  void initState() {
+  void initState()  {
     knowledgeList = widget.user.knowledgeList;
     pathList = widget.user.pathList;
     _mainWidget = HomePage(user: widget.user);
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Directionality(

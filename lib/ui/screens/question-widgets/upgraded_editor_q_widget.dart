@@ -1,6 +1,5 @@
 import 'package:eshkolot_offline/models/%D7%95upgraded_editor_class.dart';
 import 'package:flutter/material.dart';
-import 'package:eshkolot_offline/models/dragging_question.dart';
 import 'package:flutter/foundation.dart';
 
 
@@ -51,7 +50,7 @@ class _UpgradedEditorQuestionState extends State<UpgradedEditorQuestion> {
     for( int i=0;i<question.txtbox.length;i++) {
       question.ans[i] = question.txtbox[i].correctAns;
     }
-print('${question.anss}  ${question.ans}');
+    debugPrint('${question.anss}  ${question.ans}');
     return Scaffold(
       appBar: AppBar(title: Text(question.question)),
       body: Padding(
@@ -97,7 +96,7 @@ print('${question.anss}  ${question.ans}');
                     fontWeight: question.txtbox[i].bold?FontWeight.bold:FontWeight.normal
                   ),
                   onChanged: (txt){
-                    print(question.anss);
+                    debugPrint(question.anss.toString());
                     question.anss[i]=txt;
                   },
                 ),
@@ -109,7 +108,7 @@ print('${question.anss}  ${question.ans}');
       floatingActionButton: FloatingActionButton(
 
         onPressed: () {
-          print('${question.anss} ${question.ans}');
+          debugPrint('${question.anss} ${question.ans}');
           showDialog(context: context, builder: (context) {
             if (listEquals(question.anss,question.ans)) {
               return const AlertDialog(content: Text('Correct'));

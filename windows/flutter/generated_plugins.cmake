@@ -8,6 +8,8 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dart_vlc
   flutter_platform_alert
   isar_flutter_libs
+  permission_handler_windows
+  sentry_flutter
   url_launcher_windows
   window_size
 )

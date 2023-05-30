@@ -57,8 +57,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
           height: 624.h,
           width: 950.w,
           decoration: BoxDecoration(
-            border: Border.all(color: Color(0xFFE4E6E9)),
-            borderRadius: BorderRadius.all(Radius.circular(10)),
+            border: Border.all(color: const Color(0xFFE4E6E9)),
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -88,77 +88,81 @@ class _CourseMainPageState extends State<CourseMainPage> {
                 width: 551.w,
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFF6E7072)),
-                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                  borderRadius: const BorderRadius.all(Radius.circular(50)),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.only(right: 19.w),
-                  child: Row(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 15.sp,
-                          ),
-                          Text(
-                            '21 שעות',
-                            style: TextStyle(fontSize: 18.sp),
-                          )
-                        ],
-                      ),
-                      VerticalDivider(
-                        color: Colors.black,
-                        indent: 11.h,
-                        endIndent: 11.h,
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.videocam_outlined,
-                            size: 15.sp,
-                          ),
-                          Text(
-                            '33 שיעורים',
-                            style: TextStyle(fontSize: 18.sp),
-                          )
-                        ],
-                      ),
-                      VerticalDivider(
-                        color: Colors.black,
-                        indent: 11.h,
-                        endIndent: 11.h,
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.create,
-                            size: 15.sp,
-                          ),
-                          Text(
-                            '35 שאלונים',
-                            style: TextStyle(fontSize: 18.sp),
-                          )
-                        ],
-                      ),
-                      VerticalDivider(
-                        color: Colors.black,
-                        indent: 11.h,
-                        endIndent: 11.h,
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.star_outline,
-                            size: 15.sp,
-                          ),
-                          Text(
-                            '1 שאלון מסכם',
-                            style: TextStyle(fontSize: 18.sp),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 15.sp,
+                        ),
+                        SizedBox(width: 7.w),
+                        Text(
+                          '21 שעות',
+                          style: TextStyle(fontSize: 18.sp),
+                        )
+                      ],
+                    ),
+                    VerticalDivider(
+                      color: Colors.black,
+                      indent: 11.h,
+                      endIndent: 11.h,
+                    ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.videocam_outlined,
+                          size: 15.sp,
+                        ),
+                        SizedBox(width: 7.w),
+
+                        Text(
+                          '33 שיעורים',
+                          style: TextStyle(fontSize: 18.sp),
+                        )
+                      ],
+                    ),
+                    VerticalDivider(
+                      color: Colors.black,
+                      indent: 11.h,
+                      endIndent: 11.h,
+                    ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.create,
+                          size: 15.sp,
+                        ),
+                        SizedBox(width: 7.w),
+
+                        Text(
+                          '35 שאלונים',
+                          style: TextStyle(fontSize: 18.sp),
+                        )
+                      ],
+                    ),
+                    VerticalDivider(
+                      color: Colors.black,
+                      indent: 11.h,
+                      endIndent: 11.h,
+                    ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star_outline,
+                          size: 15.sp,
+                        ),
+                        SizedBox(width: 7.w),
+                        Text(
+                          '1 שאלון מסכם',
+                          style: TextStyle(fontSize: 18.sp),
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               ),
               SizedBox(
@@ -244,7 +248,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
             child: Container(
               height: 40.h,
               width: 175.w,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFF32D489),
                 borderRadius: BorderRadius.all(Radius.circular(30)),
               ),
@@ -292,7 +296,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
   }
 
   getLastPositionInCourse({bool refresh=true}) async {
-    print('getLastPositionInCourse');
+    debugPrint('getLastPositionInCourse');
     data = IsarService().getUserCourseData(widget.course.serverId);
 
     if (data != null) {

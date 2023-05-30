@@ -7,7 +7,7 @@ part of 'videoIsar.dart';
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
 extension GetVideoIsarCollection on Isar {
   IsarCollection<VideoIsar> get videoIsars => this.collection();
@@ -22,13 +22,18 @@ const VideoIsarSchema = CollectionSchema(
       name: r'downloadLink',
       type: IsarType.string,
     ),
-    r'isDownload': PropertySchema(
+    r'expiredDate': PropertySchema(
       id: 1,
+      name: r'expiredDate',
+      type: IsarType.long,
+    ),
+    r'isDownload': PropertySchema(
+      id: 2,
       name: r'isDownload',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'name',
       type: IsarType.string,
     )
@@ -44,7 +49,7 @@ const VideoIsarSchema = CollectionSchema(
   getId: _videoIsarGetId,
   getLinks: _videoIsarGetLinks,
   attach: _videoIsarAttach,
-  version: '3.0.5',
+  version: '3.1.0+1',
 );
 
 int _videoIsarEstimateSize(
@@ -65,8 +70,9 @@ void _videoIsarSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.downloadLink);
-  writer.writeBool(offsets[1], object.isDownload);
-  writer.writeString(offsets[2], object.name);
+  writer.writeLong(offsets[1], object.expiredDate);
+  writer.writeBool(offsets[2], object.isDownload);
+  writer.writeString(offsets[3], object.name);
 }
 
 VideoIsar _videoIsarDeserialize(
@@ -77,9 +83,10 @@ VideoIsar _videoIsarDeserialize(
 ) {
   final object = VideoIsar();
   object.downloadLink = reader.readString(offsets[0]);
+  object.expiredDate = reader.readLong(offsets[1]);
   object.id = id;
-  object.isDownload = reader.readBool(offsets[1]);
-  object.name = reader.readString(offsets[2]);
+  object.isDownload = reader.readBool(offsets[2]);
+  object.name = reader.readString(offsets[3]);
   return object;
 }
 
@@ -93,8 +100,10 @@ P _videoIsarDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
+      return (reader.readBool(offset)) as P;
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -327,6 +336,60 @@ extension VideoIsarQueryFilter
     });
   }
 
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> expiredDateEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'expiredDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition>
+      expiredDateGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'expiredDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> expiredDateLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'expiredDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> expiredDateBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'expiredDate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -540,6 +603,18 @@ extension VideoIsarQuerySortBy on QueryBuilder<VideoIsar, VideoIsar, QSortBy> {
     });
   }
 
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> sortByExpiredDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expiredDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> sortByExpiredDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expiredDate', Sort.desc);
+    });
+  }
+
   QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> sortByIsDownload() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isDownload', Sort.asc);
@@ -576,6 +651,18 @@ extension VideoIsarQuerySortThenBy
   QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> thenByDownloadLinkDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'downloadLink', Sort.desc);
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> thenByExpiredDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expiredDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> thenByExpiredDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expiredDate', Sort.desc);
     });
   }
 
@@ -625,6 +712,12 @@ extension VideoIsarQueryWhereDistinct
     });
   }
 
+  QueryBuilder<VideoIsar, VideoIsar, QDistinct> distinctByExpiredDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'expiredDate');
+    });
+  }
+
   QueryBuilder<VideoIsar, VideoIsar, QDistinct> distinctByIsDownload() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isDownload');
@@ -650,6 +743,12 @@ extension VideoIsarQueryProperty
   QueryBuilder<VideoIsar, String, QQueryOperations> downloadLinkProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'downloadLink');
+    });
+  }
+
+  QueryBuilder<VideoIsar, int, QQueryOperations> expiredDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'expiredDate');
     });
   }
 

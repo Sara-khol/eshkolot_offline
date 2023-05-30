@@ -426,7 +426,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
 
   updateByOuterEvent(int courseId) {
     sIndex=0;
-    print('courseId $courseId');
+    debugPrint('courseId $courseId');
     setState(() {
       Course? selectedCourse;
       for (Knowledge knowledge in knowledgeList) {

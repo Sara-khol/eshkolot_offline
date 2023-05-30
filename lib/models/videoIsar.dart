@@ -8,6 +8,7 @@ class VideoIsar {
   late Id id;
   bool isDownload = false;
   late String downloadLink;
+  late int expiredDate;
   @Ignore()
  late RequestOptions? requestOptions;
  late String name ;

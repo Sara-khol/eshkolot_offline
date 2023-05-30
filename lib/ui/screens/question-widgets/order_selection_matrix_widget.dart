@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     for (var item in q.items) {
       q.isDropped[item] = false;
     }
-    print('my app ${q.isDropped}');
+    debugPrint('my app ${q.isDropped}');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
@@ -68,7 +68,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print('build ${widget.question.isDropped}');
+    debugPrint('build ${widget.question.isDropped}');
     return ScreenUtilInit(
       designSize: const Size(1920, 1080),
       minTextAdapt:true,
@@ -223,12 +223,12 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                               );
                             },
                             onAccept: (data){
-                              print(data);
+                              debugPrint(data);
                               setState(() {
                                 widget.question.isDropped[data] = true;
                                 widget.question.ans[i] = data;
                               });
-                              print('widget.question.isDropped[${widget.question.items[i]}] ${widget.question.isDropped[widget.question.items[i]]!}');
+                              debugPrint('widget.question.isDropped[${widget.question.items[i]}] ${widget.question.isDropped[widget.question.items[i]]!}');
                             },
                           ),
                         ),
@@ -272,7 +272,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            print('${widget.question.ans} ${widget.question.positions}');
+            debugPrint('${widget.question.ans} ${widget.question.positions}');
             showDialog(
               context: context,
               builder: (context) {
@@ -338,9 +338,9 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                   setState(() {
                     widget.question.isDropped[data] = true;
                     widget.question.ans[i] = data;
-                    print('onAccept${widget.question.isDropped}');
-                    print('onAccept${widget.question.ans}');
-                    print('data${data}');
+                    debugPrint('onAccept${widget.question.isDropped}');
+                    debugPrint('onAccept${widget.question.ans}');
+                    debugPrint('data${data}');
                   });
                 },
               )),

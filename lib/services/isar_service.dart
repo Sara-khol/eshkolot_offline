@@ -4,6 +4,7 @@ import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/questionnaire.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/models/videoIsar.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -172,6 +173,22 @@ class IsarService {
     });
   }
 
+  setExpitedDateToFirstItem(int date) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      // VideoIsar? vi = await isar.videoIsars.where();
+      // vi!.isDownload = true;
+      // // await isar.videoIsars.put(vi);
+
+
+      // final isar = await db;
+      IsarCollection<VideoIsar> videoCollection = isar.collection<VideoIsar>();
+      VideoIsar? vi = await videoCollection.where().findFirst();
+      vi!.expiredDate=date;
+      await isar.videoIsars.put(vi);
+    });
+  }
+
 
   Future<VideoIsar?> getVideoById(int id) async {
     final isar = await db;
@@ -181,8 +198,8 @@ class IsarService {
 
   Future<bool> checkIfDBisEmpty() async {
     final isar = await db;
-    IsarCollection<Course> coursesCollection = isar.collection<Course>();
-    return await coursesCollection.count() == 0;
+    IsarCollection<User> userCollection = isar.collection<User>();
+    return await userCollection.count() == 0;
   }
 
   Future<bool> checkIfVideoIsarIsEmpty() async {
@@ -191,7 +208,7 @@ class IsarService {
     return await v.count() == 0;
   }
 
-  Future<List<VideoIsar>> getAllVideosDownloaded() async
+  Future<List<VideoIsar>> getAllVideosToDownload() async
   {
     final isar = await db;
     final result = await isar.videoIsars.filter()
@@ -205,10 +222,22 @@ class IsarService {
     if (await checkIfVideoIsarIsEmpty()) {
       return b;
     }
-    await getAllVideosDownloaded().then((value) {
+    await getAllVideosToDownload().then((value) {
       b = value.isEmpty;
     });
     return b;
+  }
+
+  clearVideoIsar() async
+  {
+    final isar = await db;
+    // IsarCollection<VideoIsar> v = isar.collection<VideoIsar>();
+    final videoIds = await isar.videoIsars.where().idProperty().findAll();
+
+    await isar.writeTxn(() async {
+      await isar.videoIsars.deleteAll(videoIds);
+    });
+
   }
 
 
@@ -301,7 +330,7 @@ class IsarService {
     else
       {
         //update
-        print('update ${userCourse.lessonStopId}');
+        debugPrint('update ${userCourse.lessonStopId}');
         user.courses[user.courses.indexWhere((course) => course.courseId == userCourse.courseId)] = userCourse;
 
         // course=userCourse;
@@ -309,7 +338,7 @@ class IsarService {
       }
     await isar.users.put(user);
     _user=user;
-    print('update ${isar.users.toString()}');
+    debugPrint('update ${isar.users.toString()}');
     });
   }
 

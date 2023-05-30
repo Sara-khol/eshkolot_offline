@@ -71,6 +71,7 @@ class _MainPageChildState extends State<MainPageChild> {
 
   @override
   Widget build(BuildContext context) {
+
     return Row(children: [
       menuWidget(),
       Expanded(
@@ -298,9 +299,6 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                   is QuestionnaireWidget,
                                                               () =>
                                                                   setState(() {
-                                                                    print(currentLesson
-                                                                        .questionnaire
-                                                                        .length);
                                                                     lessonPickedIndex =
                                                                         lIndex;
                                                                     subjectPickedIndex =
@@ -334,7 +332,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                 subjectPickedIndex ==
                                                                     sIndex,
                                                             () => setState(() {
-                                                                  print(
+                                                              debugPrint(
                                                                       'currentSubject.questionnaire ${currentSubject.questionnaire}');
                                                                   subjectPickedIndex =
                                                                       sIndex;
@@ -637,7 +635,7 @@ class _MainPageChildState extends State<MainPageChild> {
           int saveSubjectIndex = lastSubjectPickedIndex != -1
               ? lastSubjectPickedIndex
               : subjectPickedIndex;
-          print(
+          debugPrint(
               'subjectPickedIndex: $subjectPickedIndex lessonPickedIndex: $lessonPickedIndex '
               'saveSubjectIndex: $saveSubjectIndex');
 

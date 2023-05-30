@@ -1,5 +1,5 @@
 import 'package:eshkolot_offline/ui/screens/dialogs/dialogs.dart';
-import 'package:eshkolot_offline/ui/screens/login_page.dart';
+import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -61,15 +61,15 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                 onTap: () {
                   SyncEndDialog(context,MainPage.of(context)?.widget.user);
                   SyncDialog(context,controller);
-                  //OfflineSyncDialog(context);
-                  //CourseCompleteDialog(context, MainPage.of(context)?.widget.user, /*course,*/ controller);
+                  // OfflineSyncDialog(context);
+                  // CourseCompleteDialog(context, MainPage.of(context)?.widget.user, /*course,*/ controller);
                 },
                 child: Container(
                   height: 40.h,
                   width: 154.w,
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.all(Radius.circular(50))),
+                      borderRadius: const BorderRadius.all(Radius.circular(50))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

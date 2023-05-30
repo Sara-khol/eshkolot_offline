@@ -254,7 +254,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                 ),
                                                 onPressed: () {
                                                   setState(() {
-                                                    print(widget.subject.lessons
+                                                    debugPrint(widget.subject.lessons
                                                         .elementAt(index)
                                                         .name);
                                                     currentMainChild

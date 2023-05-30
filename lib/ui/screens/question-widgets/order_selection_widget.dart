@@ -84,7 +84,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
       floatingActionButton: FloatingActionButton(
 
         onPressed: () {
-          print('${question.items} ${ question.positions}');
+          debugPrint('${question.items} ${ question.positions}');
           showDialog(context: context, builder: (context) {
             if (listEquals(question.items,question.positions)) {
               return const AlertDialog(content: Text('Correct'));

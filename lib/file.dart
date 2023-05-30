@@ -43,6 +43,6 @@ void extractZipFile() {
       extractedFile.createSync(recursive: true);
       extractedFile.writeAsBytesSync(fileData);
     }
-    print(archiveFile.name);
+    debugPrint(archiveFile.name);
   }
 }
