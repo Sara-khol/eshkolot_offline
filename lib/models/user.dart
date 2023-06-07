@@ -26,7 +26,10 @@ class User {
   // final learnPathList = IsarLinks<LearnPath>();
 
   List<UserCourse> courses=[];
-  // final courses= IsarLinks<Course>();
+
+
+  User();
+// final courses= IsarLinks<Course>();
 }
 @Embedded()
 class UserCourse {

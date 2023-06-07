@@ -54,8 +54,8 @@ Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Relea
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\window_size_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
+;Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\data\hihi.json"; DestDir: "{localappdata}"; Flags: ignoreversion recursesubdirs 
 
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -63,4 +63,8 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+
+
+
 

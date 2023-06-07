@@ -69,13 +69,14 @@ class IsarService {
   //   });
   // }
 
-  Future<void> initCourses(List<Course> coursesList,
+  Future<void> initCourses(var coursesList,
       List<Subject> subjectList,
       List<Lesson> lessonList,
       List<Questionnaire> qList,
       List<Knowledge> knowledgeList,
-      List<User> usersList,
-      List<LearnPath> pathList) async {
+      // List<User> usersList,
+      var  jsonPaths,
+      var jsonUsers) async {
     final isar = await db;
     // await isar.writeTxn(() async {
     //    await isar.clear();
@@ -147,11 +148,17 @@ class IsarService {
     isar.writeTxnSync(() {
       isar.lessons.putAllSync(lessonList);
       isar.subjects.putAllSync(subjectList);
-      isar.courses.putAllSync(coursesList);
+    //  isar.courses.importJsonSync(coursesList);
       isar.knowledges.putAllSync(knowledgeList);
-      isar.users.putAllSync(usersList);
-      isar.learnPaths.putAllSync(pathList);
+     isar.users.putAllSync(jsonUsers);
+    //   isar.learnPaths.importJsonSync(jsonPaths);
+      isar.learnPaths.putAllSync(jsonPaths);
 
+      // isar.users.importJsonSync(jsonUsers);
+
+      // for (var user in jsonUsers) {
+      //    isar.users.importJsonSync([user]);
+      // }
       isar.videoIsars.clearSync();
     });
   }

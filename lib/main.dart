@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
@@ -11,6 +13,7 @@ import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,12 +48,64 @@ Future<void> main() async {
   );
 
   DartVLC.initialize();
+
+ late  String destDirPath ;
   List<Course> myCourses = [];
+// late   List<Map<String, dynamic>> jsonUsers ;
+late    Map<String, dynamic> data  ;
+
+   extractZipFile() async {
+    // Open the zip file
+    String zipFilePath = r"c:\installation.eshkolot";
+    // String zipFilePath = r"C:\Users\USER\GoAppProjects\eshkolot_offline\vvv.eshkolot";
+    final Directory directory = await getApplicationSupportDirectory();
+     destDirPath = directory.path;
+
+
+// Open the zip file
+    final bytes = File(zipFilePath).readAsBytesSync();
+    final archive = ZipDecoder().decodeBytes(bytes);
+
+// Loop through the contents of the zip file and extract the data files and videos
+    for (final archiveFile in archive) {
+      // Check if the file is a data file or video
+      if (archiveFile.name.endsWith('.json')) {
+        // Extract the file to the destination directory
+        final fileData = archiveFile.content;//as List<int>;
+        final filePath = '$destDirPath/${archiveFile.name}';
+        // final filePath = '${directory.path}/mydata/';
+        final extractedFile = File(filePath);
+        extractedFile.createSync(recursive: true);
+        extractedFile.writeAsBytesSync(fileData);
+      }
+      debugPrint(archiveFile.name);
+    }
+  }
+
+  setDataFromJson() async
+  {
+    final Directory directory = await getApplicationSupportDirectory();
+    destDirPath = directory.path;
+    try {
+      final file = await  File('$destDirPath/data.json');
+      final contents = await file.readAsString();
+      data  = await json.decode(contents) ;
+      // List l= data['paths'].cast<Map<String, dynamic>>();
+      debugPrint("json ${data['users']}");
+
+    } catch (e) {
+      debugPrint("error in getting data $e");
+
+    }
+  }
 
   IsarService().init();
 
   initData() async {
     // if (await IsarService().checkIfDBisEmpty()) {
+   // await extractZipFile();
+   await setDataFromJson();
+ //  generateJsonData();
     await IsarService().cleanDb();
     Map<String, List<String>> fillInQ = {
       'ab': ['c'],
@@ -275,7 +330,6 @@ Future<void> main() async {
         ..iconPath = 'math',
     ];
 
-    // User user= User()..courses.addAll(myCourses);
     final List<User> users = [
       User()
         ..name = 'שמואל'
@@ -286,17 +340,14 @@ Future<void> main() async {
           //  UserCourse()..courseId=2567060..subjectStopId=1..lessonStopId=1
         ]
     ];
-    // final List<User> users=[User()..courses.addAll([UserCourse()..courseId=myCourses[0].id..status=Status.middle
-    //   ..lessonStopId=myCourses[0].subjects.elementAt(0).lessons.elementAt(0).id,
-    //   UserCourse()..courseId=myCourses[1].id..status=Status.start,
-    //   UserCourse()..courseId=myCourses[0].id..status=Status.start]
-    // )];
+
     debugPrint('filling!!');
     Sentry.addBreadcrumb(Breadcrumb(message: 'filling data!!'));
-    await IsarService().initCourses(myCourses, subjects, lessons,
-        questionnaires, knowledgeList, users, paths);
+    await IsarService().initCourses(myCourses/*data['courses'].cast<Map<String, dynamic>>()*/, subjects, lessons,
+        questionnaires, knowledgeList,paths,/*data['users'].cast<Map<String, dynamic>>()*/users);
     // course = await IsarService.instance.getFirstCourse();
   }
+
 
   SharedPreferences preferences = await SharedPreferences.getInstance();
 
@@ -563,6 +614,7 @@ class _MyAppState extends State<MyApp> {
 
     for (VideoIsar videoIsar in vi) {
       if (!videoIsar.isDownload && currentTimestamp > videoIsar.expiredDate) {
+        debugPrint('url was expired');
         return true;
       }
     }

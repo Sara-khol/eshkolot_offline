@@ -21,6 +21,10 @@ class Course {
   // @Backlink(to: "course")
   final subjects = IsarLinks<Subject>();
 
+  @Ignore()
+  late List<int> subjectIds;
+
+
   @Backlink(to: "courses")
   final knowledge = IsarLink<Knowledge>();
 
