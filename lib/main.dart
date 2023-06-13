@@ -8,6 +8,8 @@ import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/models/subject.dart';
+import 'package:eshkolot_offline/services/localFileHelper.dart';
+import 'package:eshkolot_offline/services/network_check.dart';
 import 'package:eshkolot_offline/services/vimoe_service.dart';
 import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
@@ -27,371 +29,409 @@ import 'dart:convert';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
 
-Future<void> main() async {
-  await Sentry.init(
-    (options) {
-      options.dsn =
-          'https://0305d132e35b4bfea621838e8aaee3de@o4505141567619072.ingest.sentry.io/4505141614084096';
-      // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-      // We recommend adjusting this value in production.
-      options.tracesSampleRate = 1.0;
-      options.debug = true;
-      options.sendDefaultPii = true;
-      options.enablePrintBreadcrumbs = true;
-      options.debug=false;
-      // options.beforeBreadcrumb =beforeBreadcrumbCallback;
+Future<void> main()  async{
 
-      // options.maxRequestBodySize = MaxRequestBodySize.small;
-      // options.maxResponseBodySize = MaxResponseBodySize.small;
-    },
-    // appRunner: () => runApp(MyApp()),
-  );
+ runZonedGuarded(() async {
 
-  DartVLC.initialize();
+   WidgetsFlutterBinding.ensureInitialized();
 
- late  String destDirPath ;
-  List<Course> myCourses = [];
-// late   List<Map<String, dynamic>> jsonUsers ;
-late    Map<String, dynamic> data  ;
+   FutureOr<SentryEvent?> beforeSend(SentryEvent event, {Hint? hint}) async {
+// Check internet connectivity
+     var connectivityResult = await Connectivity().checkConnectivity();
+    // if (connectivityResult == ConnectivityResult.none) {
+     if (!await NetworkConnectivity.instance.checkConnectivity()) {
+       // Store the event locally for later sending
+       String eventJson=  const JsonEncoder().convert(event.toJson());
+
+       await LocalFileHelper().writeEvent(eventJson);
+       return null; // Prevent the event from being sent
+     }
+     // Send the event to Sentry
+     return event;
+   };
+
+   await Sentry.init(
+         (options) {
+       options.dsn =
+       'https://0305d132e35b4bfea621838e8aaee3de@o4505141567619072.ingest.sentry.io/4505141614084096';
+       // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+       // We recommend adjusting this value in production.
+       options.tracesSampleRate = 1.0;
+       // options.debug = true;
+       options.sendDefaultPii = true;
+       options.enablePrintBreadcrumbs = true;
+
+       // options.debug=false;
+       // options.beforeBreadcrumb =beforeBreadcrumbCallback;
+       options.beforeSend=beforeSend;
+
+       // options.maxRequestBodySize = MaxRequestBodySize.small;
+       // options.maxResponseBodySize = MaxResponseBodySize.small;
+     },
+     // appRunner: () => runApp(MyApp()),
+   );
+
+   DartVLC.initialize();
+
+   late  String destDirPath ;
+   List<Course> myCourses = [];
+   // late   List<Map<String, dynamic>> jsonUsers ;
+   late    Map<String, dynamic> data  ;
+
 
    extractZipFile() async {
-    // Open the zip file
-    String zipFilePath = r"c:\installation.eshkolot";
-    // String zipFilePath = r"C:\Users\USER\GoAppProjects\eshkolot_offline\vvv.eshkolot";
-    final Directory directory = await getApplicationSupportDirectory();
+     // Open the zip file
+     String zipFilePath = r"c:\installation.eshkolot";
+     // String zipFilePath = r"C:\Users\USER\GoAppProjects\eshkolot_offline\vvv.eshkolot";
+     final Directory directory = await getApplicationSupportDirectory();
      destDirPath = directory.path;
 
 
 // Open the zip file
-    final bytes = File(zipFilePath).readAsBytesSync();
-    final archive = ZipDecoder().decodeBytes(bytes);
+     final bytes = File(zipFilePath).readAsBytesSync();
+     final archive = ZipDecoder().decodeBytes(bytes);
 
 // Loop through the contents of the zip file and extract the data files and videos
-    for (final archiveFile in archive) {
-      // Check if the file is a data file or video
-      if (archiveFile.name.endsWith('.json')) {
-        // Extract the file to the destination directory
-        final fileData = archiveFile.content;//as List<int>;
-        final filePath = '$destDirPath/${archiveFile.name}';
-        // final filePath = '${directory.path}/mydata/';
-        final extractedFile = File(filePath);
-        extractedFile.createSync(recursive: true);
-        extractedFile.writeAsBytesSync(fileData);
-      }
-      debugPrint(archiveFile.name);
-    }
-  }
+     for (final archiveFile in archive) {
+       // Check if the file is a data file or video
+       if (archiveFile.name.endsWith('.json')) {
+         // Extract the file to the destination directory
+         final fileData = archiveFile.content;//as List<int>;
+         final filePath = '$destDirPath/${archiveFile.name}';
+         // final filePath = '${directory.path}/mydata/';
+         final extractedFile = File(filePath);
+         extractedFile.createSync(recursive: true);
+         extractedFile.writeAsBytesSync(fileData);
+       }
+       debugPrint(archiveFile.name);
+     }
+   }
 
-  setDataFromJson() async
-  {
-    final Directory directory = await getApplicationSupportDirectory();
-    destDirPath = directory.path;
-    try {
-      final file = await  File('$destDirPath/data.json');
-      final contents = await file.readAsString();
-      data  = await json.decode(contents) ;
-      // List l= data['paths'].cast<Map<String, dynamic>>();
-      debugPrint("json ${data['users']}");
+   setDataFromJson() async
+   {
+     final Directory directory = await getApplicationSupportDirectory();
+     destDirPath = directory.path;
+     try {
+       final file = await  File('$destDirPath/data.json');
+       final contents = await file.readAsString();
+       data  = await json.decode(contents) ;
+       // List l= data['paths'].cast<Map<String, dynamic>>();
+       debugPrint("json ${data['users']}");
 
-    } catch (e) {
-      debugPrint("error in getting data $e");
+     } catch (e) {
+       debugPrint("error in getting data $e");
 
-    }
-  }
+     }
+   }
 
-  IsarService().init();
+   IsarService().init();
 
-  initData() async {
-    // if (await IsarService().checkIfDBisEmpty()) {
-   // await extractZipFile();
-   await setDataFromJson();
- //  generateJsonData();
-    await IsarService().cleanDb();
-    Map<String, List<String>> fillInQ = {
-      'ab': ['c'],
-      'd e f': ['g'],
-      'h': []
+   initData() async {
+     // if (await IsarService().checkIfDBisEmpty()) {
+     // await extractZipFile();
+     await setDataFromJson();
+     //  generateJsonData();
+     await IsarService().cleanDb();
+     Map<String, List<String>> fillInQ = {
+       'ab': ['c'],
+       'd e f': ['g'],
+       'h': []
+     };
+
+     List<Questionnaire> questionnaires = [
+       Questionnaire()
+         ..question = 'שאלת אפשרות יחידה'
+         ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
+         ..ans = ['אופציה ג']
+         ..type = QType.radio,
+       Questionnaire()
+         ..question = 'שאלת בחירה מרובה'
+         ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
+         ..ans = ['אופציה ג', 'אופציה א']
+         ..type = QType.checkbox,
+       Questionnaire()
+         ..question = 'שאלת בחירה חופשית'
+         ..ans = ['אופציה ג', 'אופציה א']
+         ..type = QType.freeChoice,
+       Questionnaire()
+         ..question = 'שאלה מלא את החסר'
+         ..fillInQuestion = json.encode(fillInQ)
+         ..type = QType.fillIn
+     ];
+
+     List<Lesson> lessons = [
+       Lesson()
+         ..name = 'מבוא ואותיות ניקוד'
+         ..vimoeId = 467058608
+         ..questionnaire.add(questionnaires.first),
+       Lesson()
+         ..name = 'אותיות עיצור א'
+         ..vimoeId = 458427089,
+       Lesson()
+         ..name = 'אותיות עיצור ב'
+         ..vimoeId = 458427439,
+       Lesson()
+         ..name = 'אותיות עיצור ג'
+         ..vimoeId = /*458427853*/ 458690463,
+       Lesson()
+         ..name = 'אותיות עיצור ד'
+         ..vimoeId = 458428550,
+       Lesson()
+         ..name = 'אותיות עיצור ה'
+         ..vimoeId = 458429636,
+       Lesson()
+         ..name = 'אותיות עיצור ו'
+         ..vimoeId = 458429870,
+       Lesson()
+         ..name = 'אותיות עיצור ז'
+         ..vimoeId = 458431017,
+       Lesson()
+         ..name = 'אותיות עיצור ח'
+         ..vimoeId = 458484739,
+       Lesson()
+         ..name = 'אותיות עיצור ט'
+         ..vimoeId = 458486785,
+       Lesson()
+         ..name = 'אותיות עיצור י'
+         ..vimoeId = 458487712,
+       Lesson()
+         ..name = 'אותיות עיצור כ'
+         ..vimoeId = 458488614,
+       Lesson()
+         ..name = 'אותיות עיצור ל'
+         ..vimoeId = 458493015,
+       Lesson()
+         ..name = 'אותיות עיצור מ'
+         ..vimoeId = 458587389
+         ..questionnaire.addAll(questionnaires),
+     ];
+
+     final List<Subject> subjects = [
+       Subject()
+         ..name = 'חוקי קריאה והגיה'
+         ..lessons.addAll(lessons)
+         ..questionnaire.addAll(questionnaires),
+       Subject()
+         ..name = 'מבנה המשפט התיאורי'
+         ..lessons.addAll([
+           Lesson()
+             ..name = '5555'
+             ..vimoeId = 458427089
+             ..questionnaire.addAll(questionnaires),
+           Lesson()..name = '66666'
+         ]),
+
+       //..lessons.add(lessons[0])
+     ];
+
+     myCourses.add((Course()
+       ..title = 'אנגלית בסיסית א'
+       ..subjects.addAll(subjects)
+       ..serverId = /*14518542*/ 2567060
+     // ..serverId = 1
+       ..status = Status.middle
+       ..questionnaire.addAll(questionnaires)));
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+     // ..serverId = 2782842
+       ..serverId = 1
+       ..status = Status.finish);
+
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 2
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 3
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 4
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 5
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 6
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 7
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 8
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 9
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 10
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 11
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 12
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 13
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 14
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 15
+       ..status = Status.finish);
+     myCourses.add(Course()
+       ..title = 'אנגלית בסיסית ב'
+       ..serverId = 16
+       ..status = Status.finish);
+
+     Course algebraCourse = Course()
+       ..title = 'אלגברה בסיסית א’'
+       ..serverId = 17
+       ..status = Status.synchronized;
+     Course phCourse = Course()
+       ..title = 'פיזיקה רעיונית א’'
+       ..serverId = 18;
+     List<Knowledge> knowledgeList = [
+       Knowledge()
+         ..title = 'אנגלית'
+         ..color = 0xff32D489
+         ..iconPath = 'english'
+         ..isOpen = false
+         ..courses.addAll(myCourses)
+         ..id = 1,
+       Knowledge()
+         ..title = 'מתמטיקה'
+         ..color = 0xff5956DA
+         ..iconPath = 'math'
+         ..isOpen = false
+         ..courses.add(algebraCourse)
+         ..id = 2,
+       Knowledge()
+         ..title = 'פיזיקה'
+         ..color = 0xffFF317B
+         ..iconPath = 'math'
+         ..isOpen = false
+         ..courses.add(phCourse)
+         ..id = 3
+     ];
+     List<Course> meymadList = [
+       algebraCourse,
+       Course()
+         ..title = 'אלגברה בסיסית ב’'
+         ..serverId = 19
+         ..status = Status.synchronized,
+       Course()
+         ..title = 'קורס גאומטריה בסיסית'
+         ..serverId = 20
+         ..status = Status.synchronized
+     ];
+
+     List<LearnPath> paths = [
+       LearnPath()
+         ..id = 1
+         ..title = 'מסלול אמירם'
+         ..courses.addAll(myCourses)
+         ..color = 0xff32D489
+         ..iconPath = 'english',
+       LearnPath()
+         ..id = 2
+         ..title = 'מסלול מימד'
+         ..courses.addAll(meymadList)
+         ..color = 0xff5956DA
+         ..iconPath = 'math',
+     ];
+
+     final List<User> users = [
+       User()
+         ..name = 'שמואל'
+         ..knowledgeIds = [1, 2, 3]
+         ..pathIds = [1, 2]
+         ..tz = '123456789'
+         ..courses = [
+           //  UserCourse()..courseId=2567060..subjectStopId=1..lessonStopId=1
+         ]
+     ];
+
+     debugPrint('filling!!');
+     Sentry.addBreadcrumb(Breadcrumb(message: 'filling data!!'));
+     await IsarService().initCourses(myCourses/*data['courses'].cast<Map<String, dynamic>>()*/, subjects, lessons,
+         questionnaires, knowledgeList,paths,/*data['users'].cast<Map<String, dynamic>>()*/users);
+     // course = await IsarService.instance.getFirstCourse();
+   }
+
+
+   SharedPreferences preferences = await SharedPreferences.getInstance();
+
+   Future<bool> checkDatabaseInitialized(SharedPreferences preferences) async {
+
+     return !await IsarService().checkIfDBisEmpty() &&
+         (preferences.getBool('database_initialized') ?? false);
+   }
+
+   bool databaseInitialized = await checkDatabaseInitialized(preferences);
+
+
+   if (!databaseInitialized) {
+     //when db was erased manually
+     //todo remove??
+     await preferences.setBool('database_initialized', false);
+     await initData();
+     await preferences.setBool('database_initialized', true);
+
+   } else {
+     debugPrint('data was filled');
+     Sentry.addBreadcrumb(Breadcrumb(message: 'data was filled'));
+   }
+   // Course? c1, c2;
+   // if (myCourses.isNotEmpty) {
+   //   c1 = myCourses.firstWhere((item) => item.serverId == 2782842);
+   //   c2 = myCourses.firstWhere((item) => item.serverId == 2567060);
+   // }
+
+    FlutterError.onError = (FlutterErrorDetails errorDetails) {
+      Sentry.captureException(
+        errorDetails.exception,
+        stackTrace: errorDetails.stack,
+      );
     };
 
-    List<Questionnaire> questionnaires = [
-      Questionnaire()
-        ..question = 'שאלת אפשרות יחידה'
-        ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
-        ..ans = ['אופציה ג']
-        ..type = QType.radio,
-      Questionnaire()
-        ..question = 'שאלת בחירה מרובה'
-        ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
-        ..ans = ['אופציה ג', 'אופציה א']
-        ..type = QType.checkbox,
-      Questionnaire()
-        ..question = 'שאלת בחירה חופשית'
-        ..ans = ['אופציה ג', 'אופציה א']
-        ..type = QType.freeChoice,
-      Questionnaire()
-        ..question = 'שאלה מלא את החסר'
-        ..fillInQuestion = json.encode(fillInQ)
-        ..type = QType.fillIn
-    ];
+   // runApp(MyApp());
 
-    List<Lesson> lessons = [
-      Lesson()
-        ..name = 'מבוא ואותיות ניקוד'
-        ..vimoeId = 467058608
-        ..questionnaire.add(questionnaires.first),
-      Lesson()
-        ..name = 'אותיות עיצור א'
-        ..vimoeId = 458427089,
-      Lesson()
-        ..name = 'אותיות עיצור ב'
-        ..vimoeId = 458427439,
-      Lesson()
-        ..name = 'אותיות עיצור ג'
-        ..vimoeId = /*458427853*/ 458690463,
-      Lesson()
-        ..name = 'אותיות עיצור ד'
-        ..vimoeId = 458428550,
-      Lesson()
-        ..name = 'אותיות עיצור ה'
-        ..vimoeId = 458429636,
-      Lesson()
-        ..name = 'אותיות עיצור ו'
-        ..vimoeId = 458429870,
-      Lesson()
-        ..name = 'אותיות עיצור ז'
-        ..vimoeId = 458431017,
-      Lesson()
-        ..name = 'אותיות עיצור ח'
-        ..vimoeId = 458484739,
-      Lesson()
-        ..name = 'אותיות עיצור ט'
-        ..vimoeId = 458486785,
-      Lesson()
-        ..name = 'אותיות עיצור י'
-        ..vimoeId = 458487712,
-      Lesson()
-        ..name = 'אותיות עיצור כ'
-        ..vimoeId = 458488614,
-      Lesson()
-        ..name = 'אותיות עיצור ל'
-        ..vimoeId = 458493015,
-      Lesson()
-        ..name = 'אותיות עיצור מ'
-        ..vimoeId = 458587389
-        ..questionnaire.addAll(questionnaires),
-    ];
-
-    final List<Subject> subjects = [
-      Subject()
-        ..name = 'חוקי קריאה והגיה'
-        ..lessons.addAll(lessons)
-        ..questionnaire.addAll(questionnaires),
-      Subject()
-        ..name = 'מבנה המשפט התיאורי'
-        ..lessons.addAll([
-          Lesson()
-            ..name = '5555'
-            ..vimoeId = 458427089
-            ..questionnaire.addAll(questionnaires),
-          Lesson()..name = '66666'
-        ]),
-
-      //..lessons.add(lessons[0])
-    ];
-
-    myCourses.add((Course()
-      ..title = 'אנגלית בסיסית א'
-      ..subjects.addAll(subjects)
-      ..serverId = /*14518542*/ 2567060
-      // ..serverId = 1
-      ..status = Status.middle
-      ..questionnaire.addAll(questionnaires)));
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      // ..serverId = 2782842
-      ..serverId = 1
-      ..status = Status.finish);
-
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 2
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 3
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 4
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 5
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 6
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 7
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 8
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 9
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 10
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 11
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 12
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 13
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 14
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 15
-      ..status = Status.finish);
-    myCourses.add(Course()
-      ..title = 'אנגלית בסיסית ב'
-      ..serverId = 16
-      ..status = Status.finish);
-
-    Course algebraCourse = Course()
-      ..title = 'אלגברה בסיסית א’'
-      ..serverId = 17
-      ..status = Status.synchronized;
-    Course phCourse = Course()
-      ..title = 'פיזיקה רעיונית א’'
-      ..serverId = 18;
-    List<Knowledge> knowledgeList = [
-      Knowledge()
-        ..title = 'אנגלית'
-        ..color = 0xff32D489
-        ..iconPath = 'english'
-        ..isOpen = false
-        ..courses.addAll(myCourses)
-        ..id = 1,
-      Knowledge()
-        ..title = 'מתמטיקה'
-        ..color = 0xff5956DA
-        ..iconPath = 'math'
-        ..isOpen = false
-        ..courses.add(algebraCourse)
-        ..id = 2,
-      Knowledge()
-        ..title = 'פיזיקה'
-        ..color = 0xffFF317B
-        ..iconPath = 'math'
-        ..isOpen = false
-        ..courses.add(phCourse)
-        ..id = 3
-    ];
-    List<Course> meymadList = [
-      algebraCourse,
-      Course()
-        ..title = 'אלגברה בסיסית ב’'
-        ..serverId = 19
-        ..status = Status.synchronized,
-      Course()
-        ..title = 'קורס גאומטריה בסיסית'
-        ..serverId = 20
-        ..status = Status.synchronized
-    ];
-
-    List<LearnPath> paths = [
-      LearnPath()
-        ..id = 1
-        ..title = 'מסלול אמירם'
-        ..courses.addAll(myCourses)
-        ..color = 0xff32D489
-        ..iconPath = 'english',
-      LearnPath()
-        ..id = 2
-        ..title = 'מסלול מימד'
-        ..courses.addAll(meymadList)
-        ..color = 0xff5956DA
-        ..iconPath = 'math',
-    ];
-
-    final List<User> users = [
-      User()
-        ..name = 'שמואל'
-        ..knowledgeIds = [1, 2, 3]
-        ..pathIds = [1, 2]
-        ..tz = '123456789'
-        ..courses = [
-          //  UserCourse()..courseId=2567060..subjectStopId=1..lessonStopId=1
-        ]
-    ];
-
-    debugPrint('filling!!');
-    Sentry.addBreadcrumb(Breadcrumb(message: 'filling data!!'));
-    await IsarService().initCourses(myCourses/*data['courses'].cast<Map<String, dynamic>>()*/, subjects, lessons,
-        questionnaires, knowledgeList,paths,/*data['users'].cast<Map<String, dynamic>>()*/users);
-    // course = await IsarService.instance.getFirstCourse();
-  }
+    runApp(MyApp(
+        courses: myCourses /*c1 == null || c2 == null ? myCourses : [c1, c2]*/,
+        dataWasFilled: databaseInitialized));
 
 
-  SharedPreferences preferences = await SharedPreferences.getInstance();
+   doWhenWindowReady(() {
+     setWindowVisibility(visible: true);
+     setWindowTitle('My Demo');
+     // const initialSize = Size(1280, 720);
+     // appWindow.minSize = initialSize;
+     // appWindow.size = initialSize;
+     // appWindow.alignment = Alignment.center;
+     //
+     //appWindow.show();
+   });
+  }, (error, stackTrace) {
+   print('Error : $error');
+   print('StackTrace : $stackTrace');
+   Sentry.captureException(error, stackTrace: stackTrace);
+ });
 
-  Future<bool> checkDatabaseInitialized(SharedPreferences preferences) async {
-
-    return !await IsarService().checkIfDBisEmpty() &&
-        (preferences.getBool('database_initialized') ?? false);
-  }
-
-  bool databaseInitialized = await checkDatabaseInitialized(preferences);
-
-
-  if (!databaseInitialized) {
-    //when db was erased manually
-    //todo remove??
-    await preferences.setBool('database_initialized', false);
-    await initData();
-    await preferences.setBool('database_initialized', true);
-
-  } else {
-    debugPrint('data was filled');
-    Sentry.addBreadcrumb(Breadcrumb(message: 'data was filled'));
-  }
-
-  // Course? c1, c2;
-  // if (myCourses.isNotEmpty) {
-  //   c1 = myCourses.firstWhere((item) => item.serverId == 2782842);
-  //   c2 = myCourses.firstWhere((item) => item.serverId == 2567060);
-  // }
-
-  runApp(MyApp(
-      courses: myCourses /*c1 == null || c2 == null ? myCourses : [c1, c2]*/,
-      dataWasFilled: databaseInitialized));
-
-  doWhenWindowReady(() {
-    setWindowVisibility(visible: true);
-    setWindowTitle('My Demo');
-    // const initialSize = Size(1280, 720);
-    // appWindow.minSize = initialSize;
-    // appWindow.size = initialSize;
-    // appWindow.alignment = Alignment.center;
-    //
-    //appWindow.show();
-  });
 }
 
 class MyApp extends StatefulWidget {
@@ -411,12 +451,18 @@ class _MyAppState extends State<MyApp> {
   bool firstTime = true;
   final Connectivity _connectivity = Connectivity();
   late bool isNetWorkConnection;
+  final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
+
 
   @override
   void initState() {
+   // networkConnectivity.startNetworkConnectivityCheck();
+    _networkConnectivity.initialise();
     myFuture = isVideosDownload();
     super.initState();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -598,7 +644,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<List<VideoIsar>> isVideosDownload() async {
-    isNetWorkConnection = await checkConnectivity();
+    // isNetWorkConnection = await checkConnectivity();
+    isNetWorkConnection = await _networkConnectivity.checkConnectivity();
+
     allDownloaded = await IsarService().checkIfAllVideosAreDownloaded();
     if (!allDownloaded) {
       return IsarService().getAllVideosToDownload();
@@ -623,11 +671,4 @@ class _MyAppState extends State<MyApp> {
     return false;
   }
 
-  Future<bool> checkConnectivity() async {
-    var connectivityResult = await _connectivity.checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      return false;
-    }
-    return true;
-  }
 }

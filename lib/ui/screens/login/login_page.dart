@@ -1,9 +1,11 @@
 import 'package:eshkolot_offline/ui/screens/login/forgot_password_dialog.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../../models/user.dart';
 import '../../../services/isar_service.dart';
@@ -174,9 +176,11 @@ class _LoginPageState extends State<LoginPage> {
                         : 'התעודת זהות שהזנת שגויה',
                     style: TextStyle(fontSize: 20.sp, color: Colors.red)))
           ]),
-          floatingActionButton: FloatingActionButton(onPressed: () async {
+          floatingActionButton:kDebugMode? FloatingActionButton(onPressed: ()
+          async {
             IsarService().cleanDb();
-          })),
+            //Sentry.captureMessage('kkk');
+          }):null)
     );
   }
 }

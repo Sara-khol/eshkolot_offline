@@ -1,6 +1,8 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 
+import '../../../services/network_check.dart';
+
 class TitleBarWidget extends StatefulWidget {
   final void Function()? updateLastPosition;
 
@@ -48,6 +50,7 @@ class _TitleBarWidgetState extends State<TitleBarWidget> {
             CloseWindowButton(
                 colors: closeButtonColors,
                 onPressed: () {
+                 NetworkConnectivity.instance.stopListeningToConnectivity();
                   if (widget.updateLastPosition != null) {
                     widget.updateLastPosition!();
                   }

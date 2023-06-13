@@ -42,18 +42,19 @@ class VimoeService with ChangeNotifier {
   late StreamSubscription subscription;
   Timer? timer;
   int captureMessageNum = 1;
-  final transaction = Sentry.startTransaction(
-    'dio-download',
-    'download',
-    bindToScope: true,
-  );
+
+  // final transaction = Sentry.startTransaction(
+  //   'dio-download',
+  //   'download',
+  //   bindToScope: true,
+  // );
 
   tryAgainFromStart() async {
     debugPrint("timer finished ,sending data");
     Sentry.addBreadcrumb(Breadcrumb(
         message: 'videos id that were not downloaded:\n'
             '${getAllNotDownloaded().map((v) => v.id).toList()}'));
-    await transaction.finish();
+  //  await transaction.finish();
     if (captureMessageNum < 2) {
       await Sentry.captureMessage(
           'my downloading data timeout error trying again $captureMessageNum');
@@ -99,18 +100,18 @@ class VimoeService with ChangeNotifier {
   VimoeService() {
     debugPrint("VimoeService");
 
-
     dio.options.headers['content-Type'] = 'application/json;charset=UTF-8';
     dio.options.headers['authorization'] = "bearer ${token}";
     dio.options.headers['Connection'] = "keep-alive";
 
-    _networkConnectivity.initialise();
+    _networkConnectivity.whileDownloading=true;
+    //_networkConnectivity.initialise();
 
     subscription = _networkConnectivity.myStream.listen((source) async {
       _source = source;
       debugPrint('source $_source');
       if (_source.keys.toList()[0] == ConnectivityResult.none) {
-        if (downloadStatus != DownloadStatus.netWorkError) {
+       // if (downloadStatus != DownloadStatus.netWorkError) {
           if (timer != null && timer!.isActive) {
             timer!.cancel();
           }
@@ -118,13 +119,13 @@ class VimoeService with ChangeNotifier {
           downloadStatus = DownloadStatus.netWorkError;
           notifyListeners();
           if (finishConnectToVimoe) {
-            debugPrint('cancelToken');
-            Sentry.addBreadcrumb(Breadcrumb(message: 'cancelToken'));
+            debugPrint('no connection so cancel downloading');
+            Sentry.addBreadcrumb(Breadcrumb(message: 'no connection so cancel downloading'));
             cancelToken.cancel('wwwwwww');
           }
-        }
+       // }
       } else {
-        if (downloadStatus == DownloadStatus.netWorkError) {
+       // if (downloadStatus == DownloadStatus.netWorkError) {
           downloadStatus = lastDownLoadStatus;
           notifyListeners();
           isNetWorkConnection = true;
@@ -142,7 +143,7 @@ class VimoeService with ChangeNotifier {
             debugPrint('start');
             start();
           }
-        }
+        //}
       }
     });
 
@@ -181,8 +182,8 @@ class VimoeService with ChangeNotifier {
           debugPrint('block $vimoeId');
           Sentry.addBreadcrumb(Breadcrumb(message: 'block $vimoeId'));
 
-          transaction.throwable = error;
-          transaction.status = const SpanStatus.internalError();
+       //   transaction.throwable = error;
+         // transaction.status = const SpanStatus.internalError();
         }
         /*else if (error.message == 'The request was cancelled') {
           debugPrint('hhh');
@@ -259,8 +260,8 @@ class VimoeService with ChangeNotifier {
     try {
       Response response = await dio.get(url);
 
-      transaction.status =
-          SpanStatus.fromHttpStatusCode(response.statusCode ?? -1);
+      // transaction.status =
+      //     SpanStatus.fromHttpStatusCode(response.statusCode ?? -1);
 
       Map result = response.data;
 
@@ -272,8 +273,8 @@ class VimoeService with ChangeNotifier {
         await connectToVimoe(url: result['paging']['next']);
       }
     } catch (exception) {
-      transaction.throwable = exception;
-      transaction.status = const SpanStatus.internalError();
+      // transaction.throwable = exception;
+      // transaction.status = const SpanStatus.internalError();
     }
   }
 
@@ -385,7 +386,7 @@ class VimoeService with ChangeNotifier {
   Future<void> downloadFile(String url, String name, bool regular) async {
     String progress = '';
     var dir =
-        await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+        await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
     await dio.download(
       url,
       cancelToken: cancelToken,
@@ -480,6 +481,7 @@ class VimoeService with ChangeNotifier {
           debugPrint('blocked linksssssssssss');
 
           Sentry.addBreadcrumb(Breadcrumb(message: 'blocked linksssssssssss'));
+          await Sentry.captureMessage('my downloading data blocked links error ');
           //todo change..
           // downloadStatus = DownloadStatus.blockError;
           downloadStatus = DownloadStatus.downloaded;
@@ -557,16 +559,22 @@ class VimoeService with ChangeNotifier {
   void dispose() async {
     if (!isDispose) {
       debugPrint('disssss');
-      if (blockLinks.isNotEmpty) {
-        await Sentry.captureMessage('my downloading data blocked links error ');
-      } else {
+      // if (blockLinks.isNotEmpty) {
+      //   await Sentry.captureMessage('my downloading data blocked links error ');
+      // } else {
+      //todo remove condition when disable block links options to go on
+      if(blockLinks.isEmpty) {
         await Sentry.captureMessage(
             'my downloading data ok $captureMessageNum');
       }
-      debugPrint('my downloading data $captureMessageNum');
-      transaction.finish();
+     // }
+   //   transaction.finish();
       isDispose = true;
+
       subscription.cancel();
+      _networkConnectivity.disposeStream();
+      _networkConnectivity.whileDownloading=false;
+
       if (timer != null && timer!.isActive) {
         timer!.cancel();
       }
