@@ -1,6 +1,11 @@
+import 'package:eshkolot_offline/services/api_service.dart';
+import 'package:eshkolot_offline/services/network_check.dart';
+import 'package:eshkolot_offline/ui/custom_widgets/message.dart';
+import 'package:eshkolot_offline/utils/common_funcs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
+import 'package:oktoast/oktoast.dart';
 
 class ForgotPasswordDialog extends StatefulWidget {
   ForgotPasswordDialog({super.key});
@@ -12,6 +17,7 @@ class ForgotPasswordDialog extends StatefulWidget {
 class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   final TextEditingController controller = TextEditingController();
   bool isError = false;
+  bool isLoading=false;
 
   @override
   Widget build(BuildContext context) {
@@ -136,20 +142,47 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                             ),
                           ],
                         ),
-                        onPressed: () {
-                          if (controller.text.isNotEmpty) {
-                            if (isEmail(controller.text)) {
-                              Navigator.pop(context);
-                            } else {
-                              setState(() {
-                                isError = true;
-                              });
-                            }
-                          } else {
+                        onPressed: () async {
+                          // if (controller.text.isNotEmpty) {
+                          //   if (isEmail(controller.text)) {
+                          if(await NetworkConnectivity.instance.checkConnectivity()) {
                             setState(() {
-                              isError = true;
+                              isLoading = true;
                             });
+                            ApiService().sendPasswordRecoveryMail(
+                                id: 1,
+                                onSuccess: () async {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  CommonFuncs().showMyToast(
+                                      'מייל לאיפוס סיסמא נשלח אליך בהצלחה');
+                                  Navigator.pop(context);
+                                },
+                                onError: () {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  CommonFuncs().showMyToast(
+                                      'ישנה בעיה, נסה שנית');
+                                });
+
+                            //   } else {
+                            //     setState(() {
+                            //       isError = true;
+                            //     });
+                            //   }
+                            // } else {
+                            //   setState(() {
+                            //     isError = true;
+                            //   });
+                            // }
                           }
+                          else
+                            {
+                              CommonFuncs().showMyToast(
+                                  'אינך מחובר לרשת האינטרנט');
+                            }
                         },
                       ),
                     ),
@@ -161,7 +194,10 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                                 ? 'נא להזין כתובת אימייל'
                                 : 'האימייל שהוזן שגוי',
                             style:
-                                TextStyle(fontSize: 20.sp, color: Colors.red)))
+                                TextStyle(fontSize: 20.sp, color: Colors.red))),
+                    if(isLoading)
+                      CircularProgressIndicator(color: colors.grey1ColorApp,)
+
                   ],
                 ),
               ),
@@ -172,6 +208,8 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
     );
   }
 
+
+
   bool isEmail(String em) {
     String p =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -180,4 +218,25 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
 
     return regExp.hasMatch(em);
   }
+
+  void showMessage(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Message'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

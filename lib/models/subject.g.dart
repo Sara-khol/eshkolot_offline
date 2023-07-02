@@ -30,13 +30,6 @@ const SubjectSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {
-    r'course': LinkSchema(
-      id: -1393064801195139998,
-      name: r'course',
-      target: r'Course',
-      single: true,
-      linkName: r'subjects',
-    ),
     r'lessons': LinkSchema(
       id: 905957421829937577,
       name: r'lessons',
@@ -82,9 +75,10 @@ Subject _subjectDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Subject();
-  object.id = id;
-  object.name = reader.readString(offsets[0]);
+  final object = Subject(
+    id: id,
+    name: reader.readStringOrNull(offsets[0]) ?? '',
+  );
   return object;
 }
 
@@ -96,7 +90,7 @@ P _subjectDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -107,12 +101,11 @@ Id _subjectGetId(Subject object) {
 }
 
 List<IsarLinkBase<dynamic>> _subjectGetLinks(Subject object) {
-  return [object.course, object.lessons, object.questionnaire];
+  return [object.lessons, object.questionnaire];
 }
 
 void _subjectAttach(IsarCollection<dynamic> col, Id id, Subject object) {
   object.id = id;
-  object.course.attach(col, col.isar.collection<Course>(), r'course', id);
   object.lessons.attach(col, col.isar.collection<Lesson>(), r'lessons', id);
   object.questionnaire
       .attach(col, col.isar.collection<Questionnaire>(), r'questionnaire', id);
@@ -383,19 +376,6 @@ extension SubjectQueryObject
 
 extension SubjectQueryLinks
     on QueryBuilder<Subject, Subject, QFilterCondition> {
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> course(
-      FilterQuery<Course> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'course');
-    });
-  }
-
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> courseIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'course', 0, true, 0, true);
-    });
-  }
-
   QueryBuilder<Subject, Subject, QAfterFilterCondition> lessons(
       FilterQuery<Lesson> q) {
     return QueryBuilder.apply(this, (query) {

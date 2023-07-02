@@ -12,34 +12,62 @@ part 'course.g.dart';
 class Course {
   Id id = Isar.autoIncrement;
 
-  late String title;
+   String title;
 
   @Index(unique: true, replace: true)
-  late int serverId=0;
-
+  late int serverId = 0;
 
   // @Backlink(to: "course")
   final subjects = IsarLinks<Subject>();
 
+
   @Ignore()
-  late List<int> subjectIds;
+  @Name('subjects')
+  late List<dynamic> subjectIds;
+
+  @Ignore()
+  @Name('questionnaire')
+  late List<dynamic> questionnaireIds = [];
 
 
-  @Backlink(to: "courses")
-  final knowledge = IsarLink<Knowledge>();
+/*  @Name('knowledge')*/
+  late int? knowledgeId;
+
+  // @Backlink(to: "courses")
+  // final knowledge = IsarLink<Knowledge>();
 
   final questionnaire = IsarLinks<Questionnaire>();
 
 
-  //not suppose to be here, for meanwhile
-  @enumerated
-  Status status = Status.start;
-  late int lessonStopId = 0;
-  late String diplomaPath = '';
   @Ignore()
   bool isSelected = false;
   @Ignore()
   late bool isFullyDisplayed = true;
 
-// final questionnaires = IsarLinks<Questionnaire>();
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'subjects': subjectIds,
+      'knowledge': knowledgeId,
+      'questionnaire': questionnaireIds,
+    };
+  }
+
+  Course({
+     this.title='',
+     this.subjectIds=const [],
+     this.knowledgeId=0,
+     this.questionnaireIds=const [],
+    this.serverId=0
+  });
+
+  factory Course.fromJson(Map<String, dynamic> parsedJson,int courseId) {
+    return Course(
+        title: parsedJson['title'],
+        subjectIds: parsedJson['subjects'],
+        knowledgeId: parsedJson['knowledge'],
+        questionnaireIds: parsedJson['questionnaire'],
+        serverId: courseId,
+    );
+  }
 }

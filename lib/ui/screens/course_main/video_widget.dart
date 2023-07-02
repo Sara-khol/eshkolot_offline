@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 
 class VideoWidget extends StatefulWidget {
-  final int vimoeId;
+  final String? vimoeId;
 
    const VideoWidget({super.key, required this.vimoeId});
 
@@ -16,7 +16,7 @@ class VideoWidget extends StatefulWidget {
 
 class _VideoWidgetState extends State<VideoWidget> with AutomaticKeepAliveClientMixin  {
   bool? videoExists=true;
-  late Player player ;
+   Player? player ;
 bool intendedRebuild=false;
 
 
@@ -38,7 +38,7 @@ bool intendedRebuild=false;
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return videoExists != null
+    return videoExists != null && player!=null
         ? videoExists!
             ? Video(
                 player: player,
@@ -66,27 +66,38 @@ bool intendedRebuild=false;
   }
 
   videoInit()  async {
-    player = Player(id: widget.vimoeId, videoDimensions: const VideoDimensions(640, 360));
-    debugPrint(' videoInit vimoeId ${widget.vimoeId}');
+    if (widget.vimoeId != null) {
+      var dir =
+      await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+      File file = File('${dir.path}/videos/${widget.vimoeId}.mp4');
+      videoExists = await file.exists();
 
-    var dir =
-        await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
-    File file = File('${dir.path}/videos/${widget.vimoeId}.mp4');
-   videoExists = await file.exists();
-    if (videoExists!) {
-      final myFile = Media.file(file);
-      player.open(myFile, autoStart: false);
+         player = Player(id: int.parse(widget.vimoeId!),
+          videoDimensions: const VideoDimensions(640, 360));
+      debugPrint(' videoInit vimoeId ${widget.vimoeId}');
+
+
+      if (videoExists!) {
+        final myFile = Media.file(file);
+        player!.open(myFile, autoStart: false);
+      }
+      debugPrint('videoExists  ${videoExists}');
+      setState(() {});
     }
-    debugPrint('videoExists  ${videoExists}');
-    setState(() {});
+    else{
+      videoExists=false;
+      setState(() {});
+    }
   }
 
 
 
   @override
   void dispose() {
-    player.dispose();
-    player.stop();
+    if(player!=null) {
+      player!.dispose();
+      player!.stop();
+    }
     super.dispose();
   }
   @override

@@ -17,9 +17,9 @@ const UserSchema = CollectionSchema(
   name: r'User',
   id: -7838171048429979076,
   properties: {
-    r'courses': PropertySchema(
+    r'UserCourse': PropertySchema(
       id: 0,
-      name: r'courses',
+      name: r'UserCourse',
       type: IsarType.objectList,
       target: r'UserCourse',
     ),
@@ -64,7 +64,14 @@ const UserSchema = CollectionSchema(
       ],
     )
   },
-  links: {},
+  links: {
+    r'learnPathList': LinkSchema(
+      id: 4073396077458915737,
+      name: r'learnPathList',
+      target: r'LearnPath',
+      single: false,
+    )
+  },
   embeddedSchemas: {r'UserCourse': UserCourseSchema},
   getId: _userGetId,
   getLinks: _userGetLinks,
@@ -166,11 +173,13 @@ Id _userGetId(User object) {
 }
 
 List<IsarLinkBase<dynamic>> _userGetLinks(User object) {
-  return [];
+  return [object.learnPathList];
 }
 
 void _userAttach(IsarCollection<dynamic> col, Id id, User object) {
   object.id = id;
+  object.learnPathList
+      .attach(col, col.isar.collection<LearnPath>(), r'learnPathList', id);
 }
 
 extension UserByIndex on IsarCollection<User> {
@@ -350,7 +359,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
       int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'courses',
+        r'UserCourse',
         length,
         true,
         length,
@@ -362,7 +371,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   QueryBuilder<User, User, QAfterFilterCondition> coursesIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'courses',
+        r'UserCourse',
         0,
         true,
         0,
@@ -374,7 +383,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   QueryBuilder<User, User, QAfterFilterCondition> coursesIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'courses',
+        r'UserCourse',
         0,
         false,
         999999,
@@ -389,7 +398,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'courses',
+        r'UserCourse',
         0,
         true,
         length,
@@ -404,7 +413,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'courses',
+        r'UserCourse',
         length,
         include,
         999999,
@@ -421,7 +430,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
-        r'courses',
+        r'UserCourse',
         lower,
         includeLower,
         upper,
@@ -1018,12 +1027,69 @@ extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {
   QueryBuilder<User, User, QAfterFilterCondition> coursesElement(
       FilterQuery<UserCourse> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.object(q, r'courses');
+      return query.object(q, r'UserCourse');
     });
   }
 }
 
-extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {}
+extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
+  QueryBuilder<User, User, QAfterFilterCondition> learnPathList(
+      FilterQuery<LearnPath> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'learnPathList');
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> learnPathListLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'learnPathList', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> learnPathListIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'learnPathList', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> learnPathListIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'learnPathList', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> learnPathListLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'learnPathList', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      learnPathListLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'learnPathList', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> learnPathListLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'learnPathList', lower, includeLower, upper, includeUpper);
+    });
+  }
+}
 
 extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByName() {
@@ -1126,7 +1192,7 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
 
   QueryBuilder<User, List<UserCourse>, QQueryOperations> coursesProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'courses');
+      return query.addPropertyName(r'UserCourse');
     });
   }
 
@@ -1186,19 +1252,24 @@ const UserCourseSchema = Schema(
       name: r'lessonStopId',
       type: IsarType.long,
     ),
-    r'questionnaireStopId': PropertySchema(
+    r'progress_percent': PropertySchema(
       id: 4,
+      name: r'progress_percent',
+      type: IsarType.long,
+    ),
+    r'questionnaireStopId': PropertySchema(
+      id: 5,
       name: r'questionnaireStopId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'status',
       type: IsarType.byte,
       enumMap: _UserCoursestatusEnumValueMap,
     ),
     r'subjectStopId': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'subjectStopId',
       type: IsarType.long,
     )
@@ -1229,9 +1300,10 @@ void _userCourseSerialize(
   writer.writeString(offsets[1], object.diplomaPath);
   writer.writeBool(offsets[2], object.isQuestionnaire);
   writer.writeLong(offsets[3], object.lessonStopId);
-  writer.writeLong(offsets[4], object.questionnaireStopId);
-  writer.writeByte(offsets[5], object.status.index);
-  writer.writeLong(offsets[6], object.subjectStopId);
+  writer.writeLong(offsets[4], object.progressPercent);
+  writer.writeLong(offsets[5], object.questionnaireStopId);
+  writer.writeByte(offsets[6], object.status.index);
+  writer.writeLong(offsets[7], object.subjectStopId);
 }
 
 UserCourse _userCourseDeserialize(
@@ -1245,11 +1317,12 @@ UserCourse _userCourseDeserialize(
   object.diplomaPath = reader.readString(offsets[1]);
   object.isQuestionnaire = reader.readBool(offsets[2]);
   object.lessonStopId = reader.readLong(offsets[3]);
-  object.questionnaireStopId = reader.readLong(offsets[4]);
+  object.progressPercent = reader.readLong(offsets[4]);
+  object.questionnaireStopId = reader.readLong(offsets[5]);
   object.status =
-      _UserCoursestatusValueEnumMap[reader.readByteOrNull(offsets[5])] ??
+      _UserCoursestatusValueEnumMap[reader.readByteOrNull(offsets[6])] ??
           Status.start;
-  object.subjectStopId = reader.readLong(offsets[6]);
+  object.subjectStopId = reader.readLong(offsets[7]);
   return object;
 }
 
@@ -1271,9 +1344,11 @@ P _userCourseDeserializeProp<P>(
     case 4:
       return (reader.readLong(offset)) as P;
     case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (_UserCoursestatusValueEnumMap[reader.readByteOrNull(offset)] ??
           Status.start) as P;
-    case 6:
+    case 7:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1543,6 +1618,62 @@ extension UserCourseQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'lessonStopId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCourse, UserCourse, QAfterFilterCondition>
+      progressPercentEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'progress_percent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCourse, UserCourse, QAfterFilterCondition>
+      progressPercentGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'progress_percent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCourse, UserCourse, QAfterFilterCondition>
+      progressPercentLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'progress_percent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCourse, UserCourse, QAfterFilterCondition>
+      progressPercentBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'progress_percent',
         lower: lower,
         includeLower: includeLower,
         upper: upper,

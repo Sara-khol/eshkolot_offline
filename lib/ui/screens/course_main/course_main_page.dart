@@ -168,7 +168,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
               SizedBox(
                 height: 75.h,
               ),
-              if (data != null)
+             // if (data != null)
+              if (lastLesson != null || lastSubject != null)
                 ClipRRect(
                   child: Stack(
                     children: <Widget>[
@@ -296,14 +297,15 @@ class _CourseMainPageState extends State<CourseMainPage> {
   }
 
   getLastPositionInCourse({bool refresh=true}) async {
-    debugPrint('getLastPositionInCourse');
+    // debugPrint('getLastPositionInCourse');
     data = IsarService().getUserCourseData(widget.course.serverId);
 
     if (data != null) {
-
       if (data!.subjectStopId != 0) {
         for (int i = 0; i < widget.course.subjects.length; i++) {
-          if (widget.course.subjects.elementAt(i).id == data!.subjectStopId) {
+          if (widget.course.subjects
+              .elementAt(i)
+              .id == data!.subjectStopId) {
             lastSubject = widget.course.subjects.elementAt(i);
             data!.subjectIndex = i;
             break;
@@ -318,7 +320,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
       // s.id == data!.subjectStopId) : null;
       if (data!.lessonStopId != 0) {
         for (int i = 0; i < lastSubject!.lessons.length; i++) {
-          if (lastSubject!.lessons.elementAt(i).id == data!.lessonStopId) {
+          if (lastSubject!
+              .lessons
+              .elementAt(i)
+              .id == data!.lessonStopId) {
             lastLesson = lastSubject!.lessons.elementAt(i);
             data!.lessonIndex = i;
             break;
@@ -331,27 +336,29 @@ class _CourseMainPageState extends State<CourseMainPage> {
       // lastLesson = data!.lessonStopId != 0
       //     ? lastSubject!.lessons.firstWhere((l) => l.id == data!.lessonStopId)
       //     : null;
-
-      if (!data!.isQuestionnaire) {
-        lastTextButton = lastLesson!.name;
-      } else {
-        if (data!.subjectStopId == 0) {
-          //questionnaire of course
-          lastQuestionnaire = widget.course.questionnaire;
-          lastTextButton = 'תרגיל מסכם - ${widget.course.title}';
-        } else if (data!.lessonStopId == 0) {
-          //questionnaire of subject
-          lastQuestionnaire = lastSubject!.questionnaire;
-          lastTextButton = 'תרגיל מסכם - ${lastSubject!.name}';
+      //check if there is data on last stop
+      if (lastLesson != null || lastSubject != null) {
+        if (!data!.isQuestionnaire) {
+          lastTextButton = lastLesson!.name;
         } else {
-          //questionnaire of lesson
-          lastQuestionnaire = lastLesson!.questionnaire;
-          lastTextButton = 'תרגול - ${lastLesson!.name}';
+          if (data!.subjectStopId == 0) {
+            //questionnaire of course
+            lastQuestionnaire = widget.course.questionnaire;
+            lastTextButton = 'תרגיל מסכם - ${widget.course.title}';
+          } else if (data!.lessonStopId == 0) {
+            //questionnaire of subject
+            lastQuestionnaire = lastSubject!.questionnaire;
+            lastTextButton = 'תרגיל מסכם - ${lastSubject!.name}';
+          } else {
+            //questionnaire of lesson
+            lastQuestionnaire = lastLesson!.questionnaire;
+            lastTextButton = 'תרגול - ${lastLesson!.name}';
+          }
+        }
+        if (refresh) {
+          if (mounted) setState(() {});
         }
       }
-    if(refresh) {
-   if(mounted)   setState(() {});
-    }
     }
   }
 

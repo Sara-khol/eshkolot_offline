@@ -61,38 +61,44 @@ class _LessonWidgetState extends State<LessonWidget> {
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 19.w,
-                  ),
-                  Icon(
-                    Icons.videocam,
-                    size: 28.sp,
-                  ),
-                  SizedBox(
-                    width: 23.w,
-                  ),
-                  Text(
-                    lesson.name,
-                    style:
-                        TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(
-                    width: 32.w,
-                  ),
-                  Icon(
-                    Icons.access_time,
-                    size: 15.sp,
-                  ),
-                  SizedBox(
-                    width: 7.w,
-                  ),
-                  Text(
-                    "10 דק'",
-                    style: TextStyle(fontSize: 16.sp, color: Color(0xFF2D2828)),
-                  ),
-                  Spacer(),
-                  Container(
+
+                      SizedBox(
+                        width: 19.w,
+                      ),
+                      Icon(
+                        Icons.videocam,
+                        size: 28.sp,
+                      ),
+                      SizedBox(
+                        width: 23.w,
+                      ),
+                      Expanded(
+                        child: Text(
+                          lesson.name,
+                          // overflow:TextOverflow.ellipsis ,
+                          style:
+                          TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      // SizedBox(
+                      //   width: 32.w,
+                      // ),
+                      Icon(
+                        Icons.access_time,
+                        size: 15.sp,
+                      ),
+                      SizedBox(
+                        width: 7.w,
+                      ),
+                      Text(
+                        "10 דק'",
+                        style: TextStyle(fontSize: 16.sp, color: Color(0xFF2D2828)),
+                      ),
+                      SizedBox(width: 10.w),
+                      Container(
                     height: 20.h,
                     width: 70.w,
                     decoration: BoxDecoration(
@@ -113,7 +119,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                      SizedBox(
                     width: 18.w,
                   ),
                 ],
@@ -123,7 +129,7 @@ class _LessonWidgetState extends State<LessonWidget> {
               ),
               /*videoWidget*/
                VideoWidget(
-                  key: Key(lesson.vimoeId.toString()), vimoeId: lesson.vimoeId/*, player: player*/)
+                  key: Key(lesson.vimeo.toString()), vimoeId: lesson.vimeo/*, player: player*/)
             ],
           ),
         ),
@@ -149,10 +155,12 @@ class _LessonWidgetState extends State<LessonWidget> {
                   SizedBox(
                     width: 33.w,
                   ),
-                  Text(
-                    'תרגול - ${lesson.name}',
-                    style:
-                        TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w600),
+                  Expanded(
+                    child: Text(
+                      'תרגול - ${lesson.name}',
+                      style:
+                          TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w600),
+                    ),
                   ),
                   SizedBox(width: 65.h),
                   Icon(
@@ -163,7 +171,8 @@ class _LessonWidgetState extends State<LessonWidget> {
                     "  30 דק'  ",
                     style: TextStyle(fontSize: 16.sp),
                   ),
-                  Spacer(),
+                //  Spacer(),
+                  SizedBox(width: 10.w),
                   Container(
                     height: 20.h,
                     //width: 70.w,

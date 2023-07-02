@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:isar/isar.dart';
+
+import 'course.dart';
 part 'user.g.dart';
 
 @Collection()
@@ -10,13 +14,16 @@ class User {
   @Index(unique: true,replace: true,name:'tz')
   late String tz;
 
-  // //not suppose to be here
-  // final knowledgeList = IsarLinks<Knowledge>();
-
   List<int> knowledgeIds=[];
 
+
   @Ignore()
-  List<Knowledge> knowledgeList=[];
+ late Map<Knowledge,List<Course>> knowledgeCoursesMap=
+  {};
+
+
+  final learnPathList = IsarLinks<LearnPath>();
+
 
   List<int> pathIds=[];
 
@@ -24,19 +31,25 @@ class User {
   List<LearnPath> pathList=[];
 
   // final learnPathList = IsarLinks<LearnPath>();
-
+  @Name('UserCourse')
   List<UserCourse> courses=[];
 
 
-  User();
+
 // final courses= IsarLinks<Course>();
 }
 @Embedded()
 class UserCourse {
-
   late int courseId=0;
   @enumerated
- Status status=Status.start;
+  late Status status;
+
+  @ignore  @Name('status')
+ late String statusJson='הושלם';
+
+  @Name('progress_percent')
+  late int progressPercent;
+
  late int lessonStopId=0;
  late int subjectStopId=0;
  late int questionnaireStopId=0;
@@ -46,7 +59,53 @@ class UserCourse {
   late int subjectIndex;
   @ignore
   late int lessonIndex;
-  // late Status status;
+
+
+  void setComputedPropertyFromJson(Map<String, dynamic> json) {
+    courseId = json['courseId'] as int;
+    diplomaPath = json['diplomaPath'] as String;
+    statusJson = json['status'] as String;
+    progressPercent = json['progress_percent'] as int;
+    status = stringToStatusType(statusJson);
+  }
+
+
+  Map<String, dynamic> toJson() {
+    return {
+      'courseId': courseId,
+      'diplomaPath': diplomaPath,
+     'status':status.index,
+     'progress_percent':progressPercent,
+   'lessonStopId':0,
+   'subjectStopId':0,
+   'questionnaireStopId':0,
+    'isQuestionnaire':false
+    };
+  }
+
+
+  Status stringToStatusType(String value) {
+   late Status status;
+    switch (value) {
+      case 'לא התחיל':
+        status= Status.start;
+        break;
+      case 'הושלם' :
+        status= Status.finish;
+        break;
+      case 'בתהליך':
+        status= Status.middle;
+        break;
+      default:
+        throw Exception('Invalid Status type: $value');
+    }
+    if(status==Status.finish && diplomaPath.isNotEmpty)
+      {
+        status=Status.synchronized;
+      }
+    return status;
+  }
+
 }
 
 enum Status { start, middle, finish,synchronized }

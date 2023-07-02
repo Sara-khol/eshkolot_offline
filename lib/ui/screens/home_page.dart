@@ -6,11 +6,13 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../models/course.dart';
 import '../../models/user.dart';
+import '../../services/isar_service.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -22,8 +24,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // List<Knowledge>? knowledgeList = [];
-  List<Knowledge> knowledgeList = [];
+  Map<Knowledge,List<Course>> knowledgeCourses = {};
   List<LearnPath> pathList = [];
   bool showMorePath = false;
   bool showMoreKnowledge = false;
@@ -82,11 +83,10 @@ class _HomePageState extends State<HomePage> {
         },
       );
 
-  // List<KnowledgeLd> knowledgeList = [];
 
   @override
   void initState() {
-    knowledgeList = widget.user.knowledgeList;
+    knowledgeCourses = widget.user.knowledgeCoursesMap;
     pathList = widget.user.pathList;
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
     VisibilityDetectorController.instance.notifyNow();
@@ -112,12 +112,12 @@ class _HomePageState extends State<HomePage> {
           top: 78.h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
       child: Column(
         children: [
-          Center(
-              child: Text('שלום ${widget.user.name}',
-                  style: TextStyle(
-                      color: colors.blackColorApp,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 32.sp))),
+              Center(
+                  child: Text('שלום ${widget.user.name}',
+                      style: TextStyle(
+                          color: colors.blackColorApp,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 32.sp))),
           SizedBox(height: 26.h),
           Container(
               height: 51.h,
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   myCoursesWidget(bool isPath) {
-    if (knowledgeList.isNotEmpty) {
+    if (knowledgeCourses.isNotEmpty) {
       return Container(
         width: 690.w,
         height: 610.h,
@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> {
         // children: [
         //   ListView.builder(
         shrinkWrap: true,
-        itemCount: isPath ? pathList.length : knowledgeList.length,
+        itemCount: isPath ? pathList.length : knowledgeCourses.length,
         itemBuilder: (context, index) {
           return VisibilityDetector(
               key: Key(index.toString()),
@@ -267,8 +267,7 @@ class _HomePageState extends State<HomePage> {
               },
               child: isPath
                   ? pathItem(pathList[index])
-                  : knowledgeItem(knowledgeList[index], index));
-          // isPath ? pathItem(pathList[index]) : knowledgeItem(knowledgeList[index]);
+                  : knowledgeItem(knowledgeCourses.keys.elementAt(index), index));
         });
   }
 
@@ -282,9 +281,11 @@ class _HomePageState extends State<HomePage> {
               width: 31.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(knowledge.color),
+                color: Color(int.parse(knowledge.color)),
               ),
-              child: Image.asset('assets/images/${knowledge.iconPath}.png'),
+              // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
+              child: Image.asset('assets/images/english.png'),
+              // child: Center(child: HtmlWidget(knowledge.iconPath)),
             ),
             SizedBox(width: 9.w),
             Text(knowledge.title,
@@ -303,7 +304,7 @@ class _HomePageState extends State<HomePage> {
         // ),
         ListView.builder(
             shrinkWrap: true,
-            itemCount: knowledge.courses.length,
+            itemCount: knowledgeCourses.values.elementAt(kIndex).length,
             itemBuilder: (context, index) {
               // return VisibilityDetector(
               //     key: Key(index.toString()),
@@ -332,8 +333,8 @@ class _HomePageState extends State<HomePage> {
               //     //     visible: enAbleScrollKnowledge ||
               //     //         knowledge.courses.elementAt(index).isFullyDisplayed,
               //     //     child:
-              return courseItem(knowledge.courses.elementAt(index),
-                  knowledge.color, knowledge.iconPath, index);
+              return courseItem(knowledgeCourses.values.elementAt(kIndex)[index],
+                  int.parse(knowledge.color),knowledge.iconPath, index);
               // )
               // );
               // courseItem(knowledge.courses.elementAt(index),
@@ -353,7 +354,7 @@ class _HomePageState extends State<HomePage> {
             Container(
                 height: 9.h,
                 width: 9.h,
-                decoration: BoxDecoration(
+                decoration:const  BoxDecoration(
                   shape: BoxShape.circle,
                   color: Color(0xffFFDA6C),
                 )),
@@ -367,8 +368,9 @@ class _HomePageState extends State<HomePage> {
             shrinkWrap: true,
             itemCount: path.courses.length,
             itemBuilder: (context, index) {
-              return courseItem(path.courses.elementAt(index), path.color,
-                  path.iconPath, index);
+              return courseItem(path.courses.elementAt(index),path.color.isNotEmpty? int.parse(path.color):
+                  -1,
+                  path.iconPath??'', index);
             }),
         SizedBox(height: 24.h),
       ],
@@ -376,6 +378,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   courseItem(Course course, int color, String icon, int i) {
+    UserCourse? userCourse = IsarService().getUserCourseData(course.serverId);
+
     return Container(
       padding: EdgeInsets.only(top: 10.h, bottom: 10.h /*,left: 10*/),
       decoration: BoxDecoration(
@@ -384,7 +388,7 @@ class _HomePageState extends State<HomePage> {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          MainPage.of(context)?.mainWidget = MainPageChild(course: course);
+          MainPage.of(context)?.mainWidget = MainPageChild(course: course,knowledgeColor: color,);
           if( MainPage.of(context)?.updateSideMenu!=null) {
             MainPage.of(context)?.updateSideMenu!(course.serverId);
           }
@@ -396,7 +400,7 @@ class _HomePageState extends State<HomePage> {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  getIconByStatus(course.status),
+                  getIconByStatus(userCourse!.status),
                   // SizedBox(width: 12.w),
 
                   Positioned(
@@ -407,7 +411,7 @@ class _HomePageState extends State<HomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      MainPageChild(course: course)));
+                                      MainPageChild(course: course,knowledgeColor: color,)));
                         },
                         child: Text('${course.title}',
                             style: TextStyle(fontSize: 18.sp,color: colors.blackColorApp)),
@@ -417,7 +421,7 @@ class _HomePageState extends State<HomePage> {
                       right: 200.w,
                       child: Container(
                           decoration: BoxDecoration(
-                              color: Color(color),
+                              color:color!=-1? Color(color):Colors.indigo,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(30))),
                           padding: EdgeInsets.only(
@@ -427,7 +431,8 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset('assets/images/$icon.png'),
+                                // icon.isNotEmpty? HtmlWidget(icon):Container(),
+                                Image.asset('assets/images/english.png'),
                                 SizedBox(width: 15.w),
                                 Text(
                                   (i + 1).toString(),
@@ -438,7 +443,7 @@ class _HomePageState extends State<HomePage> {
                                 )
                               ])))
                 ]),
-            displayActionByStatus(course.status)
+            displayActionByStatus(userCourse.status)
           ],
         ),
       ),

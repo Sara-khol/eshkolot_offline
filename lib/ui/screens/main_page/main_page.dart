@@ -24,8 +24,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late List<Knowledge> knowledgeList = [];
-  late List<LearnPath> pathList = [];
 
   late Widget _mainWidget;
   late List<Widget> menuWidgets;
@@ -48,8 +46,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void initState()  {
-    knowledgeList = widget.user.knowledgeList;
-    pathList = widget.user.pathList;
     _mainWidget = HomePage(user: widget.user);
     super.initState();
   }

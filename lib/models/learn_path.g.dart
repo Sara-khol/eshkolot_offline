@@ -20,20 +20,25 @@ const LearnPathSchema = CollectionSchema(
     r'color': PropertySchema(
       id: 0,
       name: r'color',
-      type: IsarType.long,
+      type: IsarType.string,
+    ),
+    r'courses': PropertySchema(
+      id: 1,
+      name: r'courses',
+      type: IsarType.longList,
     ),
     r'iconPath': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'iconPath',
       type: IsarType.string,
     ),
     r'isOpen': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'isOpen',
       type: IsarType.bool,
     ),
     r'title': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'title',
       type: IsarType.string,
     )
@@ -65,7 +70,14 @@ int _learnPathEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.iconPath.length * 3;
+  bytesCount += 3 + object.color.length * 3;
+  bytesCount += 3 + object.coursesIds.length * 8;
+  {
+    final value = object.iconPath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -76,10 +88,11 @@ void _learnPathSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.color);
-  writer.writeString(offsets[1], object.iconPath);
-  writer.writeBool(offsets[2], object.isOpen);
-  writer.writeString(offsets[3], object.title);
+  writer.writeString(offsets[0], object.color);
+  writer.writeLongList(offsets[1], object.coursesIds);
+  writer.writeString(offsets[2], object.iconPath);
+  writer.writeBool(offsets[3], object.isOpen);
+  writer.writeString(offsets[4], object.title);
 }
 
 LearnPath _learnPathDeserialize(
@@ -88,12 +101,14 @@ LearnPath _learnPathDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = LearnPath();
-  object.color = reader.readLong(offsets[0]);
-  object.iconPath = reader.readString(offsets[1]);
-  object.id = id;
-  object.isOpen = reader.readBool(offsets[2]);
-  object.title = reader.readString(offsets[3]);
+  final object = LearnPath(
+    color: reader.readStringOrNull(offsets[0]) ?? '',
+    coursesIds: reader.readLongList(offsets[1]) ?? const [],
+    iconPath: reader.readStringOrNull(offsets[2]),
+    id: id,
+    title: reader.readStringOrNull(offsets[4]) ?? '',
+  );
+  object.isOpen = reader.readBool(offsets[3]);
   return object;
 }
 
@@ -105,13 +120,15 @@ P _learnPathDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongList(offset) ?? const []) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -210,46 +227,54 @@ extension LearnPathQueryWhere
 extension LearnPathQueryFilter
     on QueryBuilder<LearnPath, LearnPath, QFilterCondition> {
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorEqualTo(
-      int value) {
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'color',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorGreaterThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'color',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorLessThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'color',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorBetween(
-    int lower,
-    int upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -258,12 +283,243 @@ extension LearnPathQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'color',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'color',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> colorIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'color',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsElementEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'courses',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'courses',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'courses',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'courses',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'courses',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'courses',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'courses',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'courses',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'courses',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesIdsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'courses',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> iconPathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'iconPath',
+      ));
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      iconPathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'iconPath',
       ));
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> iconPathEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -276,7 +532,7 @@ extension LearnPathQueryFilter
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> iconPathGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -291,7 +547,7 @@ extension LearnPathQueryFilter
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> iconPathLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -306,8 +562,8 @@ extension LearnPathQueryFilter
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> iconPathBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -768,9 +1024,16 @@ extension LearnPathQuerySortThenBy
 
 extension LearnPathQueryWhereDistinct
     on QueryBuilder<LearnPath, LearnPath, QDistinct> {
-  QueryBuilder<LearnPath, LearnPath, QDistinct> distinctByColor() {
+  QueryBuilder<LearnPath, LearnPath, QDistinct> distinctByColor(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'color');
+      return query.addDistinctBy(r'color', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QDistinct> distinctByCoursesIds() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'courses');
     });
   }
 
@@ -803,13 +1066,19 @@ extension LearnPathQueryProperty
     });
   }
 
-  QueryBuilder<LearnPath, int, QQueryOperations> colorProperty() {
+  QueryBuilder<LearnPath, String, QQueryOperations> colorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'color');
     });
   }
 
-  QueryBuilder<LearnPath, String, QQueryOperations> iconPathProperty() {
+  QueryBuilder<LearnPath, List<int>, QQueryOperations> coursesIdsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'courses');
+    });
+  }
+
+  QueryBuilder<LearnPath, String?, QQueryOperations> iconPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'iconPath');
     });

@@ -6,16 +6,40 @@ part 'knowledge.g.dart';
 @Collection()
 class Knowledge {
   // Id id = Isar.autoIncrement;
- late Id id ;
+  late Id id ;
   late String title;
   late String iconPath;
-  late int color;
+  late String color;
   @Ignore()
   late bool isOpen=false;
 
   // @Index(unique: true,replace: true,name:'serverId' )
   // late int serverId;
 
-  final courses = IsarLinks<Course>();
 
+ factory Knowledge.fromJson(Map<String, dynamic> parsedJson,int knowledgeId) {
+  return Knowledge(
+   title: parsedJson['title'],
+   iconPath: parsedJson['iconPath'] as String,
+   color: (parsedJson['color'] as String).startsWith('#')?
+   (parsedJson['color'] as String).replaceFirst('#', '0xff'):parsedJson['color'],
+   id: knowledgeId,
+  );
+ }
+
+   Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'iconPath': iconPath,
+      'color': color,
+      'id': id,
+    };
+  }
+
+  Knowledge({
+   this.title='',
+   this.iconPath='',
+   this.color='',
+   this.id=0
+  });
 }

@@ -227,7 +227,8 @@ class VimoeService with ChangeNotifier {
         courses = await IsarService().getAllCourses();
       }
       for (Course course in courses) {
-        if (course.serverId > 1000) {
+        // if (course.serverId > 1000) {
+        if (course.serverId == 2567060) {
           projectId = course.serverId;
           await connectToVimoe();
         }
@@ -393,7 +394,7 @@ class VimoeService with ChangeNotifier {
       '${dir.path}/videos$name.mp4',
       onReceiveProgress: (rec, total) {
         progress = ((rec / total) * 100).toStringAsFixed(0);
-        // if(name=='/465339203') {
+        // if(name=='/458587389') {
         //   debugPrint('progress $progress $name');
         //  }
       },

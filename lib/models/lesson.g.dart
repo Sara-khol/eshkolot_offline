@@ -27,10 +27,10 @@ const LessonSchema = CollectionSchema(
       name: r'name',
       type: IsarType.string,
     ),
-    r'vimoeId': PropertySchema(
+    r'vimoe': PropertySchema(
       id: 2,
-      name: r'vimoeId',
-      type: IsarType.long,
+      name: r'vimoe',
+      type: IsarType.string,
     )
   },
   estimateSize: _lessonEstimateSize,
@@ -61,6 +61,12 @@ int _lessonEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.name.length * 3;
+  {
+    final value = object.vimeo;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -72,7 +78,7 @@ void _lessonSerialize(
 ) {
   writer.writeBool(offsets[0], object.isCompleted);
   writer.writeString(offsets[1], object.name);
-  writer.writeLong(offsets[2], object.vimoeId);
+  writer.writeString(offsets[2], object.vimeo);
 }
 
 Lesson _lessonDeserialize(
@@ -81,11 +87,12 @@ Lesson _lessonDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Lesson();
-  object.id = id;
+  final object = Lesson(
+    id: id,
+    name: reader.readStringOrNull(offsets[1]) ?? '',
+    vimeo: reader.readStringOrNull(offsets[2]),
+  );
   object.isCompleted = reader.readBool(offsets[0]);
-  object.name = reader.readString(offsets[1]);
-  object.vimoeId = reader.readLong(offsets[2]);
   return object;
 }
 
@@ -99,9 +106,9 @@ P _lessonDeserializeProp<P>(
     case 0:
       return (reader.readBool(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -388,55 +395,148 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdEqualTo(
-      int value) {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'vimoeId',
-        value: value,
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'vimoe',
       ));
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdGreaterThan(
-    int value, {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'vimoe',
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vimoe',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoGreaterThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'vimoeId',
+        property: r'vimoe',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdLessThan(
-    int value, {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoLessThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'vimoeId',
+        property: r'vimoe',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimoeIdBetween(
-    int lower,
-    int upper, {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoBetween(
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'vimoeId',
+        property: r'vimoe',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'vimoe',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'vimoe',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'vimoe',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'vimoe',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vimoe',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'vimoe',
+        value: '',
       ));
     });
   }
@@ -531,15 +631,15 @@ extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVimoeId() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVimeo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vimoeId', Sort.asc);
+      return query.addSortBy(r'vimoe', Sort.asc);
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVimoeIdDesc() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVimeoDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vimoeId', Sort.desc);
+      return query.addSortBy(r'vimoe', Sort.desc);
     });
   }
 }
@@ -581,15 +681,15 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVimoeId() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVimeo() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vimoeId', Sort.asc);
+      return query.addSortBy(r'vimoe', Sort.asc);
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVimoeIdDesc() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVimeoDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vimoeId', Sort.desc);
+      return query.addSortBy(r'vimoe', Sort.desc);
     });
   }
 }
@@ -608,9 +708,10 @@ extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QDistinct> distinctByVimoeId() {
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByVimeo(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'vimoeId');
+      return query.addDistinctBy(r'vimoe', caseSensitive: caseSensitive);
     });
   }
 }
@@ -634,9 +735,9 @@ extension LessonQueryProperty on QueryBuilder<Lesson, Lesson, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Lesson, int, QQueryOperations> vimoeIdProperty() {
+  QueryBuilder<Lesson, String?, QQueryOperations> vimeoProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'vimoeId');
+      return query.addPropertyName(r'vimoe');
     });
   }
 }

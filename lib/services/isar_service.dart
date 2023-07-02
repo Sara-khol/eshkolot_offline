@@ -12,7 +12,6 @@ import '../models/course.dart';
 import '../models/subject.dart';
 import 'package:collection/collection.dart';
 
-
 class IsarService {
   late Future<Isar> db;
 
@@ -75,83 +74,19 @@ class IsarService {
       List<Questionnaire> qList,
       List<Knowledge> knowledgeList,
       // List<User> usersList,
-      var  jsonPaths,
+      var jsonPaths,
       var jsonUsers) async {
     final isar = await db;
-    // await isar.writeTxn(() async {
-    //    await isar.clear();
-    //    await isar.subjects.putAll(subjectList);
-    //    await isar.courses.putAll(coursesList);
-    //    await isar.lessons.putAll(lessonList);
-    //    await isar.questionnaires.putAll(qList);
-    //  await  coursesList[0].subjects.save();
-    // // await  coursesList[0].subjects.first.questionnaires.save();
-    // // await  coursesList[0].subjects.first.lessons.first.questionnaire.save();
-    // // await  coursesList[0].subjects.first.lessons[0].name;
-    //
-    //    // await isar.teachers.put(mathTeacher);
-    //    // await linda.teachers.save();
-    //  });
     await isar.writeTxn(() async {
       await isar.clear();
-      // await isar.courses.putAll(coursesList);
-      // await isar.subjects.putAll(subjectList);
-      // await isar.lessons.putAll(lessonList);
-      // await isar.questionnaires.putAll(qList);
-      // await coursesList[0].subjects.save();
-      // coursesList[0].subjects.addAll(subjectList);
-      // await coursesList[0].subjects.elementAt(0).lessons.save();
-      // await coursesList[0].subjects.elementAt(0).questionnaires.save();
-      // // await  coursesList[0].subjects.elementAt(0).lessons.elementAt(0).questionnaire.save();
-      //
-      // coursesList[0].subjects.elementAt(0).lessons.addAll(lessonList);
-      // await coursesList[0]
-      //     .subjects
-      //     .elementAt(0)
-      //     .lessons
-      //     .elementAt(0)
-      //     .questionnaire
-      //     .save();
-      //
-      // coursesList[0].subjects.elementAt(0).questionnaires.add(qList[1]);
-      // coursesList[0]
-      //     .subjects
-      //     .elementAt(0)
-      //     .lessons
-      //     .elementAt(0)
-      //     .questionnaire
-      //     .value = qList[0];
-      //
-      // await coursesList[0].subjects.elementAt(0).lessons.save();
-      // await coursesList[0].subjects.elementAt(0).questionnaires.save();
-      // await coursesList[0]
-      //     .subjects
-      //     .elementAt(0)
-      //     .lessons
-      //     .elementAt(0)
-      //     .questionnaire
-      //     .save();
-      //
-      // print("jjj ${coursesList[0].subjects}");
-      // print("hhh ${coursesList[0].subjects.elementAt(0).lessons}");
-      // print(
-      //     "hhh ${coursesList[0].subjects.elementAt(0).lessons.elementAt(0).name}");
-      // print(
-      //     "qqq ${coursesList[0].subjects.elementAt(0).questionnaires.elementAt(0).question}");
-      // print(
-      //     "qqq ${coursesList[0].subjects.elementAt(0).lessons.elementAt(0).questionnaire.value?.question}");
-      // //   await  coursesList[0].subjects.elementAt(0).lessons.save();
-      //
-      // // coursesList[0].subjects.elementAt(0).lessons.save();
-      // // await linda.teachers.save();
     });
     isar.writeTxnSync(() {
       isar.lessons.putAllSync(lessonList);
       isar.subjects.putAllSync(subjectList);
-    //  isar.courses.importJsonSync(coursesList);
+       isar.courses.putAllSync(coursesList);
       isar.knowledges.putAllSync(knowledgeList);
-     isar.users.putAllSync(jsonUsers);
-    //   isar.learnPaths.importJsonSync(jsonPaths);
+      isar.users.importJsonSync(jsonUsers);
+      //   isar.learnPaths.importJsonSync(jsonPaths);
       isar.learnPaths.putAllSync(jsonPaths);
 
       // isar.users.importJsonSync(jsonUsers);
@@ -163,8 +98,7 @@ class IsarService {
     });
   }
 
-  addIsarVideo(VideoIsar videoIsar) async
-  {
+  addIsarVideo(VideoIsar videoIsar) async {
     final isar = await db;
     await isar.writeTxn(() async {
       await isar.videoIsars.put(videoIsar);
@@ -187,15 +121,13 @@ class IsarService {
       // vi!.isDownload = true;
       // // await isar.videoIsars.put(vi);
 
-
       // final isar = await db;
       IsarCollection<VideoIsar> videoCollection = isar.collection<VideoIsar>();
       VideoIsar? vi = await videoCollection.where().findFirst();
-      vi!.expiredDate=date;
+      vi!.expiredDate = date;
       await isar.videoIsars.put(vi);
     });
   }
-
 
   Future<VideoIsar?> getVideoById(int id) async {
     final isar = await db;
@@ -215,12 +147,10 @@ class IsarService {
     return await v.count() == 0;
   }
 
-  Future<List<VideoIsar>> getAllVideosToDownload() async
-  {
+  Future<List<VideoIsar>> getAllVideosToDownload() async {
     final isar = await db;
-    final result = await isar.videoIsars.filter()
-        .isDownloadEqualTo(false)
-        .findAll();
+    final result =
+    await isar.videoIsars.filter().isDownloadEqualTo(false).findAll();
     return result;
   }
 
@@ -235,8 +165,7 @@ class IsarService {
     return b;
   }
 
-  clearVideoIsar() async
-  {
+  clearVideoIsar() async {
     final isar = await db;
     // IsarCollection<VideoIsar> v = isar.collection<VideoIsar>();
     final videoIds = await isar.videoIsars.where().idProperty().findAll();
@@ -244,9 +173,7 @@ class IsarService {
     await isar.writeTxn(() async {
       await isar.videoIsars.deleteAll(videoIds);
     });
-
   }
-
 
   Future<Course?> getFirstCourse() async {
     final isar = await db;
@@ -268,121 +195,139 @@ class IsarService {
     return knowledgeCollection;
   }
 
-  Future<User?> getUser() async {
-    final isar = await db;
-    User? user = await isar.users.where().findFirst();
-    if (user != null) {
-      for (int knowledgeId in user.knowledgeIds) {
-        Knowledge? knowledge = await getKnowledgeById(knowledgeId, isar);
-        if (knowledge != null) {
-          user.knowledgeList.add(knowledge);
-        }
-      }
-      for (int pathId in user.pathIds) {
-        LearnPath? path = await getPathById(pathId, isar);
-        if (path != null) {
-          user.pathList.add(path);
-        }
-      }
-    }
-    return user;
-  }
 
   Future<User?> getUserByTz(String tz) async {
     final isar = await db;
     User? user = await isar.users.where().tzEqualTo(tz).findFirst();
 
     if (user != null) {
-      _user = user;
       for (int knowledgeId in user.knowledgeIds) {
         Knowledge? knowledge = await getKnowledgeById(knowledgeId, isar);
         if (knowledge != null) {
-          user.knowledgeList.add(knowledge);
+          user.knowledgeCoursesMap[knowledge]=[];
+          }
+        }
+      for (UserCourse userCourse in user.courses) {
+        Course? c = await isar.courses.where()
+            .serverIdEqualTo(userCourse.courseId)
+            .findFirst();
+        if (c != null && c.knowledgeId!=null) {
+
+          for (var entry in user.knowledgeCoursesMap.entries) {
+            Knowledge knowledge = entry.key;
+            if(knowledge.id==c.knowledgeId)
+            {
+              user.knowledgeCoursesMap[knowledge]?.add(c);
+            }
+          }
         }
       }
-      for (int pathId in user.pathIds) {
-        LearnPath? path = await getPathById(pathId, isar);
-        if (path != null) {
-          user.pathList.add(path);
+      for(var entry in user.knowledgeCoursesMap.entries)
+      {
+        debugPrint('knowledge ${entry.key.id}');
+        for(Course v in entry.value )
+        {
+          debugPrint('course ${v.title}');
         }
+
       }
+        for (int pathId in user.pathIds) {
+          LearnPath? path = await getPathById(pathId, isar);
+          if (path != null) {
+            user.pathList.add(path);
+          }
+        }
+
+        _user = user;
+        await isar.writeTxn(() async {
+          await isar.users.put(user);
+        });
+      }
+      return user;
     }
-    return user;
-  }
 
-  getCurrentUser() {
-    return _user;
-  }
+    getCurrentUser() {
+      return _user;
+    }
 
-  UserCourse? getUserCourseData(int courseId)  {
-    UserCourse? course = _user.courses.firstWhereOrNull((course) => course.courseId == courseId);
-    return course;
-  }
+    UserCourse? getUserCourseData(int courseId) {
+      UserCourse? course =
+      _user.courses.firstWhereOrNull((course) => course.courseId == courseId);
+      return course;
+    }
 
-  addUserCourseStop(UserCourse userCourse) async
-  {
-    final isar = await db;
-    await isar.writeTxn(() async {
-    User? user=  await isar.users.get(_user.id);
-    UserCourse? course= user!.courses.firstWhereOrNull((course) => course.courseId == userCourse.courseId);
+    addUserCourseStop(UserCourse newDataCourse) async {
+      final isar = await db;
+      await isar.writeTxn(() async {
+        User? user = await isar.users.get(_user.id);
+        UserCourse? course = user!.courses.firstWhereOrNull(
+                (course) => course.courseId == newDataCourse.courseId);
 
+        // // not supposed to get to here
 
+        // if(course==null)
+        //   {
+        //     //add
+        //     user.courses=user.courses.toList();
+        //     user.courses.add(newDataCourse);
+        //   }
+        // else
+        if (course != null) {
+          //update
+          debugPrint('update ${newDataCourse.lessonStopId}');
 
-    if(course==null)
-      {
-        //add
-        user.courses=user.courses.toList();
-        user.courses.add(userCourse);
-      }
-    else
-      {
-        //update
-        debugPrint('update ${userCourse.lessonStopId}');
-        user.courses[user.courses.indexWhere((course) => course.courseId == userCourse.courseId)] = userCourse;
+          course.subjectStopId = newDataCourse.subjectStopId;
+          course.lessonStopId = newDataCourse.lessonStopId;
+          course.isQuestionnaire = newDataCourse.isQuestionnaire;
+          //  course.questionnaireStopId=userCourse.questionnaireStopId;
 
-        // course=userCourse;
-        // user.courses.add(userCourse);
-      }
-    await isar.users.put(user);
-    _user=user;
-    debugPrint('update ${isar.users.toString()}');
-    });
-  }
+          // user.courses[user.courses.indexWhere((course) => course.courseId == newDataCourse.courseId)] = newDataCourse;
+          user.courses[user.courses.indexWhere(
+                  (course) => course.courseId == newDataCourse.courseId)] =
+              course;
 
+          // course=userCourse;
+          // user.courses.add(userCourse);
+        }
+        await isar.users.put(user);
+        _user = user;
+        debugPrint('update ${isar.users.toString()}');
+      });
+    }
 
-Future<List<User>> getUsers() async {
-  final isar = await db;
-  List<User> users = await isar.users.where().findAll();
-  return users;
-}
+    Future<List<User>> getUsers() async {
+      final isar = await db;
+      List<User> users = await isar.users.where().findAll();
+      return users;
+    }
 
-Future<Knowledge?> getKnowledgeById(int id, Isar isar,) async {
-  Knowledge? knowledge = await isar.knowledges.get(id);
-  return knowledge;
-}
+    Future<Knowledge?> getKnowledgeById(int id,
+        Isar isar) async {
+      Knowledge? knowledge = await isar.knowledges.get(id);
+      return knowledge;
+    }
 
-Future<LearnPath?> getPathById(int id, Isar isar) async {
-  final isar = await db;
-  LearnPath? path = await isar.learnPaths.get(id);
-  return path;
-}
+    Future<LearnPath?> getPathById(int id, Isar isar) async {
+      final isar = await db;
+      LearnPath? path = await isar.learnPaths.get(id);
+      return path;
+    }
 
-Stream<List<Course>> listenToCourses() async* {
-  final isar = await db;
-  yield* isar.courses
-      .where()
-      .watch(fireImmediately: true /*initialReturn: true*/);
-}
+    Stream<List<Course>> listenToCourses() async* {
+      final isar = await db;
+      yield* isar.courses
+          .where()
+          .watch(fireImmediately: true /*initialReturn: true*/);
+    }
 
-updateLesson(int id) async {
-  final isar = await db;
-  await isar.writeTxn(() async {
-    Lesson? lesson = await isar.lessons.get(id);
-    lesson!.isCompleted = true;
-    await isar.lessons.put(lesson);
-  });
-}
-
+    updateLesson(int id) async {
+      final isar = await db;
+      await isar.writeTxn(() async {
+        Lesson? lesson = await isar.lessons.get(id);
+        lesson!.isCompleted = true;
+        await isar.lessons.put(lesson);
+      });
+    }
 
 // insertFresh(List<Email> emailList) async {
 //   await isarInstance.writeTxn(() async {
@@ -428,4 +373,4 @@ updateLesson(int id) async {
 //   //await emailCollection.filter().isSyncedEqualTo(false).findAll();
 //   //return emails;
 // }
-}
+  }

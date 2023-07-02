@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../../../models/user.dart';
 import '../../../services/isar_service.dart';
@@ -21,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   Color myColor = const Color(0xff2D2828);
 
   //todo remove text
-  TextEditingController controller = TextEditingController(text: '123456789');
+  TextEditingController controller = TextEditingController(text: '111222333');
 
   bool isError = false;
   @override
@@ -119,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                 ]),
             InkWell(
               onTap: () async {
-                if (controller.text.isNotEmpty) {
+               // if (controller.text.isNotEmpty) {
                   User? user = await IsarService().getUserByTz(controller.text);
                   if (user != null) {
                     if (mounted) {
@@ -133,11 +132,11 @@ class _LoginPageState extends State<LoginPage> {
                       isError = true;
                     });
                   }
-                } else {
-                  setState(() {
-                    isError = true;
-                  });
-                }
+                // } else {
+                //   setState(() {
+                //     isError = true;
+                //   });
+                // }
               },
               child: Container(
                 height: 40.h,
@@ -179,7 +178,6 @@ class _LoginPageState extends State<LoginPage> {
           floatingActionButton:kDebugMode? FloatingActionButton(onPressed: ()
           async {
             IsarService().cleanDb();
-            //Sentry.captureMessage('kkk');
           }):null)
     );
   }

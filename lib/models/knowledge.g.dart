@@ -20,7 +20,7 @@ const KnowledgeSchema = CollectionSchema(
     r'color': PropertySchema(
       id: 0,
       name: r'color',
-      type: IsarType.long,
+      type: IsarType.string,
     ),
     r'iconPath': PropertySchema(
       id: 1,
@@ -39,14 +39,7 @@ const KnowledgeSchema = CollectionSchema(
   deserializeProp: _knowledgeDeserializeProp,
   idName: r'id',
   indexes: {},
-  links: {
-    r'courses': LinkSchema(
-      id: 8626370710802806334,
-      name: r'courses',
-      target: r'Course',
-      single: false,
-    )
-  },
+  links: {},
   embeddedSchemas: {},
   getId: _knowledgeGetId,
   getLinks: _knowledgeGetLinks,
@@ -60,6 +53,7 @@ int _knowledgeEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.color.length * 3;
   bytesCount += 3 + object.iconPath.length * 3;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
@@ -71,7 +65,7 @@ void _knowledgeSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.color);
+  writer.writeString(offsets[0], object.color);
   writer.writeString(offsets[1], object.iconPath);
   writer.writeString(offsets[2], object.title);
 }
@@ -82,11 +76,12 @@ Knowledge _knowledgeDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Knowledge();
-  object.color = reader.readLong(offsets[0]);
-  object.iconPath = reader.readString(offsets[1]);
-  object.id = id;
-  object.title = reader.readString(offsets[2]);
+  final object = Knowledge(
+    color: reader.readStringOrNull(offsets[0]) ?? '',
+    iconPath: reader.readStringOrNull(offsets[1]) ?? '',
+    id: id,
+    title: reader.readStringOrNull(offsets[2]) ?? '',
+  );
   return object;
 }
 
@@ -98,11 +93,11 @@ P _knowledgeDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -113,12 +108,11 @@ Id _knowledgeGetId(Knowledge object) {
 }
 
 List<IsarLinkBase<dynamic>> _knowledgeGetLinks(Knowledge object) {
-  return [object.courses];
+  return [];
 }
 
 void _knowledgeAttach(IsarCollection<dynamic> col, Id id, Knowledge object) {
   object.id = id;
-  object.courses.attach(col, col.isar.collection<Course>(), r'courses', id);
 }
 
 extension KnowledgeQueryWhereSort
@@ -201,46 +195,54 @@ extension KnowledgeQueryWhere
 extension KnowledgeQueryFilter
     on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorEqualTo(
-      int value) {
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'color',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorGreaterThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'color',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorLessThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'color',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorBetween(
-    int lower,
-    int upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -249,6 +251,75 @@ extension KnowledgeQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'color',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'color',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'color',
+        value: '',
       ));
     });
   }
@@ -572,67 +643,7 @@ extension KnowledgeQueryObject
     on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {}
 
 extension KnowledgeQueryLinks
-    on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> courses(
-      FilterQuery<Course> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'courses');
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition>
-      coursesLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> coursesIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition>
-      coursesIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition>
-      coursesLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition>
-      coursesLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition>
-      coursesLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'courses', lower, includeLower, upper, includeUpper);
-    });
-  }
-}
+    on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {}
 
 extension KnowledgeQuerySortBy on QueryBuilder<Knowledge, Knowledge, QSortBy> {
   QueryBuilder<Knowledge, Knowledge, QAfterSortBy> sortByColor() {
@@ -725,9 +736,10 @@ extension KnowledgeQuerySortThenBy
 
 extension KnowledgeQueryWhereDistinct
     on QueryBuilder<Knowledge, Knowledge, QDistinct> {
-  QueryBuilder<Knowledge, Knowledge, QDistinct> distinctByColor() {
+  QueryBuilder<Knowledge, Knowledge, QDistinct> distinctByColor(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'color');
+      return query.addDistinctBy(r'color', caseSensitive: caseSensitive);
     });
   }
 
@@ -754,7 +766,7 @@ extension KnowledgeQueryProperty
     });
   }
 
-  QueryBuilder<Knowledge, int, QQueryOperations> colorProperty() {
+  QueryBuilder<Knowledge, String, QQueryOperations> colorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'color');
     });

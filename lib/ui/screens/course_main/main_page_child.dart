@@ -1,3 +1,4 @@
+
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
@@ -14,9 +15,10 @@ import 'course_main_page.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 class MainPageChild extends StatefulWidget {
-  const MainPageChild({super.key, required this.course});
+  const MainPageChild({super.key, required this.course, required this.knowledgeColor});
 
   final Course course;
+  final int  knowledgeColor;
 
   static _MainPageChildState? of(BuildContext context) =>
       context.findAncestorStateOfType<_MainPageChildState>();
@@ -39,12 +41,14 @@ class _MainPageChildState extends State<MainPageChild> {
   late bool doShowNext;
   late String nextButtonText;
   final CoursePageController myController = CoursePageController();
+  UserCourse? userCourse;
 
   set bodyWidget(Widget value) => setState(() => _bodyWidget.value = value);
 
   @override
   void initState() {
     super.initState();
+    userCourse= IsarService().getUserCourseData(widget.course.serverId);
     _bodyWidget = ValueNotifier(
         CourseMainPage(course: widget.course, controller: myController));
 
@@ -66,6 +70,8 @@ class _MainPageChildState extends State<MainPageChild> {
     }
     _bodyWidget.value =
         CourseMainPage(course: widget.course, controller: myController);
+    userCourse= IsarService().getUserCourseData(widget.course.serverId);
+
     super.didUpdateWidget(oldWidget);
   }
 
@@ -109,15 +115,15 @@ class _MainPageChildState extends State<MainPageChild> {
                     child: Row(
                       children: [
                         Text(
-                          '${(currentStep / totalSteps * 100).toInt()}% הושלמו',
+                          '${userCourse!.progressPercent}% הושלמו',
                           style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color:
                                   //todo change get color or from knowledge or from path
-                                  Color(widget.course.knowledge.value != null
-                                      ? widget.course.knowledge.value!.color
-                                      : 0xff32D489)),
+                                  Color(widget.knowledgeColor!=-1?widget.knowledgeColor:0xff32D489/*widget.course.knowledge.value != null
+                                      ?int.parse( widget.course.knowledge.value!.color)
+                                      : 0xff32D489*/)),
                           // Color(widget.course.knowledge.value??widget.course.knowledge.value!.color)),
                         ),
                         SizedBox(
@@ -138,7 +144,7 @@ class _MainPageChildState extends State<MainPageChild> {
                     backgroundColor: Color(0xFFF4F4F3),
                     progressColor: Color(0xFF62FFB8),
                     lineHeight: 5,
-                    percent: currentStep / totalSteps,
+                    percent: userCourse!.progressPercent/100,
                     isRTL: true,
                   ),
                 ],
@@ -402,6 +408,8 @@ class _MainPageChildState extends State<MainPageChild> {
 
   subjectTitleDisplay(Subject currentSubject, int sIndex) {
     return ListTile(
+      contentPadding: EdgeInsets.only(right: 20.w),
+
       title: SizedBox(
         width: double.infinity,
         // color: Colors.transparent,
@@ -413,18 +421,22 @@ class _MainPageChildState extends State<MainPageChild> {
                 : Icon(Icons.circle_outlined,
                     color: colors.grey2ColorApp, size: 20.sp),
             SizedBox(
-              width: 25.w,
+              width: 20.w,
             ),
             Icon(
               Icons.book,
               size: 13.h,
             ),
             SizedBox(
-              width: 8.w,
+              width: 13.w,
             ),
-            Text(currentSubject.name,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
-            Spacer(),
+            Expanded(
+              child: Text(currentSubject.name,
+                  //overflow: TextOverflow.ellipsis,
+            //softWrap: false,
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
+            ),
+           // Spacer(),
             Icon(Icons.arrow_drop_down_sharp)
           ],
         ),
@@ -494,7 +506,7 @@ class _MainPageChildState extends State<MainPageChild> {
                   tileColor: isSelect
                       ? colors.grey2ColorApp
                       : Colors.transparent,
-                  contentPadding: EdgeInsets.only(right: 20.h),
+                  contentPadding: EdgeInsets.only(right: 20.h,bottom: 20.h,left: 20.h),
                   // hoverColor: colors.grey2ColorApp,
                   title: Row(
                     children: [
@@ -508,11 +520,13 @@ class _MainPageChildState extends State<MainPageChild> {
                         color: Colors.black,
                       ),
                       SizedBox(width: 14.w),
-                      Text(name,
-                          style: TextStyle(
-                              fontWeight:
-                                  isLesson ? FontWeight.w600 : FontWeight.w400,
-                              fontSize: 16.sp)),
+                      Expanded(
+                        child: Text(name,
+                            style: TextStyle(
+                                fontWeight:
+                                    isLesson ? FontWeight.w600 : FontWeight.w400,
+                                fontSize: 16.sp)),
+                      ),
                     ],
                   ),
                   onTap: onPress),
