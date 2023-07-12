@@ -1,9 +1,7 @@
-import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../../../models/course.dart';
 import '../../../models/knowledge.dart';
@@ -216,7 +214,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                 //make first course chosen
                 MainPage.of(context)?.mainWidget = MainPageChild(
                     course: courses.first,
-                    knowledgeColor: int.parse(knowledge.color));
+                    knowledgeColor:  knowledge.color!=''?int.parse(knowledge.color):-1);
                 courses.first.isSelected = true;
                 sIndex = 0;
                 //for first time
@@ -238,7 +236,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                   width: 31.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(int.parse(knowledge.color)),
+                    color:knowledge.color!=''? Color(int.parse(knowledge.color)):Colors.indigo,
                   ),
                   // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
                   // child: Center(child: HtmlWidget(knowledge.iconPath)),
@@ -272,8 +270,8 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               itemBuilder: (context, index) {
                 return courseItem(
                     knowledgeCourses.values.elementAt(kIndex)[index],
-                    int.parse(knowledge.color),
-                    knowledge.iconPath,
+                    knowledge.color!=''?int.parse(knowledge.color):-1 ,
+                    knowledge.iconPath??'',
                     index);
               }),
         ),
@@ -439,7 +437,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
     setState(() {
       Course? selectedCourse;
       for (var entry in knowledgeCourses.entries) {
-        Knowledge knowledge = entry.key;
+      //  Knowledge knowledge = entry.key;
         List<Course> courses = entry.value;
         selectedCourse =
             courses.firstWhereOrNull((element) => element.serverId == courseId);

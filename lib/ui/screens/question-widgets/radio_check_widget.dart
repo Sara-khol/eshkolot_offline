@@ -1,39 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/checkbox_widget.dart';
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+
+import '../course_main/questionnaire_tab.dart';
 
 class RadioCheck extends StatefulWidget {
-  RadioCheck(this.question, {super.key});
+  const RadioCheck(this.question, {super.key, required this.questionController});
 
-  Questionnaire question;
+ final Question question;
+ final QuestionController questionController;
 
   @override
-  State<RadioCheck> createState() => _RadioCheckState(/*question*/);
+  State<RadioCheck> createState() => _RadioCheckState();
 }
 
 class _RadioCheckState extends State<RadioCheck> {
 
-  String _character = '';
+  String _character='';
 
-  List<bool> _isSelected=[];
+   List<bool> _isSelected=[];
 
+
+  @override
   void initState(){
+  super.initState();
+  widget.questionController.isFilled=isFilled;
+  widget.questionController.isCorrect=verifyCheck;
 
-    for(int i=0;i<widget.question.options!.length;i++){
-      _isSelected.add(false);
-    }
-    print(_isSelected);
+  _isSelected= List<bool>.filled(widget.question.ans!.length, false);
   }
 
-  // bool _isSelectedA = false;
-  // bool _isSelectedB = false;
-  // bool _isSelectedC = false;
-  // bool _isSelectedD = false;
 
-  int radio = 1;
-  int check = 2;
+  @override
+  void didUpdateWidget(covariant RadioCheck oldWidget) {
+    if(oldWidget.question!=widget.question)
+      {
+       _isSelected= List<bool>.filled(widget.question.ans!.length, false);
+        _character='';
+     }
+    widget.questionController.isFilled=isFilled;
+    widget.questionController.isCorrect=verifyCheck;
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,28 +53,22 @@ class _RadioCheckState extends State<RadioCheck> {
            widget.question.type == QType.checkbox
               ? getCheckBoxWidget(widget.question)
               : getRadioWidget(widget.question),
-          SizedBox(
-            height: 30.h,
-          ),
-          actionButton(),
         ]));
   }
 
-  Widget getRadioWidget(Questionnaire item) {
+  Widget getRadioWidget(Question item) {
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Align(
               alignment: Alignment.centerRight,
-              child: Text(
+              child: HtmlWidget(
                 item.question,
-                textAlign: TextAlign.right,
-                style: TextStyle(color: Color.fromARGB(255, 45, 40, 40),fontSize: 27.w),
               )),
-          for(var option in item.options!)...[
+          for(var ans in item.ans!)...[
             RadioListTile<String?>(
-              title: Text(option),
-              value: option,
+              title: Text(ans.ans),
+              value: ans.ans,
               groupValue: _character,
               onChanged: (value) {
                 setState(() {
@@ -73,53 +77,22 @@ class _RadioCheckState extends State<RadioCheck> {
               },
             ),
           ]
-          /*RadioListTile<String?>(
-            title: Text(item.optionB!),
-            value: item.optionB,
-            groupValue: _character,
-            onChanged: (value) {
-              setState(() {
-                _character = value!;
-              });
-            },
-          ),
-          RadioListTile<String?>(
-            title: Text(item.optionC!),
-            value: item.optionC,
-            groupValue: _character,
-            onChanged: (value) {
-              setState(() {
-                _character = value!;
-              });
-            },
-          ),
-          RadioListTile<String?>(
-            title: Text(item.optionD!),
-            value: item.optionD,
-            groupValue: _character,
-            onChanged: (value) {
-              setState(() {
-                _character = value!;
-              });
-            },
-          ),*/
         ]);
   }
 
-  Widget getCheckBoxWidget(Questionnaire item) {
+  Widget getCheckBoxWidget(Question item) {
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Align(
             alignment: Alignment.centerLeft,
-            child: Text(
+            child: HtmlWidget(
               item.question,
-              textAlign: TextAlign.left,
             ),
           ),
-          for(int i=0;i<item.options!.length;i++)...[
+          for(int i=0;i<item.ans!.length;i++)...[
             CheckBoxWidget(
-              label: item.options![i],
+              label: item.ans![i].ans,
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               value: _isSelected[i],
               onChanged: (bool newValue) {
@@ -129,84 +102,40 @@ class _RadioCheckState extends State<RadioCheck> {
               },
             ),
           ]
-          /*CheckBoxWidget(
-            label: item.optionB!,
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            value: _isSelectedB,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isSelectedB = newValue;
-              });
-            },
-          ),
-          CheckBoxWidget(
-            label: item.optionC!,
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            value: _isSelectedC,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isSelectedC = newValue;
-              });
-            },
-          ),
-          CheckBoxWidget(
-            label: item.optionD!,
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            value: _isSelectedD,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isSelectedD = newValue;
-              });
-            },
-          ),*/
         ]);
   }
 
-  Widget actionButton() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF167F67)),
-          child: Text(
-            "Verify",
-            style: TextStyle(color: Colors.white),
-          ),
-          onPressed: () => onVerifyClick(),
-        ),
-      ],
-    );
-  }
 
-  onVerifyClick() {
-    var msg = "";
-    final answers = [];
+
+
+
+  bool isFilled()
+  {
     if (widget.question.type == QType.radio) {
-      if (_character == widget.question.ans![0]) {
-        msg = "Correct";
-      } else {
-        msg = "Incorrect";
-      }
+    return  _character!='';
     }
-    else {
-      for(int i=0;i<widget.question.options!.length;i++){
-        if (_isSelected[i]) answers.add(widget.question.options![i]);
-      }
-      Function eq = const DeepCollectionEquality.unordered().equals;
-      debugPrint('answers${answers}');
-      debugPrint('widget.question.ans${widget.question.ans}');
+    else{
+     bool? b= _isSelected.firstWhereOrNull((element) => element);
+     return b!=null;
+    }
+    }
 
-      if (eq(answers, widget.question.ans)) {
-        msg = "Correct";
-      } else {
-        msg = "Incorrect";
+
+  bool verifyCheck() {
+
+    if (widget.question.type == QType.radio) {
+      Answer? correctAnswer = widget.question.ans!.firstWhere(
+              (ans) => ans.isCorrect == true);
+       return  _character == correctAnswer.ans;
       }
+    else {
+      for (int i = 0; i < widget.question.ans!.length; i++) {
+        if (widget.question.ans![i].isCorrect != _isSelected[i]) {
+          return false;
+        }
+      }
+      return true;
     }
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(content: Text(msg),);
-      },
-    );
   }
+
 }

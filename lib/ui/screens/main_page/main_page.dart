@@ -1,15 +1,12 @@
-import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/side_menu_widget.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/top_bar_user_widget.dart';
 import 'package:flutter/material.dart';
 import '../../../models/course.dart';
-import '../../../models/knowledge.dart';
 import '../home_page.dart';
 
 
-typedef void changeMainWidget(Widget mainWidget);
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key, required this.user});

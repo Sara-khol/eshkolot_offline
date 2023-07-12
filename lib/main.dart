@@ -27,7 +27,7 @@ import 'package:window_size/window_size.dart';
 import 'models/course.dart';
 import 'models/knowledge.dart';
 import 'models/lesson.dart';
-import 'models/questionnaire.dart';
+import 'models/quiz.dart';
 import 'dart:convert';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
@@ -136,32 +136,33 @@ Future<void> main()  async{
        'h': []
      };
 
-     List<Questionnaire> questionnaires = [
-       Questionnaire()
-         ..question = 'שאלת אפשרות יחידה'
-         ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
-         ..ans = ['אופציה ג']
-         ..type = QType.radio,
-       Questionnaire()
-         ..question = 'שאלת בחירה מרובה'
-         ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
-         ..ans = ['אופציה ג', 'אופציה א']
-         ..type = QType.checkbox,
-       Questionnaire()
-         ..question = 'שאלת בחירה חופשית'
-         ..ans = ['אופציה ג', 'אופציה א']
-         ..type = QType.freeChoice,
-       Questionnaire()
-         ..question = 'שאלה מלא את החסר'
-         ..fillInQuestion = json.encode(fillInQ)
-         ..type = QType.fillIn
+     List<Quiz> questionnaires = [
+       // Quiz()
+       //   ..question = 'שאלת אפשרות יחידה'
+       //   ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
+       //   ..ans = ['אופציה ג']
+       //   ..type = QType.radio,
+       // Quiz()
+       //   ..question = 'שאלת בחירה מרובה'
+       //   ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
+       //   ..ans = ['אופציה ג', 'אופציה א']
+       //   ..type = QType.checkbox,
+       // Quiz()
+       //   ..question = 'שאלת בחירה חופשית'
+       //   ..ans = ['אופציה ג', 'אופציה א']
+       //   ..type = QType.freeChoice,
+       // Quiz()
+       //   ..question = 'שאלה מלא את החסר'
+       //   ..fillInQuestion = json.encode(fillInQ)
+       //   ..type = QType.fillIn
      ];
 
      List<Lesson> lessons = [
        Lesson()
          ..name = 'מבוא ואותיות ניקוד'
          ..vimeo = '467058608'
-         ..questionnaire.add(questionnaires.first),
+         //..questionnaire.add(questionnaires.first)
+       ,
        Lesson()
          ..name = 'אותיות עיצור א'
          ..vimeo = '458427089',
@@ -201,7 +202,8 @@ Future<void> main()  async{
        Lesson()
          ..name = 'אותיות עיצור מ'
          ..vimeo = '458587389'
-         ..questionnaire.addAll(questionnaires),
+        // ..questionnaire.addAll(questionnaires)
+       ,
      ];
 
      final List<Subject> subjects = [
@@ -209,7 +211,8 @@ Future<void> main()  async{
        ..id=1
          ..name = 'חוקי קריאה והגיה'
          ..lessons.addAll(lessons)
-         ..questionnaire.addAll(questionnaires),
+       //  ..questionnaire.addAll(questionnaires)
+       ,
        Subject()
          ..id=2
          ..name = 'מבנה המשפט התיאורי'
@@ -217,7 +220,8 @@ Future<void> main()  async{
            Lesson()
              ..name = '5555'
              ..vimeo = '458427089'
-             ..questionnaire.addAll(questionnaires),
+            // ..questionnaire.addAll(questionnaires)
+           ,
            Lesson()..name = '66666'
          ]),
 
@@ -225,13 +229,15 @@ Future<void> main()  async{
      ];
     subjects.addAll(InstallationDataHelper().mySubjects);
     lessons.addAll(InstallationDataHelper().myLessons);
+    questionnaires.addAll(InstallationDataHelper().myQuizzes);
      myCourses.add((Course()
        ..title = 'ניסיון אנגלית א'
        ..subjects.addAll(subjects)
        ..serverId = /*14518542*/ 2567060
      // ..serverId = 1
 
-       ..questionnaire.addAll(questionnaires)));
+       //..questionnaire.addAll(questionnaires)
+     ));
      myCourses.add(Course()
        ..title = 'אנגלית  בניסיון ב'
      // ..serverId = 2782842

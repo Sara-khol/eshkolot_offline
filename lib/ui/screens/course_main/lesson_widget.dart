@@ -136,6 +136,7 @@ class _LessonWidgetState extends State<LessonWidget> {
         SizedBox(
           height: 17.h,
         ),
+        if(lesson.questionnaire.value!=null)
         Container(
           width: 950.w,
           height: 66.h,
@@ -201,7 +202,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                           MainPageChild.of(context)?.bodyWidget =
                               QuestionnaireWidget(
                                   title: 'תרגול - ${lesson.name}',
-                                  questionnaires: lesson.questionnaire);
+                                  questionnaires: lesson.questionnaire.value!.questionnaireList);
                         });
                         // QuestionnaireWidget(key: UniqueKey(),questionnaires: widget.subject.lessons.elementAt(lessonIndex).questionnaire);
                       },

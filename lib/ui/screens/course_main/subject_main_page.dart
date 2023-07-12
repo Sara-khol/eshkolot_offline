@@ -348,7 +348,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                                 .subject.lessons
                                                                 .elementAt(
                                                                     index)
-                                                                .questionnaire);
+                                                                .questionnaire.value!.questionnaireList);
                                                   });
                                                 },
                                               ),

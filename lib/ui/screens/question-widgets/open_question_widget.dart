@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+
+import '../course_main/questionnaire_tab.dart';
 
 
 class OpenQuestion extends StatefulWidget {
-  Questionnaire question;
-  OpenQuestion(this.question,{super.key,});
+  final Question question;
+  final QuestionController questionController;
+
+  OpenQuestion(this.question,{super.key, required this.questionController,});
   
   @override
   State<OpenQuestion> createState() => _OpenQuestionState();
@@ -15,6 +21,24 @@ class _OpenQuestionState extends State<OpenQuestion> {
   
   final myController = TextEditingController();
   String ans='';
+
+  @override
+  void initState() {
+    widget.questionController.isFilled=isFilled;
+    widget.questionController.isCorrect=isCorrect;
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant OpenQuestion oldWidget) {
+    if(oldWidget.question!=widget.question)
+    {
+      myController.text='';
+    }
+    widget.questionController.isFilled=isFilled;
+    widget.questionController.isCorrect=isCorrect;
+    super.didUpdateWidget(oldWidget);
+  }
   
   @override
   void dispose() {
@@ -27,22 +51,46 @@ class _OpenQuestionState extends State<OpenQuestion> {
   Widget build(BuildContext context) {
     return Column(
       children:[
-        Text(widget.question.question),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: TextField(
-            controller: myController,
-          ),
-        )],
+        HtmlWidget(widget.question.question),
+        SizedBox(height: 20.h),
+        createTextField(myController),
+        SizedBox(height: 20.h),
+      ],
     );
-      /*floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ans=myController.text;
-        },
-        child: const Text('ans'),//Icon(Icons.search),
-      ),*/
+  }
+
+  Widget createTextField(TextEditingController controller) {
+    return Container(
+        padding: EdgeInsets.only(right: 5, left: 5),
+        //   margin: EdgeInsets.only(top: 15.h,bottom: 15.h),
+        width: 800.w,
+        height: 400.h,
+        child: TextField(
+
+            maxLines: null,
+            expands: true,
+            keyboardType: TextInputType.multiline,
+            controller: controller,
+            cursorColor:  Colors.black,
+            textAlign: TextAlign.start,
+            textAlignVertical: TextAlignVertical.top,
+            style: TextStyle(fontSize: 20.sp),
+            decoration: InputDecoration(
+              hintText: 'נא הזן את תשובתך',
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black12)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black)),
+              contentPadding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 20.h ),
+              isDense: true,
+            )));
+  }
+
+  bool isFilled() {
+    return myController.text.isNotEmpty;
+  }
+
+  bool isCorrect() {
+    return true;
   }
 }

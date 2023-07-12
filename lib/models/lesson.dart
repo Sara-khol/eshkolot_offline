@@ -1,4 +1,4 @@
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:isar/isar.dart';
 
 part 'lesson.g.dart';
@@ -13,7 +13,7 @@ class  Lesson {
    late List<dynamic> questionnaireIds = [];
 
   // Questionnaire? questionnaire;
-  final questionnaire = IsarLinks<Questionnaire>();
+  final questionnaire = IsarLink<Quiz>();
   bool isCompleted=false;
 
   @Name('vimoe')

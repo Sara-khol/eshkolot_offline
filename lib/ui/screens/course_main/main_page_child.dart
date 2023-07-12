@@ -1,4 +1,3 @@
-
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
@@ -15,10 +14,11 @@ import 'course_main_page.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 class MainPageChild extends StatefulWidget {
-  const MainPageChild({super.key, required this.course, required this.knowledgeColor});
+  const MainPageChild(
+      {super.key, required this.course, required this.knowledgeColor});
 
   final Course course;
-  final int  knowledgeColor;
+  final int knowledgeColor;
 
   static _MainPageChildState? of(BuildContext context) =>
       context.findAncestorStateOfType<_MainPageChildState>();
@@ -48,7 +48,7 @@ class _MainPageChildState extends State<MainPageChild> {
   @override
   void initState() {
     super.initState();
-    userCourse= IsarService().getUserCourseData(widget.course.serverId);
+    userCourse = IsarService().getUserCourseData(widget.course.serverId);
     _bodyWidget = ValueNotifier(
         CourseMainPage(course: widget.course, controller: myController));
 
@@ -70,14 +70,13 @@ class _MainPageChildState extends State<MainPageChild> {
     }
     _bodyWidget.value =
         CourseMainPage(course: widget.course, controller: myController);
-    userCourse= IsarService().getUserCourseData(widget.course.serverId);
+    userCourse = IsarService().getUserCourseData(widget.course.serverId);
 
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Row(children: [
       menuWidget(),
       Expanded(
@@ -121,9 +120,12 @@ class _MainPageChildState extends State<MainPageChild> {
                               fontWeight: FontWeight.w600,
                               color:
                                   //todo change get color or from knowledge or from path
-                                  Color(widget.knowledgeColor!=-1?widget.knowledgeColor:0xff32D489/*widget.course.knowledge.value != null
+                                  Color(widget.knowledgeColor != -1
+                                          ? widget.knowledgeColor
+                                          : 0xff32D489 /*widget.course.knowledge.value != null
                                       ?int.parse( widget.course.knowledge.value!.color)
-                                      : 0xff32D489*/)),
+                                      : 0xff32D489*/
+                                      )),
                           // Color(widget.course.knowledge.value??widget.course.knowledge.value!.color)),
                         ),
                         SizedBox(
@@ -144,7 +146,7 @@ class _MainPageChildState extends State<MainPageChild> {
                     backgroundColor: Color(0xFFF4F4F3),
                     progressColor: Color(0xFF62FFB8),
                     lineHeight: 5,
-                    percent: userCourse!.progressPercent/100,
+                    percent: userCourse!.progressPercent / 100,
                     isRTL: true,
                   ),
                 ],
@@ -234,15 +236,21 @@ class _MainPageChildState extends State<MainPageChild> {
                                                             currentLesson
                                                                 .isCompleted,
                                                             currentLesson.questionnaire
+                                                                        .value !=
+                                                                    null &&
+                                                                currentLesson
+                                                                    .questionnaire
+                                                                    .value!
+                                                                    .questionnaireList
                                                                     .isEmpty &&
                                                                 lIndex ==
                                                                     currentSubject
-                                                                            .lessons.length -
+                                                                            .lessons
+                                                                            .length -
                                                                         1,
                                                             lIndex,
                                                             currentLesson.name,
-                                                            lessonPickedIndex ==
-                                                                    lIndex &&
+                                                            lessonPickedIndex == lIndex &&
                                                                 subjectPickedIndex ==
                                                                     sIndex &&
                                                                 _bodyWidget
@@ -280,13 +288,24 @@ class _MainPageChildState extends State<MainPageChild> {
                                                           });
                                                         }),
                                                         if (currentLesson
-                                                            .questionnaire
-                                                            .isNotEmpty)
+                                                                    .questionnaire
+                                                                    .value !=
+                                                                null &&
+                                                            currentLesson
+                                                                .questionnaire
+                                                                .value!
+                                                                .questionnaireList
+                                                                .isNotEmpty)
                                                           lessonOrQuestionnaireItem(
                                                               false,
                                                               false /*todo get question is complete*/,
                                                               currentSubject
                                                                       .questionnaire
+                                                                      .isNotEmpty &&
+                                                                  currentSubject
+                                                                      .questionnaire
+                                                                      .first
+                                                                      .questionnaireList
                                                                       .isEmpty &&
                                                                   lIndex ==
                                                                       currentSubject
@@ -298,11 +317,10 @@ class _MainPageChildState extends State<MainPageChild> {
                                                               lessonPickedIndex ==
                                                                       lIndex &&
                                                                   subjectPickedIndex ==
-                                                                      sIndex
-                                                                  &&
+                                                                      sIndex &&
                                                                   _bodyWidget
-                                                                      .value
-                                                                  is QuestionnaireWidget,
+                                                                          .value
+                                                                      is QuestionnaireWidget,
                                                               () =>
                                                                   setState(() {
                                                                     lessonPickedIndex =
@@ -313,83 +331,101 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                     _bodyWidget.value = QuestionnaireWidget(
                                                                         title:
                                                                             'תרגול - ${currentLesson.name}',
-                                                                        questionnaires:
-                                                                            currentLesson.questionnaire);
+                                                                        questionnaires: currentLesson
+                                                                            .questionnaire
+                                                                            .value!
+                                                                            .questionnaireList);
                                                                   }))
                                                       ],
                                                     ));
                                                   },
                                                 ),
                                               ),
-                                              if (currentSubject
-                                                  .questionnaire.isNotEmpty)
+                                              if (currentSubject.questionnaire.isNotEmpty)
                                                 Visibility(
                                                     visible:
                                                         currentSubject.isTapped,
-                                                    child:
-                                                        lessonOrQuestionnaireItem(
-                                                            false,
-                                                            false /*todo get question is complete*/,
-                                                            true,
-                                                            -1,
-                                                            'תרגיל מסכם - ${currentSubject.name}',
-                                                            lessonPickedIndex ==
-                                                                    -1 &&
-                                                                subjectPickedIndex ==
-                                                                    sIndex,
-                                                            () => setState(() {
-                                                              debugPrint(
-                                                                      'currentSubject.questionnaire ${currentSubject.questionnaire}');
-                                                                  subjectPickedIndex =
-                                                                      sIndex;
-                                                                  lessonPickedIndex =
-                                                                      -1;
-                                                                  _bodyWidget.value = QuestionnaireWidget(
-                                                                      title:
-                                                                          'תרגיל מסכם - ${currentSubject.name}',
-                                                                      questionnaires:
-                                                                          currentSubject
-                                                                              .questionnaire);
-                                                                })))
+                                                    child: ListView.builder(
+                                                        shrinkWrap: true,
+                                                        itemCount: currentSubject.questionnaire.length,
+                                                        itemBuilder:
+                                                            (ctx, qIndex) {
+                                                          return lessonOrQuestionnaireItem(
+                                                              false,
+                                                              false /*todo get question is complete*/,
+                                                              true,
+                                                              -1,
+                                                              'תרגיל מסכם - ${currentSubject.name}',
+                                                              lessonPickedIndex ==
+                                                                      -1 &&
+                                                                  subjectPickedIndex ==
+                                                                      sIndex,
+                                                              () =>
+                                                                  setState(() {
+                                                                    debugPrint(
+                                                                        'currentSubject.questionnaire ${currentSubject.questionnaire}');
+                                                                    subjectPickedIndex =
+                                                                        sIndex;
+                                                                    lessonPickedIndex =
+                                                                        -1;
+                                                                    _bodyWidget.value = QuestionnaireWidget(
+                                                                        title:
+                                                                            'תרגיל מסכם - ${currentSubject.name}',
+                                                                        questionnaires: currentSubject
+                                                                            .questionnaire.elementAt(qIndex)
+                                                                            .questionnaireList);
+                                                                  }));
+                                                        }))
                                             ])),
                                       ],
                                     );
 
                                     ///רשימת נושאים בתוך קורס
                                   }),
-                              // שאלון מסכם של הקורס
-                              //אם יש צורך אפשר להעביר לתוך הליסט של השיעורים ורק להציג באיבר האחרון
-                              if (widget.course.questionnaire.isNotEmpty)
-                                GestureDetector(
-                                    onTap: () => setState(() {
-                                          subjectPickedIndex = -1;
-                                          lessonPickedIndex = -1;
-                                          _bodyWidget.value = QuestionnaireWidget(
-                                              title:
-                                                  'תרגול מסכם - ${widget.course.title}',
-                                              questionnaires:
-                                                  widget.course.questionnaire);
-                                        }),
-                                    child: Container(
-                                        width: double.infinity,
-                                        padding: EdgeInsets.only(right: 10.w),
-                                        height: 50.h,
-                                        child: Center(
-                                            child: Row(children: [
-                                          Icon(
-                                            Icons.star_border,
-                                            size: 20.sp,
-                                            color: Colors.black,
-                                          ),
-                                          SizedBox(
-                                            width: 14.w,
-                                          ),
-                                          Text(
-                                              'תרגיל מסכם - קורס ${widget.course.title}',
-                                              style: TextStyle(
-                                                  fontSize: 16.sp,
-                                                  color: Color(0xFF2D2828))),
-                                        ]))))
+                              // שאלונים מסכמים של הקורס
+                              if (widget.course.questionnaires.isNotEmpty)
+                                ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount:
+                                        widget.course.questionnaires.length,
+                                    itemBuilder: (ctx, qIndex) {
+                                      return GestureDetector(
+                                          onTap: () => setState(() {
+                                                subjectPickedIndex = -1;
+                                                lessonPickedIndex = -1;
+                                                _bodyWidget.value =
+                                                    QuestionnaireWidget(
+                                                        title:
+                                                            'תרגול מסכם - ${widget.course.title} ${qIndex + 1}',
+                                                        questionnaires: widget
+                                                            .course
+                                                            .questionnaires
+                                                            .elementAt(qIndex)
+                                                            .questionnaireList);
+                                              }),
+                                          child: Container(
+                                              width: double.infinity,
+                                              padding:
+                                                  EdgeInsets.only(right: 10.w),
+                                              height: 50.h,
+                                              child: Center(
+                                                  child: Row(children: [
+                                                Icon(
+                                                  Icons.star_border,
+                                                  size: 20.sp,
+                                                  color: Colors.black,
+                                                ),
+                                                SizedBox(
+                                                  width: 14.w,
+                                                ),
+                                                Text(
+                                                    'תרגיל מסכם - קורס ${widget.course.title} ${qIndex + 1}',
+                                                    style: TextStyle(
+                                                        fontSize: 16.sp,
+                                                        color:
+                                                            Color(0xFF2D2828))),
+                                              ]))));
+                                    })
                             ],
                           ),
                         ),
@@ -409,7 +445,6 @@ class _MainPageChildState extends State<MainPageChild> {
   subjectTitleDisplay(Subject currentSubject, int sIndex) {
     return ListTile(
       contentPadding: EdgeInsets.only(right: 20.w),
-
       title: SizedBox(
         width: double.infinity,
         // color: Colors.transparent,
@@ -433,10 +468,11 @@ class _MainPageChildState extends State<MainPageChild> {
             Expanded(
               child: Text(currentSubject.name,
                   //overflow: TextOverflow.ellipsis,
-            //softWrap: false,
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
+                  //softWrap: false,
+                  style:
+                      TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
             ),
-           // Spacer(),
+            // Spacer(),
             Icon(Icons.arrow_drop_down_sharp)
           ],
         ),
@@ -470,6 +506,8 @@ class _MainPageChildState extends State<MainPageChild> {
       String name,
       bool isSelect,
       VoidCallback onPress) {
+    //todo remove sizebox because text can be long and there is no space,
+    //but when doing that can not see VerticalDivider in stack
     return SizedBox(
       height: 50.h,
       child: Row(
@@ -503,10 +541,10 @@ class _MainPageChildState extends State<MainPageChild> {
                   visualDensity: const VisualDensity(vertical: -4),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
-                  tileColor: isSelect
-                      ? colors.grey2ColorApp
-                      : Colors.transparent,
-                  contentPadding: EdgeInsets.only(right: 20.h,bottom: 20.h,left: 20.h),
+                  tileColor:
+                      isSelect ? colors.grey2ColorApp : Colors.transparent,
+                  contentPadding:
+                      EdgeInsets.only(right: 20.h, bottom: 20.h, left: 20.h),
                   // hoverColor: colors.grey2ColorApp,
                   title: Row(
                     children: [
@@ -523,8 +561,9 @@ class _MainPageChildState extends State<MainPageChild> {
                       Expanded(
                         child: Text(name,
                             style: TextStyle(
-                                fontWeight:
-                                    isLesson ? FontWeight.w600 : FontWeight.w400,
+                                fontWeight: isLesson
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
                                 fontSize: 16.sp)),
                       ),
                     ],
@@ -720,9 +759,8 @@ class _MainPageChildState extends State<MainPageChild> {
     super.dispose();
   }
 
-  setNextData({bool refresh=false}) {
+  setNextData({bool refresh = false}) {
     switch (_bodyWidget.value.runtimeType) {
-
       case CourseMainPage:
         {
           nextButtonText = 'לנושא הראשון';
@@ -755,9 +793,9 @@ class _MainPageChildState extends State<MainPageChild> {
         }
         break;
     }
-  if(refresh) {
-    setState(() {});
-  }
+    if (refresh) {
+      setState(() {});
+    }
   }
 }
 

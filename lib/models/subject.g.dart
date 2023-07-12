@@ -39,7 +39,7 @@ const SubjectSchema = CollectionSchema(
     r'questionnaire': LinkSchema(
       id: -5076065259254387669,
       name: r'questionnaire',
-      target: r'Questionnaire',
+      target: r'Quiz',
       single: false,
     )
   },
@@ -108,7 +108,7 @@ void _subjectAttach(IsarCollection<dynamic> col, Id id, Subject object) {
   object.id = id;
   object.lessons.attach(col, col.isar.collection<Lesson>(), r'lessons', id);
   object.questionnaire
-      .attach(col, col.isar.collection<Questionnaire>(), r'questionnaire', id);
+      .attach(col, col.isar.collection<Quiz>(), r'questionnaire', id);
 }
 
 extension SubjectQueryWhereSort on QueryBuilder<Subject, Subject, QWhere> {
@@ -434,7 +434,7 @@ extension SubjectQueryLinks
   }
 
   QueryBuilder<Subject, Subject, QAfterFilterCondition> questionnaire(
-      FilterQuery<Questionnaire> q) {
+      FilterQuery<Quiz> q) {
     return QueryBuilder.apply(this, (query) {
       return query.link(q, r'questionnaire');
     });

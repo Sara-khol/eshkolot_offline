@@ -1,25 +1,24 @@
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:isar/isar.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 
 class QuestionnaireWidget extends StatefulWidget {
-  final IsarLinks<Questionnaire> questionnaires;
+  final List<Question> questionnaires;
   final String title;
   const QuestionnaireWidget({super.key, required this.questionnaires, required this.title});
 
   @override
   State<QuestionnaireWidget> createState() => _QuestionnaireWidgetState();
+
+  static _QuestionnaireWidgetState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_QuestionnaireWidgetState>();
 }
 
 class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerProviderStateMixin {
 
   late Widget displayWidget;
   late TabController _tabController1;
-  ScrollController scrollController= ScrollController();
 
   @override
   void initState() {
@@ -31,23 +30,19 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerPr
   @override
   void didUpdateWidget(covariant QuestionnaireWidget oldWidget) {
     displayWidget=initialDisplay();
-    scrollController.jumpTo(scrollController.position.minScrollExtent);
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
     _tabController1.dispose();
-    scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
 
-    return SingleChildScrollView(
-      controller: scrollController,
-      child: Container(
+    return  Container(
         width: 950.w,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -61,11 +56,12 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerPr
                 children: [
                   Icon(Icons.create,size: 30.w),
                   SizedBox(width: 23.w,),
-                  Text(widget.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 36.sp)),
+                  Expanded(child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 36.sp))),
                   SizedBox(width: 30.w,),
                   Icon(Icons.access_time_outlined,size: 15.sp,),
                   Text("  30 דק' ",style: TextStyle(fontSize: 16.sp)),
-                  Spacer(),
+                //  Spacer(),
+                  SizedBox(width: 10.w),
                   Container(
                     height: 20.h,
                     width: 70.w,
@@ -127,25 +123,22 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerPr
                   )
                 ],
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height,
-                child: TabBarView(
-                  controller: _tabController1,
-                  children: <Widget>[
-                    Column(
-                      children: [
-
-                        displayWidget
-                      ],
-                    ),
-                    Text('חומרי למידה'),
-                  ],
+              Expanded(
+               // height: MediaQuery.of(context).size.height+10000.h,
+                child: ClipRect(
+                  child: TabBarView(physics: NeverScrollableScrollPhysics(),
+                    controller: _tabController1,
+                    children: <Widget>[
+                      displayWidget,
+                      Text('חומרי למידה'),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
-      ),
+     // ),
     );
 
   }
@@ -186,6 +179,20 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget> with TickerPr
             ),
           ):Text('לא נמצאו שאלונים',  style: TextStyle(fontSize: 22.h)),
         ]);
+  }
+
+  setInitialDisplay()
+  {
+    setState(() {
+      displayWidget=initialDisplay();
+    });
+  }
+
+  @override
+  didChangeDependencies()
+  {
+    debugPrint('qw didChangeDependencies');
+    super.didChangeDependencies();
   }
 }
 

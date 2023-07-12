@@ -1,7 +1,6 @@
 import 'package:eshkolot_offline/models/lesson.dart';
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:isar/isar.dart';
-import 'course.dart';
 
 part 'subject.g.dart';
 
@@ -23,7 +22,7 @@ class Subject {
 
   final lessons = IsarLinks<Lesson>();
    // List<Questionnaire>? questionnaires;
-  final questionnaire = IsarLinks<Questionnaire>();
+  final questionnaire = IsarLinks<Quiz>();
 
   @Ignore()
   bool isTapped=false;

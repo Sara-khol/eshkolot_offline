@@ -60,10 +60,10 @@ const CourseSchema = CollectionSchema(
       target: r'Subject',
       single: false,
     ),
-    r'questionnaire': LinkSchema(
-      id: -1575972599652728065,
-      name: r'questionnaire',
-      target: r'Questionnaire',
+    r'questionnaires': LinkSchema(
+      id: 5166100795105764940,
+      name: r'questionnaires',
+      target: r'Quiz',
       single: false,
     )
   },
@@ -133,14 +133,14 @@ Id _courseGetId(Course object) {
 }
 
 List<IsarLinkBase<dynamic>> _courseGetLinks(Course object) {
-  return [object.subjects, object.questionnaire];
+  return [object.subjects, object.questionnaires];
 }
 
 void _courseAttach(IsarCollection<dynamic> col, Id id, Course object) {
   object.id = id;
   object.subjects.attach(col, col.isar.collection<Subject>(), r'subjects', id);
-  object.questionnaire
-      .attach(col, col.isar.collection<Questionnaire>(), r'questionnaire', id);
+  object.questionnaires
+      .attach(col, col.isar.collection<Quiz>(), r'questionnaires', id);
 }
 
 extension CourseByIndex on IsarCollection<Course> {
@@ -735,55 +735,55 @@ extension CourseQueryLinks on QueryBuilder<Course, Course, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Course, Course, QAfterFilterCondition> questionnaire(
-      FilterQuery<Questionnaire> q) {
+  QueryBuilder<Course, Course, QAfterFilterCondition> questionnaires(
+      FilterQuery<Quiz> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'questionnaire');
+      return query.link(q, r'questionnaires');
     });
   }
 
   QueryBuilder<Course, Course, QAfterFilterCondition>
-      questionnaireLengthEqualTo(int length) {
+      questionnairesLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', length, true, length, true);
+      return query.linkLength(r'questionnaires', length, true, length, true);
     });
   }
 
-  QueryBuilder<Course, Course, QAfterFilterCondition> questionnaireIsEmpty() {
+  QueryBuilder<Course, Course, QAfterFilterCondition> questionnairesIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Course, Course, QAfterFilterCondition>
-      questionnaireIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', 0, false, 999999, true);
+      return query.linkLength(r'questionnaires', 0, true, 0, true);
     });
   }
 
   QueryBuilder<Course, Course, QAfterFilterCondition>
-      questionnaireLengthLessThan(
+      questionnairesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaires', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      questionnairesLengthLessThan(
     int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', 0, true, length, include);
+      return query.linkLength(r'questionnaires', 0, true, length, include);
     });
   }
 
   QueryBuilder<Course, Course, QAfterFilterCondition>
-      questionnaireLengthGreaterThan(
+      questionnairesLengthGreaterThan(
     int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', length, include, 999999, true);
+      return query.linkLength(r'questionnaires', length, include, 999999, true);
     });
   }
 
   QueryBuilder<Course, Course, QAfterFilterCondition>
-      questionnaireLengthBetween(
+      questionnairesLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -791,7 +791,7 @@ extension CourseQueryLinks on QueryBuilder<Course, Course, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(
-          r'questionnaire', lower, includeLower, upper, includeUpper);
+          r'questionnaires', lower, includeLower, upper, includeUpper);
     });
   }
 }

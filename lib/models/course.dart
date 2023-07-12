@@ -1,7 +1,5 @@
-import 'package:eshkolot_offline/models/knowledge.dart';
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/subject.dart';
-import 'package:eshkolot_offline/models/user.dart';
 import 'package:isar/isar.dart';
 // import 'package:json_annotation/json_annotation.dart';
 
@@ -36,7 +34,7 @@ class Course {
   // @Backlink(to: "courses")
   // final knowledge = IsarLink<Knowledge>();
 
-  final questionnaire = IsarLinks<Questionnaire>();
+  final  questionnaires = IsarLinks<Quiz>();
 
 
   @Ignore()

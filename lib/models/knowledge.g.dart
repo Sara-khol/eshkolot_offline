@@ -54,7 +54,12 @@ int _knowledgeEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.color.length * 3;
-  bytesCount += 3 + object.iconPath.length * 3;
+  {
+    final value = object.iconPath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -78,7 +83,7 @@ Knowledge _knowledgeDeserialize(
 ) {
   final object = Knowledge(
     color: reader.readStringOrNull(offsets[0]) ?? '',
-    iconPath: reader.readStringOrNull(offsets[1]) ?? '',
+    iconPath: reader.readStringOrNull(offsets[1]),
     id: id,
     title: reader.readStringOrNull(offsets[2]) ?? '',
   );
@@ -95,7 +100,7 @@ P _knowledgeDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 1:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
@@ -324,8 +329,25 @@ extension KnowledgeQueryFilter
     });
   }
 
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> iconPathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'iconPath',
+      ));
+    });
+  }
+
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition>
+      iconPathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'iconPath',
+      ));
+    });
+  }
+
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> iconPathEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -338,7 +360,7 @@ extension KnowledgeQueryFilter
   }
 
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> iconPathGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -353,7 +375,7 @@ extension KnowledgeQueryFilter
   }
 
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> iconPathLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -368,8 +390,8 @@ extension KnowledgeQueryFilter
   }
 
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> iconPathBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -772,7 +794,7 @@ extension KnowledgeQueryProperty
     });
   }
 
-  QueryBuilder<Knowledge, String, QQueryOperations> iconPathProperty() {
+  QueryBuilder<Knowledge, String?, QQueryOperations> iconPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'iconPath');
     });

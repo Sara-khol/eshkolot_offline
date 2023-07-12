@@ -43,8 +43,8 @@ const LessonSchema = CollectionSchema(
     r'questionnaire': LinkSchema(
       id: 5260463454641152466,
       name: r'questionnaire',
-      target: r'Questionnaire',
-      single: false,
+      target: r'Quiz',
+      single: true,
     )
   },
   embeddedSchemas: {},
@@ -125,7 +125,7 @@ List<IsarLinkBase<dynamic>> _lessonGetLinks(Lesson object) {
 void _lessonAttach(IsarCollection<dynamic> col, Id id, Lesson object) {
   object.id = id;
   object.questionnaire
-      .attach(col, col.isar.collection<Questionnaire>(), r'questionnaire', id);
+      .attach(col, col.isar.collection<Quiz>(), r'questionnaire', id);
 }
 
 extension LessonQueryWhereSort on QueryBuilder<Lesson, Lesson, QWhere> {
@@ -546,62 +546,15 @@ extension LessonQueryObject on QueryBuilder<Lesson, Lesson, QFilterCondition> {}
 
 extension LessonQueryLinks on QueryBuilder<Lesson, Lesson, QFilterCondition> {
   QueryBuilder<Lesson, Lesson, QAfterFilterCondition> questionnaire(
-      FilterQuery<Questionnaire> q) {
+      FilterQuery<Quiz> q) {
     return QueryBuilder.apply(this, (query) {
       return query.link(q, r'questionnaire');
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
-      questionnaireLengthEqualTo(int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> questionnaireIsEmpty() {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> questionnaireIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(r'questionnaire', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
-      questionnaireIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
-      questionnaireLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
-      questionnaireLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'questionnaire', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
-      questionnaireLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'questionnaire', lower, includeLower, upper, includeUpper);
     });
   }
 }

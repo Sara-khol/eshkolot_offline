@@ -1,7 +1,7 @@
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/models/videoIsar.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +39,11 @@ class IsarService {
         CourseSchema,
         SubjectSchema,
         LessonSchema,
-        QuestionnaireSchema,
+        QuizSchema,
         KnowledgeSchema,
         UserSchema,
         LearnPathSchema,
-        VideoIsarSchema
+        VideoIsarSchema,
       ], inspector: true, directory: dir.path);
     }
     return Future.value(Isar.getInstance());
@@ -71,16 +71,20 @@ class IsarService {
   Future<void> initCourses(var coursesList,
       List<Subject> subjectList,
       List<Lesson> lessonList,
-      List<Questionnaire> qList,
+      List<Quiz> qList,
       List<Knowledge> knowledgeList,
       // List<User> usersList,
       var jsonPaths,
-      var jsonUsers) async {
+      var jsonUsers,
+      ) async {
     final isar = await db;
     await isar.writeTxn(() async {
       await isar.clear();
     });
     isar.writeTxnSync(() {
+      //the order matters for isarlinks!!!
+      //quiz  needs to boe first
+      isar.quizs.putAllSync(qList);
       isar.lessons.putAllSync(lessonList);
       isar.subjects.putAllSync(subjectList);
        isar.courses.putAllSync(coursesList);
@@ -88,6 +92,7 @@ class IsarService {
       isar.users.importJsonSync(jsonUsers);
       //   isar.learnPaths.importJsonSync(jsonPaths);
       isar.learnPaths.putAllSync(jsonPaths);
+
 
       // isar.users.importJsonSync(jsonUsers);
 

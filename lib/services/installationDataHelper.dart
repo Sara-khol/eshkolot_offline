@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:collection/src/iterable_extensions.dart';
+
 
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
-import 'package:eshkolot_offline/models/questionnaire.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/subject.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:collection/collection.dart';
 
 import '../models/course.dart';
 import '../models/user.dart';
@@ -29,6 +30,8 @@ class InstallationDataHelper {
   List<Lesson> myLessons = [];
   List<Knowledge> myKnowledgeList = [];
   List<LearnPath> myPathList = [];
+  List<Quiz> myQuizzes = [];
+
 
   init() async {
     late String destDirPath;
@@ -100,8 +103,26 @@ class InstallationDataHelper {
           for (int lessonId in subject.lessonsIds) {
             var l = lessons[lessonId.toString()];
             Lesson lesson = Lesson.fromJson(l, lessonId);
+
+            for (int qId in lesson.questionnaireIds) {
+              var q = questionnaires[qId.toString()];
+
+              Quiz quiz = Quiz.fromJson(q, qId);
+              lesson.questionnaire.value=quiz;
+              myQuizzes.add(quiz);
+            }
+
+
             subject.lessons.add(lesson);
             myLessons.add(lesson);
+          }
+
+          for (int qId in subject.questionnaireIds) {
+            var q = questionnaires[qId.toString()];
+
+            Quiz quiz = Quiz.fromJson(q, qId);
+            subject.questionnaire.add(quiz);
+            myQuizzes.add(quiz);
           }
 
           course.subjects.add(subject);
@@ -110,7 +131,22 @@ class InstallationDataHelper {
 
         for (int qId in course.questionnaireIds) {
           var q = questionnaires[qId.toString()];
-          Questionnaire questionnaire = Questionnaire.fromJson(q, qId);
+          Quiz quiz = Quiz.fromJson(q, qId);
+          // debugPrint('quiz ${quiz.id}');
+          // for(Question question  in quiz.questionnaireList)
+          //   {
+          //     debugPrint('q ${question.question}');
+          //     debugPrint('op ${question.options}');
+          //
+          //   }
+          course.questionnaires.add(quiz);
+          myQuizzes.add(quiz);
+
+
+
+          // Subject1 tryQ = Subject1.fromJson( qId);
+          // course.questionnaires.add(tryQ);
+          // myTries.add(tryQ);
 
         }
         myCourses.add(course);
@@ -124,9 +160,12 @@ class InstallationDataHelper {
         LearnPath path = LearnPath.fromJson(p, pId);
 
         for (int courseId in path.coursesIds) {
-          Course c =
-              myCourses.firstWhere((element) => element.serverId == courseId);
-          path.courses.add(c);
+          Course? c =
+              myCourses.firstWhereOrNull((element) => element.serverId == courseId);
+        //todo is a problem in json file ?
+          if(c!=null) {
+            path.courses.add(c);
+          }
         }
 
         return path;

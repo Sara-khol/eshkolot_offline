@@ -6,7 +6,6 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -281,7 +280,7 @@ class _HomePageState extends State<HomePage> {
               width: 31.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(int.parse(knowledge.color)),
+                color:knowledge.color!='' ?Color(int.parse(knowledge.color)):Colors.indigo,
               ),
               // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
               child: Image.asset('assets/images/english.png'),
@@ -334,7 +333,7 @@ class _HomePageState extends State<HomePage> {
               //     //         knowledge.courses.elementAt(index).isFullyDisplayed,
               //     //     child:
               return courseItem(knowledgeCourses.values.elementAt(kIndex)[index],
-                  int.parse(knowledge.color),knowledge.iconPath, index);
+                  knowledge.color!=''  ? int.parse(knowledge.color):-1,knowledge.iconPath??'', index);
               // )
               // );
               // courseItem(knowledge.courses.elementAt(index),

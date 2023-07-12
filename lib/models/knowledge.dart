@@ -1,4 +1,3 @@
-import 'package:eshkolot_offline/models/course.dart';
 import 'package:isar/isar.dart';
 
 part 'knowledge.g.dart';
@@ -8,7 +7,7 @@ class Knowledge {
   // Id id = Isar.autoIncrement;
   late Id id ;
   late String title;
-  late String iconPath;
+  late String? iconPath;
   late String color;
   @Ignore()
   late bool isOpen=false;
@@ -20,9 +19,9 @@ class Knowledge {
  factory Knowledge.fromJson(Map<String, dynamic> parsedJson,int knowledgeId) {
   return Knowledge(
    title: parsedJson['title'],
-   iconPath: parsedJson['iconPath'] as String,
-   color: (parsedJson['color'] as String).startsWith('#')?
-   (parsedJson['color'] as String).replaceFirst('#', '0xff'):parsedJson['color'],
+   iconPath:parsedJson['iconPath'] ??'',
+   color:parsedJson['color']!=null? (parsedJson['color'] as String).startsWith('#')?
+   (parsedJson['color'] as String).replaceFirst('#', '0xff'):parsedJson['color']:'',
    id: knowledgeId,
   );
  }

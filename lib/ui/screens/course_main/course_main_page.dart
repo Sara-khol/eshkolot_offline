@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:isar/isar.dart';
 import '../../../models/course.dart';
-import '../../../models/questionnaire.dart';
+import '../../../models/quiz.dart';
 import '../../../models/user.dart';
 import '../../../services/isar_service.dart';
 import 'main_page_child.dart';
@@ -27,10 +27,10 @@ class CourseMainPage extends StatefulWidget {
 class _CourseMainPageState extends State<CourseMainPage> {
   late Future myFuture;
   Lesson? lastLesson;
-  late IsarLinks<Questionnaire> lastQuestionnaire;
+  late IsarLinks<Quiz> lastQuestionnaire;
   Subject? lastSubject;
   UserCourse? data;
-  late String lastTextButton;
+  late String lastTextButton='';
   late var currentMainChild;
 
   @override
@@ -221,7 +221,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                             } else {
                               MainPageChild.of(context)?.bodyWidget =
                                   QuestionnaireWidget(
-                                      questionnaires: lastQuestionnaire,
+                                    //todo change save correct the right questionarie
+                                      questionnaires: lastQuestionnaire.first.questionnaireList,
                                       title:
                                       lastTextButton /*lastLesson == null
                                             ? 'תרגיל מסכם - ${lastSubject!.name}'
@@ -229,8 +230,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                         'תרגול - ${lastLesson!.name}'*/
                                   );
                             }
-                          },
-
+                          }
                         ),
                       ),
                     ],
@@ -340,21 +340,23 @@ class _CourseMainPageState extends State<CourseMainPage> {
       if (lastLesson != null || lastSubject != null) {
         if (!data!.isQuestionnaire) {
           lastTextButton = lastLesson!.name;
-        } else {
-          if (data!.subjectStopId == 0) {
-            //questionnaire of course
-            lastQuestionnaire = widget.course.questionnaire;
-            lastTextButton = 'תרגיל מסכם - ${widget.course.title}';
-          } else if (data!.lessonStopId == 0) {
-            //questionnaire of subject
-            lastQuestionnaire = lastSubject!.questionnaire;
-            lastTextButton = 'תרגיל מסכם - ${lastSubject!.name}';
-          } else {
-            //questionnaire of lesson
-            lastQuestionnaire = lastLesson!.questionnaire;
-            lastTextButton = 'תרגול - ${lastLesson!.name}';
-          }
         }
+        //todo correct and put back!!
+        // else {
+        //   if (data!.subjectStopId == 0) {
+        //     //questionnaire of course
+        //     lastQuestionnaire = widget.course.questionnaire;
+        //     lastTextButton = 'תרגיל מסכם - ${widget.course.title}';
+        //   } else if (data!.lessonStopId == 0) {
+        //     //questionnaire of subject
+        //     lastQuestionnaire = lastSubject!.questionnaire;
+        //     lastTextButton = 'תרגיל מסכם - ${lastSubject!.name}';
+        //   } else {
+        //     //questionnaire of lesson
+        //     lastQuestionnaire = lastLesson!.questionnaire;
+        //     lastTextButton = 'תרגול - ${lastLesson!.name}';
+        //   }
+        // }
         if (refresh) {
           if (mounted) setState(() {});
         }
