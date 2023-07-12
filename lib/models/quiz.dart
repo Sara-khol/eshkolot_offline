@@ -104,9 +104,9 @@ class Question {
         return QType.sortMatrix;
       case 'sort_answer':
         return QType.sort;
-      // default:
-      //   // todo change
-      //   return QType.freeChoice;
+      default:
+        // todo change
+        return QType.freeChoice;
     }
   }
 }
