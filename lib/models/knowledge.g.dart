@@ -17,10 +17,11 @@ const KnowledgeSchema = CollectionSchema(
   name: r'Knowledge',
   id: -6281718478121586361,
   properties: {
-    r'color': PropertySchema(
+    r'icon': PropertySchema(
       id: 0,
-      name: r'color',
-      type: IsarType.string,
+      name: r'icon',
+      type: IsarType.object,
+      target: r'MyIcon',
     ),
     r'iconPath': PropertySchema(
       id: 1,
@@ -40,7 +41,7 @@ const KnowledgeSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {r'MyIcon': MyIconSchema},
   getId: _knowledgeGetId,
   getLinks: _knowledgeGetLinks,
   attach: _knowledgeAttach,
@@ -53,7 +54,8 @@ int _knowledgeEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.color.length * 3;
+  bytesCount += 3 +
+      MyIconSchema.estimateSize(object.icon, allOffsets[MyIcon]!, allOffsets);
   {
     final value = object.iconPath;
     if (value != null) {
@@ -70,7 +72,12 @@ void _knowledgeSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.color);
+  writer.writeObject<MyIcon>(
+    offsets[0],
+    allOffsets,
+    MyIconSchema.serialize,
+    object.icon,
+  );
   writer.writeString(offsets[1], object.iconPath);
   writer.writeString(offsets[2], object.title);
 }
@@ -82,7 +89,12 @@ Knowledge _knowledgeDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Knowledge(
-    color: reader.readStringOrNull(offsets[0]) ?? '',
+    icon: reader.readObjectOrNull<MyIcon>(
+          offsets[0],
+          MyIconSchema.deserialize,
+          allOffsets,
+        ) ??
+        MyIcon(),
     iconPath: reader.readStringOrNull(offsets[1]),
     id: id,
     title: reader.readStringOrNull(offsets[2]) ?? '',
@@ -98,7 +110,12 @@ P _knowledgeDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readObjectOrNull<MyIcon>(
+            offset,
+            MyIconSchema.deserialize,
+            allOffsets,
+          ) ??
+          MyIcon()) as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
@@ -199,136 +216,6 @@ extension KnowledgeQueryWhere
 
 extension KnowledgeQueryFilter
     on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'color',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'color',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'color',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'color',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> colorIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'color',
-        value: '',
-      ));
-    });
-  }
-
   QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> iconPathIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -662,24 +549,19 @@ extension KnowledgeQueryFilter
 }
 
 extension KnowledgeQueryObject
-    on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {}
+    on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {
+  QueryBuilder<Knowledge, Knowledge, QAfterFilterCondition> icon(
+      FilterQuery<MyIcon> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'icon');
+    });
+  }
+}
 
 extension KnowledgeQueryLinks
     on QueryBuilder<Knowledge, Knowledge, QFilterCondition> {}
 
 extension KnowledgeQuerySortBy on QueryBuilder<Knowledge, Knowledge, QSortBy> {
-  QueryBuilder<Knowledge, Knowledge, QAfterSortBy> sortByColor() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterSortBy> sortByColorDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.desc);
-    });
-  }
-
   QueryBuilder<Knowledge, Knowledge, QAfterSortBy> sortByIconPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'iconPath', Sort.asc);
@@ -707,18 +589,6 @@ extension KnowledgeQuerySortBy on QueryBuilder<Knowledge, Knowledge, QSortBy> {
 
 extension KnowledgeQuerySortThenBy
     on QueryBuilder<Knowledge, Knowledge, QSortThenBy> {
-  QueryBuilder<Knowledge, Knowledge, QAfterSortBy> thenByColor() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Knowledge, Knowledge, QAfterSortBy> thenByColorDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'color', Sort.desc);
-    });
-  }
-
   QueryBuilder<Knowledge, Knowledge, QAfterSortBy> thenByIconPath() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'iconPath', Sort.asc);
@@ -758,13 +628,6 @@ extension KnowledgeQuerySortThenBy
 
 extension KnowledgeQueryWhereDistinct
     on QueryBuilder<Knowledge, Knowledge, QDistinct> {
-  QueryBuilder<Knowledge, Knowledge, QDistinct> distinctByColor(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'color', caseSensitive: caseSensitive);
-    });
-  }
-
   QueryBuilder<Knowledge, Knowledge, QDistinct> distinctByIconPath(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -788,9 +651,9 @@ extension KnowledgeQueryProperty
     });
   }
 
-  QueryBuilder<Knowledge, String, QQueryOperations> colorProperty() {
+  QueryBuilder<Knowledge, MyIcon, QQueryOperations> iconProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'color');
+      return query.addPropertyName(r'icon');
     });
   }
 
@@ -806,3 +669,485 @@ extension KnowledgeQueryProperty
     });
   }
 }
+
+// **************************************************************************
+// IsarEmbeddedGenerator
+// **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const MyIconSchema = Schema(
+  name: r'MyIcon',
+  id: -1223852937101797862,
+  properties: {
+    r'color': PropertySchema(
+      id: 0,
+      name: r'color',
+      type: IsarType.string,
+    ),
+    r'nameIcon': PropertySchema(
+      id: 1,
+      name: r'nameIcon',
+      type: IsarType.string,
+    ),
+    r'textColor': PropertySchema(
+      id: 2,
+      name: r'textColor',
+      type: IsarType.string,
+    )
+  },
+  estimateSize: _myIconEstimateSize,
+  serialize: _myIconSerialize,
+  deserialize: _myIconDeserialize,
+  deserializeProp: _myIconDeserializeProp,
+);
+
+int _myIconEstimateSize(
+  MyIcon object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.color.length * 3;
+  bytesCount += 3 + object.nameIcon.length * 3;
+  bytesCount += 3 + object.textColor.length * 3;
+  return bytesCount;
+}
+
+void _myIconSerialize(
+  MyIcon object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.color);
+  writer.writeString(offsets[1], object.nameIcon);
+  writer.writeString(offsets[2], object.textColor);
+}
+
+MyIcon _myIconDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = MyIcon(
+    color: reader.readStringOrNull(offsets[0]) ?? '',
+    nameIcon: reader.readStringOrNull(offsets[1]) ?? '',
+    textColor: reader.readStringOrNull(offsets[2]) ?? '',
+  );
+  return object;
+}
+
+P _myIconDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 1:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 2:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension MyIconQueryFilter on QueryBuilder<MyIcon, MyIcon, QFilterCondition> {
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'color',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'color',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'color',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'color',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> colorIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'color',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'nameIcon',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'nameIcon',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'nameIcon',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'nameIcon',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'nameIcon',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'nameIcon',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'nameIcon',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'nameIcon',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'nameIcon',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> nameIconIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'nameIcon',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'textColor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'textColor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'textColor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'textColor',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'textColor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'textColor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'textColor',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'textColor',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'textColor',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MyIcon, MyIcon, QAfterFilterCondition> textColorIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'textColor',
+        value: '',
+      ));
+    });
+  }
+}
+
+extension MyIconQueryObject on QueryBuilder<MyIcon, MyIcon, QFilterCondition> {}

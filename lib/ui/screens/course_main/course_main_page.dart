@@ -16,9 +16,10 @@ import 'main_page_child.dart';
 class CourseMainPage extends StatefulWidget {
   final Course course;
 
+  const CourseMainPage(
+      {super.key, required this.course, required this.controller});
 
-  const CourseMainPage({super.key, required this.course, required this.controller});
-   final CoursePageController controller;
+  final CoursePageController controller;
 
   @override
   State<CourseMainPage> createState() => _CourseMainPageState();
@@ -30,16 +31,15 @@ class _CourseMainPageState extends State<CourseMainPage> {
   late IsarLinks<Quiz> lastQuestionnaire;
   Subject? lastSubject;
   UserCourse? data;
-  late String lastTextButton='';
+  late String lastTextButton = '';
   late var currentMainChild;
 
   @override
   initState() {
     super.initState();
-    widget.controller.method=getLastPositionInCourse;
-    widget.controller.checkIfCreated=checkIfCreated;
+    widget.controller.method = getLastPositionInCourse;
+    widget.controller.checkIfCreated = checkIfCreated;
     getLastPositionInCourse(refresh: false);
-
   }
 
   @override
@@ -66,20 +66,19 @@ class _CourseMainPageState extends State<CourseMainPage> {
               SizedBox(
                 height: 90.h,
               ),
-              Image.asset('assets/images/logo_english.jpg',
-                  height: 147.h),
+              Image.asset('assets/images/logo_english.jpg', height: 147.h),
               SizedBox(
                 height: 23.h,
               ),
               Text(widget.course.title,
-                  style: TextStyle(
-                      fontSize: 36.sp, fontWeight: FontWeight.w600)),
+                  style:
+                      TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600)),
               SizedBox(
                 height: 15.h,
               ),
               Text("התחל מכאן ללמוד ולתרגל את בסיס השפה האנגלית",
-                  style: TextStyle(
-                      fontSize: 20.sp, fontWeight: FontWeight.w400)),
+                  style:
+                      TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
               SizedBox(
                 height: 30.h,
               ),
@@ -93,82 +92,63 @@ class _CourseMainPageState extends State<CourseMainPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 15.sp,
-                        ),
-                        SizedBox(width: 7.w),
-                        Text(
-                          '21 שעות',
-                          style: TextStyle(fontSize: 18.sp),
-                        )
-                      ],
+                    Icon(
+                      Icons.access_time,
+                      size: 15.sp,
+                    ),
+                    SizedBox(width: 7.w),
+                    Text(
+                      '${widget.course.countHours} שעות',
+                      style: TextStyle(fontSize: 18.sp),
                     ),
                     VerticalDivider(
                       color: Colors.black,
                       indent: 11.h,
                       endIndent: 11.h,
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.videocam_outlined,
-                          size: 15.sp,
-                        ),
-                        SizedBox(width: 7.w),
-
-                        Text(
-                          '33 שיעורים',
-                          style: TextStyle(fontSize: 18.sp),
-                        )
-                      ],
+                    Icon(
+                      Icons.videocam_outlined,
+                      size: 15.sp,
+                    ),
+                    SizedBox(width: 7.w),
+                    Text(
+                      '${widget.course.countLesson} שיעורים',
+                      style: TextStyle(fontSize: 18.sp),
                     ),
                     VerticalDivider(
                       color: Colors.black,
                       indent: 11.h,
                       endIndent: 11.h,
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.create,
-                          size: 15.sp,
-                        ),
-                        SizedBox(width: 7.w),
-
-                        Text(
-                          '35 שאלונים',
-                          style: TextStyle(fontSize: 18.sp),
-                        )
-                      ],
+                    Icon(
+                      Icons.create,
+                      size: 15.sp,
+                    ),
+                    SizedBox(width: 7.w),
+                    Text(
+                      '${widget.course.countQuiz} שאלונים',
+                      style: TextStyle(fontSize: 18.sp),
                     ),
                     VerticalDivider(
                       color: Colors.black,
                       indent: 11.h,
                       endIndent: 11.h,
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star_outline,
-                          size: 15.sp,
-                        ),
-                        SizedBox(width: 7.w),
-                        Text(
-                          '1 שאלון מסכם',
-                          style: TextStyle(fontSize: 18.sp),
-                        )
-                      ],
+                    Icon(
+                      Icons.star_outline,
+                      size: 15.sp,
                     ),
+                    SizedBox(width: 7.w),
+                    Text(
+                        '${widget.course.countEndQuiz} ${widget.course.countEndQuiz == 1 ? 'שאלון מסכם' : 'שאלונים מסכמים'}',
+                        style: TextStyle(fontSize: 18.sp)),
                   ],
                 ),
               ),
               SizedBox(
                 height: 75.h,
               ),
-             // if (data != null)
+              // if (data != null)
               if (lastLesson != null || lastSubject != null)
                 ClipRRect(
                   child: Stack(
@@ -177,61 +157,61 @@ class _CourseMainPageState extends State<CourseMainPage> {
                         height: 40.h,
                         decoration: const BoxDecoration(
                           color: Colors.black,
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(30)),
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
                         ),
                         child: TextButton(
-                          style: TextButton.styleFrom(
-                            alignment: Alignment.center,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.only(
-                                left: 50.w, right: 50.w),
-                            textStyle: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                  'המשך מהמקום שעצרת $lastTextButton',
-                                  style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontFamily: 'RAG-Sans')),
-                              SizedBox(width: 4.w),
-                              Icon(Icons.arrow_forward,color: Colors.white,size:15.sp ,)
-                            ],
-                          ),
-                          onPressed: () {
-                            if (!data!.isQuestionnaire) {
-                              currentMainChild?.subjectPickedIndex= data!.subjectIndex;
-                              currentMainChild?.lessonPickedIndex=data!.lessonIndex;
-                              currentMainChild?.bodyWidget =
-                                  LessonWidget(
-                                      lesson: lastLesson!,
-                                      onNext: data!.lessonIndex + 1 < lastSubject!.lessons.length
-                                          ? () => currentMainChild
-                                          .goToNextLesson(
-                                          lastSubject!,
-                                          data!.subjectIndex,
-                                          lastSubject!.lessons
-                                              .elementAt(
-                                              data!.lessonIndex + 1),
-                                          data!.lessonIndex + 1):null);
-                            } else {
-                              MainPageChild.of(context)?.bodyWidget =
-                                  QuestionnaireWidget(
-                                    //todo change save correct the right questionarie
-                                      questionnaires: lastQuestionnaire.first.questionnaireList,
-                                      title:
-                                      lastTextButton /*lastLesson == null
+                            style: TextButton.styleFrom(
+                              alignment: Alignment.center,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.only(left: 50.w, right: 50.w),
+                              textStyle: TextStyle(
+                                  fontSize: 18.sp, fontWeight: FontWeight.w600),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('המשך מהמקום שעצרת $lastTextButton',
+                                    style: TextStyle(
+                                        fontSize: 18.sp,
+                                        fontFamily: 'RAG-Sans')),
+                                SizedBox(width: 4.w),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                  size: 15.sp,
+                                )
+                              ],
+                            ),
+                            onPressed: () {
+                              if (!data!.isQuestionnaire) {
+                                currentMainChild?.subjectPickedIndex =
+                                    data!.subjectIndex;
+                                currentMainChild?.lessonPickedIndex =
+                                    data!.lessonIndex;
+                                currentMainChild?.bodyWidget = LessonWidget(
+                                    lesson: lastLesson!,
+                                    onNext: data!.lessonIndex + 1 <
+                                            lastSubject!.lessons.length
+                                        ? () => currentMainChild.goToNextLesson(
+                                            lastSubject!,
+                                            data!.subjectIndex,
+                                            lastSubject!.lessons.elementAt(
+                                                data!.lessonIndex + 1),
+                                            data!.lessonIndex + 1)
+                                        : null);
+                              } else {
+                                MainPageChild.of(context)?.bodyWidget =
+                                    QuestionnaireWidget(
+                                        //todo change save correct the right questionarie
+                                        quiz: lastQuestionnaire.first,
+                                        title:
+                                            lastTextButton /*lastLesson == null
                                             ? 'תרגיל מסכם - ${lastSubject!.name}'
                                             :
                                         'תרגול - ${lastLesson!.name}'*/
-                                  );
-                            }
-                          }
-                        ),
+                                        );
+                              }
+                            }),
                       ),
                     ],
                   ),
@@ -259,19 +239,17 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     alignment: Alignment.center,
                     foregroundColor: Colors.white,
                     //padding: EdgeInsets.only(left: 45.w,right: 45.w,),
-                    textStyle: TextStyle(
-                        fontSize: 18.sp, fontWeight: FontWeight.w600),
+                    textStyle:
+                        TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
                   ),
                   onPressed: () {
-                    MainPageChild.of(context)?.bodyWidget =
-                        SubjectMainPage(
-                            subjectIndex: 0,
-                            subject: widget.course.subjects.first,
-                            onNext:   1 <
-                                widget.course.subjects.length
-                                ? () => MainPageChild.of(context)?.goToNextSubject(
+                    MainPageChild.of(context)?.bodyWidget = SubjectMainPage(
+                        subjectIndex: 0,
+                        subject: widget.course.subjects.first,
+                        onNext: 1 < widget.course.subjects.length
+                            ? () => MainPageChild.of(context)?.goToNextSubject(
                                 widget.course.subjects.elementAt(1), 1)
-                                : null);
+                            : null);
                     MainPageChild.of(context)?.subjectPickedIndex = 0;
                   },
                   child: Row(
@@ -296,16 +274,14 @@ class _CourseMainPageState extends State<CourseMainPage> {
     );
   }
 
-  getLastPositionInCourse({bool refresh=true}) async {
+  getLastPositionInCourse({bool refresh = true}) async {
     // debugPrint('getLastPositionInCourse');
     data = IsarService().getUserCourseData(widget.course.serverId);
 
     if (data != null) {
       if (data!.subjectStopId != 0) {
         for (int i = 0; i < widget.course.subjects.length; i++) {
-          if (widget.course.subjects
-              .elementAt(i)
-              .id == data!.subjectStopId) {
+          if (widget.course.subjects.elementAt(i).id == data!.subjectStopId) {
             lastSubject = widget.course.subjects.elementAt(i);
             data!.subjectIndex = i;
             break;
@@ -320,10 +296,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
       // s.id == data!.subjectStopId) : null;
       if (data!.lessonStopId != 0) {
         for (int i = 0; i < lastSubject!.lessons.length; i++) {
-          if (lastSubject!
-              .lessons
-              .elementAt(i)
-              .id == data!.lessonStopId) {
+          if (lastSubject!.lessons.elementAt(i).id == data!.lessonStopId) {
             lastLesson = lastSubject!.lessons.elementAt(i);
             data!.lessonIndex = i;
             break;
@@ -370,11 +343,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
     super.didChangeDependencies();
   }
 
- bool checkIfCreated()
-  {
-    return(mounted) ;
-
+  bool checkIfCreated() {
+    return (mounted);
   }
-
-
 }

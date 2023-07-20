@@ -17,9 +17,9 @@ const LessonSchema = CollectionSchema(
   name: r'Lesson',
   id: 6343151657775798464,
   properties: {
-    r'isCompleted': PropertySchema(
+    r'isCompletedCurrentUser': PropertySchema(
       id: 0,
-      name: r'isCompleted',
+      name: r'isCompletedCurrentUser',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
@@ -27,8 +27,13 @@ const LessonSchema = CollectionSchema(
       name: r'name',
       type: IsarType.string,
     ),
-    r'vimoe': PropertySchema(
+    r'time': PropertySchema(
       id: 2,
+      name: r'time',
+      type: IsarType.string,
+    ),
+    r'vimoe': PropertySchema(
+      id: 3,
       name: r'vimoe',
       type: IsarType.string,
     )
@@ -44,7 +49,7 @@ const LessonSchema = CollectionSchema(
       id: 5260463454641152466,
       name: r'questionnaire',
       target: r'Quiz',
-      single: true,
+      single: false,
     )
   },
   embeddedSchemas: {},
@@ -61,6 +66,7 @@ int _lessonEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.name.length * 3;
+  bytesCount += 3 + object.time.length * 3;
   {
     final value = object.vimeo;
     if (value != null) {
@@ -76,9 +82,10 @@ void _lessonSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeBool(offsets[0], object.isCompleted);
+  writer.writeBool(offsets[0], object.isCompletedCurrentUser);
   writer.writeString(offsets[1], object.name);
-  writer.writeString(offsets[2], object.vimeo);
+  writer.writeString(offsets[2], object.time);
+  writer.writeString(offsets[3], object.vimeo);
 }
 
 Lesson _lessonDeserialize(
@@ -90,9 +97,10 @@ Lesson _lessonDeserialize(
   final object = Lesson(
     id: id,
     name: reader.readStringOrNull(offsets[1]) ?? '',
-    vimeo: reader.readStringOrNull(offsets[2]),
+    time: reader.readStringOrNull(offsets[2]) ?? '',
+    vimeo: reader.readStringOrNull(offsets[3]),
   );
-  object.isCompleted = reader.readBool(offsets[0]);
+  object.isCompletedCurrentUser = reader.readBool(offsets[0]);
   return object;
 }
 
@@ -108,6 +116,8 @@ P _lessonDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 3:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -256,11 +266,11 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> isCompletedEqualTo(
-      bool value) {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
+      isCompletedCurrentUserEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isCompleted',
+        property: r'isCompletedCurrentUser',
         value: value,
       ));
     });
@@ -390,6 +400,135 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'name',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'time',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'time',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'time',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'time',
         value: '',
       ));
     });
@@ -552,23 +691,71 @@ extension LessonQueryLinks on QueryBuilder<Lesson, Lesson, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> questionnaireIsNull() {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
+      questionnaireLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> questionnaireIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(r'questionnaire', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
+      questionnaireIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
+      questionnaireLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
+      questionnaireLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'questionnaire', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition>
+      questionnaireLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'questionnaire', lower, includeLower, upper, includeUpper);
     });
   }
 }
 
 extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByIsCompleted() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByIsCompletedCurrentUser() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.asc);
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByIsCompletedDesc() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy>
+      sortByIsCompletedCurrentUserDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.desc);
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
     });
   }
 
@@ -581,6 +768,18 @@ extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
   QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.desc);
     });
   }
 
@@ -610,15 +809,16 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByIsCompleted() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByIsCompletedCurrentUser() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.asc);
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
     });
   }
 
-  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByIsCompletedDesc() {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy>
+      thenByIsCompletedCurrentUserDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.desc);
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
     });
   }
 
@@ -631,6 +831,18 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
   QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.desc);
     });
   }
 
@@ -648,9 +860,9 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
 }
 
 extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
-  QueryBuilder<Lesson, Lesson, QDistinct> distinctByIsCompleted() {
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByIsCompletedCurrentUser() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isCompleted');
+      return query.addDistinctBy(r'isCompletedCurrentUser');
     });
   }
 
@@ -658,6 +870,13 @@ extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByTime(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'time', caseSensitive: caseSensitive);
     });
   }
 
@@ -676,15 +895,22 @@ extension LessonQueryProperty on QueryBuilder<Lesson, Lesson, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Lesson, bool, QQueryOperations> isCompletedProperty() {
+  QueryBuilder<Lesson, bool, QQueryOperations>
+      isCompletedCurrentUserProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isCompleted');
+      return query.addPropertyName(r'isCompletedCurrentUser');
     });
   }
 
   QueryBuilder<Lesson, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<Lesson, String, QQueryOperations> timeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'time');
     });
   }
 

@@ -31,6 +31,14 @@ class Course {
 /*  @Name('knowledge')*/
   late int? knowledgeId;
 
+  late String? countHours;
+  late String? countLesson;
+  late String? countQuiz;
+  late String? countEndQuiz;
+
+  // @Name('knowledge_num')
+  late String? knowledgeNum;
+
   // @Backlink(to: "courses")
   // final knowledge = IsarLink<Knowledge>();
 
@@ -48,6 +56,11 @@ class Course {
       'subjects': subjectIds,
       'knowledge': knowledgeId,
       'questionnaire': questionnaireIds,
+      'countHours': countHours,
+      'countLesson': countLesson,
+      'countQuiz': countQuiz,
+      'countEndQuiz': countEndQuiz,
+      'knowledgeNum': knowledgeNum,
     };
   }
 
@@ -56,7 +69,12 @@ class Course {
      this.subjectIds=const [],
      this.knowledgeId=0,
      this.questionnaireIds=const [],
-    this.serverId=0
+    this.serverId=0,
+    this.knowledgeNum,
+    this.countHours,
+    this.countLesson,
+    this.countEndQuiz,
+    this.countQuiz
   });
 
   factory Course.fromJson(Map<String, dynamic> parsedJson,int courseId) {
@@ -65,6 +83,11 @@ class Course {
         subjectIds: parsedJson['subjects'],
         knowledgeId: parsedJson['knowledge'],
         questionnaireIds: parsedJson['questionnaire'],
+        countHours: parsedJson['countHours'],
+        countLesson: parsedJson['countLesson'],
+        countQuiz: parsedJson['countQuiz'],
+        countEndQuiz: parsedJson['countEndQuiz'],
+        knowledgeNum: parsedJson['knowledge_num'],
         serverId: courseId,
     );
   }

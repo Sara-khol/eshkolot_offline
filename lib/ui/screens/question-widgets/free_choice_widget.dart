@@ -20,11 +20,14 @@ class FreeChoice extends StatefulWidget {
 class _FreeChoiceState extends State<FreeChoice> {
 
   final myController = TextEditingController();
+  late List<String> ansList;
 
   @override
   void initState() {
     widget.questionController.isFilled=isFilled;
     widget.questionController.isCorrect=isCorrect;
+    debugPrint(widget.question.ans!.first.ans);
+    ansList = widget.question.ans!.first.ans.split('\n');
     super.initState();
   }
 
@@ -84,6 +87,6 @@ class _FreeChoiceState extends State<FreeChoice> {
   }
 
   bool isCorrect() {
-    return myController.text.compareTo(widget.question.ans!.first.ans) == 0;
+   return ansList.any((item) => item.trim() == myController.text);
   }
 }

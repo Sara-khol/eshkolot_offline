@@ -214,7 +214,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                 //make first course chosen
                 MainPage.of(context)?.mainWidget = MainPageChild(
                     course: courses.first,
-                    knowledgeColor:  knowledge.color!=''?int.parse(knowledge.color):-1);
+                    knowledgeColor:  knowledge.icon.color!=''?int.parse(knowledge.icon.color):-1);
                 courses.first.isSelected = true;
                 sIndex = 0;
                 //for first time
@@ -236,7 +236,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                   width: 31.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color:knowledge.color!=''? Color(int.parse(knowledge.color)):Colors.indigo,
+                    color:knowledge.icon.color!=''? Color(int.parse(knowledge.icon.color)):Colors.indigo,
                   ),
                   // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
                   // child: Center(child: HtmlWidget(knowledge.iconPath)),
@@ -270,7 +270,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               itemBuilder: (context, index) {
                 return courseItem(
                     knowledgeCourses.values.elementAt(kIndex)[index],
-                    knowledge.color!=''?int.parse(knowledge.color):-1 ,
+                    knowledge.icon.color!=''?int.parse(knowledge.icon.color):-1 ,
                     knowledge.iconPath??'',
                     index);
               }),

@@ -17,8 +17,13 @@ const QuizSchema = CollectionSchema(
   name: r'Quiz',
   id: 3912563531471134748,
   properties: {
-    r'questionnaireList': PropertySchema(
+    r'isCompletedCurrentUser': PropertySchema(
       id: 0,
+      name: r'isCompletedCurrentUser',
+      type: IsarType.bool,
+    ),
+    r'questionnaireList': PropertySchema(
+      id: 1,
       name: r'questionnaireList',
       type: IsarType.objectList,
       target: r'Question',
@@ -61,8 +66,9 @@ void _quizSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
+  writer.writeBool(offsets[0], object.isCompletedCurrentUser);
   writer.writeObjectList<Question>(
-    offsets[0],
+    offsets[1],
     allOffsets,
     QuestionSchema.serialize,
     object.questionnaireList,
@@ -78,13 +84,14 @@ Quiz _quizDeserialize(
   final object = Quiz(
     id: id,
     questionnaireList: reader.readObjectList<Question>(
-          offsets[0],
+          offsets[1],
           QuestionSchema.deserialize,
           allOffsets,
           Question(),
         ) ??
         const [],
   );
+  object.isCompletedCurrentUser = reader.readBool(offsets[0]);
   return object;
 }
 
@@ -96,6 +103,8 @@ P _quizDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readBool(offset)) as P;
+    case 1:
       return (reader.readObjectList<Question>(
             offset,
             QuestionSchema.deserialize,
@@ -248,6 +257,16 @@ extension QuizQueryFilter on QueryBuilder<Quiz, Quiz, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> isCompletedCurrentUserEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isCompletedCurrentUser',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Quiz, Quiz, QAfterFilterCondition>
       questionnaireListLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
@@ -348,7 +367,19 @@ extension QuizQueryObject on QueryBuilder<Quiz, Quiz, QFilterCondition> {
 
 extension QuizQueryLinks on QueryBuilder<Quiz, Quiz, QFilterCondition> {}
 
-extension QuizQuerySortBy on QueryBuilder<Quiz, Quiz, QSortBy> {}
+extension QuizQuerySortBy on QueryBuilder<Quiz, Quiz, QSortBy> {
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> sortByIsCompletedCurrentUser() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> sortByIsCompletedCurrentUserDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
+    });
+  }
+}
 
 extension QuizQuerySortThenBy on QueryBuilder<Quiz, Quiz, QSortThenBy> {
   QueryBuilder<Quiz, Quiz, QAfterSortBy> thenById() {
@@ -362,14 +393,38 @@ extension QuizQuerySortThenBy on QueryBuilder<Quiz, Quiz, QSortThenBy> {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> thenByIsCompletedCurrentUser() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> thenByIsCompletedCurrentUserDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
+    });
+  }
 }
 
-extension QuizQueryWhereDistinct on QueryBuilder<Quiz, Quiz, QDistinct> {}
+extension QuizQueryWhereDistinct on QueryBuilder<Quiz, Quiz, QDistinct> {
+  QueryBuilder<Quiz, Quiz, QDistinct> distinctByIsCompletedCurrentUser() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isCompletedCurrentUser');
+    });
+  }
+}
 
 extension QuizQueryProperty on QueryBuilder<Quiz, Quiz, QQueryProperty> {
   QueryBuilder<Quiz, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Quiz, bool, QQueryOperations> isCompletedCurrentUserProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isCompletedCurrentUser');
     });
   }
 
@@ -413,8 +468,13 @@ const QuestionSchema = Schema(
       name: r'question',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(
+    r'quiz_materials': PropertySchema(
       id: 4,
+      name: r'quiz_materials',
+      type: IsarType.string,
+    ),
+    r'type': PropertySchema(
+      id: 5,
       name: r'type',
       type: IsarType.byte,
       enumMap: _QuestiontypeEnumValueMap,
@@ -458,6 +518,7 @@ int _questionEstimateSize(
     }
   }
   bytesCount += 3 + object.question.length * 3;
+  bytesCount += 3 + object.quizMaterials.length * 3;
   return bytesCount;
 }
 
@@ -476,7 +537,8 @@ void _questionSerialize(
   writer.writeLong(offsets[1], object.idQues);
   writer.writeStringList(offsets[2], object.options);
   writer.writeString(offsets[3], object.question);
-  writer.writeByte(offsets[4], object.type.index);
+  writer.writeString(offsets[4], object.quizMaterials);
+  writer.writeByte(offsets[5], object.type.index);
 }
 
 Question _questionDeserialize(
@@ -495,7 +557,8 @@ Question _questionDeserialize(
     idQues: reader.readLongOrNull(offsets[1]) ?? -1,
     options: reader.readStringList(offsets[2]),
     question: reader.readStringOrNull(offsets[3]) ?? '',
-    type: _QuestiontypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
+    quizMaterials: reader.readStringOrNull(offsets[4]) ?? '',
+    type: _QuestiontypeValueEnumMap[reader.readByteOrNull(offsets[5])] ??
         QType.checkbox,
   );
   return object;
@@ -522,6 +585,8 @@ P _questionDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 4:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 5:
       return (_QuestiontypeValueEnumMap[reader.readByteOrNull(offset)] ??
           QType.checkbox) as P;
     default:
@@ -1064,6 +1129,140 @@ extension QuestionQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'question',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> quizMaterialsEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'quiz_materials',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition>
+      quizMaterialsGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'quiz_materials',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> quizMaterialsLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'quiz_materials',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> quizMaterialsBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'quiz_materials',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition>
+      quizMaterialsStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'quiz_materials',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> quizMaterialsEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'quiz_materials',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> quizMaterialsContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'quiz_materials',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> quizMaterialsMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'quiz_materials',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition>
+      quizMaterialsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'quiz_materials',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition>
+      quizMaterialsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'quiz_materials',
         value: '',
       ));
     });

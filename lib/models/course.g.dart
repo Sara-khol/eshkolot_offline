@@ -17,18 +17,43 @@ const CourseSchema = CollectionSchema(
   name: r'Course',
   id: -5832084671214696602,
   properties: {
-    r'knowledgeId': PropertySchema(
+    r'countEndQuiz': PropertySchema(
       id: 0,
+      name: r'countEndQuiz',
+      type: IsarType.string,
+    ),
+    r'countHours': PropertySchema(
+      id: 1,
+      name: r'countHours',
+      type: IsarType.string,
+    ),
+    r'countLesson': PropertySchema(
+      id: 2,
+      name: r'countLesson',
+      type: IsarType.string,
+    ),
+    r'countQuiz': PropertySchema(
+      id: 3,
+      name: r'countQuiz',
+      type: IsarType.string,
+    ),
+    r'knowledgeId': PropertySchema(
+      id: 4,
       name: r'knowledgeId',
       type: IsarType.long,
     ),
+    r'knowledgeNum': PropertySchema(
+      id: 5,
+      name: r'knowledgeNum',
+      type: IsarType.string,
+    ),
     r'serverId': PropertySchema(
-      id: 1,
+      id: 6,
       name: r'serverId',
       type: IsarType.long,
     ),
     r'title': PropertySchema(
-      id: 2,
+      id: 7,
       name: r'title',
       type: IsarType.string,
     )
@@ -80,6 +105,36 @@ int _courseEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.countEndQuiz;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.countHours;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.countLesson;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.countQuiz;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.knowledgeNum;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -90,9 +145,14 @@ void _courseSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.knowledgeId);
-  writer.writeLong(offsets[1], object.serverId);
-  writer.writeString(offsets[2], object.title);
+  writer.writeString(offsets[0], object.countEndQuiz);
+  writer.writeString(offsets[1], object.countHours);
+  writer.writeString(offsets[2], object.countLesson);
+  writer.writeString(offsets[3], object.countQuiz);
+  writer.writeLong(offsets[4], object.knowledgeId);
+  writer.writeString(offsets[5], object.knowledgeNum);
+  writer.writeLong(offsets[6], object.serverId);
+  writer.writeString(offsets[7], object.title);
 }
 
 Course _courseDeserialize(
@@ -102,9 +162,14 @@ Course _courseDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Course(
-    knowledgeId: reader.readLongOrNull(offsets[0]),
-    serverId: reader.readLongOrNull(offsets[1]) ?? 0,
-    title: reader.readStringOrNull(offsets[2]) ?? '',
+    countEndQuiz: reader.readStringOrNull(offsets[0]),
+    countHours: reader.readStringOrNull(offsets[1]),
+    countLesson: reader.readStringOrNull(offsets[2]),
+    countQuiz: reader.readStringOrNull(offsets[3]),
+    knowledgeId: reader.readLongOrNull(offsets[4]),
+    knowledgeNum: reader.readStringOrNull(offsets[5]),
+    serverId: reader.readLongOrNull(offsets[6]) ?? 0,
+    title: reader.readStringOrNull(offsets[7]) ?? '',
   );
   object.id = id;
   return object;
@@ -118,10 +183,20 @@ P _courseDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readLongOrNull(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 7:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -371,6 +446,590 @@ extension CourseQueryWhere on QueryBuilder<Course, Course, QWhereClause> {
 }
 
 extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'countEndQuiz',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'countEndQuiz',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countEndQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'countEndQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'countEndQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'countEndQuiz',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'countEndQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'countEndQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'countEndQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'countEndQuiz',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countEndQuiz',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'countEndQuiz',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'countHours',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'countHours',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countHours',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'countHours',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'countHours',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'countHours',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'countHours',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'countHours',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'countHours',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'countHours',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countHours',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countHoursIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'countHours',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'countLesson',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'countLesson',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'countLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'countLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'countLesson',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'countLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'countLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'countLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'countLesson',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countLesson',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countLessonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'countLesson',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'countQuiz',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'countQuiz',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'countQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'countQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'countQuiz',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'countQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'countQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'countQuiz',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'countQuiz',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'countQuiz',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> countQuizIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'countQuiz',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -488,6 +1147,152 @@ extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'knowledgeNum',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'knowledgeNum',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'knowledgeNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'knowledgeNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'knowledgeNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'knowledgeNum',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'knowledgeNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'knowledgeNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'knowledgeNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'knowledgeNum',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'knowledgeNum',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeNumIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'knowledgeNum',
+        value: '',
       ));
     });
   }
@@ -797,6 +1602,54 @@ extension CourseQueryLinks on QueryBuilder<Course, Course, QFilterCondition> {
 }
 
 extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountEndQuiz() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countEndQuiz', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountEndQuizDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countEndQuiz', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountHours() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countHours', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountHoursDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countHours', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountLesson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countLesson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountLessonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countLesson', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountQuiz() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countQuiz', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCountQuizDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countQuiz', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> sortByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'knowledgeId', Sort.asc);
@@ -806,6 +1659,18 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
   QueryBuilder<Course, Course, QAfterSortBy> sortByKnowledgeIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'knowledgeId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByKnowledgeNum() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'knowledgeNum', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByKnowledgeNumDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'knowledgeNum', Sort.desc);
     });
   }
 
@@ -835,6 +1700,54 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
 }
 
 extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountEndQuiz() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countEndQuiz', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountEndQuizDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countEndQuiz', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountHours() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countHours', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountHoursDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countHours', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountLesson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countLesson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountLessonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countLesson', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountQuiz() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countQuiz', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCountQuizDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countQuiz', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -856,6 +1769,18 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
   QueryBuilder<Course, Course, QAfterSortBy> thenByKnowledgeIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'knowledgeId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByKnowledgeNum() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'knowledgeNum', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByKnowledgeNumDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'knowledgeNum', Sort.desc);
     });
   }
 
@@ -885,9 +1810,44 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
 }
 
 extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
+  QueryBuilder<Course, Course, QDistinct> distinctByCountEndQuiz(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'countEndQuiz', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Course, Course, QDistinct> distinctByCountHours(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'countHours', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Course, Course, QDistinct> distinctByCountLesson(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'countLesson', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Course, Course, QDistinct> distinctByCountQuiz(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'countQuiz', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Course, Course, QDistinct> distinctByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'knowledgeId');
+    });
+  }
+
+  QueryBuilder<Course, Course, QDistinct> distinctByKnowledgeNum(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'knowledgeNum', caseSensitive: caseSensitive);
     });
   }
 
@@ -912,9 +1872,39 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Course, String?, QQueryOperations> countEndQuizProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'countEndQuiz');
+    });
+  }
+
+  QueryBuilder<Course, String?, QQueryOperations> countHoursProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'countHours');
+    });
+  }
+
+  QueryBuilder<Course, String?, QQueryOperations> countLessonProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'countLesson');
+    });
+  }
+
+  QueryBuilder<Course, String?, QQueryOperations> countQuizProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'countQuiz');
+    });
+  }
+
   QueryBuilder<Course, int?, QQueryOperations> knowledgeIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'knowledgeId');
+    });
+  }
+
+  QueryBuilder<Course, String?, QQueryOperations> knowledgeNumProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'knowledgeNum');
     });
   }
 

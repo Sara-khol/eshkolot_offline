@@ -28,18 +28,33 @@ const UserSchema = CollectionSchema(
       name: r'knowledgeIds',
       type: IsarType.longList,
     ),
-    r'name': PropertySchema(
+    r'lessonCompleted': PropertySchema(
       id: 2,
+      name: r'lessonCompleted',
+      type: IsarType.longList,
+    ),
+    r'name': PropertySchema(
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'pathIds': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'pathIds',
       type: IsarType.longList,
     ),
+    r'questionCompleted': PropertySchema(
+      id: 5,
+      name: r'questionCompleted',
+      type: IsarType.longList,
+    ),
+    r'subjectCompleted': PropertySchema(
+      id: 6,
+      name: r'subjectCompleted',
+      type: IsarType.longList,
+    ),
     r'tz': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'tz',
       type: IsarType.string,
     )
@@ -94,8 +109,11 @@ int _userEstimateSize(
     }
   }
   bytesCount += 3 + object.knowledgeIds.length * 8;
+  bytesCount += 3 + object.lessonCompleted.length * 8;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.pathIds.length * 8;
+  bytesCount += 3 + object.questionCompleted.length * 8;
+  bytesCount += 3 + object.subjectCompleted.length * 8;
   bytesCount += 3 + object.tz.length * 3;
   return bytesCount;
 }
@@ -113,9 +131,12 @@ void _userSerialize(
     object.courses,
   );
   writer.writeLongList(offsets[1], object.knowledgeIds);
-  writer.writeString(offsets[2], object.name);
-  writer.writeLongList(offsets[3], object.pathIds);
-  writer.writeString(offsets[4], object.tz);
+  writer.writeLongList(offsets[2], object.lessonCompleted);
+  writer.writeString(offsets[3], object.name);
+  writer.writeLongList(offsets[4], object.pathIds);
+  writer.writeLongList(offsets[5], object.questionCompleted);
+  writer.writeLongList(offsets[6], object.subjectCompleted);
+  writer.writeString(offsets[7], object.tz);
 }
 
 User _userDeserialize(
@@ -134,9 +155,12 @@ User _userDeserialize(
       [];
   object.id = id;
   object.knowledgeIds = reader.readLongList(offsets[1]) ?? [];
-  object.name = reader.readString(offsets[2]);
-  object.pathIds = reader.readLongList(offsets[3]) ?? [];
-  object.tz = reader.readString(offsets[4]);
+  object.lessonCompleted = reader.readLongList(offsets[2]) ?? [];
+  object.name = reader.readString(offsets[3]);
+  object.pathIds = reader.readLongList(offsets[4]) ?? [];
+  object.questionCompleted = reader.readLongList(offsets[5]) ?? [];
+  object.subjectCompleted = reader.readLongList(offsets[6]) ?? [];
+  object.tz = reader.readString(offsets[7]);
   return object;
 }
 
@@ -158,10 +182,16 @@ P _userDeserializeProp<P>(
     case 1:
       return (reader.readLongList(offset) ?? []) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
       return (reader.readLongList(offset) ?? []) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
     case 4:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 5:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 6:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -629,6 +659,146 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
+  QueryBuilder<User, User, QAfterFilterCondition> lessonCompletedElementEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lessonCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      lessonCompletedElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lessonCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      lessonCompletedElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lessonCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> lessonCompletedElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lessonCompleted',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> lessonCompletedLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lessonCompleted',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> lessonCompletedIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lessonCompleted',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> lessonCompletedIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lessonCompleted',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> lessonCompletedLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lessonCompleted',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      lessonCompletedLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lessonCompleted',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> lessonCompletedLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'lessonCompleted',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<User, User, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -886,6 +1056,292 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(
         r'pathIds',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedElementEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'questionCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'questionCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'questionCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'questionCompleted',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'questionCompleted',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> questionCompletedIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'questionCompleted',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'questionCompleted',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'questionCompleted',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'questionCompleted',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      questionCompletedLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'questionCompleted',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      subjectCompletedElementEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'subjectCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      subjectCompletedElementGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'subjectCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      subjectCompletedElementLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'subjectCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      subjectCompletedElementBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'subjectCompleted',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> subjectCompletedLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'subjectCompleted',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> subjectCompletedIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'subjectCompleted',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> subjectCompletedIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'subjectCompleted',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      subjectCompletedLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'subjectCompleted',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition>
+      subjectCompletedLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'subjectCompleted',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> subjectCompletedLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'subjectCompleted',
         lower,
         includeLower,
         upper,
@@ -1162,6 +1618,12 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
     });
   }
 
+  QueryBuilder<User, User, QDistinct> distinctByLessonCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lessonCompleted');
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1172,6 +1634,18 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
   QueryBuilder<User, User, QDistinct> distinctByPathIds() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pathIds');
+    });
+  }
+
+  QueryBuilder<User, User, QDistinct> distinctByQuestionCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'questionCompleted');
+    });
+  }
+
+  QueryBuilder<User, User, QDistinct> distinctBySubjectCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'subjectCompleted');
     });
   }
 
@@ -1202,6 +1676,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
     });
   }
 
+  QueryBuilder<User, List<int>, QQueryOperations> lessonCompletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lessonCompleted');
+    });
+  }
+
   QueryBuilder<User, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
@@ -1211,6 +1691,18 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, List<int>, QQueryOperations> pathIdsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pathIds');
+    });
+  }
+
+  QueryBuilder<User, List<int>, QQueryOperations> questionCompletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'questionCompleted');
+    });
+  }
+
+  QueryBuilder<User, List<int>, QQueryOperations> subjectCompletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'subjectCompleted');
     });
   }
 

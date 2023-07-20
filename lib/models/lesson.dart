@@ -13,16 +13,20 @@ class  Lesson {
    late List<dynamic> questionnaireIds = [];
 
   // Questionnaire? questionnaire;
-  final questionnaire = IsarLink<Quiz>();
-  bool isCompleted=false;
+  final questionnaire = IsarLinks<Quiz>();
+
+   bool isCompletedCurrentUser=false;
 
   @Name('vimoe')
   String? vimeo='';
+
+   String time;
 
   Lesson({
     this.name='',
     this.id=0,
     this.vimeo='',
+    this.time='',
     this.questionnaireIds=const []
   });
 
@@ -32,6 +36,7 @@ class  Lesson {
       questionnaireIds: parsedJson['questionnaire'],
       id:lessonId ,
       vimeo:parsedJson['vimoe'],
+      time:parsedJson['time'],
     );
   }
 

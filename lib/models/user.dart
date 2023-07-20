@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
@@ -33,6 +32,11 @@ class User {
   // final learnPathList = IsarLinks<LearnPath>();
   @Name('UserCourse')
   List<UserCourse> courses=[];
+
+  List<int> subjectCompleted=[];
+  List<int> questionCompleted=[];
+  List<int> lessonCompleted=[];
+
 
 
 

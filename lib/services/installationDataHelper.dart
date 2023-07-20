@@ -31,6 +31,7 @@ class InstallationDataHelper {
   List<Knowledge> myKnowledgeList = [];
   List<LearnPath> myPathList = [];
   List<Quiz> myQuizzes = [];
+  List<Quiz> testQuizzes = [];
 
 
   init() async {
@@ -58,6 +59,7 @@ class InstallationDataHelper {
     Map<String, dynamic> subjects = data['subjects'] as Map<String, dynamic>;
     Map<String, dynamic> lessons = data['lessons'] as Map<String, dynamic>;
     Map<String, dynamic> questionnaires = data['questionnaire'] as Map<String, dynamic>;
+    Map<String, dynamic> questionnairesTest = data['testing_question'] as Map<String, dynamic>;
     Map<String, dynamic> knowledgeAreas =
         data['knowledge'] as Map<String, dynamic>;
     Map<String, dynamic> learnPaths = data['learnPath'] as Map<String, dynamic>;
@@ -108,7 +110,7 @@ class InstallationDataHelper {
               var q = questionnaires[qId.toString()];
 
               Quiz quiz = Quiz.fromJson(q, qId);
-              lesson.questionnaire.value=quiz;
+              lesson.questionnaire.add(quiz);
               myQuizzes.add(quiz);
             }
 
@@ -128,9 +130,15 @@ class InstallationDataHelper {
           course.subjects.add(subject);
           mySubjects.add(subject);
         }
+    //todo remove  just for testing
+        if(course.serverId==78407)
+          {
+            course.questionnaireIds.addAll([66164,82517,111897,128955,129722]);
+          }
 
         for (int qId in course.questionnaireIds) {
           var q = questionnaires[qId.toString()];
+          q ??= questionnairesTest[qId.toString()];
           Quiz quiz = Quiz.fromJson(q, qId);
           // debugPrint('quiz ${quiz.id}');
           // for(Question question  in quiz.questionnaireList)

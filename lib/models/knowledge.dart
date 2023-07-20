@@ -5,40 +5,60 @@ part 'knowledge.g.dart';
 @Collection()
 class Knowledge {
   // Id id = Isar.autoIncrement;
-  late Id id ;
+  late Id id;
+
   late String title;
   late String? iconPath;
-  late String color;
+   MyIcon icon;
   @Ignore()
-  late bool isOpen=false;
+  late bool isOpen = false;
 
   // @Index(unique: true,replace: true,name:'serverId' )
   // late int serverId;
 
+  factory Knowledge.fromJson(Map<String, dynamic> parsedJson, int knowledgeId) {
+    return Knowledge(
+      title: parsedJson['title'],
+      iconPath: parsedJson['iconPath'] ?? '',
+      id: knowledgeId,
+      icon: MyIcon.fromJson(parsedJson['icon'])
+    );
+  }
 
- factory Knowledge.fromJson(Map<String, dynamic> parsedJson,int knowledgeId) {
-  return Knowledge(
-   title: parsedJson['title'],
-   iconPath:parsedJson['iconPath'] ??'',
-   color:parsedJson['color']!=null? (parsedJson['color'] as String).startsWith('#')?
-   (parsedJson['color'] as String).replaceFirst('#', '0xff'):parsedJson['color']:'',
-   id: knowledgeId,
-  );
- }
-
-   Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'title': title,
       'iconPath': iconPath,
-      'color': color,
       'id': id,
+      'icon':icon
     };
   }
 
-  Knowledge({
-   this.title='',
-   this.iconPath='',
-   this.color='',
-   this.id=0
-  });
+  Knowledge(
+      {this.title = '', this.iconPath = '', this.id = 0, required this.icon});
+}
+
+@Embedded()
+class MyIcon {
+  // @Name('name_icon')
+  late String nameIcon;
+  late String color;
+  // @Name('text_color')
+  late String textColor;
+
+  MyIcon.fromJson(Map<String, dynamic> json) {
+    nameIcon = json['name_icon'] ?? '';
+    color =json['color'] != null
+        ? (json['color'] as String).startsWith('#')
+        ? (json['color'] as String).replaceFirst('#', '0xff')
+        : json['color']
+        : '';
+    textColor = json['text_color'] != null
+        ? (json['text_color'] as String).startsWith('#')
+        ? (json['text_color'] as String).replaceFirst('#', '0xff')
+        : json['text_color']
+        : '';
+  }
+
+  MyIcon({this.nameIcon = '', this.color = '', this.textColor = ''});
 }

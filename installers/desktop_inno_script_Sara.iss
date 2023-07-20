@@ -51,6 +51,7 @@ Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Relea
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\permission_handler_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\sentry_flutter_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\audioplayers_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\window_size_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\runner\Release\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs

@@ -9,6 +9,9 @@ class Subject {
   late Id id/* = Isar.autoIncrement*/;
   late String name;
 
+  bool isCompletedCurrentUser=false;
+
+
   // @Backlink(to: "subjects")
   // final course = IsarLink<Course>();
 

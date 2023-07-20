@@ -7,6 +7,8 @@ part 'quiz.g.dart';
 class Quiz {
   late Id id;
   late List<Question> questionnaireList = [];
+  bool isCompletedCurrentUser=false;
+
 
   Quiz.fromJson(List<dynamic> json, int qId) {
     id = qId;
@@ -59,6 +61,8 @@ class Question {
   late List<Answer>? ans = [];
   @Name('id_ques')
   late int idQues;
+  @Name('quiz_materials')
+  late String quizMaterials;
   @enumerated
   late QType type;
 
@@ -77,6 +81,8 @@ class Question {
     // type = QType.values.firstWhere(
     //         (qType) => qType.toString() == json['type']);
     type = stringToStatusType(json['type']);
+    quizMaterials = json['quiz_materials']??'';
+
   }
 
   Question({
@@ -86,6 +92,7 @@ class Question {
     // this.fillInQuestion = '',
     this.type = QType.checkbox,
     this.idQues = -1,
+    this.quizMaterials=''
   });
 
   QType stringToStatusType(String value) {
@@ -94,8 +101,6 @@ class Question {
         return QType.fillIn;
       case 'free_answer':
         return QType.freeChoice;
-      case 'essay':
-        return QType.openQ;
       case 'single':
         return QType.radio;
       case 'multiple':
@@ -104,6 +109,8 @@ class Question {
         return QType.sortMatrix;
       case 'sort_answer':
         return QType.sort;
+      case 'essay':
+        return QType.openQ;
       default:
         // todo change
         return QType.freeChoice;

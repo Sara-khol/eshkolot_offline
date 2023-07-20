@@ -127,13 +127,13 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    topInformation(Icons.check, 'הושלם 2'),
+                    topInformation(Icons.check, 'הושלם',2),
                     Container(
                         height: 27.h, width: 1.w, color: colors.blackColorApp),
-                    topInformation(Icons.refresh, 'ממתין לסינכרון 1'),
+                    topInformation(Icons.refresh, 'ממתין לסינכרון',1),
                     Container(
                         height: 27.h, width: 1.w, color: colors.blackColorApp),
-                    topInformation(Icons.star_outlined, ' תעודות 1'),
+                    topInformation(Icons.star_outlined, 'תעודות',1),
                   ])),
           SizedBox(height: 35.h),
           Row(
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
         );
   }
 
-  topInformation(IconData iconData, String s) {
+  topInformation(IconData iconData, String s,int num) {
     return Row(mainAxisSize: MainAxisSize.min, children: [
       Container(
           width: 14.h,
@@ -165,8 +165,8 @@ class _HomePageState extends State<HomePage> {
           decoration:
                BoxDecoration(shape: BoxShape.circle, color: colors.lightGrey1ColorApp),
           child: Center(child: Icon(iconData, size: 12.sp))),
-      Text(s, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
-      SizedBox(width: 25.w),
+      Text('$s $num', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+      SizedBox(width: 25.w)
     ]);
   }
 
@@ -280,7 +280,7 @@ class _HomePageState extends State<HomePage> {
               width: 31.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color:knowledge.color!='' ?Color(int.parse(knowledge.color)):Colors.indigo,
+                color:knowledge.icon.color!='' ?Color(int.parse(knowledge.icon.color)):Colors.indigo,
               ),
               // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
               child: Image.asset('assets/images/english.png'),
@@ -333,7 +333,7 @@ class _HomePageState extends State<HomePage> {
               //     //         knowledge.courses.elementAt(index).isFullyDisplayed,
               //     //     child:
               return courseItem(knowledgeCourses.values.elementAt(kIndex)[index],
-                  knowledge.color!=''  ? int.parse(knowledge.color):-1,knowledge.iconPath??'', index);
+                  knowledge.icon.color!=''  ? int.parse(knowledge.icon.color):-1,knowledge.iconPath??'', index);
               // )
               // );
               // courseItem(knowledge.courses.elementAt(index),

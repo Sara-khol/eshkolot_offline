@@ -17,8 +17,13 @@ const SubjectSchema = CollectionSchema(
   name: r'Subject',
   id: 7648000959054204885,
   properties: {
-    r'name': PropertySchema(
+    r'isCompletedCurrentUser': PropertySchema(
       id: 0,
+      name: r'isCompletedCurrentUser',
+      type: IsarType.bool,
+    ),
+    r'name': PropertySchema(
+      id: 1,
       name: r'name',
       type: IsarType.string,
     )
@@ -66,7 +71,8 @@ void _subjectSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.name);
+  writer.writeBool(offsets[0], object.isCompletedCurrentUser);
+  writer.writeString(offsets[1], object.name);
 }
 
 Subject _subjectDeserialize(
@@ -77,8 +83,9 @@ Subject _subjectDeserialize(
 ) {
   final object = Subject(
     id: id,
-    name: reader.readStringOrNull(offsets[0]) ?? '',
+    name: reader.readStringOrNull(offsets[1]) ?? '',
   );
+  object.isCompletedCurrentUser = reader.readBool(offsets[0]);
   return object;
 }
 
@@ -90,6 +97,8 @@ P _subjectDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readBool(offset)) as P;
+    case 1:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -236,6 +245,16 @@ extension SubjectQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      isCompletedCurrentUserEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isCompletedCurrentUser',
+        value: value,
       ));
     });
   }
@@ -495,6 +514,19 @@ extension SubjectQueryLinks
 }
 
 extension SubjectQuerySortBy on QueryBuilder<Subject, Subject, QSortBy> {
+  QueryBuilder<Subject, Subject, QAfterSortBy> sortByIsCompletedCurrentUser() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy>
+      sortByIsCompletedCurrentUserDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
+    });
+  }
+
   QueryBuilder<Subject, Subject, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -522,6 +554,19 @@ extension SubjectQuerySortThenBy
     });
   }
 
+  QueryBuilder<Subject, Subject, QAfterSortBy> thenByIsCompletedCurrentUser() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy>
+      thenByIsCompletedCurrentUserDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
+    });
+  }
+
   QueryBuilder<Subject, Subject, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -537,6 +582,12 @@ extension SubjectQuerySortThenBy
 
 extension SubjectQueryWhereDistinct
     on QueryBuilder<Subject, Subject, QDistinct> {
+  QueryBuilder<Subject, Subject, QDistinct> distinctByIsCompletedCurrentUser() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isCompletedCurrentUser');
+    });
+  }
+
   QueryBuilder<Subject, Subject, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -550,6 +601,13 @@ extension SubjectQueryProperty
   QueryBuilder<Subject, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Subject, bool, QQueryOperations>
+      isCompletedCurrentUserProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isCompletedCurrentUser');
     });
   }
 
