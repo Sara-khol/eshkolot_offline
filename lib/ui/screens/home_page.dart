@@ -23,7 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Map<Knowledge,List<Course>> knowledgeCourses = {};
+  Map<Knowledge, List<Course>> knowledgeCourses = {};
   List<LearnPath> pathList = [];
   bool showMorePath = false;
   bool showMoreKnowledge = false;
@@ -82,7 +82,6 @@ class _HomePageState extends State<HomePage> {
         },
       );
 
-
   @override
   void initState() {
     knowledgeCourses = widget.user.knowledgeCoursesMap;
@@ -107,65 +106,79 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         backgroundColor: Colors.white,
         body: Padding(
-      padding: EdgeInsets.only(
-          top: 78.h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
-      child: Column(
-        children: [
+          padding: EdgeInsets.only(
+              top: 78.h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
+          child: Column(
+            children: [
               Center(
                   child: Text('שלום ${widget.user.name}',
                       style: TextStyle(
                           color: colors.blackColorApp,
                           fontWeight: FontWeight.w600,
                           fontSize: 32.sp))),
-          SizedBox(height: 26.h),
-          Container(
-              height: 51.h,
-              decoration: BoxDecoration(
-                  border: Border.all(color: colors.blackColorApp, width: 1.h),
-                  borderRadius: BorderRadius.all(Radius.circular(50))),
-              child: Row(
+              SizedBox(height: 26.h),
+              Container(
+                  height: 51.h,
+                  decoration: BoxDecoration(
+                      border:
+                          Border.all(color: colors.blackColorApp, width: 1.h),
+                      borderRadius: BorderRadius.all(Radius.circular(50))),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        topInformation(
+                            Icons.check,
+                            'הושלם',
+                            widget.user.courses
+                                .where((c) => c.status == Status.synchronized)
+                                .length),
+                        Container(
+                            height: 27.h,
+                            width: 1.w,
+                            color: colors.blackColorApp),
+                        topInformation(
+                            Icons.refresh,
+                            'ממתין לסינכרון',
+                            widget.user.courses
+                                .where((c) => c.status == Status.finish)
+                                .length),
+                        Container(
+                            height: 27.h,
+                            width: 1.w,
+                            color: colors.blackColorApp),
+                        topInformation(
+                            Icons.star_outlined,
+                            'תעודות',
+                            widget.user.courses
+                                .where((c) => c.status == Status.synchronized)
+                                .length),
+                      ])),
+              SizedBox(height: 35.h),
+              Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+                  // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
                   children: [
-                    topInformation(Icons.check, 'הושלם',2),
-                    Container(
-                        height: 27.h, width: 1.w, color: colors.blackColorApp),
-                    topInformation(Icons.refresh, 'ממתין לסינכרון',1),
-                    Container(
-                        height: 27.h, width: 1.w, color: colors.blackColorApp),
-                    topInformation(Icons.star_outlined, 'תעודות',1),
-                  ])),
-          SizedBox(height: 35.h),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
-              children: [
-                myCoursesWidget(false),
-                SizedBox(width: 36.w),
-                myCoursesWidget(true)
-              ])
-        ],
-      ),
-    )
-        //;
-        //             }
-        //             return Text('Error');
-        //  }
-        //}
-        //  )
-        );
+                    myCoursesWidget(false),
+                    SizedBox(width: 36.w),
+                    myCoursesWidget(true)
+                  ])
+            ],
+          ),
+        ));
   }
 
-  topInformation(IconData iconData, String s,int num) {
+  topInformation(IconData iconData, String s, int num) {
     return Row(mainAxisSize: MainAxisSize.min, children: [
       Container(
           width: 14.h,
           height: 14.h,
           margin: EdgeInsets.only(right: 20.w, left: 15.w),
-          decoration:
-               BoxDecoration(shape: BoxShape.circle, color: colors.lightGrey1ColorApp),
+          decoration: BoxDecoration(
+              shape: BoxShape.circle, color: colors.lightGrey1ColorApp),
           child: Center(child: Icon(iconData, size: 12.sp))),
-      Text('$s $num', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+      Text('$s $num',
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
       SizedBox(width: 25.w)
     ]);
   }
@@ -179,13 +192,16 @@ class _HomePageState extends State<HomePage> {
             EdgeInsets.only(top: 30.h, right: 42.w, left: 42.w, bottom: 30.h),
         decoration: BoxDecoration(
             border: Border.all(color: const Color(0xffE4E6E9)),
-            borderRadius:  const BorderRadius.all(Radius.circular(10))),
+            borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               isPath ? 'מסלולי למידה' : 'הקורסים שלי',
-              style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w600,color: colors.blackColorApp ),
+              style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w600,
+                  color: colors.blackColorApp),
             ),
             SizedBox(height: 40.h),
             // positionsView,
@@ -266,7 +282,8 @@ class _HomePageState extends State<HomePage> {
               },
               child: isPath
                   ? pathItem(pathList[index])
-                  : knowledgeItem(knowledgeCourses.keys.elementAt(index), index));
+                  : knowledgeItem(
+                      knowledgeCourses.keys.elementAt(index), index));
         });
   }
 
@@ -280,7 +297,9 @@ class _HomePageState extends State<HomePage> {
               width: 31.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color:knowledge.icon.color!='' ?Color(int.parse(knowledge.icon.color)):Colors.indigo,
+                color: knowledge.icon.color != ''
+                    ? Color(int.parse(knowledge.icon.color))
+                    : Colors.indigo,
               ),
               // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
               child: Image.asset('assets/images/english.png'),
@@ -288,7 +307,10 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(width: 9.w),
             Text(knowledge.title,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp,color: colors.blackColorApp)),
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18.sp,
+                    color: colors.blackColorApp)),
           ],
         ),
         SizedBox(height: 2.h),
@@ -332,8 +354,13 @@ class _HomePageState extends State<HomePage> {
               //     //     visible: enAbleScrollKnowledge ||
               //     //         knowledge.courses.elementAt(index).isFullyDisplayed,
               //     //     child:
-              return courseItem(knowledgeCourses.values.elementAt(kIndex)[index],
-                  knowledge.icon.color!=''  ? int.parse(knowledge.icon.color):-1,knowledge.iconPath??'', index);
+              return courseItem(
+                  knowledgeCourses.values.elementAt(kIndex)[index],
+                  knowledge.icon.color != ''
+                      ? int.parse(knowledge.icon.color)
+                      : -1,
+                  knowledge.iconPath ?? '',
+                  index);
               // )
               // );
               // courseItem(knowledge.courses.elementAt(index),
@@ -353,13 +380,16 @@ class _HomePageState extends State<HomePage> {
             Container(
                 height: 9.h,
                 width: 9.h,
-                decoration:const  BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Color(0xffFFDA6C),
                 )),
             SizedBox(width: 11.w),
             Text(path.title,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp,color: colors.blackColorApp)),
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18.sp,
+                    color: colors.blackColorApp)),
           ],
         ),
         SizedBox(height: 2.h),
@@ -367,9 +397,11 @@ class _HomePageState extends State<HomePage> {
             shrinkWrap: true,
             itemCount: path.courses.length,
             itemBuilder: (context, index) {
-              return courseItem(path.courses.elementAt(index),path.color.isNotEmpty? int.parse(path.color):
-                  -1,
-                  path.iconPath??'', index);
+              return courseItem(
+                  path.courses.elementAt(index),
+                  path.color.isNotEmpty ? int.parse(path.color) : -1,
+                  path.iconPath ?? '',
+                  index);
             }),
         SizedBox(height: 24.h),
       ],
@@ -387,8 +419,11 @@ class _HomePageState extends State<HomePage> {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          MainPage.of(context)?.mainWidget = MainPageChild(course: course,knowledgeColor: color,);
-          if( MainPage.of(context)?.updateSideMenu!=null) {
+          MainPage.of(context)?.mainWidget = MainPageChild(
+            course: course,
+            knowledgeColor: color,
+          );
+          if (MainPage.of(context)?.updateSideMenu != null) {
             MainPage.of(context)?.updateSideMenu!(course.serverId);
           }
         },
@@ -409,18 +444,21 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      MainPageChild(course: course,knowledgeColor: color,)));
+                                  builder: (context) => MainPageChild(
+                                        course: course,
+                                        knowledgeColor: color,
+                                      )));
                         },
                         child: Text('${course.title}',
-                            style: TextStyle(fontSize: 18.sp,color: colors.blackColorApp)),
+                            style: TextStyle(
+                                fontSize: 18.sp, color: colors.blackColorApp)),
                       )),
                   //  SizedBox(width: 63.w),
                   Positioned(
                       right: 200.w,
                       child: Container(
                           decoration: BoxDecoration(
-                              color:color!=-1? Color(color):Colors.indigo,
+                              color: color != -1 ? Color(color) : Colors.indigo,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(30))),
                           padding: EdgeInsets.only(
@@ -434,7 +472,7 @@ class _HomePageState extends State<HomePage> {
                                 Image.asset('assets/images/english.png'),
                                 SizedBox(width: 15.w),
                                 Text(
-                                  (i + 1).toString(),
+                                  '${course.knowledgeNum}',
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13.sp,
@@ -457,19 +495,22 @@ class _HomePageState extends State<HomePage> {
             height: 15.h,
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: colors.lightGrey1ColorApp, width: 3.sp)));
-        //return Icon(Icons.circle_outlined,color: colors.lightGrey1ColorApp,size: 20.sp,);
+                border:
+                    Border.all(color: colors.lightGrey1ColorApp, width: 3.sp)));
+      //return Icon(Icons.circle_outlined,color: colors.lightGrey1ColorApp,size: 20.sp,);
       case Status.middle:
         return Image.asset('assets/images/procces_circle.png');
       default:
-        return Container(
+        return Icon(Icons.check_circle,
+            color: colors.lightGreen1ColorApp, size: 22.sp);
+        /*Container(
           width: 15.h,
           height: 15.h,
           decoration: const BoxDecoration(
               shape: BoxShape.circle, color: Color(0xff62FFB8)),
           child: Center(
               child: Icon(Icons.check, color: Colors.white, size: 12.sp)),
-        );
+        )*/
     }
   }
 
@@ -494,19 +535,18 @@ class _HomePageState extends State<HomePage> {
       if (text != '') SizedBox(width: 7.w),
       Container(
         decoration: BoxDecoration(
-         color: colors.lightGrey1ColorApp,
-          borderRadius: BorderRadius.all(Radius.circular(30))
-        ),
+            color: colors.lightGrey1ColorApp,
+            borderRadius: BorderRadius.all(Radius.circular(30))),
         padding:
             EdgeInsets.only(right: 11.w, left: 11.w, top: 5.h, bottom: 5.h),
         child: Row(
           children: [
             Text(
               buttonText,
-              style: TextStyle(fontSize: 14.sp,color: colors.blackColorApp),
+              style: TextStyle(fontSize: 14.sp, color: colors.blackColorApp),
             ),
             SizedBox(width: 3.w),
-            Icon(Icons.arrow_forward,size: 14.sp)
+            Icon(Icons.arrow_forward, size: 14.sp)
           ],
         ),
       )
@@ -519,6 +559,4 @@ class _HomePageState extends State<HomePage> {
     knowledgeScrollController.dispose();
     super.dispose();
   }
-
-
 }

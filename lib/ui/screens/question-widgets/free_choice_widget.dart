@@ -39,6 +39,7 @@ class _FreeChoiceState extends State<FreeChoice> {
       }
    widget.questionController.isFilled=isFilled;
    widget.questionController.isCorrect=isCorrect;
+   ansList = widget.question.ans!.first.ans.split('\n');
     super.didUpdateWidget(oldWidget);
   }
 

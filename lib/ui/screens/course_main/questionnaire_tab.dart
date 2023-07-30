@@ -1,3 +1,4 @@
+import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_end_dialog.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/order_selection_matrix_widget.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/order_selection_widget.dart';
@@ -8,13 +9,14 @@ import 'package:eshkolot_offline/ui/screens/question-widgets/fill_in_widget.dart
 import 'package:eshkolot_offline/ui/screens/question-widgets/free_choice_widget.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/open_question_widget.dart';
 import '../../../utils/common_funcs.dart';
-import '../dialogs/dialogs.dart';
 import '../question-widgets/radio_check_widget.dart';
+import 'main_page_child.dart';
 
 class QuestionnaireTab extends StatefulWidget {
-  const QuestionnaireTab({super.key, required this.questionnaire});
+  const QuestionnaireTab({super.key, required this.questionnaire, required this.questionnaireId});
 
   final List<Question> questionnaire;
+  final int questionnaireId;
 
   @override
   State<QuestionnaireTab> createState() => _QuestionnaireTabState();
@@ -245,7 +247,13 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     if (onNextClick(isLast: true)) {
       if (checkAnswers()) {
         QuestionnaireWidget.of(context)?.setInitialDisplay();
-        endQuestionsDialog(context, correctQNum, qNum);
+        MainPageChild.of(context)?.updateCompleteQuiz(widget.questionnaireId);
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return QuestionnaireEndDialog(
+                qNum: qNum, correctQNum: correctQNum,);
+            });
       }
     }
   }

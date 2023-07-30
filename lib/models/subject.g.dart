@@ -26,6 +26,11 @@ const SubjectSchema = CollectionSchema(
       id: 1,
       name: r'name',
       type: IsarType.string,
+    ),
+    r'time': PropertySchema(
+      id: 2,
+      name: r'time',
+      type: IsarType.string,
     )
   },
   estimateSize: _subjectEstimateSize,
@@ -62,6 +67,7 @@ int _subjectEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.name.length * 3;
+  bytesCount += 3 + object.time.length * 3;
   return bytesCount;
 }
 
@@ -73,6 +79,7 @@ void _subjectSerialize(
 ) {
   writer.writeBool(offsets[0], object.isCompletedCurrentUser);
   writer.writeString(offsets[1], object.name);
+  writer.writeString(offsets[2], object.time);
 }
 
 Subject _subjectDeserialize(
@@ -84,6 +91,7 @@ Subject _subjectDeserialize(
   final object = Subject(
     id: id,
     name: reader.readStringOrNull(offsets[1]) ?? '',
+    time: reader.readStringOrNull(offsets[2]) ?? '',
   );
   object.isCompletedCurrentUser = reader.readBool(offsets[0]);
   return object;
@@ -99,6 +107,8 @@ P _subjectDeserializeProp<P>(
     case 0:
       return (reader.readBool(offset)) as P;
     case 1:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 2:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -388,6 +398,136 @@ extension SubjectQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'time',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'time',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'time',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'time',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> timeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'time',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension SubjectQueryObject
@@ -538,6 +678,18 @@ extension SubjectQuerySortBy on QueryBuilder<Subject, Subject, QSortBy> {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy> sortByTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy> sortByTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.desc);
+    });
+  }
 }
 
 extension SubjectQuerySortThenBy
@@ -578,6 +730,18 @@ extension SubjectQuerySortThenBy
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy> thenByTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy> thenByTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'time', Sort.desc);
+    });
+  }
 }
 
 extension SubjectQueryWhereDistinct
@@ -592,6 +756,13 @@ extension SubjectQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QDistinct> distinctByTime(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'time', caseSensitive: caseSensitive);
     });
   }
 }
@@ -614,6 +785,12 @@ extension SubjectQueryProperty
   QueryBuilder<Subject, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<Subject, String, QQueryOperations> timeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'time');
     });
   }
 }

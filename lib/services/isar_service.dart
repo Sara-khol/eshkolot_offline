@@ -242,13 +242,17 @@ class IsarService {
         await updateLessonCompleted(lessonId);
       }
 
+
       for (int subjectId in user.subjectCompleted) {
         await updateSubjectCompleted(subjectId);
       }
 
+
       for (int quizId in user.questionCompleted) {
         await updateQuizCompleted(quizId);
       }
+
+
 
       _user = user;
       await isar.writeTxn(() async {
@@ -284,6 +288,7 @@ class IsarService {
       //     user.courses.add(newDataCourse);
       //   }
       // else
+
       if (course != null) {
         //update
         debugPrint('update ${newDataCourse.lessonStopId}');
@@ -330,33 +335,85 @@ class IsarService {
         .watch(fireImmediately: true /*initialReturn: true*/);
   }
 
-  updateLessonCompleted(int id) async {
+  updateLessonCompleted(int id ,[bool updateUser=false]) async {
     final isar = await db;
-    Lesson? lesson;
-    await isar.writeTxn(() async {
-      lesson = await isar.lessons.get(id);
-      lesson!.isCompletedCurrentUser = true;
-      await isar.lessons.put(lesson!);
-    });
-    return lesson;
+      Lesson? lesson;
+      await isar.writeTxn(() async {
+        if(!updateUser) {
+          lesson = await isar.lessons.get(id);
+          lesson!.isCompletedCurrentUser = true;
+          await isar.lessons.put(lesson!);
+        }
+        else{
+          List<int> lessonCompletedList = List.from(_user.lessonCompleted);
+          lessonCompletedList.add(id);
+          _user.lessonCompleted = lessonCompletedList;
+
+          await isar.users.put(_user);
+        }
+      });
   }
 
-  updateSubjectCompleted(int id) async {
+  updateCourse(int id,[bool updateComplete=false]) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      Subject? subject = await isar.subjects.get(id);
-      subject!.isCompletedCurrentUser = true;
-      await isar.subjects.put(subject);
+        _user.courses
+            .firstWhere((c) => c.courseId == id)
+            .status =updateComplete? Status.finish:Status.middle;
+        await isar.users.put(_user);
+    });
+
+    // _user.knowledgeCoursesMap.values.firstWhere((List<Course> list) => list.firstWhere(
+    //         (course) => course.serverId==id));
+    // Course? course;
+    // for (final coursesList in _user.knowledgeCoursesMap.values) {
+    //    course = coursesList.firstWhereOrNull((course) => course.id == id);
+    //   if (course != null) {
+    //     break;
+    //   }
+    // }
+    // if(course!=null)
+    //   {
+    //     course.
+    //   }
+
+  }
+
+  updateSubjectCompleted(int id,[bool updateUser=false]) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      if(!updateUser) {
+        Subject? subject = await isar.subjects.get(id);
+        subject!.isCompletedCurrentUser = true;
+        await isar.subjects.put(subject);
+      }
+      else{
+
+        List<int> subjectCompletedList = List.from(_user.subjectCompleted);
+        subjectCompletedList.add(id);
+        _user.subjectCompleted = subjectCompletedList;
+
+        await isar.users.put(_user);
+      }
     });
   }
 
-  updateQuizCompleted(int id) async {
-    debugPrint('updateQuizCompleted id $id');
+  updateQuizCompleted(int id,[bool updateUser=false]) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      Quiz? quiz = await isar.quizs.get(id);
-      quiz!.isCompletedCurrentUser = true;
-      await isar.quizs.put(quiz);
+      if(!updateUser) {
+        Quiz? quiz = await isar.quizs.get(id);
+        quiz!.isCompletedCurrentUser = true;
+        await isar.quizs.put(quiz);
+      }
+      else{
+
+        List<int> quizCompletedList = List.from(_user.questionCompleted);
+        quizCompletedList.add(id);
+        _user.questionCompleted = quizCompletedList;
+
+        await isar.users.put(_user);
+      }
     });
   }
 

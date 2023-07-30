@@ -33,6 +33,19 @@ class _OrderSelectionMatrixWidgetState
 
   @override
   void initState() {
+    initData();
+
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant OrderSelectionMatrixWidget oldWidget) {
+   initData();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  initData()
+  {
     widget.questionController.isFilled = isFilled;
     widget.questionController.isCorrect = isCorrect;
     matrixMatchList=widget.question.ans!.map((e) => e.matrixMatch ?? '').toList();
@@ -40,17 +53,9 @@ class _OrderSelectionMatrixWidgetState
     ans=List<String>.generate(correctAnswersList.length, (index) => '');
     // dragQ = DragQ(widget.question.ans!.map((e) => e.matrixMatch ?? '').toList(),
     //     widget.question.ans!.map((e) => e.ans).toList(), {});
+    randomList.clear();
     randomList = List.from(correctAnswersList);
     randomList.shuffle();
-
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant OrderSelectionMatrixWidget oldWidget) {
-    widget.questionController.isFilled = isFilled;
-    widget.questionController.isCorrect = isCorrect;
-    super.didUpdateWidget(oldWidget);
   }
 
   @override

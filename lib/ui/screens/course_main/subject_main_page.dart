@@ -27,14 +27,24 @@ class SubjectMainPage extends StatefulWidget {
 
 class _SubjectMainPageState extends State<SubjectMainPage> {
 //    late int totalSteps=widget.course.subjects.first.lessons.length+1;
-  late int totalSteps = widget.subject.lessons.length + 1;
-  int currentStep = 1;
+  late int totalSteps;
+  late int currentStep;
+
   late var currentMainChild;
 
   @override
   void initState() {
+    setSteps();
     super.initState();
     //bodyWidget=mainWidget();
+  }
+
+  @override
+  void didUpdateWidget(covariant SubjectMainPage oldWidget) {
+    if (oldWidget.subject != widget.subject) {
+      setSteps();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -114,13 +124,13 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                           FaIcon(FontAwesomeIcons.bookOpen, size: 27.sp),
                           Expanded(
                             child: Padding(
-                                padding: EdgeInsets.only(left: 10.w, right: 8.w),
-                                child: Text(
-                                  widget.subject.name,
-                                  style: TextStyle(
-                                      fontSize: 36.sp,
-                                      fontWeight: FontWeight.w600),
-                                ),
+                              padding: EdgeInsets.only(left: 10.w, right: 8.w),
+                              child: Text(
+                                widget.subject.name,
+                                style: TextStyle(
+                                    fontSize: 36.sp,
+                                    fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ),
                           Row(
@@ -130,21 +140,30 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                 size: 15,
                               ),
                               SizedBox(width: (7.5).w),
-                              Text("4 שעות ו 10 דק'", style: TextStyle(fontSize: 16.sp))
+                              Text(widget.subject.time,
+                                  style: TextStyle(fontSize: 16.sp))
                             ],
                           ),
-                          SizedBox(width:10.w),
+                          SizedBox(width: 10.w),
                           Container(
                               height: 20.h,
                               width: 70.w,
                               decoration: BoxDecoration(
-                                  color: widget.subject.isCompletedCurrentUser? colors.lightGreen2ColorApp:colors.lightBlueColorApp,
-                                  borderRadius: const BorderRadius.all(Radius.circular(10))),
+                                  color: widget.subject.isCompletedCurrentUser
+                                      ? colors.lightGreen2ColorApp
+                                      : colors.lightBlueColorApp,
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10))),
                               child: Center(
                                 child: Text(
-                                  widget.subject.isCompletedCurrentUser?'הושלם':'בלמידה',
+                                  widget.subject.isCompletedCurrentUser
+                                      ? 'הושלם'
+                                      : 'בלמידה',
                                   //  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 13.sp, color: colors.blackColorApp,fontWeight: FontWeight.w600),
+                                  style: TextStyle(
+                                      fontSize: 13.sp,
+                                      color: colors.blackColorApp,
+                                      fontWeight: FontWeight.w600),
                                 ),
                               )),
                           SizedBox(
@@ -193,7 +212,8 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                         itemCount: widget.subject.lessons.length,
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
-                          Lesson currentLesson=  widget.subject.lessons.elementAt(index);
+                          Lesson currentLesson =
+                              widget.subject.lessons.elementAt(index);
                           return Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -232,10 +252,16 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                               // widget.subject.lessons
                                               //     .elementAt(index)
                                               //     .isCompletedCurrentUser,
-                                              currentLesson.isCompletedCurrentUser,
-                                              currentLesson.questionnaire.isEmpty &&
-                                                 widget.subject.questionnaire.isEmpty &&
-                                                  index == widget.subject.lessons.length - 1),
+                                              currentLesson
+                                                  .isCompletedCurrentUser,
+                                              currentLesson
+                                                      .questionnaire.isEmpty &&
+                                                  widget.subject.questionnaire
+                                                      .isEmpty &&
+                                                  index ==
+                                                      widget.subject.lessons
+                                                              .length -
+                                                          1),
                                           SizedBox(
                                             width: 35.w,
                                           ),
@@ -294,6 +320,8 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                           ?.lastSubjectPickedIndex =
                                                       widget.subjectIndex;
                                                   currentMainChild?.bodyWidget = LessonWidget(
+                                                      updateComplete: currentMainChild
+                                                          .updateCompleteLesson,
                                                       lesson: widget
                                                           .subject.lessons
                                                           .elementAt(index),
@@ -308,8 +336,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                                   .subjectIndex,
                                                               widget.subject
                                                                   .lessons
-                                                                  .elementAt(
-                                                                      index + 1),
+                                                                  .elementAt(index + 1),
                                                               index + 1)
                                                           : null);
                                                 });
@@ -322,18 +349,31 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                     if (currentLesson.questionnaire.isNotEmpty)
                                       ListView.builder(
                                           shrinkWrap: true,
-                                          itemCount: currentLesson.questionnaire.length,
+                                          itemCount: currentLesson
+                                              .questionnaire.length,
                                           itemBuilder: (ctx, qIndex) {
                                             return displayQuestion(
                                                 subjectIndex: index,
                                                 qIndex: qIndex,
-                                                isCompleted:currentLesson.questionnaire.elementAt(qIndex).isCompletedCurrentUser ,
-                                                name: ' תרגול -  ${currentLesson.name} ${qIndex + 1}',
-                                                isLast:   qIndex ==
-                                                    currentLesson.questionnaire.length -
-                                                        1 &&
-                                                    index == widget.subject.lessons.length - 1 &&
-                                                    widget.subject.questionnaire.isEmpty,
+                                                isCompleted: currentLesson
+                                                    .questionnaire
+                                                    .elementAt(qIndex)
+                                                    .isCompletedCurrentUser,
+                                                name: currentLesson
+                                                    .questionnaire
+                                                    .elementAt(qIndex)
+                                                    .title,
+                                                isLast: qIndex ==
+                                                        currentLesson
+                                                                .questionnaire
+                                                                .length -
+                                                            1 &&
+                                                    index ==
+                                                        widget.subject.lessons
+                                                                .length -
+                                                            1 &&
+                                                    widget.subject.questionnaire
+                                                        .isEmpty,
                                                 onPress: () {
                                                   setState(() {
                                                     currentMainChild
@@ -342,12 +382,15 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                     currentMainChild
                                                             ?.lastSubjectPickedIndex =
                                                         widget.subjectIndex;
+                                                    currentMainChild
+                                                        ?.questionPickedIndex = qIndex;
                                                     MainPageChild.of(context)
                                                             ?.bodyWidget =
                                                         QuestionnaireWidget(
-                                                            title:
-                                                                'תרגול - ${currentLesson.name}',
-                                                            quiz: currentLesson.questionnaire.elementAt(qIndex));
+                                                            quiz: currentLesson
+                                                                .questionnaire
+                                                                .elementAt(
+                                                                    qIndex));
                                                   });
                                                 });
                                           }),
@@ -364,16 +407,21 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                       ),
                       if (widget.subject.questionnaire.isNotEmpty)
                         ListView.builder(
-                            padding: EdgeInsets.only(right: 61.w),
+                            padding: EdgeInsets.only(right: 61.w, left: 66.w),
                             itemCount: widget.subject.questionnaire.length,
                             shrinkWrap: true,
                             itemBuilder: (context, qIndex) {
                               return displayQuestion(
                                   subjectIndex: 0,
-                                  isCompleted: widget.subject.questionnaire.elementAt(qIndex).isCompletedCurrentUser,
+                                  isCompleted: widget.subject.questionnaire
+                                      .elementAt(qIndex)
+                                      .isCompletedCurrentUser,
                                   qIndex: qIndex,
-                                  name: 'תרגיל מסכם -  ${widget.subject.name} ${qIndex + 1}',
-                                  isLast:  qIndex == widget.subject.questionnaire.length - 1,
+                                  name: widget.subject.questionnaire
+                                      .elementAt(qIndex)
+                                      .title,
+                                  isLast: qIndex ==
+                                      widget.subject.questionnaire.length - 1,
                                   onPress: () {
                                     setState(() {
                                       currentMainChild?.lessonPickedIndex = -1;
@@ -381,10 +429,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                           widget.subjectIndex;
                                       MainPageChild.of(context)?.bodyWidget =
                                           QuestionnaireWidget(
-                                              title:
-                                                  'תרגיל מסכם - ${widget.subject.name}',
-                                              quiz: widget
-                                                  .subject.questionnaire
+                                              quiz: widget.subject.questionnaire
                                                   .elementAt(qIndex));
                                     });
                                   });
@@ -392,15 +437,15 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                     ]))));
   }
 
-  progressIcon(int index, bool isLesson, bool isCompleted,bool isLast) {
+  progressIcon(int index, bool isLesson, bool isCompleted, bool isLast) {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: [
         VerticalDivider(
-          color: isCompleted ? Color(0xFF62FFB8) : colors.grey2ColorApp,
-          thickness: 3.w,
-          indent: index == 0 && isLesson ? 25.h : null,
-          endIndent: isLast ? 20.h : null),
+            color: isCompleted ? Color(0xFF62FFB8) : colors.grey2ColorApp,
+            thickness: 3.w,
+            indent: index == 0 && isLesson ? 25.h : null,
+            endIndent: isLast ? 20.h : null),
         isCompleted
             ? Icon(
                 Icons.check_circle,
@@ -423,15 +468,15 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
       {required int subjectIndex,
       required int qIndex,
       required String name,
-        required bool isCompleted,
-        required bool isLast,
+      required bool isCompleted,
+      required bool isLast,
       required VoidCallback onPress}) {
     return SizedBox(
       height: 37.h,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          progressIcon(subjectIndex, false,isCompleted,isLast),
+          progressIcon(subjectIndex, false, isCompleted, isLast),
           SizedBox(
             width: 35.w,
           ),
@@ -441,7 +486,8 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
           ),
           SizedBox(width: 14.h),
           Expanded(
-            child: Text(name,
+            child: Text(
+              name,
               style: TextStyle(fontSize: 16.sp),
             ),
           ),
@@ -504,6 +550,28 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
   // backToSubject(Subject subject) {
   //   MainPageChild.of(context)?.bodyWidget = SubjectMainPage(subject: subject);
   // }
+
+  setSteps() async {
+    totalSteps = 0;
+    currentStep = 0;
+    // totalSteps+=subject.lessons.length;
+    for (Lesson lesson in widget.subject.lessons) {
+      totalSteps++;
+      if (lesson.isCompletedCurrentUser) {
+        currentStep++;
+      }
+      totalSteps += lesson.questionnaire.length;
+      currentStep += lesson.questionnaire
+          .where((item) => item.isCompletedCurrentUser == true)
+          .length;
+    }
+    totalSteps += widget.subject.questionnaire.length;
+    currentStep += widget.subject.questionnaire
+        .where((item) => item.isCompletedCurrentUser == true)
+        .length;
+
+    //  progressPercent = ((currentStep / totalSteps) * 100).round();
+  }
 
   @override
   void didChangeDependencies() {

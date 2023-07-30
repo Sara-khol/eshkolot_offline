@@ -10,8 +10,9 @@ import '../../../models/lesson.dart';
 class LessonWidget extends StatefulWidget {
   final Lesson lesson;
   final VoidCallback? onNext;
+  final Function(int) updateComplete;
 
-  LessonWidget({super.key, required this.lesson, required this.onNext});
+  const LessonWidget({super.key, required this.lesson, required this.onNext, required this.updateComplete});
 
   @override
   State<LessonWidget> createState() => _LessonWidgetState();
@@ -208,7 +209,6 @@ class _LessonWidgetState extends State<LessonWidget> {
                                 setState(() {
                                   MainPageChild.of(context)?.bodyWidget =
                                       QuestionnaireWidget(
-                                          title: 'תרגול - ${lesson.name} ${qIndex+1}',
                                           quiz: lesson.questionnaire
                                               .elementAt(qIndex));
                                 });
@@ -256,6 +256,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                       ),
                       onPressed: () async {
                       // lesson= await IsarService().updateLessonCompleted(lesson.id);
+                        widget.updateComplete(widget.lesson.id);
                        widget.onNext!();
                         setState(() {});
                       },

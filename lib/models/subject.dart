@@ -8,6 +8,7 @@ part 'subject.g.dart';
 class Subject {
   late Id id/* = Isar.autoIncrement*/;
   late String name;
+  late String time;
 
   bool isCompletedCurrentUser=false;
 
@@ -33,6 +34,7 @@ class Subject {
   factory Subject.fromJson(Map<String, dynamic> parsedJson,int subjectId) {
     return Subject(
       name: parsedJson['name'],
+      time:parsedJson['time'],
       lessonsIds: parsedJson['lessons'],
       questionnaireIds: parsedJson['questionnaire'],
       id:subjectId ,
@@ -42,6 +44,7 @@ class Subject {
 
   Subject({
     this.name='',
+    this.time='',
     this.lessonsIds=const [ ],
     this.questionnaireIds=const [],
     this.id=0,

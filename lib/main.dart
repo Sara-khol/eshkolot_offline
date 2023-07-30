@@ -5,7 +5,6 @@ import 'package:archive/archive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
-import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/models/subject.dart';
@@ -78,10 +77,6 @@ Future<void> main()  async{
 
    late  String destDirPath;
    List<Course> myCourses = [];
-   List<Course> myEshkolotCourses = [];
-   // late   List<Map<String, dynamic>> jsonUsers ;
-   late    Map<String, dynamic> data  ;
- late   List<dynamic> users;
 
    extractZipFile() async {
      // Open the zip file
@@ -110,16 +105,6 @@ Future<void> main()  async{
        debugPrint(archiveFile.name);
      }
    }
-
-
-
-   setAllCourseData()
-   {
-
-   }
-
-   
-
    IsarService().init();
 
    initData() async {
@@ -130,246 +115,22 @@ Future<void> main()  async{
 
      //  generateJsonData();
      await IsarService().cleanDb();
-     Map<String, List<String>> fillInQ = {
-       'ab': ['c'],
-       'd e f': ['g'],
-       'h': []
-     };
 
-     List<Quiz> questionnaires = [
-       // Quiz()
-       //   ..question = 'שאלת אפשרות יחידה'
-       //   ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
-       //   ..ans = ['אופציה ג']
-       //   ..type = QType.radio,
-       // Quiz()
-       //   ..question = 'שאלת בחירה מרובה'
-       //   ..options = ['אופציה א', 'אופציה ב', 'אופציה ג', 'אופציה ד']
-       //   ..ans = ['אופציה ג', 'אופציה א']
-       //   ..type = QType.checkbox,
-       // Quiz()
-       //   ..question = 'שאלת בחירה חופשית'
-       //   ..ans = ['אופציה ג', 'אופציה א']
-       //   ..type = QType.freeChoice,
-       // Quiz()
-       //   ..question = 'שאלה מלא את החסר'
-       //   ..fillInQuestion = json.encode(fillInQ)
-       //   ..type = QType.fillIn
-     ];
+     List<Quiz> questionnaires = [];
 
-     List<Lesson> lessons = [
-       Lesson()
-         ..name = 'מבוא ואותיות ניקוד'
-         ..vimeo = '467058608'
-         //..questionnaire.add(questionnaires.first)
-       ,
-       Lesson()
-         ..name = 'אותיות עיצור א'
-         ..vimeo = '458427089',
-       Lesson()
-         ..name = 'אותיות עיצור ב'
-         ..vimeo = '458427439',
-       Lesson()
-         ..name = 'אותיות עיצור ג'
-         ..vimeo = /*458427853*/ '458690463',
-       Lesson()
-         ..name = 'אותיות עיצור ד'
-         ..vimeo = '458428550',
-       Lesson()
-         ..name = 'אותיות עיצור ה'
-         ..vimeo = '458429636',
-       Lesson()
-         ..name = 'אותיות עיצור ו'
-         ..vimeo = '458429870',
-       Lesson()
-         ..name = 'אותיות עיצור ז'
-         ..vimeo = '458431017',
-       Lesson()
-         ..name = 'אותיות עיצור ח'
-         ..vimeo = '458484739',
-       Lesson()
-         ..name = 'אותיות עיצור ט'
-         ..vimeo = '458486785',
-       Lesson()
-         ..name = 'אותיות עיצור י'
-         ..vimeo = '458487712',
-       Lesson()
-         ..name = 'אותיות עיצור כ'
-         ..vimeo = '458488614',
-       Lesson()
-         ..name = 'אותיות עיצור ל'
-         ..vimeo = '458493015',
-       Lesson()
-         ..name = 'אותיות עיצור מ'
-         ..vimeo = '458587389'
-        // ..questionnaire.addAll(questionnaires)
-       ,
-     ];
+     List<Lesson> lessons = [];
 
-     final List<Subject> subjects = [
-       Subject()
-       ..id=1
-         ..name = 'חוקי קריאה והגיה'
-         ..lessons.addAll(lessons)
-       //  ..questionnaire.addAll(questionnaires)
-       ,
-       Subject()
-         ..id=2
-         ..name = 'מבנה המשפט התיאורי'
-         ..lessons.addAll([
-           Lesson()
-             ..name = '5555'
-             ..vimeo = '458427089'
-            // ..questionnaire.addAll(questionnaires)
-           ,
-           Lesson()..name = '66666'
-         ]),
-
-       //..lessons.add(lessons[0])
-     ];
+     final List<Subject> subjects = [];
     subjects.addAll(InstallationDataHelper().mySubjects);
     lessons.addAll(InstallationDataHelper().myLessons);
     questionnaires.addAll(InstallationDataHelper().myQuizzes);
-     myCourses.add((Course()
-       ..title = 'ניסיון אנגלית א'
-       ..subjects.addAll(subjects)
-       ..serverId = /*14518542*/ 2567060
-     // ..serverId = 1
 
-       //..questionnaire.addAll(questionnaires)
-     ));
-     myCourses.add(Course()
-       ..title = 'אנגלית  בניסיון ב'
-     // ..serverId = 2782842
-       ..serverId = 1);
-
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 2
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 3
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 4
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 5
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 6
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 7
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 8
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 9
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 10
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 11
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 12
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 13
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 14
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 15
-     //   ..status = Status.finish);
-     // myCourses.add(Course()
-     //   ..title = 'אנגלית בסיסית ב'
-     //   ..serverId = 16
-     //   ..status = Status.finish);
-
-     Course algebraCourse = Course()
-       ..title = 'אלגברה בסיסית א’'
-       ..serverId = 17;
-     Course phCourse = Course()
-       ..title = 'פיזיקה רעיונית א’'
-       ..serverId = 18;
      List<Knowledge> knowledgeList = [
-       // Knowledge()
-       //   ..title = 'אנגלית'
-       //   ..color = '0xff32D489'
-       //   ..iconPath = 'english'
-       //   ..isOpen = false
-       //  ..courses.addAll(myCourses)
-       //   ..id = 61,
-       // Knowledge()
-       //   ..title = 'מתמטיקה'
-       //   ..color = '0xff5956DA'
-       //   ..iconPath = 'math'
-       //   ..isOpen = false
-       //   ..courses.add(algebraCourse)
-       //   ..id = 216,
-       // Knowledge()
-       //   ..title = 'פיזיקה'
-       //   ..color = '0xffFF317B'
-       //   ..iconPath = 'math'
-       //   ..isOpen = false
-       //   ..courses.add(phCourse)
-       //   ..id = 175
-     ];
-     List<Course> meymadList = [
-       algebraCourse,
-       Course()
-         ..title = 'אלגברה בסיסית ב’'
-         ..serverId = 19,
-       Course()
-         ..title = 'קורס גאומטריה בסיסית'
-         ..serverId = 20
      ];
 
-     List<LearnPath> paths = [
-       LearnPath()
-         ..id = 1
-         ..title = 'מסלול אמירם'
-        ..courses.addAll(myCourses)
-         ..color = '0xff32D489'
-         ..iconPath = 'english',
-       LearnPath()
-         ..id = 2
-         ..title = 'מסלול מימד'
-         ..courses.addAll(meymadList)
-         ..color = '0xff5956DA'
-         ..iconPath = 'math',
-     ];
+     List<LearnPath> paths = [];
      knowledgeList.addAll(InstallationDataHelper().myKnowledgeList);
      paths.addAll(InstallationDataHelper().myPathList);
-
-     final List<User> users = [
-       User()
-         ..name = 'שמואל'
-         ..knowledgeIds = [1, 2, 3]
-         ..pathIds = [1, 2]
-         ..tz = '123456789'
-         ..courses = [
-           //  UserCourse()..courseId=2567060..subjectStopId=1..lessonStopId=1
-         ]
-     ];
 
      debugPrint('filling!!');
      Sentry.addBreadcrumb(Breadcrumb(message: 'filling data!!'));

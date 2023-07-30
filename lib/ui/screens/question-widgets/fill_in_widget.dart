@@ -30,6 +30,8 @@ class _FillInState extends State<FillIn> {
     fillInQ=extractKeyValuePairs(widget.question.ans!.first.ans);
     widget.questionController.isCorrect=isCorrect;
     widget.questionController.isFilled=isFilled;
+    // debugPrint(replaceCurlyBracesWithTextFields(widget.question.ans!.first.ans));
+
     super.initState();
   }
 
@@ -39,8 +41,7 @@ class _FillInState extends State<FillIn> {
     // {
       widget.questionController.isCorrect=isCorrect;
       widget.questionController.isFilled=isFilled;
-
-  // }
+      // }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -59,6 +60,7 @@ class _FillInState extends State<FillIn> {
 
   @override
   Widget build(BuildContext context) {
+
     var english = RegExp(r'[a-zA-Z]');
     return  Padding(
         padding: const EdgeInsets.only(top: 25),
@@ -83,7 +85,8 @@ class _FillInState extends State<FillIn> {
         //          return SizedBox(height: 0); // Hide the line break
         //        }
                return null;
-             }),
+             }
+             ),
           ],
         ),
       );
@@ -95,7 +98,7 @@ class _FillInState extends State<FillIn> {
     fillInQ.forEach((key, value) {
       children.add(HtmlWidget(key/*,style: TextStyle(fontSize: 25),*/));
       if (value.isNotEmpty) {
-        var textEditingController = new TextEditingController();
+        var textEditingController = new TextEditingController(text: 'kkk');
         myControllers.add(textEditingController);
         children.add(createTextField(textEditingController));
       }
@@ -104,26 +107,72 @@ class _FillInState extends State<FillIn> {
   }
 
   Widget createTextField(TextEditingController controller) {
-    return Container(
-        padding: EdgeInsets.only(right: 5, left: 5),
+    return /*Container(
+        padding: EdgeInsets.only(right: 5.w, left: 5.w),
      //   margin: EdgeInsets.only(top: 15.h,bottom: 15.h),
-        width: 50,
+        width: 150.w,
         height: 30.h,
-        child: IntrinsicWidth(
-          child: TextField(
-              controller: controller,
-              cursorColor:  Colors.black,
-              textAlign: TextAlign.center,
-               style: TextStyle(fontSize: 20.sp),
-              decoration:const InputDecoration(
-                border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black)),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 15 ),
-                isDense: true,
-              )),
-        ));
+        child: TextField(
+
+          onChanged: (e){
+            debugPrint('text $e');
+          },
+            controller: controller,
+            cursorColor:  Colors.black,
+            textAlign: TextAlign.center,
+             style: TextStyle(fontSize: 20.sp),
+            decoration:const InputDecoration(
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 15 ),
+              isDense: true,
+            )))*/
+      Container(
+        height: 40.h,
+        width: 200.w,
+        alignment: Alignment.center,
+        margin: EdgeInsets.only(top: 10.h,bottom: 10.h),
+        child: TextField(
+            obscureText: false,
+            textAlignVertical: TextAlignVertical.center,
+            controller: controller,
+            textAlign: TextAlign.center,
+            cursorColor: Colors.black,
+         //   maxLines: null, // Allow multiple lines to handle long text without spaces
+            style: TextStyle(
+              fontSize: 22.sp,
+            ),
+            decoration:   InputDecoration(
+             // isCollapsed: true,
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black)),
+             contentPadding: EdgeInsets.only(top: 10.h,right: 10.w,left: 10.w),
+             // isDense: true,
+            )
+        )
+
+
+
+
+
+
+
+            // InputDecoration(
+            //   focusedBorder: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(30),
+            //       borderSide: BorderSide(color: Color(0xffF4F4F3))),
+            //   enabledBorder: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(30),
+            //       borderSide: BorderSide(color: Color(0xffF4F4F3))),
+            //   //contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 15),
+            // )
+   // ),
+      )
+      ;
   }
 
 

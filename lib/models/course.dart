@@ -50,6 +50,9 @@ class Course {
   @Ignore()
   late bool isFullyDisplayed = true;
 
+  @Ignore()
+  int currentSteps=0;
+
   Map<String, dynamic> toJson() {
     return {
       'title': title,

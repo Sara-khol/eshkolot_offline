@@ -8,53 +8,50 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import '../../../models/quiz.dart';
 import '../course_main/questionnaire_tab.dart';
 
-
-
 class OrderSelectionWidget extends StatefulWidget {
-  final  Question question;
+  final Question question;
   final QuestionController questionController;
 
-
   const OrderSelectionWidget(
-      this.question, {
-        super.key, required this.questionController,
-      });
+    this.question, {
+    super.key,
+    required this.questionController,
+  });
 
   @override
   State<OrderSelectionWidget> createState() => _OrderSelectionWidgetState();
 }
 
 class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
-
   List<String> randomList = [];
-  bool didChange=false;
-
-
+  bool didChange = false;
 
   //Questionnaire question;
 
   @override
   void initState() {
-    widget.questionController.isFilled = isFilled;
-    widget.questionController.isCorrect = isCorrect;
-   for(Answer answer in widget.question.ans!)
-     {
-       randomList.add(answer.ans);
-     }
-   randomList.shuffle();
+    initData();
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant OrderSelectionWidget oldWidget) {
+    initData();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  initData() {
     widget.questionController.isFilled = isFilled;
     widget.questionController.isCorrect = isCorrect;
-    super.didUpdateWidget(oldWidget);
+    randomList.clear();
+    for (Answer answer in widget.question.ans!) {
+      randomList.add(answer.ans);
+    }
+    randomList.shuffle();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: [
         SizedBox(height: 25.h),
@@ -62,22 +59,20 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
         SizedBox(height: 30.h),
         ReorderableListView(
           proxyDecorator: proxyDecorator,
-
-            buildDefaultDragHandles: false,
-            shrinkWrap: true,
-            children: _listOfItems(),
-            onReorder: (int oldIndex, int newIndex) {
-            if(!didChange) didChange=true;
-        setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
-          final String item = randomList.removeAt(oldIndex);
-          randomList.insert(newIndex, item);
-        });
-            },
-
-          ),
+          buildDefaultDragHandles: false,
+          shrinkWrap: true,
+          children: _listOfItems(),
+          onReorder: (int oldIndex, int newIndex) {
+            if (!didChange) didChange = true;
+            setState(() {
+              if (oldIndex < newIndex) {
+                newIndex -= 1;
+              }
+              final String item = randomList.removeAt(oldIndex);
+              randomList.insert(newIndex, item);
+            });
+          },
+        ),
       ],
     );
   }
@@ -91,7 +86,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
           child: Container(
             height: 60.h,
             padding: EdgeInsets.only(right: 15.w, left: 15.w),
-            margin: EdgeInsets.only(right: 2.w, left: 2.w,bottom: 12.h),
+            margin: EdgeInsets.only(right: 2.w, left: 2.w, bottom: 12.h),
             decoration: ShapeDecoration(
               color: const Color(0xFFFCFCFF),
               shape: RoundedRectangleBorder(
@@ -102,13 +97,14 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
                 ),
                 borderRadius: BorderRadius.circular(3),
               ),
-            ),            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(randomList[i]),
-            ],
-          ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(randomList[i]),
+              ],
+            ),
           ),
         ),
       ]
@@ -125,13 +121,9 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
           child: child,
         );
       },
-      child: Directionality(textDirection: TextDirection.rtl,
-          child: child),
+      child: Directionality(textDirection: TextDirection.rtl, child: child),
     );
   }
-
-
-
 
   bool isFilled() {
     return didChange;
@@ -139,7 +131,8 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
 
   bool isCorrect() {
     debugPrint('list answer ${randomList}');
-    if(listEquals(randomList,widget.question.ans!.map((e) => e.ans).toList())) {
+    if (listEquals(
+        randomList, widget.question.ans!.map((e) => e.ans).toList())) {
       return true;
     }
     return false;

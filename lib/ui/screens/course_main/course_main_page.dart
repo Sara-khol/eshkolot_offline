@@ -190,6 +190,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                     data!.lessonIndex;
                                 currentMainChild?.bodyWidget = LessonWidget(
                                     lesson: lastLesson!,
+                                    //todo check if works..
+                                    updateComplete: currentMainChild.updateCompleteLesson,
                                     onNext: data!.lessonIndex + 1 <
                                             lastSubject!.lessons.length
                                         ? () => currentMainChild.goToNextLesson(
@@ -204,11 +206,6 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                     QuestionnaireWidget(
                                         //todo change save correct the right questionarie
                                         quiz: lastQuestionnaire.first,
-                                        title:
-                                            lastTextButton /*lastLesson == null
-                                            ? 'תרגיל מסכם - ${lastSubject!.name}'
-                                            :
-                                        'תרגול - ${lastLesson!.name}'*/
                                         );
                               }
                             }),

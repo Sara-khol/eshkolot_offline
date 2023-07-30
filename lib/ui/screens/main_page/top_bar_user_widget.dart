@@ -1,6 +1,6 @@
+import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/ui/screens/dialogs/dialogs.dart';
 import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
-import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -59,7 +59,7 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
               SizedBox(width: 12.w),
               InkWell(
                 onTap: () {
-                  SyncEndDialog(context,MainPage.of(context)?.widget.user);
+                  SyncEndDialog(context,IsarService().getCurrentUser());
                   SyncDialog(context,controller);
                   // OfflineSyncDialog(context);
                   // CourseCompleteDialog(context, MainPage.of(context)?.widget.user, /*course,*/ controller);

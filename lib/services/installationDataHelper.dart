@@ -113,8 +113,6 @@ class InstallationDataHelper {
               lesson.questionnaire.add(quiz);
               myQuizzes.add(quiz);
             }
-
-
             subject.lessons.add(lesson);
             myLessons.add(lesson);
           }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -12,6 +14,23 @@ class ApiService {
     // Prints the raw data returned by the server
     debugPrint('data: ${response.data}');
     if (response.statusCode==200 && response.data) {
+      onSuccess();
+    } else {
+      onError();
+    }
+  }
+
+  syncData({required Function() onSuccess,required Function() onError,required Map<String, dynamic> jsonMap}) async {
+
+    debugPrint('url: ${_baseUrl}update_user_data');
+    debugPrint('data : ${ json.encode(jsonMap)}');
+
+
+    Response response = await _dio.post('${_baseUrl}update_user_data',data: json.encode(jsonMap), /*: {"Content-Type": "application/json" }*/);
+
+    // Prints the raw data returned by the server
+    debugPrint('data: ${response.data}');
+    if (response.statusCode==200 ) {
       onSuccess();
     } else {
       onError();

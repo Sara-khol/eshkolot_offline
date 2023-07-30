@@ -1,3 +1,6 @@
+
+import 'package:eshkolot_offline/services/api_service.dart';
+import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/ui/screens/home_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +81,19 @@ void SyncDialog(BuildContext context,AnimationController controller){
 
 
 void SyncEndDialog(BuildContext context,User? user){
+
+  User user=IsarService().getCurrentUser();
+
+List<int> courseCompleted = user.courses.where((course) => course.status==Status.finish)
+      .map((course) => course.courseId)
+      .toList();
+
+  Map<String, dynamic> map =
+  {'id_user':user.tz,'lessonCompleted': user.lessonCompleted, 'questionCompleted': user.questionCompleted,
+    'subjectCompleted':user.subjectCompleted, 'coursesCompleted': courseCompleted};
+
+
+  ApiService().syncData( onSuccess: (){}, onError: (){}, jsonMap: map);
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -145,7 +161,7 @@ void SyncEndDialog(BuildContext context,User? user){
                             ],
                           ),
                           onPressed: () {
-                            MainPage.of(context)?.mainWidget= HomePage(user: user!);
+                            MainPage.of(context)?.mainWidget= HomePage(user: user);
                             Navigator.pop(context);
                           },
                         ),
@@ -240,174 +256,4 @@ void OfflineSyncDialog(BuildContext context){
 }
 
 
-void CourseCompleteDialog(BuildContext context,User? user,/*Course course,*/AnimationController controller){
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Center(
-        child: AlertDialog(
-          content: Container(
-            height: 640.h,
-            width: 656.w,
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: TextButton(
-                    child: Image.asset('assets/images/X.jpg',height: 18.h),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-                //child: Image.asset('assets/images/X.jpg',height: 16.h))),
-                Padding(
-                  padding: EdgeInsets.only(/*top: 44.h,*/right: 70.w,left: 70.w),
-                  child: Column(
-                    children: [
-                      Image.asset('assets/images/course_done.jpg',height: 159.h),
-                      SizedBox(height: 35.h,),
-                      Text('כל הכבוד!',
-                        style: TextStyle(
-                            fontSize: 36.sp, fontWeight: FontWeight.w600),
-                        textDirection: TextDirection.rtl,
-                        textAlign:TextAlign.center,
-                      ),
-                      //Text('סיימת קורס ${course.title} !',
-                      Text('סיימת קורס !',
-                        style: TextStyle(
-                            fontSize: 32.sp, fontWeight: FontWeight.w600),
-                        textDirection: TextDirection.rtl,
-                        textAlign:TextAlign.center,
-                      ),
-                      SizedBox(height: 45.h,),
-                      Container(
-                       // padding: EdgeInsets.only(right: 70.w,left: 70.w),
-                        child: Text('עכשיו הזמן לסנכרן את נתוני הלמידה באתר אשכולות\n כדי לקבל את התעודה המחכה לכם באזור האישי\n וכן את דמי הפיקדון ששילמתם',
-                            style: TextStyle(
-                                fontSize: 18.sp,
 
-                            ),
-                            textDirection: TextDirection.rtl,
-                            textAlign:TextAlign.center),
-                      ),
-                      SizedBox(height: 35.h,),
-                      Text('כל הכבוד על ההתמדה והלמידה!',
-                        style: TextStyle(
-                            fontSize: 18.sp
-                        ),
-                        textDirection: TextDirection.rtl,),
-                      SizedBox(height: 56.h,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-
-                            height: 40.h,width: 163.w,
-                            decoration: BoxDecoration(
-                              border: Border.all(color:  Color(0xFF2D2828),),
-                              borderRadius: BorderRadius.all(Radius.circular(30))
-                            ),
-                            child: TextButton(
-                              child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-
-                                  Text(' סנכרון נתונים ',style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color:  Color(0xFF2D2828),
-                                  ),),
-                                  Icon(Icons.refresh,color:  Color(0xFF2D2828),size: 18.sp,),
-                                ],
-                              ),
-                              onPressed: () {
-                                //MainPage.of(context)?.mainWidget= HomePage(user: user!);
-                                SyncDialog(context, controller);
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                          SizedBox(width: 53.w,),
-                          Container(
-                            height: 40.h,width: 171.w,
-                            decoration: BoxDecoration(
-                                color: Color(0xFF2D2828),
-                                borderRadius: BorderRadius.all(Radius.circular(30))
-                            ),
-                            child: TextButton(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [Icon(Icons.arrow_back,color: Colors.white,size: 15.sp,),
-                                  Text(' להמשך למידה ',style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white
-                                  ),),
-
-                                ],
-                              ),
-                              onPressed: () {
-                                MainPage.of(context)?.mainWidget= HomePage(user: user!);
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-void endQuestionsDialog(BuildContext context,int correctQNum,int qNum){
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Center(
-        child: AlertDialog(
-          content: SizedBox(
-            height: 640.h,
-            width: 656.w,
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: TextButton(
-                    child: Image.asset('assets/images/X.jpg',height: 18.h),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(/*top: 45.h,*/right: 70.w,left: 70.w),
-                  child: Column(
-                    children: [
-                      Text('תוצאות השאלון',
-                        style: TextStyle(
-                            fontSize: 36.sp, fontWeight: FontWeight.w600),
-                        textDirection: TextDirection.rtl,
-                        textAlign:TextAlign.center,
-                      ),
-                      SizedBox(height: 15.h,),
-                      Container(height: 40.h,child: Text(' הצלחת ${correctQNum} מתוך ${qNum}  שאלות '),)
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}

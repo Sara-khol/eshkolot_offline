@@ -10,10 +10,9 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 class QuestionnaireWidget extends StatefulWidget {
   // final List<Question> questionnaires;
   final Quiz quiz;
-  final String title;
 
   const QuestionnaireWidget(
-      {super.key, required this.quiz, required this.title});
+      {super.key, required this.quiz});
 
   @override
   State<QuestionnaireWidget> createState() => _QuestionnaireWidgetState();
@@ -30,7 +29,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
 
   @override
   void initState() {
-    questionnaires = widget.quiz.questionnaireList;
+    questionnaires = widget.quiz.questionList;
     displayWidget = initialDisplay();
     _tabController = TabController(length: 2, vsync: this);
     super.initState();
@@ -38,6 +37,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
 
   @override
   void didUpdateWidget(covariant QuestionnaireWidget oldWidget) {
+    questionnaires = widget.quiz.questionList;
     _tabController.animateTo(0);
     displayWidget = initialDisplay();
     super.didUpdateWidget(oldWidget);
@@ -66,13 +66,13 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                 Icon(Icons.create, size: 30.w),
                 SizedBox(width: 23.w),
                 Expanded(
-                    child: Text(widget.title,
+                    child: Text(widget.quiz.title,
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 36.sp))),
                 SizedBox(width: 30.w),
                 Icon(Icons.access_time_outlined, size: 15.sp),
                 SizedBox(width: (7.5).w),
-                Text("30 דק'", style: TextStyle(fontSize: 16.sp)),
+                Text(widget.quiz.time, style: TextStyle(fontSize: 16.sp)),
                 //  Spacer(),
                 SizedBox(width: 10.w),
                 Container(
@@ -99,7 +99,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
             SizedBox(
               height: 17.h,
             ),
-            if (questionnaires.isNotEmpty && questionnaires.first.quizMaterials != '')
+            if (questionnaires.isNotEmpty && widget.quiz.quizMaterials != '')
               Row(
                 children: [
                   Image.asset('assets/images/hand.jpg'),
@@ -108,7 +108,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                 ],
               ),
             if (questionnaires.isNotEmpty &&
-                questionnaires.first.quizMaterials != '')
+                widget.quiz.quizMaterials != '')
               TabBar(
                 labelColor: const Color.fromARGB(255, 45, 40, 40),
                 unselectedLabelColor: const Color.fromARGB(255, 172, 174, 175),
@@ -147,7 +147,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
               // height: MediaQuery.of(context).size.height+10000.h,
               child: ClipRect(
                 child: questionnaires.isNotEmpty &&
-                        questionnaires.first.quizMaterials != ''
+                    widget.quiz.quizMaterials != ''
                     ? TabBarView(
                         physics: const NeverScrollableScrollPhysics(),
                         controller: _tabController,
@@ -194,7 +194,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                   onPressed: () {
                     setState(() {
                       displayWidget =
-                          QuestionnaireTab(questionnaire: questionnaires);
+                          QuestionnaireTab(questionnaire: questionnaires,questionnaireId: widget.quiz.id);
                     });
                   },
                   child: Row(
@@ -230,7 +230,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
         child: Column(
       children: [
         AudioWidget(),
-        HtmlWidget(questionnaires.first.quizMaterials),
+        HtmlWidget(widget.quiz.quizMaterials),
       ],
     ));
   }
