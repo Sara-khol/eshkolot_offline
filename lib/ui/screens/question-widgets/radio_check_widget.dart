@@ -1,7 +1,9 @@
+import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/checkbox_widget.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../course_main/questionnaire_tab.dart';
@@ -62,12 +64,12 @@ class _RadioCheckState extends State<RadioCheck> {
         children: <Widget>[
           Align(
               alignment: Alignment.centerRight,
-              child: HtmlWidget(
-                item.question,
-              )),
+              child: HtmlDataWidget(item.question, quizId: item.quizId)),
+          SizedBox(height: 30.h,),
           for(var ans in item.ans!)...[
             RadioListTile<String?>(
-              title: Text(ans.ans),
+              title: Text(ans.ans,style: TextStyle(fontSize: 27.sp),),
+
               value: ans.ans,
               groupValue: _character,
               onChanged: (value) {
@@ -86,8 +88,9 @@ class _RadioCheckState extends State<RadioCheck> {
         children: <Widget>[
           Align(
             alignment: Alignment.centerLeft,
-            child: HtmlWidget(
+            child: HtmlDataWidget(
               item.question,
+              quizId: widget.question.quizId,
             ),
           ),
           for(int i=0;i<item.ans!.length;i++)...[

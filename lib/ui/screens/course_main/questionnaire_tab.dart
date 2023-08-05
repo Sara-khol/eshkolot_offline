@@ -13,10 +13,11 @@ import '../question-widgets/radio_check_widget.dart';
 import 'main_page_child.dart';
 
 class QuestionnaireTab extends StatefulWidget {
-  const QuestionnaireTab({super.key, required this.questionnaire, required this.questionnaireId});
+  const QuestionnaireTab({super.key, required this.quiz});
 
-  final List<Question> questionnaire;
-  final int questionnaireId;
+  final Quiz quiz;
+
+  // final int questionnaireId;
 
   @override
   State<QuestionnaireTab> createState() => _QuestionnaireTabState();
@@ -25,10 +26,9 @@ class QuestionnaireTab extends StatefulWidget {
 class _QuestionnaireTabState extends State<QuestionnaireTab> {
   int selected = 1;
   int index = 0;
-  late  QuestionController myQController = QuestionController();
-  int correctQNum=0;
-  int qNum=0;
-
+  late QuestionController myQController = QuestionController();
+  int correctQNum = 0;
+  int qNum = 0;
 
   @override
   void initState() {
@@ -40,179 +40,184 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-        child: Column(children: <Widget>[
-          SizedBox(
-            height: 60.h,
-          ),
-            Wrap(
-              children: [
-                for (int i = 1; i <= widget.questionnaire.length; i++) ...[
-                    Container(
-                      width: 45.w,
-                      decoration: BoxDecoration(
-                        color: i == selected
-                            ? const Color((0xFF5956DA))
-                            : Colors.transparent,
-                      ),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          alignment: Alignment.center,
-                          foregroundColor:
-                              i == selected ? Colors.white : const Color((0xFF2D2828)),
-                          textStyle: TextStyle(fontSize: 18.w),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            selected = i;
-                            index = i - 1;
-                          });
-                        },
-                        child: Text('$i', style: TextStyle(fontSize: 18.w)),
-                      ),
-                    ),
-                  //),
-                ]
-              ],
-            ),
+      child: Column(children: <Widget>[
+        SizedBox(
+          height: 60.h,
+        ),
+        Wrap(
+          children: [
+            for (int i = 1; i <= widget.quiz.questionList.length; i++) ...[
+              Container(
+                width: 45.w,
+                decoration: BoxDecoration(
+                  color: i == selected
+                      ? const Color((0xFF5956DA))
+                      : Colors.transparent,
+                ),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    alignment: Alignment.center,
+                    foregroundColor: i == selected
+                        ? Colors.white
+                        : const Color((0xFF2D2828)),
+                    textStyle: TextStyle(fontSize: 18.w),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      selected = i;
+                      index = i - 1;
+                    });
+                  },
+                  child: Text('$i', style: TextStyle(fontSize: 18.w)),
+                ),
+              ),
+              //),
+            ]
+          ],
+        ),
         //  ),
-          Padding(
-            padding: EdgeInsets.only(top: 15.h, bottom: 30.h),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.square,
-                  color: const Color(0xFF5956DA),
-                  size: 15.sp,
-                ),
-                Text(' הנוכחי', style: TextStyle(fontSize: 16.w)),
-                SizedBox(
-                  width: 11.w,
-                ),
-                Icon(Icons.square, color: const Color(0xFFACAEAF), size: 15.sp),
-                Text(' ביקורת', style: TextStyle(fontSize: 16.w)),
-                SizedBox(
-                  width: 11.w,
-                ),
-                Icon(Icons.square, color: const Color(0xFF62FFB8), size: 15.sp),
-                Text(' נענו', style: TextStyle(fontSize: 16.w)),
-                SizedBox(
-                  width: 11.w,
-                ),
-                Icon(Icons.square, color: const Color(0xFFF97575), size: 15.sp),
-                Text(' לא נכון', style: TextStyle(fontSize: 16.w)),
-                const Spacer(),
-                Container(
-                  height: 20.h,
-                  width: 100.w,
-                  decoration: const BoxDecoration(
-                      color: Color(0xFFF4F4F3),
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      alignment: Alignment.center,
-                      foregroundColor: const Color(0xFF2D2828),
-                      textStyle:
-                          TextStyle(fontSize: 12.w, fontWeight: FontWeight.w600),
-                    ),
-                    onPressed: () {},
-                    child: Row(
-                      children: [
-                        Text('סקור שאלה', style: TextStyle(fontSize: 12.w)),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 10.sp,
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-          const Divider(color: Color.fromARGB(255, 228, 230, 233)),
-          Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                'שאלה $selected מתוך ${widget.questionnaire.length}',
-                style: TextStyle(color: const Color(0xFF6E7072), fontSize: 18.sp),
-              )),
-          Column(
+        Padding(
+          padding: EdgeInsets.only(top: 15.h, bottom: 30.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-               // getQuestionnaireByType(widget.questionnaire.elementAt(index)),
-               getQuestionnaireByType(widget.questionnaire.elementAt(selected-1)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Visibility(
-                    visible: selected != 1,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.cyan),
-                      child: const Text(
-                        "חזרה",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      onPressed: () => onBackClick(),
-                    ),
+              Icon(
+                Icons.square,
+                color: const Color(0xFF5956DA),
+                size: 15.sp,
+              ),
+              Text(' הנוכחי', style: TextStyle(fontSize: 16.w)),
+              SizedBox(
+                width: 11.w,
+              ),
+              Icon(Icons.square, color: const Color(0xFFACAEAF), size: 15.sp),
+              Text(' ביקורת', style: TextStyle(fontSize: 16.w)),
+              SizedBox(
+                width: 11.w,
+              ),
+              Icon(Icons.square, color: const Color(0xFF62FFB8), size: 15.sp),
+              Text(' נענו', style: TextStyle(fontSize: 16.w)),
+              SizedBox(
+                width: 11.w,
+              ),
+              Icon(Icons.square, color: const Color(0xFFF97575), size: 15.sp),
+              Text(' לא נכון', style: TextStyle(fontSize: 16.w)),
+              const Spacer(),
+              Container(
+                height: 20.h,
+                width: 100.w,
+                decoration: const BoxDecoration(
+                    color: Color(0xFFF4F4F3),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    alignment: Alignment.center,
+                    foregroundColor: const Color(0xFF2D2828),
+                    textStyle:
+                        TextStyle(fontSize: 12.w, fontWeight: FontWeight.w600),
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.cyan),
-                    child: Text(
-                      selected == widget.questionnaire.length
-                          ? "סיום שאלון"
-                          : "הבא",
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () => selected == widget.questionnaire.length
-                        ? onFinishClick()
-                        : onNextClick(),
+                  onPressed: () {},
+                  child: Row(
+                    children: [
+                      Text('סקור שאלה', style: TextStyle(fontSize: 12.w)),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 10.sp,
+                      )
+                    ],
                   ),
-                ],
+                ),
               )
             ],
           ),
-        ]),
-     // ),
+        ),
+        const Divider(color: Color.fromARGB(255, 228, 230, 233)),
+        Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'שאלה $selected מתוך ${widget.quiz.questionList.length}',
+              style: TextStyle(color: const Color(0xFF6E7072), fontSize: 18.sp),
+            )),
+        Column(
+          children: [
+            // getQuestionnaireByType(widget.questionnaire.elementAt(index)),
+            getQuestionnaireByType(
+                widget.quiz.questionList.elementAt(selected - 1)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Visibility(
+                  visible: selected != 1,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12))),
+                        backgroundColor: Color(0xFF5956DA)),
+                    child: const Text(
+                      "חזרה",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () => onBackClick(),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                      backgroundColor: Color(0xFF5956DA)),
+                  child: Text(
+                    selected == widget.quiz.questionList.length
+                        ? "סיום שאלון"
+                        : "הבא",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () => selected == widget.quiz.questionList.length
+                      ? onFinishClick()
+                      : onNextClick(),
+                ),
+              ],
+            )
+          ],
+        ),
+      ]),
+      // ),
     );
   }
 
   getQuestionnaireByType(Question item) {
     debugPrint('type ${item.type}');
-    myQController=QuestionController();
+    myQController = QuestionController();
+    item.quizId = widget.quiz.id;
     switch (item.type) {
       case QType.checkbox:
-        return RadioCheck(item,questionController:myQController);
+        return RadioCheck(item, questionController: myQController);
       case QType.radio:
-        return RadioCheck(item,questionController:myQController);
+        return RadioCheck(item, questionController: myQController);
       case QType.freeChoice:
-        return FreeChoice(item,questionController:myQController);
+        return FreeChoice(item, questionController: myQController);
       case QType.fillIn:
-        return FillIn(item,questionController:myQController);
+        return FillIn(item, questionController: myQController);
       case QType.openQ:
-        return OpenQuestion(item,questionController:myQController);
+        return OpenQuestion(item, questionController: myQController);
       case QType.sort:
-      return OrderSelectionWidget(item, questionController: myQController);
-        // return Container();
+        return OrderSelectionWidget(item, questionController: myQController);
+      // return Container();
       case QType.sortMatrix:
-        return OrderSelectionMatrixWidget(item, questionController: myQController);
+        return OrderSelectionMatrixWidget(item,
+            questionController: myQController);
     }
   }
 
-  bool onNextClick({bool isLast=false}) {
-    if(myQController.isFilled!=null && myQController.isFilled!()) {
-      widget.questionnaire
-          .elementAt(selected - 1)
-          .isFilled = true;
+  bool onNextClick({bool isLast = false}) {
+    if (myQController.isFilled != null && myQController.isFilled!()) {
+      widget.quiz.questionList.elementAt(selected - 1).isFilled = true;
 
       if (myQController.isCorrect != null) {
-        widget.questionnaire
-            .elementAt(selected - 1)
-            .isCorrect = myQController.isCorrect!();
-        debugPrint('iscorrect ${widget.questionnaire
-            .elementAt(selected - 1)
-            .isCorrect}');
+        widget.quiz.questionList.elementAt(selected - 1).isCorrect =
+            myQController.isCorrect!();
+        debugPrint(
+            'iscorrect ${widget.quiz.questionList.elementAt(selected - 1).isCorrect}');
       }
       if (!isLast) {
         setState(() {
@@ -220,11 +225,9 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
           selected++;
         });
       }
-    }
-    else{
-      if(myQController.isFilled!=null) {
-        CommonFuncs().showMyToast(
-          'הינך חייב לענות על השאלה');
+    } else {
+      if (myQController.isFilled != null) {
+        CommonFuncs().showMyToast('הינך חייב לענות על השאלה');
         return false;
       }
       // not supposed to get to here for meanwhile
@@ -232,14 +235,14 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
         //todo change , not allow to go next
         // CommonFuncs().showMyToast(
         //     'בעיה');
-        if(!isLast) {
+        if (!isLast) {
           setState(() {
             index++;
             selected++;
           });
         }
       }
-      }
+    }
     return true;
   }
 
@@ -247,29 +250,26 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     if (onNextClick(isLast: true)) {
       if (checkAnswers()) {
         QuestionnaireWidget.of(context)?.setInitialDisplay();
-        MainPageChild.of(context)?.updateCompleteQuiz(widget.questionnaireId);
+        MainPageChild.of(context)?.updateCompleteQuiz(widget.quiz.id);
         showDialog(
             context: context,
             builder: (BuildContext context) {
               return QuestionnaireEndDialog(
-                qNum: qNum, correctQNum: correctQNum,);
+                  qNum: qNum,
+                  correctQNum: correctQNum,
+                  grade1: widget.quiz.grade1,
+                  grade2: widget.quiz.grade2);
             });
       }
     }
   }
 
- bool checkAnswers()
-  {
-    for(Question q in widget.questionnaire)
-    {
-      if(q.isCorrect)
-      {
+  bool checkAnswers() {
+    for (Question q in widget.quiz.questionList) {
+      if (q.isCorrect) {
         correctQNum++;
-      }
-      else if(!q.isFilled)
-      {
-        CommonFuncs().showMyToast(
-            'ישנם שאלות שלא מולאו');
+      } else if (!q.isFilled) {
+        CommonFuncs().showMyToast('ישנם שאלות שלא מולאו');
         return false;
       }
 
@@ -277,7 +277,6 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     }
     return true;
   }
-
 
   onBackClick() {
     setState(() {
@@ -287,14 +286,13 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   }
 
   @override
-  didChangeDependencies()
-  {
+  didChangeDependencies() {
     debugPrint('qu didChangeDependencies');
     super.didChangeDependencies();
   }
 }
 
 class QuestionController {
-   bool Function()? isFilled;
-   bool Function()? isCorrect;
+  bool Function()? isFilled;
+  bool Function()? isCorrect;
 }

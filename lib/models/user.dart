@@ -63,6 +63,8 @@ class UserCourse {
   late int subjectIndex;
   @ignore
   late int lessonIndex;
+  @ignore
+  late int questionIndex;
 
 
   void setComputedPropertyFromJson(Map<String, dynamic> json) {

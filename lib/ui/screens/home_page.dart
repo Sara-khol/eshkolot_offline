@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
@@ -6,6 +8,8 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -31,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   final pathScrollController = ScrollController();
   final knowledgeScrollController = ScrollController();
   bool reversed = false;
+  late var dir;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -83,89 +88,105 @@ class _HomePageState extends State<HomePage> {
       );
 
   @override
-  void initState() {
+  initState() {
     knowledgeCourses = widget.user.knowledgeCoursesMap;
     pathList = widget.user.pathList;
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
     VisibilityDetectorController.instance.notifyNow();
+   // initDirectory();
     super.initState();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    if (!buildCalledYet) {
-      buildCalledYet = true;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          showMoreKnowledge =
-              knowledgeScrollController.position.maxScrollExtent > 0;
-          showMorePath = pathScrollController.position.maxScrollExtent > 0;
-        });
-      });
-    }
-    return Scaffold(
-        backgroundColor: Colors.white,
-        body: Padding(
-          padding: EdgeInsets.only(
-              top: 78.h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
-          child: Column(
-            children: [
-              Center(
-                  child: Text('שלום ${widget.user.name}',
-                      style: TextStyle(
-                          color: colors.blackColorApp,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 32.sp))),
-              SizedBox(height: 26.h),
-              Container(
-                  height: 51.h,
-                  decoration: BoxDecoration(
-                      border:
-                          Border.all(color: colors.blackColorApp, width: 1.h),
-                      borderRadius: BorderRadius.all(Radius.circular(50))),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        topInformation(
-                            Icons.check,
-                            'הושלם',
-                            widget.user.courses
-                                .where((c) => c.status == Status.synchronized)
-                                .length),
-                        Container(
-                            height: 27.h,
-                            width: 1.w,
-                            color: colors.blackColorApp),
-                        topInformation(
-                            Icons.refresh,
-                            'ממתין לסינכרון',
-                            widget.user.courses
-                                .where((c) => c.status == Status.finish)
-                                .length),
-                        Container(
-                            height: 27.h,
-                            width: 1.w,
-                            color: colors.blackColorApp),
-                        topInformation(
-                            Icons.star_outlined,
-                            'תעודות',
-                            widget.user.courses
-                                .where((c) => c.status == Status.synchronized)
-                                .length),
-                      ])),
-              SizedBox(height: 35.h),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
+
+    return FutureBuilder(
+      future: initDirectory(),
+      builder: (context,snapshot) {
+        if(snapshot.hasData) {
+          if (!buildCalledYet) {
+            buildCalledYet = true;
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                showMoreKnowledge =
+                    knowledgeScrollController.position.maxScrollExtent > 0;
+                showMorePath = pathScrollController.position.maxScrollExtent > 0;
+              });
+            });
+          }
+          return Scaffold(
+              backgroundColor: Colors.white,
+              body: Padding(
+                padding: EdgeInsets.only(
+                    top: 78
+                        .h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
+                child: Column(
                   children: [
-                    myCoursesWidget(false),
-                    SizedBox(width: 36.w),
-                    myCoursesWidget(true)
-                  ])
-            ],
-          ),
-        ));
+                    Center(
+                        child: Text('שלום ${widget.user.name}',
+                            style: TextStyle(
+                                color: colors.blackColorApp,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 32.sp))),
+                    SizedBox(height: 26.h),
+                    Container(
+                        height: 51.h,
+                        decoration: BoxDecoration(
+                            border:
+                            Border.all(color: colors.blackColorApp, width: 1.h),
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(50))),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              topInformation(
+                                  Icons.check,
+                                  'הושלם',
+                                  widget.user.courses
+                                      .where((c) =>
+                                  c.status == Status.synchronized)
+                                      .length),
+                              Container(
+                                  height: 27.h,
+                                  width: 1.w,
+                                  color: colors.blackColorApp),
+                              topInformation(
+                                  Icons.refresh,
+                                  'ממתין לסינכרון',
+                                  widget.user.courses
+                                      .where((c) => c.status == Status.finish)
+                                      .length),
+                              Container(
+                                  height: 27.h,
+                                  width: 1.w,
+                                  color: colors.blackColorApp),
+                              topInformation(
+                                  Icons.star_outlined,
+                                  'תעודות',
+                                  widget.user.courses
+                                      .where((c) =>
+                                  c.status == Status.synchronized)
+                                      .length),
+                            ])),
+                    SizedBox(height: 35.h),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
+                        children: [
+                          myCoursesWidget(false),
+                          SizedBox(width: 36.w),
+                          myCoursesWidget(true)
+                        ])
+                  ],
+                ),
+              ));
+        }
+        return const CircularProgressIndicator();
+      }
+    );
   }
 
   topInformation(IconData iconData, String s, int num) {
@@ -301,8 +322,13 @@ class _HomePageState extends State<HomePage> {
                     ? Color(int.parse(knowledge.icon.color))
                     : Colors.indigo,
               ),
-              // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
-              child: Image.asset('assets/images/english.png'),
+              child: Center(
+                  child: SvgPicture.file(
+                File('${dir.path}/icons/${knowledge.icon.nameIcon}'),
+                width: 12.w,
+                height: 12.h,
+              )),
+
               // child: Center(child: HtmlWidget(knowledge.iconPath)),
             ),
             SizedBox(width: 9.w),
@@ -359,16 +385,17 @@ class _HomePageState extends State<HomePage> {
                   knowledge.icon.color != ''
                       ? int.parse(knowledge.icon.color)
                       : -1,
-                  knowledge.iconPath ?? '',
+                  knowledge.icon.nameIcon ?? '',
                   index);
-              // )
-              // );
-              // courseItem(knowledge.courses.elementAt(index),
-              //     knowledge.color, knowledge.iconPath, index);
             }),
         SizedBox(height: 24.h),
       ],
     );
+  }
+
+   initDirectory() async {
+    dir = await getApplicationSupportDirectory();
+    return dir;
   }
 
   pathItem(LearnPath path) {
@@ -397,10 +424,14 @@ class _HomePageState extends State<HomePage> {
             shrinkWrap: true,
             itemCount: path.courses.length,
             itemBuilder: (context, index) {
+           Knowledge courseKnowledge=  knowledgeCourses.keys.firstWhere((k) => k.id==path.courses.elementAt(index).knowledgeId);
               return courseItem(
                   path.courses.elementAt(index),
-                  path.color.isNotEmpty ? int.parse(path.color) : -1,
-                  path.iconPath ?? '',
+                  courseKnowledge.icon.color != ''
+                      ? int.parse(courseKnowledge.icon.color)
+                      : -1,
+                 courseKnowledge.icon.nameIcon??'' ,
+                  /*path.color.isNotEmpty ? int.parse(path.color) : -1*/
                   index);
             }),
         SizedBox(height: 24.h),
@@ -469,7 +500,12 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 // icon.isNotEmpty? HtmlWidget(icon):Container(),
-                                Image.asset('assets/images/english.png'),
+                              if(icon!='')   Center(
+                                    child: SvgPicture.file(
+                                      File('${dir.path}/icons/${icon}'),
+                                      width: 9.w,
+                                      height: 9.h,
+                                    )),
                                 SizedBox(width: 15.w),
                                 Text(
                                   '${course.knowledgeNum}',
@@ -503,7 +539,7 @@ class _HomePageState extends State<HomePage> {
       default:
         return Icon(Icons.check_circle,
             color: colors.lightGreen1ColorApp, size: 22.sp);
-        /*Container(
+      /*Container(
           width: 15.h,
           height: 15.h,
           decoration: const BoxDecoration(

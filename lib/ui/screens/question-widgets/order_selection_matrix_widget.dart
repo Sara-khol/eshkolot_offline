@@ -1,4 +1,5 @@
 import 'package:eshkolot_offline/models/quiz.dart';
+import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/foundation.dart';
@@ -64,7 +65,7 @@ class _OrderSelectionMatrixWidgetState
       // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(height: 25.h),
-        HtmlWidget(widget.question.question),
+        HtmlDataWidget(widget.question.question,quizId:  widget.question.quizId,),
         SizedBox(height: 20.h),
         SizedBox(
           width: MediaQuery.sizeOf(context).width,
@@ -130,7 +131,7 @@ class _OrderSelectionMatrixWidgetState
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: colors.blackColorApp,
-                        fontSize: 20.sp,
+                        fontSize: 27.sp,
                         fontWeight: FontWeight.w400,
                         // height: 22,
                       ),

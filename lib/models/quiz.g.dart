@@ -17,29 +17,39 @@ const QuizSchema = CollectionSchema(
   name: r'Quiz',
   id: 3912563531471134748,
   properties: {
-    r'isCompletedCurrentUser': PropertySchema(
+    r'grade1': PropertySchema(
       id: 0,
+      name: r'grade1',
+      type: IsarType.long,
+    ),
+    r'grade2': PropertySchema(
+      id: 1,
+      name: r'grade2',
+      type: IsarType.long,
+    ),
+    r'isCompletedCurrentUser': PropertySchema(
+      id: 2,
       name: r'isCompletedCurrentUser',
       type: IsarType.bool,
     ),
     r'questionList': PropertySchema(
-      id: 1,
+      id: 3,
       name: r'questionList',
       type: IsarType.objectList,
       target: r'Question',
     ),
     r'quizMaterials': PropertySchema(
-      id: 2,
+      id: 4,
       name: r'quizMaterials',
       type: IsarType.string,
     ),
     r'time': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'time',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'title',
       type: IsarType.string,
     )
@@ -84,16 +94,18 @@ void _quizSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeBool(offsets[0], object.isCompletedCurrentUser);
+  writer.writeLong(offsets[0], object.grade1);
+  writer.writeLong(offsets[1], object.grade2);
+  writer.writeBool(offsets[2], object.isCompletedCurrentUser);
   writer.writeObjectList<Question>(
-    offsets[1],
+    offsets[3],
     allOffsets,
     QuestionSchema.serialize,
     object.questionList,
   );
-  writer.writeString(offsets[2], object.quizMaterials);
-  writer.writeString(offsets[3], object.time);
-  writer.writeString(offsets[4], object.title);
+  writer.writeString(offsets[4], object.quizMaterials);
+  writer.writeString(offsets[5], object.time);
+  writer.writeString(offsets[6], object.title);
 }
 
 Quiz _quizDeserialize(
@@ -103,19 +115,21 @@ Quiz _quizDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Quiz(
+    grade1: reader.readLongOrNull(offsets[0]) ?? 0,
+    grade2: reader.readLongOrNull(offsets[1]) ?? 0,
     id: id,
     questionList: reader.readObjectList<Question>(
-          offsets[1],
+          offsets[3],
           QuestionSchema.deserialize,
           allOffsets,
           Question(),
         ) ??
         const [],
-    quizMaterials: reader.readStringOrNull(offsets[2]) ?? '',
-    time: reader.readStringOrNull(offsets[3]) ?? '',
-    title: reader.readStringOrNull(offsets[4]) ?? '',
+    quizMaterials: reader.readStringOrNull(offsets[4]) ?? '',
+    time: reader.readStringOrNull(offsets[5]) ?? '',
+    title: reader.readStringOrNull(offsets[6]) ?? '',
   );
-  object.isCompletedCurrentUser = reader.readBool(offsets[0]);
+  object.isCompletedCurrentUser = reader.readBool(offsets[2]);
   return object;
 }
 
@@ -127,8 +141,12 @@ P _quizDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 1:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 2:
+      return (reader.readBool(offset)) as P;
+    case 3:
       return (reader.readObjectList<Question>(
             offset,
             QuestionSchema.deserialize,
@@ -136,11 +154,11 @@ P _quizDeserializeProp<P>(
             Question(),
           ) ??
           const []) as P;
-    case 2:
-      return (reader.readStringOrNull(offset) ?? '') as P;
-    case 3:
-      return (reader.readStringOrNull(offset) ?? '') as P;
     case 4:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 5:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 6:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -235,6 +253,110 @@ extension QuizQueryWhere on QueryBuilder<Quiz, Quiz, QWhereClause> {
 }
 
 extension QuizQueryFilter on QueryBuilder<Quiz, Quiz, QFilterCondition> {
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade1EqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'grade1',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade1GreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'grade1',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade1LessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'grade1',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade1Between(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'grade1',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade2EqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'grade2',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade2GreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'grade2',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade2LessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'grade2',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterFilterCondition> grade2Between(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'grade2',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Quiz, Quiz, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -780,6 +902,30 @@ extension QuizQueryObject on QueryBuilder<Quiz, Quiz, QFilterCondition> {
 extension QuizQueryLinks on QueryBuilder<Quiz, Quiz, QFilterCondition> {}
 
 extension QuizQuerySortBy on QueryBuilder<Quiz, Quiz, QSortBy> {
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> sortByGrade1() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade1', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> sortByGrade1Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade1', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> sortByGrade2() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade2', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> sortByGrade2Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade2', Sort.desc);
+    });
+  }
+
   QueryBuilder<Quiz, Quiz, QAfterSortBy> sortByIsCompletedCurrentUser() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
@@ -830,6 +976,30 @@ extension QuizQuerySortBy on QueryBuilder<Quiz, Quiz, QSortBy> {
 }
 
 extension QuizQuerySortThenBy on QueryBuilder<Quiz, Quiz, QSortThenBy> {
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> thenByGrade1() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade1', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> thenByGrade1Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade1', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> thenByGrade2() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade2', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QAfterSortBy> thenByGrade2Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grade2', Sort.desc);
+    });
+  }
+
   QueryBuilder<Quiz, Quiz, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -892,6 +1062,18 @@ extension QuizQuerySortThenBy on QueryBuilder<Quiz, Quiz, QSortThenBy> {
 }
 
 extension QuizQueryWhereDistinct on QueryBuilder<Quiz, Quiz, QDistinct> {
+  QueryBuilder<Quiz, Quiz, QDistinct> distinctByGrade1() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'grade1');
+    });
+  }
+
+  QueryBuilder<Quiz, Quiz, QDistinct> distinctByGrade2() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'grade2');
+    });
+  }
+
   QueryBuilder<Quiz, Quiz, QDistinct> distinctByIsCompletedCurrentUser() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isCompletedCurrentUser');
@@ -925,6 +1107,18 @@ extension QuizQueryProperty on QueryBuilder<Quiz, Quiz, QQueryProperty> {
   QueryBuilder<Quiz, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Quiz, int, QQueryOperations> grade1Property() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'grade1');
+    });
+  }
+
+  QueryBuilder<Quiz, int, QQueryOperations> grade2Property() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'grade2');
     });
   }
 

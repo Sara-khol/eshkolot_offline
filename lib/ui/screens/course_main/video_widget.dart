@@ -4,22 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:eshkolot_offline/utils/constants.dart' as Constants;
+
+import 'main_page_child.dart';
 
 class VideoWidget extends StatefulWidget {
   final String? vimoeId;
 
-   const VideoWidget({super.key, required this.vimoeId});
+  const VideoWidget({super.key, required this.vimoeId});
 
   @override
   State<VideoWidget> createState() => _VideoWidgetState();
 }
 
-class _VideoWidgetState extends State<VideoWidget> with AutomaticKeepAliveClientMixin  {
-  bool? videoExists=true;
-   Player? player ;
-bool intendedRebuild=false;
+class _VideoWidgetState extends State<VideoWidget>
+    with AutomaticKeepAliveClientMixin {
+  bool? videoExists = true;
+  Player? player;
 
-
+  bool intendedRebuild = false;
 
   @override
   void initState() {
@@ -31,14 +34,14 @@ bool intendedRebuild=false;
     //   //todo so remove...
     //   setState(() {});
     // });
-   videoInit();
+    videoInit();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return videoExists != null && player!=null
+    return videoExists != null && player != null
         ? videoExists!
             ? Video(
                 player: player,
@@ -47,7 +50,6 @@ bool intendedRebuild=false;
                 scale: 1.0,
                 // default
                 showControls: true,
-
               )
             : Container(
                 height: 515.h,
@@ -62,20 +64,20 @@ bool intendedRebuild=false;
                 ),
               )
         : const CircularProgressIndicator();
-
   }
 
-  videoInit()  async {
+  videoInit() async {
     if (widget.vimoeId != null) {
       var dir =
-      await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
-      File file = File('${dir.path}/videos/${widget.vimoeId}.mp4');
+          await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+      File file = File(
+          '${dir.path}/${Constants.lessonPath}/${MainPageChild.of(context)?.widget.course.serverId}/${widget.vimoeId}.mp4');
       videoExists = await file.exists();
 
-         player = Player(id: int.parse(widget.vimoeId!),
+      player = Player(
+          id: int.parse(widget.vimoeId!),
           videoDimensions: const VideoDimensions(640, 360));
       debugPrint(' videoInit vimoeId ${widget.vimoeId}');
-
 
       if (videoExists!) {
         final myFile = Media.file(file);
@@ -83,24 +85,21 @@ bool intendedRebuild=false;
       }
       debugPrint('videoExists  ${videoExists}');
       setState(() {});
-    }
-    else{
-      videoExists=false;
+    } else {
+      videoExists = false;
       setState(() {});
     }
   }
 
-
-
   @override
   void dispose() {
-    if(player!=null) {
+    if (player != null) {
       player!.dispose();
       player!.stop();
     }
     super.dispose();
   }
+
   @override
   bool get wantKeepAlive => true;
-
 }

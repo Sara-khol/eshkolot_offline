@@ -11,10 +11,14 @@ class Quiz {
   late String time;
   late List<Question> questionList = [];
   bool isCompletedCurrentUser = false;
+  late int grade1;
+  late int grade2;
 
    Quiz.fromJson(Map<String, dynamic> parsedJson, int qId) {
     id = qId;
     title=parsedJson['title']??'';
+    grade1=parsedJson['grade1']??0;
+    grade2=parsedJson['grade2']??0;
     quizMaterials=parsedJson['quiz_materials']??'';
     time=parsedJson['time']??'';
     for (var questionnaire in parsedJson['questionList']) {
@@ -28,6 +32,8 @@ class Quiz {
       this.questionList = const [],
       this.title = '',
       this.quizMaterials = '',
+        this.grade1=0,
+        this.grade2=0,
       this.time=''});
 }
 
@@ -45,6 +51,8 @@ class Question {
   bool isCorrect = false;
   @Ignore()
   bool isFilled = false;
+  @Ignore()
+  int quizId=0;
 
   Question.fromJson(Map<String, dynamic> json) {
     question = json['question']??'';

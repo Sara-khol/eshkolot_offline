@@ -1,6 +1,5 @@
 import 'package:eshkolot_offline/services/api_service.dart';
 import 'package:eshkolot_offline/services/network_check.dart';
-import 'package:eshkolot_offline/ui/custom_widgets/message.dart';
 import 'package:eshkolot_offline/utils/common_funcs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

@@ -26,6 +26,7 @@ class CheckBoxWidget extends StatelessWidget {
           children: <Widget>[
             Checkbox(
               value: value,
+
               onChanged: (newValue) {
                 onChanged(newValue);
               },

@@ -28,7 +28,7 @@ class CourseMainPage extends StatefulWidget {
 class _CourseMainPageState extends State<CourseMainPage> {
   late Future myFuture;
   Lesson? lastLesson;
-  late IsarLinks<Quiz> lastQuestionnaire;
+   Quiz? lastQuestionnaire;
   Subject? lastSubject;
   UserCourse? data;
   late String lastTextButton = '';
@@ -149,7 +149,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                 height: 75.h,
               ),
               // if (data != null)
-              if (lastLesson != null || lastSubject != null)
+              if (lastLesson != null || lastSubject != null || lastQuestionnaire!=null)
                 ClipRRect(
                   child: Stack(
                     children: <Widget>[
@@ -188,6 +188,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                     data!.subjectIndex;
                                 currentMainChild?.lessonPickedIndex =
                                     data!.lessonIndex;
+
+
                                 currentMainChild?.bodyWidget = LessonWidget(
                                     lesson: lastLesson!,
                                     //todo check if works..
@@ -202,10 +204,11 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                             data!.lessonIndex + 1)
                                         : null);
                               } else {
+                                currentMainChild?.questionPickedIndex =
+                                    data!.questionIndex;
                                 MainPageChild.of(context)?.bodyWidget =
                                     QuestionnaireWidget(
-                                        //todo change save correct the right questionarie
-                                        quiz: lastQuestionnaire.first,
+                                        quiz: lastQuestionnaire!,
                                         );
                               }
                             }),
@@ -307,31 +310,53 @@ class _CourseMainPageState extends State<CourseMainPage> {
       //     ? lastSubject!.lessons.firstWhere((l) => l.id == data!.lessonStopId)
       //     : null;
       //check if there is data on last stop
-      if (lastLesson != null || lastSubject != null) {
+    //  if (lastLesson != null || lastSubject != null) {
         if (!data!.isQuestionnaire) {
           lastTextButton = lastLesson!.name;
         }
-        //todo correct and put back!!
-        // else {
-        //   if (data!.subjectStopId == 0) {
-        //     //questionnaire of course
-        //     lastQuestionnaire = widget.course.questionnaire;
-        //     lastTextButton = 'תרגיל מסכם - ${widget.course.title}';
-        //   } else if (data!.lessonStopId == 0) {
-        //     //questionnaire of subject
-        //     lastQuestionnaire = lastSubject!.questionnaire;
-        //     lastTextButton = 'תרגיל מסכם - ${lastSubject!.name}';
-        //   } else {
-        //     //questionnaire of lesson
-        //     lastQuestionnaire = lastLesson!.questionnaire;
-        //     lastTextButton = 'תרגול - ${lastLesson!.name}';
-        //   }
-        // }
+        else {
+          if (data!.subjectStopId == 0) {
+            //questionnaire of course
+            //lastQuestionnaire = widget.course.questionnaires.firstWhere((q) => q.id==data!.questionnaireStopId);
+
+            for (int i = 0; i < widget.course.questionnaires.length; i++) {
+              if (widget.course.questionnaires.elementAt(i).id == data!.questionnaireStopId) {
+                lastQuestionnaire = widget.course.questionnaires.elementAt(i);
+                data!.questionIndex = i;
+                break;
+              }
+            }
+          } else if (data!.lessonStopId == 0) {
+            //questionnaire of subject
+           // lastQuestionnaire = lastSubject!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
+
+            for (int i = 0; i <  lastSubject!.questionnaire.length; i++) {
+              if ( lastSubject!.questionnaire.elementAt(i).id == data!.questionnaireStopId) {
+                lastQuestionnaire =  lastSubject!.questionnaire.elementAt(i);
+                data!.questionIndex = i;
+                break;
+              }
+            }
+          } else {
+            //questionnaire of lesson
+           // lastQuestionnaire = lastLesson!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
+
+            for (int i = 0; i < lastLesson!.questionnaire.length; i++) {
+              if ( lastLesson!.questionnaire.elementAt(i).id == data!.questionnaireStopId) {
+                lastQuestionnaire =  lastLesson!.questionnaire.elementAt(i);
+                data!.questionIndex = i;
+                break;
+              }
+            }
+          }
+          lastTextButton = lastQuestionnaire!.title;
+
+        }
         if (refresh) {
           if (mounted) setState(() {});
         }
       }
-    }
+   // }
   }
 
   @override

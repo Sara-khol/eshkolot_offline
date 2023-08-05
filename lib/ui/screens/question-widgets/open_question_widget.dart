@@ -3,6 +3,7 @@ import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
+import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
 
 
@@ -51,7 +52,7 @@ class _OpenQuestionState extends State<OpenQuestion> {
   Widget build(BuildContext context) {
     return Column(
       children:[
-        HtmlWidget(widget.question.question),
+        HtmlDataWidget(widget.question.question,quizId: widget.question.quizId),
         SizedBox(height: 20.h),
         createTextField(myController),
         SizedBox(height: 20.h),

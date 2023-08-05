@@ -1,4 +1,5 @@
 
+import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/ui/custom_widgets/audio_widget.dart';
@@ -194,7 +195,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                   onPressed: () {
                     setState(() {
                       displayWidget =
-                          QuestionnaireTab(questionnaire: questionnaires,questionnaireId: widget.quiz.id);
+                          QuestionnaireTab(quiz:widget.quiz);
                     });
                   },
                   child: Row(
@@ -229,8 +230,8 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
     return SingleChildScrollView(
         child: Column(
       children: [
-        AudioWidget(),
-        HtmlWidget(widget.quiz.quizMaterials),
+        // AudioWidget(path: ''),
+        HtmlDataWidget(widget.quiz.quizMaterials,quizId:widget.quiz.id ),
       ],
     ));
   }

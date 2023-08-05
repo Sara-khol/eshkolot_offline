@@ -3,6 +3,7 @@ import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
+import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
 
 
@@ -54,7 +55,7 @@ class _FreeChoiceState extends State<FreeChoice> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        HtmlWidget(widget.question.question),
+        HtmlDataWidget(widget.question.question,quizId: widget.question.quizId,),
         createTextField(myController)
       ],
     );

@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../../../models/quiz.dart';
+import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
 
 class OrderSelectionWidget extends StatefulWidget {
@@ -55,7 +56,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
     return Column(
       children: [
         SizedBox(height: 25.h),
-        HtmlWidget(widget.question.question),
+        HtmlDataWidget(widget.question.question,quizId: widget.question.quizId,),
         SizedBox(height: 30.h),
         ReorderableListView(
           proxyDecorator: proxyDecorator,
@@ -102,7 +103,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(randomList[i]),
+                Text(randomList[i],style: TextStyle(fontSize: 27.sp)),
               ],
             ),
           ),

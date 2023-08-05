@@ -296,6 +296,7 @@ class IsarService {
         course.subjectStopId = newDataCourse.subjectStopId;
         course.lessonStopId = newDataCourse.lessonStopId;
         course.isQuestionnaire = newDataCourse.isQuestionnaire;
+        course.questionnaireStopId = newDataCourse.questionnaireStopId;
         //  course.questionnaireStopId=userCourse.questionnaireStopId;
 
         // user.courses[user.courses.indexWhere((course) => course.courseId == newDataCourse.courseId)] = newDataCourse;

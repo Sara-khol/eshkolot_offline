@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dart_vlc/dart_vlc.dart';
+import 'package:eshkolot_offline/file.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
@@ -13,6 +14,7 @@ import 'package:eshkolot_offline/services/network_check.dart';
 import 'package:eshkolot_offline/services/vimoe_service.dart';
 import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
+import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,187 +33,212 @@ import 'dart:convert';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
 
-Future<void> main()  async{
+Future<void> main() async {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
- runZonedGuarded(() async {
-
-   WidgetsFlutterBinding.ensureInitialized();
-
-   FutureOr<SentryEvent?> beforeSend(SentryEvent event, {Hint? hint}) async {
+    FutureOr<SentryEvent?> beforeSend(SentryEvent event, {Hint? hint}) async {
 // Check internet connectivity
-     var connectivityResult = await Connectivity().checkConnectivity();
-    // if (connectivityResult == ConnectivityResult.none) {
-     if (!await NetworkConnectivity.instance.checkConnectivity()) {
-       // Store the event locally for later sending
-       String eventJson=  const JsonEncoder().convert(event.toJson());
+      var connectivityResult = await Connectivity().checkConnectivity();
+      // if (connectivityResult == ConnectivityResult.none) {
+      if (!await NetworkConnectivity.instance.checkConnectivity()) {
+        // Store the event locally for later sending
+        String eventJson = const JsonEncoder().convert(event.toJson());
 
-       await LocalFileHelper().writeEvent(eventJson);
-       return null; // Prevent the event from being sent
-     }
-     // Send the event to Sentry
-     return event;
-   };
+        await LocalFileHelper().writeEvent(eventJson);
+        return null; // Prevent the event from being sent
+      }
+      // Send the event to Sentry
+      return event;
+    }
 
-   await Sentry.init(
-         (options) {
-       options.dsn =
-      kDebugMode?'': 'https://0305d132e35b4bfea621838e8aaee3de@o4505141567619072.ingest.sentry.io/4505141614084096';
-       // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-       // We recommend adjusting this value in production.
-       options.tracesSampleRate = 1.0;
-       // options.debug = true;
-       options.sendDefaultPii = true;
-       options.enablePrintBreadcrumbs = true;
+    await Sentry.init(
+      (options) {
+        options.dsn = kDebugMode
+            ? ''
+            : 'https://0305d132e35b4bfea621838e8aaee3de@o4505141567619072.ingest.sentry.io/4505141614084096';
+        // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+        // We recommend adjusting this value in production.
+        options.tracesSampleRate = 1.0;
+        // options.debug = true;
+        options.sendDefaultPii = true;
+        options.enablePrintBreadcrumbs = true;
 
-     //  options.debug=false;
-       // options.beforeBreadcrumb =beforeBreadcrumbCallback;
-       options.beforeSend=beforeSend;
+        //  options.debug=false;
+        // options.beforeBreadcrumb =beforeBreadcrumbCallback;
+        options.beforeSend = beforeSend;
 
-       // options.maxRequestBodySize = MaxRequestBodySize.small;
-       // options.maxResponseBodySize = MaxResponseBodySize.small;
-     },
-     // appRunner: () => runApp(MyApp()),
-   );
+        // options.maxRequestBodySize = MaxRequestBodySize.small;
+        // options.maxResponseBodySize = MaxResponseBodySize.small;
+      },
+      // appRunner: () => runApp(MyApp()),
+    );
 
-   DartVLC.initialize();
+    DartVLC.initialize();
 
-   late  String destDirPath;
-   List<Course> myCourses = [];
+    late String destDirPath;
+    List<Course> myCourses = [];
 
-   extractZipFile() async {
-     // Open the zip file
-     String zipFilePath = r"c:\installation.eshkolot";
-     // String zipFilePath = r"C:\Users\USER\GoAppProjects\eshkolot_offline\vvv.eshkolot";
-     final Directory directory = await getApplicationSupportDirectory();
-     destDirPath = directory.path;
+    extractZipFile(String extractPath) async {
+      try {
+        // Get a list of files in the "lessons" folder
+        List<FileSystemEntity> lessonFiles = Directory(extractPath).listSync();
 
+        for (FileSystemEntity file in lessonFiles) {
+          if (file is File && file.path.endsWith('.zip')) {
+            // Extract each zip file
+            String zipFilePath = file.path;
 
-// Open the zip file
-     final bytes = File(zipFilePath).readAsBytesSync();
-     final archive = ZipDecoder().decodeBytes(bytes);
+            // Create the destination folder based on the zip file's name
+            String destinationFolderName =
+                file.path.split('/').last.replaceAll('.zip', '');
+            String destinationPath = '$extractPath/$destinationFolderName/';
 
-// Loop through the contents of the zip file and extract the data files and videos
-     for (final archiveFile in archive) {
-       // Check if the file is a data file or video
-       if (archiveFile.name.endsWith('.json')) {
-         // Extract the file to the destination directory
-         final fileData = archiveFile.content;//as List<int>;
-         final filePath = '$destDirPath/${archiveFile.name}';
-         // final filePath = '${directory.path}/mydata/';
-         final extractedFile = File(filePath);
-         extractedFile.createSync(recursive: true);
-         extractedFile.writeAsBytesSync(fileData);
-       }
-       debugPrint(archiveFile.name);
-     }
-   }
-   IsarService().init();
+            // Create the destination folder if it doesn't exist
+            Directory(destinationPath).createSync(recursive: true);
 
-   initData() async {
-     // if (await IsarService().checkIfDBisEmpty()) {
-     // await extractZipFile();
-     await InstallationDataHelper().init();
-     myCourses.addAll(InstallationDataHelper().myCourses);
+            // Read the zip file
+            List<int> bytes = await file.readAsBytes();
 
-     //  generateJsonData();
-     await IsarService().cleanDb();
+            // Extract the zip contents
+            Archive archive = ZipDecoder().decodeBytes(bytes);
+            for (ArchiveFile archiveFile in archive) {
+              String fileName = archiveFile.name;
+              if (archiveFile.isFile) {
+                // Get the file content as a List<int>
+                List<int> fileData = archiveFile.content as List<int>;
 
-     List<Quiz> questionnaires = [];
+                // Create the file in the destination folder
+                File destinationFile = File('$destinationPath$fileName');
+                destinationFile.createSync(recursive: true);
+                destinationFile.writeAsBytesSync(fileData);
+              } else {
+                // If it's a directory, create the directory in the destination folder
+                Directory('$destinationPath$fileName')
+                    .createSync(recursive: true);
+              }
+            }
+            debugPrint('Zip extraction completed for: $zipFilePath');
+          }
+        }
+      } catch (e) {
+        debugPrint('Error extracting zips: $e');
+      }
+    }
 
-     List<Lesson> lessons = [];
+    setDataFiles() async {
+      final Directory directory = await getApplicationSupportDirectory();
+      destDirPath = directory.path;
+      extractZipFile('$destDirPath/${Constants.lessonPath}/');
+      extractZipFile('$destDirPath/${Constants.quizPath}/');
+    }
 
-     final List<Subject> subjects = [];
-    subjects.addAll(InstallationDataHelper().mySubjects);
-    lessons.addAll(InstallationDataHelper().myLessons);
-    questionnaires.addAll(InstallationDataHelper().myQuizzes);
+    IsarService().init();
 
-     List<Knowledge> knowledgeList = [
-     ];
+    initData() async {
+      // if (await IsarService().checkIfDBisEmpty()) {
+      // await extractZipFile();
+      await InstallationDataHelper().init();
+      myCourses.addAll(InstallationDataHelper().myCourses);
 
-     List<LearnPath> paths = [];
-     knowledgeList.addAll(InstallationDataHelper().myKnowledgeList);
-     paths.addAll(InstallationDataHelper().myPathList);
+      //  generateJsonData();
+      await IsarService().cleanDb();
 
-     debugPrint('filling!!');
-     Sentry.addBreadcrumb(Breadcrumb(message: 'filling data!!'));
-     await IsarService().initCourses(myCourses/*data['courses'].cast<Map<String, dynamic>>()*/, subjects, lessons,
-         questionnaires, knowledgeList,paths,InstallationDataHelper().data['users'].cast<Map<String, dynamic>>());
-     // course = await IsarService.instance.getFirstCourse();
-   }
+      List<Quiz> questionnaires = [];
 
+      List<Lesson> lessons = [];
 
-   SharedPreferences preferences = await SharedPreferences.getInstance();
+      final List<Subject> subjects = [];
+      subjects.addAll(InstallationDataHelper().mySubjects);
+      lessons.addAll(InstallationDataHelper().myLessons);
+      questionnaires.addAll(InstallationDataHelper().myQuizzes);
 
-   Future<bool> checkDatabaseInitialized(SharedPreferences preferences) async {
+      List<Knowledge> knowledgeList = [];
 
-     return !await IsarService().checkIfDBisEmpty() &&
-         (preferences.getBool('database_initialized') ?? false);
-   }
+      List<LearnPath> paths = [];
+      knowledgeList.addAll(InstallationDataHelper().myKnowledgeList);
+      paths.addAll(InstallationDataHelper().myPathList);
 
-   bool databaseInitialized = await checkDatabaseInitialized(preferences);
+      debugPrint('filling!!');
+      Sentry.addBreadcrumb(Breadcrumb(message: 'filling data!!'));
+      await IsarService().initCourses(
+          myCourses /*data['courses'].cast<Map<String, dynamic>>()*/,
+          subjects,
+          lessons,
+          questionnaires,
+          knowledgeList,
+          paths,
+          InstallationDataHelper().data['users'].cast<Map<String, dynamic>>());
+      // course = await IsarService.instance.getFirstCourse();
+    }
 
+    SharedPreferences preferences = await SharedPreferences.getInstance();
 
-   if (!databaseInitialized) {
-     //when db was erased manually
-     //todo remove??
-     await preferences.setBool('database_initialized', false);
-     await initData();
-    await preferences.setBool('database_initialized', true);
+    Future<bool> checkDatabaseInitialized(SharedPreferences preferences) async {
+      return !await IsarService().checkIfDBisEmpty() &&
+          (preferences.getBool('database_initialized') ?? false);
+    }
 
-   } else {
-     debugPrint('data was filled');
-     Sentry.addBreadcrumb(Breadcrumb(message: 'data was filled'));
-   }
-   // Course? c1, c2;
-   // if (myCourses.isNotEmpty) {
-   //   c1 = myCourses.firstWhere((item) => item.serverId == 2782842);
-   //   c2 = myCourses.firstWhere((item) => item.serverId == 2567060);
-   // }
+    bool databaseInitialized = await checkDatabaseInitialized(preferences);
+
+    if (!databaseInitialized) {
+      //when db was erased manually
+      //todo remove??
+      await preferences.setBool('database_initialized', false);
+      await initData();
+      await preferences.setBool('database_initialized', true);
+      setDataFiles();
+    } else {
+      debugPrint('data was filled');
+      Sentry.addBreadcrumb(Breadcrumb(message: 'data was filled'));
+    }
+    // Course? c1, c2;
+    // if (myCourses.isNotEmpty) {
+    //   c1 = myCourses.firstWhere((item) => item.serverId == 2782842);
+    //   c2 = myCourses.firstWhere((item) => item.serverId == 2567060);
+    // }
 
     FlutterError.onError = (FlutterErrorDetails errorDetails) {
       Sentry.captureException(
         errorDetails.exception,
         stackTrace: errorDetails.stack,
       );
-      if(kDebugMode)
-        {
-          FlutterError.presentError(errorDetails);
-         // myErrorsHandler.onErrorDetails(errorDetails);
-        }
+      if (kDebugMode) {
+        FlutterError.presentError(errorDetails);
+        // myErrorsHandler.onErrorDetails(errorDetails);
+      }
     };
 
-   // FlutterError.onError = (details) {
-   //   FlutterError.presentError(details);
-   //   myErrorsHandler.onErrorDetails(details);
-   // };
-   // PlatformDispatcher.instance.onError = (error, stack) {
-   //   myErrorsHandler.onError(error, stack);
-   //   return true;
-   // };
+    // FlutterError.onError = (details) {
+    //   FlutterError.presentError(details);
+    //   myErrorsHandler.onErrorDetails(details);
+    // };
+    // PlatformDispatcher.instance.onError = (error, stack) {
+    //   myErrorsHandler.onError(error, stack);
+    //   return true;
+    // };
 
-   // runApp(MyApp());
+    // runApp(MyApp());
 
     runApp(MyApp(
         courses: myCourses /*c1 == null || c2 == null ? myCourses : [c1, c2]*/,
         dataWasFilled: databaseInitialized));
 
-
-   doWhenWindowReady(() {
-     setWindowVisibility(visible: true);
-     setWindowTitle('My Demo');
-     // const initialSize = Size(1280, 720);
-     // appWindow.minSize = initialSize;
-     // appWindow.size = initialSize;
-     // appWindow.alignment = Alignment.center;
-     //
-     //appWindow.show();
-   });
+    doWhenWindowReady(() {
+      setWindowVisibility(visible: true);
+      setWindowTitle('My Demo');
+      // const initialSize = Size(1280, 720);
+      // appWindow.minSize = initialSize;
+      // appWindow.size = initialSize;
+      // appWindow.alignment = Alignment.center;
+      //
+      //appWindow.show();
+    });
   }, (error, stackTrace) {
-   print('Error : $error');
-   print('StackTrace : $stackTrace');
-   Sentry.captureException(error, stackTrace: stackTrace);
- });
-
+    print('Error : $error');
+    print('StackTrace : $stackTrace');
+    Sentry.captureException(error, stackTrace: stackTrace);
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -233,26 +260,23 @@ class _MyAppState extends State<MyApp> {
   late bool isNetWorkConnection;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
 
-
   @override
   void initState() {
-   // networkConnectivity.startNetworkConnectivityCheck();
+    // networkConnectivity.startNetworkConnectivityCheck();
     _networkConnectivity.initialise();
     myFuture = isVideosDownload();
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return OKToast(
-     //  textStyle: const TextStyle(fontSize: 19.0, color: Colors.white),
-     //  backgroundColor: Colors.grey,
-     //  animationCurve: Curves.easeIn,
-     // // animationBuilder: const Miui10AnimBuilder(),
-     //  animationDuration: const Duration(milliseconds: 200),
-     //  duration: const Duration(seconds: 3),
+      //  textStyle: const TextStyle(fontSize: 19.0, color: Colors.white),
+      //  backgroundColor: Colors.grey,
+      //  animationCurve: Curves.easeIn,
+      // // animationBuilder: const Miui10AnimBuilder(),
+      //  animationDuration: const Duration(milliseconds: 200),
+      //  duration: const Duration(seconds: 3),
       child: ScreenUtilInit(
           designSize: const Size(1920, 1080),
           minTextAdapt: true,
@@ -260,19 +284,20 @@ class _MyAppState extends State<MyApp> {
             return MaterialApp(
                 debugShowCheckedModeBanner: false,
                 title: 'Flutter Demo',
-                theme:
-                    ThemeData(primarySwatch: Colors.blue, fontFamily: 'RAG-Sans'),
-                home: LoginPage() /*FutureBuilder(
+                theme: ThemeData(
+                    primarySwatch: Colors.blue, fontFamily: 'RAG-Sans'),
+                home:
+                    LoginPage() /*FutureBuilder(
                     future: myFuture,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         vi = snapshot.data ?? [];
                         if (allDownloaded) return LoginPage();
                       //???
-                        return *//*(widget.dataWasFilled &&
+                        return */ /*(widget.dataWasFilled &&
                                     widget.courses.isNotEmpty) ||
                                 !widget.dataWasFilled
-                            ?*//*
+                            ?*/ /*
                           ChangeNotifierProvider<VimoeService>(
                                 create: (_) => VimoeService(),
                                 builder: (context, child) {
@@ -323,7 +348,7 @@ class _MyAppState extends State<MyApp> {
                                     });
                                   }
                                 })
-                            *//*: LoginPage()*//*;
+                            */ /*: LoginPage()*/ /*;
                       }
                       return const Center(
                         child: Scaffold(
@@ -331,7 +356,7 @@ class _MyAppState extends State<MyApp> {
                             body: Center(child: CircularProgressIndicator())),
                       );
                     })*/
-            );
+                );
           }),
     );
   }
@@ -446,8 +471,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   checkDateExpired() {
-    int currentTimestamp = DateTime
-        .now().millisecondsSinceEpoch ~/ 1000;
+    int currentTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     // Convert current datetime to seconds
 
     for (VideoIsar videoIsar in vi) {
@@ -457,8 +481,6 @@ class _MyAppState extends State<MyApp> {
       }
     }
 
-
     return false;
   }
-
 }
