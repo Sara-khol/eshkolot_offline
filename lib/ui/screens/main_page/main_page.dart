@@ -27,10 +27,14 @@ class _MainPageState extends State<MainPage> {
   Course? lastCourseSelected;
   int coursesIndex = 0;
   void Function()? updateLastPosition;
+  //void Function()? updateSync;
   void Function(int)? updateSideMenu;
 
 
   set mainWidget(Widget value) => setState(() => _mainWidget = value);
+
+  get getMainWidget {return _mainWidget;}
+
 
   set setUpdate(Function()? value) {
     Future.delayed(Duration.zero, () async {
@@ -40,10 +44,23 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  // set syncUpdate(Function()? value) {
+  //   Future.delayed(Duration.zero, () async {
+  //     setState(() {
+  //       updateSync = value;
+  //     });
+  //   });
+  // }
+
 
   @override
   void initState()  {
     _mainWidget = HomePage(user: widget.user);
+ // syncUpdate = (){
+ //      setState(() {
+ //        debugPrint('hhhfff');
+ //      });
+ //    };
     super.initState();
   }
   @override
@@ -59,7 +76,7 @@ class _MainPageState extends State<MainPage> {
             SideMenuWidget(myUser: widget.user),
             Expanded(
                 child: Column(children: [
-              TopBarUserWidget(),
+              TopBarUserWidget(/*updateLastPosition: updateSync!*/),
               Expanded(child: _mainWidget)
             ]))
           ]))

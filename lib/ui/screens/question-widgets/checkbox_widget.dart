@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CheckBoxWidget extends StatelessWidget {
 
@@ -31,7 +32,7 @@ class CheckBoxWidget extends StatelessWidget {
                 onChanged(newValue);
               },
             ),
-            Expanded(child: Text(label)),
+            Expanded(child: Text(label,style: TextStyle(fontSize: 27.sp),)),
           ],
         ),
       ),

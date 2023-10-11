@@ -6,6 +6,8 @@ part 'videoIsar.g.dart';
 @Collection()
 class VideoIsar {
   late Id id;
+  @Index()
+  late int courseId;
   bool isDownload = false;
   late String downloadLink;
   late int expiredDate;

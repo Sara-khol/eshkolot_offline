@@ -43,18 +43,24 @@ const UserSchema = CollectionSchema(
       name: r'pathIds',
       type: IsarType.longList,
     ),
-    r'questionCompleted': PropertySchema(
+    r'percentages': PropertySchema(
       id: 5,
+      name: r'percentages',
+      type: IsarType.objectList,
+      target: r'UserGrade',
+    ),
+    r'questionCompleted': PropertySchema(
+      id: 6,
       name: r'questionCompleted',
       type: IsarType.longList,
     ),
     r'subjectCompleted': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'subjectCompleted',
       type: IsarType.longList,
     ),
     r'tz': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'tz',
       type: IsarType.string,
     )
@@ -87,7 +93,10 @@ const UserSchema = CollectionSchema(
       single: false,
     )
   },
-  embeddedSchemas: {r'UserCourse': UserCourseSchema},
+  embeddedSchemas: {
+    r'UserCourse': UserCourseSchema,
+    r'UserGrade': UserGradeSchema
+  },
   getId: _userGetId,
   getLinks: _userGetLinks,
   attach: _userAttach,
@@ -112,6 +121,14 @@ int _userEstimateSize(
   bytesCount += 3 + object.lessonCompleted.length * 8;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.pathIds.length * 8;
+  bytesCount += 3 + object.percentages.length * 3;
+  {
+    final offsets = allOffsets[UserGrade]!;
+    for (var i = 0; i < object.percentages.length; i++) {
+      final value = object.percentages[i];
+      bytesCount += UserGradeSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
   bytesCount += 3 + object.questionCompleted.length * 8;
   bytesCount += 3 + object.subjectCompleted.length * 8;
   bytesCount += 3 + object.tz.length * 3;
@@ -134,9 +151,15 @@ void _userSerialize(
   writer.writeLongList(offsets[2], object.lessonCompleted);
   writer.writeString(offsets[3], object.name);
   writer.writeLongList(offsets[4], object.pathIds);
-  writer.writeLongList(offsets[5], object.questionCompleted);
-  writer.writeLongList(offsets[6], object.subjectCompleted);
-  writer.writeString(offsets[7], object.tz);
+  writer.writeObjectList<UserGrade>(
+    offsets[5],
+    allOffsets,
+    UserGradeSchema.serialize,
+    object.percentages,
+  );
+  writer.writeLongList(offsets[6], object.questionCompleted);
+  writer.writeLongList(offsets[7], object.subjectCompleted);
+  writer.writeString(offsets[8], object.tz);
 }
 
 User _userDeserialize(
@@ -158,9 +181,16 @@ User _userDeserialize(
   object.lessonCompleted = reader.readLongList(offsets[2]) ?? [];
   object.name = reader.readString(offsets[3]);
   object.pathIds = reader.readLongList(offsets[4]) ?? [];
-  object.questionCompleted = reader.readLongList(offsets[5]) ?? [];
-  object.subjectCompleted = reader.readLongList(offsets[6]) ?? [];
-  object.tz = reader.readString(offsets[7]);
+  object.percentages = reader.readObjectList<UserGrade>(
+        offsets[5],
+        UserGradeSchema.deserialize,
+        allOffsets,
+        UserGrade(),
+      ) ??
+      [];
+  object.questionCompleted = reader.readLongList(offsets[6]) ?? [];
+  object.subjectCompleted = reader.readLongList(offsets[7]) ?? [];
+  object.tz = reader.readString(offsets[8]);
   return object;
 }
 
@@ -188,10 +218,18 @@ P _userDeserializeProp<P>(
     case 4:
       return (reader.readLongList(offset) ?? []) as P;
     case 5:
-      return (reader.readLongList(offset) ?? []) as P;
+      return (reader.readObjectList<UserGrade>(
+            offset,
+            UserGradeSchema.deserialize,
+            allOffsets,
+            UserGrade(),
+          ) ??
+          []) as P;
     case 6:
       return (reader.readLongList(offset) ?? []) as P;
     case 7:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1064,6 +1102,90 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
+  QueryBuilder<User, User, QAfterFilterCondition> percentagesLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'percentages',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> percentagesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'percentages',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> percentagesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'percentages',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> percentagesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'percentages',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> percentagesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'percentages',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> percentagesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'percentages',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<User, User, QAfterFilterCondition>
       questionCompletedElementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1486,6 +1608,13 @@ extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {
       return query.object(q, r'UserCourse');
     });
   }
+
+  QueryBuilder<User, User, QAfterFilterCondition> percentagesElement(
+      FilterQuery<UserGrade> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'percentages');
+    });
+  }
 }
 
 extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
@@ -1694,6 +1823,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
     });
   }
 
+  QueryBuilder<User, List<UserGrade>, QQueryOperations> percentagesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'percentages');
+    });
+  }
+
   QueryBuilder<User, List<int>, QQueryOperations> questionCompletedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'questionCompleted');
@@ -1804,16 +1939,16 @@ UserCourse _userCourseDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = UserCourse();
-  object.courseId = reader.readLong(offsets[0]);
-  object.diplomaPath = reader.readString(offsets[1]);
+  final object = UserCourse(
+    courseId: reader.readLongOrNull(offsets[0]) ?? 0,
+    diplomaPath: reader.readStringOrNull(offsets[1]) ?? '',
+    progressPercent: reader.readLongOrNull(offsets[4]) ?? 0,
+    status: _UserCoursestatusValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+        Status.start,
+  );
   object.isQuestionnaire = reader.readBool(offsets[2]);
   object.lessonStopId = reader.readLong(offsets[3]);
-  object.progressPercent = reader.readLong(offsets[4]);
   object.questionnaireStopId = reader.readLong(offsets[5]);
-  object.status =
-      _UserCoursestatusValueEnumMap[reader.readByteOrNull(offsets[6])] ??
-          Status.start;
   object.subjectStopId = reader.readLong(offsets[7]);
   return object;
 }
@@ -1826,15 +1961,15 @@ P _userCourseDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
       return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 5:
       return (reader.readLong(offset)) as P;
     case 6:
@@ -2342,3 +2477,188 @@ extension UserCourseQueryFilter
 
 extension UserCourseQueryObject
     on QueryBuilder<UserCourse, UserCourse, QFilterCondition> {}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const UserGradeSchema = Schema(
+  name: r'UserGrade',
+  id: 6206172405607541662,
+  properties: {
+    r'percentage': PropertySchema(
+      id: 0,
+      name: r'percentage',
+      type: IsarType.long,
+    ),
+    r'quizId': PropertySchema(
+      id: 1,
+      name: r'quizId',
+      type: IsarType.long,
+    )
+  },
+  estimateSize: _userGradeEstimateSize,
+  serialize: _userGradeSerialize,
+  deserialize: _userGradeDeserialize,
+  deserializeProp: _userGradeDeserializeProp,
+);
+
+int _userGradeEstimateSize(
+  UserGrade object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  return bytesCount;
+}
+
+void _userGradeSerialize(
+  UserGrade object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeLong(offsets[0], object.percentage);
+  writer.writeLong(offsets[1], object.quizId);
+}
+
+UserGrade _userGradeDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = UserGrade(
+    percentage: reader.readLongOrNull(offsets[0]) ?? 0,
+    quizId: reader.readLongOrNull(offsets[1]) ?? 0,
+  );
+  return object;
+}
+
+P _userGradeDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 1:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension UserGradeQueryFilter
+    on QueryBuilder<UserGrade, UserGrade, QFilterCondition> {
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition> percentageEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'percentage',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition>
+      percentageGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'percentage',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition> percentageLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'percentage',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition> percentageBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'percentage',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition> quizIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'quizId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition> quizIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'quizId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition> quizIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'quizId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserGrade, UserGrade, QAfterFilterCondition> quizIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'quizId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension UserGradeQueryObject
+    on QueryBuilder<UserGrade, UserGrade, QFilterCondition> {}

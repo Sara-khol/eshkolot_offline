@@ -4,7 +4,6 @@ import 'package:eshkolot_offline/ui/screens/question-widgets/checkbox_widget.dar
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../course_main/questionnaire_tab.dart';
 
@@ -32,6 +31,7 @@ class _RadioCheckState extends State<RadioCheck> {
   widget.questionController.isCorrect=verifyCheck;
 
   _isSelected= List<bool>.filled(widget.question.ans!.length, false);
+
   }
 
 
@@ -50,7 +50,7 @@ class _RadioCheckState extends State<RadioCheck> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding:  EdgeInsets.only(top: 20.h),
         child: Column(children: <Widget>[
            widget.question.type == QType.checkbox
               ? getCheckBoxWidget(widget.question)
@@ -68,7 +68,8 @@ class _RadioCheckState extends State<RadioCheck> {
           SizedBox(height: 30.h,),
           for(var ans in item.ans!)...[
             RadioListTile<String?>(
-              title: Text(ans.ans,style: TextStyle(fontSize: 27.sp),),
+              // title: Text(ans.ans,style: TextStyle(fontSize: 27.sp),),
+              title: HtmlDataWidget(ans.ans, quizId: item.quizId,),
 
               value: ans.ans,
               groupValue: _character,
@@ -93,6 +94,7 @@ class _RadioCheckState extends State<RadioCheck> {
               quizId: widget.question.quizId,
             ),
           ),
+          SizedBox(height: 30.h,),
           for(int i=0;i<item.ans!.length;i++)...[
             CheckBoxWidget(
               label: item.ans![i].ans,

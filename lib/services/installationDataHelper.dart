@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:collection/src/iterable_extensions.dart';
 
-
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/subject.dart';
+import 'package:eshkolot_offline/services/isar_service.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -33,6 +34,14 @@ class InstallationDataHelper {
   List<Quiz> myQuizzes = [];
   List<Quiz> testQuizzes = [];
 
+  EventBus eventBusHomePage = EventBus();
+  EventBus eventBusMainPageChild = EventBus();
+  EventBus eventBusSubjectPage = EventBus();
+  EventBus eventBusLessonPage = EventBus();
+  EventBus eventBusQuizPage = EventBus();
+  EventBus eventBusSideMenu = EventBus();
+  EventBus eventBusVimeo = EventBus();
+  EventBus eventBusDialogs = EventBus();
 
   init() async {
     late String destDirPath;
@@ -43,26 +52,31 @@ class InstallationDataHelper {
     //  final file = await File('$destDirPath/download_software(2).json');
     //  final file = await File('$destDirPath/download_software(7).json');
     final contents = await file.readAsString();
-    data = await json.decode(contents);
-    await setDataFromJson();
+    String cleanedJson = contents.replaceAll('\\n', '');
+    data = await json.decode(cleanedJson);
+    // data = await json.decode(contents);
+    await setDataFromJson(data);
     // }
     // catch (e) {
     // debugPrint("error $e");
     // }
   }
 
-  setDataFromJson() async {
+  setDataFromJson(Map<String, dynamic> data) async {
     // try{
     debugPrint('set data from json');
     users = data['users'] as List<dynamic>;
     Map<String, dynamic> courses = data['courses'] as Map<String, dynamic>;
     Map<String, dynamic> subjects = data['subjects'] as Map<String, dynamic>;
     Map<String, dynamic> lessons = data['lessons'] as Map<String, dynamic>;
-    Map<String, dynamic> questionnaires = data['questionnaire'] as Map<String, dynamic>;
-    Map<String, dynamic> questionnairesTest = data['testing_question'] as Map<String, dynamic>;
+    Map<String, dynamic> questionnaires =
+        data['questionnaire'] as Map<String, dynamic>;
+    Map<String, dynamic> questionnairesTest =
+        data['testing_question'] as Map<String, dynamic>;
     Map<String, dynamic> knowledgeAreas =
         data['knowledge'] as Map<String, dynamic>;
     Map<String, dynamic> learnPaths = data['learnPath'] as Map<String, dynamic>;
+    // Map<String, dynamic> learnPaths={} /*= data['learnPath'] as Map<String, dynamic>*/;
 
     for (var user in users) {
       debugPrint('user ${user['name']}');
@@ -71,7 +85,7 @@ class InstallationDataHelper {
         //  if(myKnowledgeList.firstWhereOrNull((k) => k.id==kId)==null) {
         var k = knowledgeAreas[kId.toString()];
         Knowledge knowledge = Knowledge.fromJson(k, kId);
-       // user['ddd'] = knowledge.toJson();
+        // user['ddd'] = knowledge.toJson();
         return knowledge;
         // }
       }).toList());
@@ -81,10 +95,10 @@ class InstallationDataHelper {
       List<dynamic> userCoursesJson = user['UserCourse'] as List<dynamic>;
       //check if course already exists
       List<UserCourse> userCourses = userCoursesJson.map((courseJson) {
-        final userCourse = UserCourse();
+        //   final userCourse = UserCourse();
 
         //set user courses with correct data , done for converting to right enum status
-        userCourse.setComputedPropertyFromJson(courseJson);
+        UserCourse userCourse = UserCourse.fromJson(courseJson);
 
         var c = courses[userCourse.courseId.toString()];
         Course course = Course.fromJson(c, userCourse.courseId);
@@ -94,9 +108,6 @@ class InstallationDataHelper {
         //     .firstWhere((k) => k.id == course.knowledgeId)
         //     .courses
         //     .add(course);
-
-
-
 
         for (int subjectId in course.subjectIds) {
           var s = subjects[subjectId.toString()];
@@ -128,11 +139,11 @@ class InstallationDataHelper {
           course.subjects.add(subject);
           mySubjects.add(subject);
         }
-    //todo remove  just for testing
-        if(course.serverId==78407)
-          {
-            course.questionnaireIds.addAll([66164,82517,111897,128955,129722]);
-          }
+        //todo remove  just for testing
+        if (course.id == 78407) {
+          course.questionnaireIds
+              .addAll([66164, 82517, 111897, 128955, 129722]);
+        }
 
         for (int qId in course.questionnaireIds) {
           var q = questionnaires[qId.toString()];
@@ -148,12 +159,9 @@ class InstallationDataHelper {
           course.questionnaires.add(quiz);
           myQuizzes.add(quiz);
 
-
-
           // Subject1 tryQ = Subject1.fromJson( qId);
           // course.questionnaires.add(tryQ);
           // myTries.add(tryQ);
-
         }
         myCourses.add(course);
         return userCourse;
@@ -167,9 +175,9 @@ class InstallationDataHelper {
 
         for (int courseId in path.coursesIds) {
           Course? c =
-              myCourses.firstWhereOrNull((element) => element.serverId == courseId);
-        //todo is a problem in json file ?
-          if(c!=null) {
+              myCourses.firstWhereOrNull((element) => element.id == courseId);
+          //todo is a problem in json file ?
+          if (c != null) {
             path.courses.add(c);
           }
         }
@@ -197,5 +205,155 @@ class InstallationDataHelper {
     // }
   }
 
-  setAllDataCourse(Course course) {}
+  Future<Course> setSyncNewCourse(Map<String, dynamic> data) async {
+    late Course course;
+    // Map<String, dynamic> sanitizedData = {};
+    // data.forEach((key, value) {
+    //   if (value is String) {
+    //     sanitizedData[key] = value.replaceAll('\n', '');
+    //   } else {
+    //     sanitizedData[key] = value;
+    //   }
+    // });
+    Map<String, dynamic> sanitizedData = removeNewlines(data);
+    Map<String, dynamic> courses =
+        sanitizedData['courses'] as Map<String, dynamic>;
+    Map<String, dynamic> subjects =
+        sanitizedData['subjects'] as Map<String, dynamic>;
+    Map<String, dynamic> lessons =
+        sanitizedData['lessons'] as Map<String, dynamic>;
+    Map<String, dynamic> questionnaires =
+        sanitizedData['questionnaire'] as Map<String, dynamic>;
+    Map<String, dynamic> knowledgeAreas =
+        sanitizedData['knowledge'] as Map<String, dynamic>;
+
+    int courseId = int.parse(courses.keys.first);
+
+    Map<String, dynamic> c = courses.values.first;
+    course = Course.fromJson(c, courseId);
+
+    for (int subjectId in course.subjectIds) {
+      var s = subjects[subjectId.toString()];
+      Subject subject = Subject.fromJson(s, subjectId);
+
+      for (int lessonId in subject.lessonsIds) {
+        var l = lessons[lessonId.toString()];
+        Lesson lesson = Lesson.fromJson(l, lessonId);
+
+        for (int qId in lesson.questionnaireIds) {
+          var q = questionnaires[qId.toString()];
+
+          Quiz quiz = Quiz.fromJson(q, qId);
+          lesson.questionnaire.add(quiz);
+          myQuizzes.add(quiz);
+        }
+        subject.lessons.add(lesson);
+        myLessons.add(lesson);
+      }
+
+      for (int qId in subject.questionnaireIds) {
+        var q = questionnaires[qId.toString()];
+
+        Quiz quiz = Quiz.fromJson(q, qId);
+        subject.questionnaire.add(quiz);
+        myQuizzes.add(quiz);
+      }
+
+      course.subjects.add(subject);
+      mySubjects.add(subject);
+    }
+
+    for (int qId in course.questionnaireIds) {
+      var q = questionnaires[qId.toString()];
+      Quiz quiz = Quiz.fromJson(q, qId);
+      course.questionnaires.add(quiz);
+      myQuizzes.add(quiz);
+    }
+
+    await IsarService().addQuizzes(myQuizzes);
+    await IsarService().addLessons(myLessons);
+    await IsarService().addSubjects(mySubjects);
+    await IsarService().addCourse(course);
+//because there is only one ...
+    Map<String, dynamic> k = knowledgeAreas.values.first;
+    int knowledgeId = int.parse(knowledgeAreas.keys.first);
+    Knowledge knowledge = Knowledge.fromJson(k, knowledgeId);
+    if (!await IsarService().isKnowledgeExist(knowledgeId)) {
+      await IsarService().addKnowledge(knowledge);
+    }
+
+    await IsarService().updateUserCourse( course, knowledge);
+    return course;
+  }
+
+  Map<String, dynamic> removeNewlines(Map<String, dynamic> input) {
+    Map<String, dynamic> result = {};
+
+    input.forEach((key, value) {
+      if (value is String) {
+        result[key] = value.replaceAll('\n', '');
+      } else if (value is Map<String, dynamic>) {
+        result[key] = removeNewlines(value);
+      } else if (value is List) {
+        result[key] = removeNewlinesFromList(value);
+      } else {
+        result[key] = value;
+      }
+    });
+
+    return result;
+  }
+
+  List removeNewlinesFromList(List input) {
+    List result = [];
+
+    for (var item in input) {
+      if (item is String) {
+        result.add(item.replaceAll('\n', ''));
+      } else if (item is Map<String, dynamic>) {
+        result.add(removeNewlines(item));
+      } else if (item is List) {
+        result.add(removeNewlinesFromList(item));
+      } else {
+        result.add(item);
+      }
+    }
+
+    return result;
+  }
+
+  syncDataCourse(Map<String, dynamic> data, Function(bool b) onSuccess) async {
+    List<dynamic> userCourseMap = data['UserCourse'] as List<dynamic>;
+    List<dynamic> lessonCompleted = data['lessonCompleted'] as List<dynamic>;
+    List<dynamic> subjectCompleted = data['subjectCompleted'] as List<dynamic>;
+    List<dynamic> questionCompleted =
+        data['questionCompleted'] as List<dynamic>;
+
+    // questionCompleted.add(33070);
+    List<UserCourse> userCourseList = [];
+    for (var userCourse in userCourseMap) {
+      //UserCourse? uc = IsarService().getUserCourseData(userCourse['courseId']);
+      // if (uc != null) {
+      //  debugPrint('uc ${uc.courseId}');
+      UserCourse uc = UserCourse.fromJson(userCourse);
+      userCourseList.add(uc);
+    }
+    bool getVideos = await IsarService().updateCourseData(userCourseList);
+    debugPrint('after getting course $getVideos');
+    for (int lessonId in lessonCompleted) {
+      await IsarService().updateLessonCompleted(lessonId,
+          updateLesson: true, updateUser: true);
+    }
+
+    for (int subjectId in subjectCompleted) {
+      await IsarService().updateSubjectCompleted(subjectId);
+    }
+
+    for (int qId in questionCompleted) {
+      await IsarService().updateQuizCompleted(qId);
+    }
+   // if (!getVideos) {
+      onSuccess(getVideos);
+ //   }
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
+import 'package:html/parser.dart';
 import 'package:isar/isar.dart';
 
 part 'subject.g.dart';
@@ -32,8 +33,10 @@ class Subject {
   bool isTapped=false;
 
   factory Subject.fromJson(Map<String, dynamic> parsedJson,int subjectId) {
+    final String parsedString = parse(parsedJson['name']).documentElement!.text;
     return Subject(
-      name: parsedJson['name'],
+      // name: parsedJson['name'],
+      name: parsedString,
       time:parsedJson['time'],
       lessonsIds: parsedJson['lessons'],
       questionnaireIds: parsedJson['questionnaire'],

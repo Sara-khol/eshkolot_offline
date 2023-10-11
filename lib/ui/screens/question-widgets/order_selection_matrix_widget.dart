@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/foundation.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../course_main/questionnaire_tab.dart';
 
@@ -56,6 +55,7 @@ class _OrderSelectionMatrixWidgetState
     //     widget.question.ans!.map((e) => e.ans).toList(), {});
     randomList.clear();
     randomList = List.from(correctAnswersList);
+    randomList= randomList.map((str) => str.replaceAll('\n', '')).toList();
     randomList.shuffle();
   }
 
@@ -108,7 +108,7 @@ class _OrderSelectionMatrixWidgetState
           Padding(
             padding: EdgeInsets.only(bottom: 12.h),
             child: Container(
-              height: 60.h,
+              height: 75.h,
               margin: EdgeInsets.only(right: 2.w, left: 2.w),
               decoration: ShapeDecoration(
                 color: const Color(0xFFFCFCFF),
@@ -124,16 +124,18 @@ class _OrderSelectionMatrixWidgetState
               child: Row(
                 children: [
                   Container(
-                    width: 120.w,
+                    width: 140.w,
                     padding: EdgeInsets.all(10.h),
-                    child: Text(
-                      randomList[i],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: colors.blackColorApp,
-                        fontSize: 27.sp,
-                        fontWeight: FontWeight.w400,
-                        // height: 22,
+                    child: Center(
+                      child: Text(
+                        randomList[i],
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: colors.blackColorApp,
+                          fontSize: 27.sp,
+                          fontWeight: FontWeight.w400,
+                          // height: 22,
+                        ),
                       ),
                     ),
                   ),

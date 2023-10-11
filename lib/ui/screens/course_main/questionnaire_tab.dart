@@ -76,61 +76,63 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
           ],
         ),
         //  ),
-        Padding(
-          padding: EdgeInsets.only(top: 15.h, bottom: 30.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.square,
-                color: const Color(0xFF5956DA),
-                size: 15.sp,
-              ),
-              Text(' הנוכחי', style: TextStyle(fontSize: 16.w)),
-              SizedBox(
-                width: 11.w,
-              ),
-              Icon(Icons.square, color: const Color(0xFFACAEAF), size: 15.sp),
-              Text(' ביקורת', style: TextStyle(fontSize: 16.w)),
-              SizedBox(
-                width: 11.w,
-              ),
-              Icon(Icons.square, color: const Color(0xFF62FFB8), size: 15.sp),
-              Text(' נענו', style: TextStyle(fontSize: 16.w)),
-              SizedBox(
-                width: 11.w,
-              ),
-              Icon(Icons.square, color: const Color(0xFFF97575), size: 15.sp),
-              Text(' לא נכון', style: TextStyle(fontSize: 16.w)),
-              const Spacer(),
-              Container(
-                height: 20.h,
-                width: 100.w,
-                decoration: const BoxDecoration(
-                    color: Color(0xFFF4F4F3),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    alignment: Alignment.center,
-                    foregroundColor: const Color(0xFF2D2828),
-                    textStyle:
-                        TextStyle(fontSize: 12.w, fontWeight: FontWeight.w600),
-                  ),
-                  onPressed: () {},
-                  child: Row(
-                    children: [
-                      Text('סקור שאלה', style: TextStyle(fontSize: 12.w)),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 10.sp,
-                      )
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
+        //todo remove question colors for now
+        SizedBox(height: 15.h),
+        // Padding(
+        //   padding: EdgeInsets.only(top: 15.h, bottom: 30.h),
+        //   child: Row(
+        //     crossAxisAlignment: CrossAxisAlignment.center,
+        //     children: [
+        //       Icon(
+        //         Icons.square,
+        //         color: const Color(0xFF5956DA),
+        //         size: 15.sp,
+        //       ),
+        //       Text(' הנוכחי', style: TextStyle(fontSize: 16.w)),
+        //       SizedBox(
+        //         width: 11.w,
+        //       ),
+        //       Icon(Icons.square, color: const Color(0xFFACAEAF), size: 15.sp),
+        //       Text(' ביקורת', style: TextStyle(fontSize: 16.w)),
+        //       SizedBox(
+        //         width: 11.w,
+        //       ),
+        //       Icon(Icons.square, color: const Color(0xFF62FFB8), size: 15.sp),
+        //       Text(' נענו', style: TextStyle(fontSize: 16.w)),
+        //       SizedBox(
+        //         width: 11.w,
+        //       ),
+        //       Icon(Icons.square, color: const Color(0xFFF97575), size: 15.sp),
+        //       Text(' לא נכון', style: TextStyle(fontSize: 16.w)),
+        //       const Spacer(),
+        //       Container(
+        //         height: 20.h,
+        //         width: 100.w,
+        //         decoration: const BoxDecoration(
+        //             color: Color(0xFFF4F4F3),
+        //             borderRadius: BorderRadius.all(Radius.circular(10))),
+        //         child: TextButton(
+        //           style: TextButton.styleFrom(
+        //             alignment: Alignment.center,
+        //             foregroundColor: const Color(0xFF2D2828),
+        //             textStyle:
+        //                 TextStyle(fontSize: 12.w, fontWeight: FontWeight.w600),
+        //           ),
+        //           onPressed: () {},
+        //           child: Row(
+        //             children: [
+        //               Text('סקור שאלה', style: TextStyle(fontSize: 12.w)),
+        //               Icon(
+        //                 Icons.arrow_forward,
+        //                 size: 10.sp,
+        //               )
+        //             ],
+        //           ),
+        //         ),
+        //       )
+        //     ],
+        //   ),
+        // ),
         const Divider(color: Color.fromARGB(255, 228, 230, 233)),
         Align(
             alignment: Alignment.centerRight,
@@ -143,6 +145,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             // getQuestionnaireByType(widget.questionnaire.elementAt(index)),
             getQuestionnaireByType(
                 widget.quiz.questionList.elementAt(selected - 1)),
+          SizedBox(height: 20.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -255,6 +258,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             context: context,
             builder: (BuildContext context) {
               return QuestionnaireEndDialog(
+                qID: widget.quiz.id,
                   qNum: qNum,
                   correctQNum: correctQNum,
                   grade1: widget.quiz.grade1,

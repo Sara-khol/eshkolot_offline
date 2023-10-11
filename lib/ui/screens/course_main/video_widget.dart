@@ -71,7 +71,7 @@ class _VideoWidgetState extends State<VideoWidget>
       var dir =
           await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
       File file = File(
-          '${dir.path}/${Constants.lessonPath}/${MainPageChild.of(context)?.widget.course.serverId}/${widget.vimoeId}.mp4');
+          '${dir.path}/${Constants.lessonPath}/${MainPageChild.of(context)?.widget.course.id}/${widget.vimoeId}.mp4');
       videoExists = await file.exists();
 
       player = Player(

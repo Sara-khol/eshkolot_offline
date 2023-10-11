@@ -9,11 +9,12 @@ part 'course.g.dart';
 // @JsonSerializable()
 class Course {
   Id id = Isar.autoIncrement;
-
+  // int vimeoId=10390152/*2567060*/;
+   String vimeoId/*2567060*/;
    String title;
 
-  @Index(unique: true, replace: true)
-  late int serverId = 0;
+  // @Index(unique: true, replace: true)
+  // late int serverId = 0;
 
   // @Backlink(to: "course")
   final subjects = IsarLinks<Subject>();
@@ -64,6 +65,7 @@ class Course {
       'countQuiz': countQuiz,
       'countEndQuiz': countEndQuiz,
       'knowledgeNum': knowledgeNum,
+       'vimeoId': vimeoId,
     };
   }
 
@@ -72,8 +74,10 @@ class Course {
      this.subjectIds=const [],
      this.knowledgeId=0,
      this.questionnaireIds=const [],
-    this.serverId=0,
+    // this.serverId=0,
+    this.id=0,
     this.knowledgeNum,
+    this.vimeoId='',
     this.countHours,
     this.countLesson,
     this.countEndQuiz,
@@ -91,7 +95,9 @@ class Course {
         countQuiz: parsedJson['countQuiz'],
         countEndQuiz: parsedJson['countEndQuiz'],
         knowledgeNum: parsedJson['knowledge_num'],
-        serverId: courseId,
+        vimeoId: parsedJson['vimeoId'],
+        // serverId: courseId,
+        id: courseId,
     );
   }
 }

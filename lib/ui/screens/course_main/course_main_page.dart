@@ -6,7 +6,6 @@ import 'package:eshkolot_offline/ui/screens/course_main/subject_main_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:isar/isar.dart';
 import '../../../models/course.dart';
 import '../../../models/quiz.dart';
 import '../../../models/user.dart';
@@ -28,7 +27,7 @@ class CourseMainPage extends StatefulWidget {
 class _CourseMainPageState extends State<CourseMainPage> {
   late Future myFuture;
   Lesson? lastLesson;
-   Quiz? lastQuestionnaire;
+  Quiz? lastQuestionnaire;
   Subject? lastSubject;
   UserCourse? data;
   late String lastTextButton = '';
@@ -149,7 +148,9 @@ class _CourseMainPageState extends State<CourseMainPage> {
                 height: 75.h,
               ),
               // if (data != null)
-              if (lastLesson != null || lastSubject != null || lastQuestionnaire!=null)
+              if (lastLesson != null ||
+                  lastSubject != null ||
+                  lastQuestionnaire != null)
                 ClipRRect(
                   child: Stack(
                     children: <Widget>[
@@ -189,11 +190,11 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                 currentMainChild?.lessonPickedIndex =
                                     data!.lessonIndex;
 
-
                                 currentMainChild?.bodyWidget = LessonWidget(
                                     lesson: lastLesson!,
                                     //todo check if works..
-                                    updateComplete: currentMainChild.updateCompleteLesson,
+                                    updateComplete:
+                                        currentMainChild.updateCompleteLesson,
                                     onNext: data!.lessonIndex + 1 <
                                             lastSubject!.lessons.length
                                         ? () => currentMainChild.goToNextLesson(
@@ -206,10 +207,14 @@ class _CourseMainPageState extends State<CourseMainPage> {
                               } else {
                                 currentMainChild?.questionPickedIndex =
                                     data!.questionIndex;
+                                currentMainChild?.subjectPickedIndex =
+                                    data!.subjectIndex;
+                                currentMainChild?.lessonPickedIndex =
+                                    data!.lessonIndex;
                                 MainPageChild.of(context)?.bodyWidget =
                                     QuestionnaireWidget(
-                                        quiz: lastQuestionnaire!,
-                                        );
+                                  quiz: lastQuestionnaire!,
+                                );
                               }
                             }),
                       ),
@@ -276,9 +281,12 @@ class _CourseMainPageState extends State<CourseMainPage> {
 
   getLastPositionInCourse({bool refresh = true}) async {
     // debugPrint('getLastPositionInCourse');
-    data = IsarService().getUserCourseData(widget.course.serverId);
+    data = IsarService().getUserCourseData(widget.course.id);
 
-    if (data != null) {
+    if (data != null &&
+        (data!.subjectStopId != 0 ||
+            data!.lessonStopId != 0 ||
+            data!.questionnaireStopId != 0)) {
       if (data!.subjectStopId != 0) {
         for (int i = 0; i < widget.course.subjects.length; i++) {
           if (widget.course.subjects.elementAt(i).id == data!.subjectStopId) {
@@ -310,53 +318,54 @@ class _CourseMainPageState extends State<CourseMainPage> {
       //     ? lastSubject!.lessons.firstWhere((l) => l.id == data!.lessonStopId)
       //     : null;
       //check if there is data on last stop
-    //  if (lastLesson != null || lastSubject != null) {
-        if (!data!.isQuestionnaire) {
-          lastTextButton = lastLesson!.name;
-        }
-        else {
-          if (data!.subjectStopId == 0) {
-            //questionnaire of course
-            //lastQuestionnaire = widget.course.questionnaires.firstWhere((q) => q.id==data!.questionnaireStopId);
+      //  if (lastLesson != null || lastSubject != null) {
+      if (!data!.isQuestionnaire) {
+        lastTextButton = lastLesson!.name;
+      } else {
+        if (data!.subjectStopId == 0) {
+          //questionnaire of course
+          //lastQuestionnaire = widget.course.questionnaires.firstWhere((q) => q.id==data!.questionnaireStopId);
 
-            for (int i = 0; i < widget.course.questionnaires.length; i++) {
-              if (widget.course.questionnaires.elementAt(i).id == data!.questionnaireStopId) {
-                lastQuestionnaire = widget.course.questionnaires.elementAt(i);
-                data!.questionIndex = i;
-                break;
-              }
-            }
-          } else if (data!.lessonStopId == 0) {
-            //questionnaire of subject
-           // lastQuestionnaire = lastSubject!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
-
-            for (int i = 0; i <  lastSubject!.questionnaire.length; i++) {
-              if ( lastSubject!.questionnaire.elementAt(i).id == data!.questionnaireStopId) {
-                lastQuestionnaire =  lastSubject!.questionnaire.elementAt(i);
-                data!.questionIndex = i;
-                break;
-              }
-            }
-          } else {
-            //questionnaire of lesson
-           // lastQuestionnaire = lastLesson!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
-
-            for (int i = 0; i < lastLesson!.questionnaire.length; i++) {
-              if ( lastLesson!.questionnaire.elementAt(i).id == data!.questionnaireStopId) {
-                lastQuestionnaire =  lastLesson!.questionnaire.elementAt(i);
-                data!.questionIndex = i;
-                break;
-              }
+          for (int i = 0; i < widget.course.questionnaires.length; i++) {
+            if (widget.course.questionnaires.elementAt(i).id ==
+                data!.questionnaireStopId) {
+              lastQuestionnaire = widget.course.questionnaires.elementAt(i);
+              data!.questionIndex = i;
+              break;
             }
           }
-          lastTextButton = lastQuestionnaire!.title;
+        } else if (data!.lessonStopId == 0) {
+          //questionnaire of subject
+          // lastQuestionnaire = lastSubject!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
 
+          for (int i = 0; i < lastSubject!.questionnaire.length; i++) {
+            if (lastSubject!.questionnaire.elementAt(i).id ==
+                data!.questionnaireStopId) {
+              lastQuestionnaire = lastSubject!.questionnaire.elementAt(i);
+              data!.questionIndex = i;
+              break;
+            }
+          }
+        } else {
+          //questionnaire of lesson
+          // lastQuestionnaire = lastLesson!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
+
+          for (int i = 0; i < lastLesson!.questionnaire.length; i++) {
+            if (lastLesson!.questionnaire.elementAt(i).id ==
+                data!.questionnaireStopId) {
+              lastQuestionnaire = lastLesson!.questionnaire.elementAt(i);
+              data!.questionIndex = i;
+              break;
+            }
+          }
         }
-        if (refresh) {
-          if (mounted) setState(() {});
-        }
+        lastTextButton = lastQuestionnaire!.title;
       }
-   // }
+      if (refresh) {
+        if (mounted) setState(() {});
+      }
+    }
+    // }
   }
 
   @override

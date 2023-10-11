@@ -20,9 +20,10 @@ class _LoginPageState extends State<LoginPage> {
   Color myColor = const Color(0xff2D2828);
 
   //todo remove text
-  TextEditingController controller = TextEditingController(text: '111222333');
+  TextEditingController controller = TextEditingController();
 
   bool isError = false;
+  bool isErrorNoCourses = false;
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -65,12 +66,12 @@ class _LoginPageState extends State<LoginPage> {
                         //       setState(() {});
                         //     }
                         //   },
-                        keyboardType: TextInputType.number,
+                     //   keyboardType: TextInputType.number,
                         controller: controller,
-                        inputFormatters: <TextInputFormatter>[
-                          LengthLimitingTextInputFormatter(9),
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
+                        // inputFormatters: <TextInputFormatter>[
+                        //   LengthLimitingTextInputFormatter(9),
+                        //   FilteringTextInputFormatter.digitsOnly
+                        // ],
                         // Only numbers can be entered,max 9 digits
                         // autofocus: true,
                         textAlign: TextAlign.right,
@@ -120,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
               onTap: () async {
                // if (controller.text.isNotEmpty) {
                   User? user = await IsarService().getUserByTz(controller.text);
-                  if (user != null) {
+                  if (user != null && user.knowledgeCoursesMap.isNotEmpty) {
                     if (mounted) {
                       Navigator.pushReplacement(
                           context,
@@ -128,9 +129,9 @@ class _LoginPageState extends State<LoginPage> {
                               builder: (context) => MainPage(user: user)));
                     }
                   } else {
-                    setState(() {
-                      isError = true;
-                    });
+                      setState(() {
+                     user==null?   isError = true:isErrorNoCourses=true;
+                      });
                   }
                 // } else {
                 //   setState(() {
@@ -168,11 +169,11 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(height: 20.h),
             Visibility(
-                visible: isError,
+                visible: isError || isErrorNoCourses,
                 child: Text(
                     controller.text.isEmpty
                         ? 'נא להזין תעודת זהות'
-                        : 'התעודת זהות שהזנת שגויה',
+                        :isError? 'התעודת זהות שהזנת שגויה':'למשתמש אין קורסים שרשום אליהם',
                     style: TextStyle(fontSize: 20.sp, color: Colors.red)))
           ]),
           floatingActionButton:kDebugMode? FloatingActionButton(onPressed: ()

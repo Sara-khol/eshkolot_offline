@@ -28,6 +28,13 @@ class _LessonWidgetState extends State<LessonWidget> {
   void initState() {
     super.initState();
     lesson = widget.lesson;
+    // InstallationDataHelper().eventBusLessonPage.on().listen((event) {
+    //   lesson.isCompletedCurrentUser=event as bool;
+    //   if(mounted) {
+    //     setState(() {});
+    //   }
+    // });
+
     debugPrint('lesson initState isComplete ${lesson.isCompletedCurrentUser}');
 
   }
@@ -44,6 +51,11 @@ class _LessonWidgetState extends State<LessonWidget> {
     // Sentry.captureMessage(' didUpdateWidget player ${player.id}');
     // print('player ${player.id}');
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override
@@ -207,6 +219,8 @@ class _LessonWidgetState extends State<LessonWidget> {
                               ),
                               onPressed: () {
                                 setState(() {
+
+                                  MainPageChild.of(context)?.questionPickedIndex=qIndex;
                                   MainPageChild.of(context)?.bodyWidget =
                                       QuestionnaireWidget(
                                           quiz: lesson.questionnaire

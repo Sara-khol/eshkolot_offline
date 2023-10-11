@@ -42,7 +42,11 @@ class _AudioWidgetState extends State<AudioWidget> {
         int rminutes = sminutes - (shours * 60);
         int rseconds = sseconds - (sminutes * 60 + shours * 60 * 60);
 
-        currentPostLabel = "$rhours:$rminutes:$rseconds";
+        String formattedRMinutes = rminutes.toString().padLeft(2, '0');
+        String formattedRSeconds = rseconds.toString().padLeft(2, '0');
+
+        // currentPostLabel = "$rhours:$rminutes:$rseconds";
+        currentPostLabel = "$formattedRMinutes:$formattedRSeconds";
         setState(() {
           //refresh the UI
         });

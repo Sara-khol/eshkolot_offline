@@ -17,23 +17,28 @@ const VideoIsarSchema = CollectionSchema(
   name: r'VideoIsar',
   id: 2185217824995906155,
   properties: {
-    r'downloadLink': PropertySchema(
+    r'courseId': PropertySchema(
       id: 0,
+      name: r'courseId',
+      type: IsarType.long,
+    ),
+    r'downloadLink': PropertySchema(
+      id: 1,
       name: r'downloadLink',
       type: IsarType.string,
     ),
     r'expiredDate': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'expiredDate',
       type: IsarType.long,
     ),
     r'isDownload': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'isDownload',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     )
@@ -43,7 +48,21 @@ const VideoIsarSchema = CollectionSchema(
   deserialize: _videoIsarDeserialize,
   deserializeProp: _videoIsarDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'courseId': IndexSchema(
+      id: -4937057111615935929,
+      name: r'courseId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'courseId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _videoIsarGetId,
@@ -69,10 +88,11 @@ void _videoIsarSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.downloadLink);
-  writer.writeLong(offsets[1], object.expiredDate);
-  writer.writeBool(offsets[2], object.isDownload);
-  writer.writeString(offsets[3], object.name);
+  writer.writeLong(offsets[0], object.courseId);
+  writer.writeString(offsets[1], object.downloadLink);
+  writer.writeLong(offsets[2], object.expiredDate);
+  writer.writeBool(offsets[3], object.isDownload);
+  writer.writeString(offsets[4], object.name);
 }
 
 VideoIsar _videoIsarDeserialize(
@@ -82,11 +102,12 @@ VideoIsar _videoIsarDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = VideoIsar();
-  object.downloadLink = reader.readString(offsets[0]);
-  object.expiredDate = reader.readLong(offsets[1]);
+  object.courseId = reader.readLong(offsets[0]);
+  object.downloadLink = reader.readString(offsets[1]);
+  object.expiredDate = reader.readLong(offsets[2]);
   object.id = id;
-  object.isDownload = reader.readBool(offsets[2]);
-  object.name = reader.readString(offsets[3]);
+  object.isDownload = reader.readBool(offsets[3]);
+  object.name = reader.readString(offsets[4]);
   return object;
 }
 
@@ -98,12 +119,14 @@ P _videoIsarDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
-    case 1:
       return (reader.readLong(offset)) as P;
+    case 1:
+      return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -127,6 +150,14 @@ extension VideoIsarQueryWhereSort
   QueryBuilder<VideoIsar, VideoIsar, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterWhere> anyCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'courseId'),
+      );
     });
   }
 }
@@ -197,10 +228,153 @@ extension VideoIsarQueryWhere
       ));
     });
   }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterWhereClause> courseIdEqualTo(
+      int courseId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'courseId',
+        value: [courseId],
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterWhereClause> courseIdNotEqualTo(
+      int courseId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [],
+              upper: [courseId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [courseId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [courseId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [],
+              upper: [courseId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterWhereClause> courseIdGreaterThan(
+    int courseId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'courseId',
+        lower: [courseId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterWhereClause> courseIdLessThan(
+    int courseId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'courseId',
+        lower: [],
+        upper: [courseId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterWhereClause> courseIdBetween(
+    int lowerCourseId,
+    int upperCourseId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'courseId',
+        lower: [lowerCourseId],
+        includeLower: includeLower,
+        upper: [upperCourseId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension VideoIsarQueryFilter
     on QueryBuilder<VideoIsar, VideoIsar, QFilterCondition> {
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> courseIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'courseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> courseIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'courseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> courseIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'courseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> courseIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'courseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<VideoIsar, VideoIsar, QAfterFilterCondition> downloadLinkEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -591,6 +765,18 @@ extension VideoIsarQueryLinks
     on QueryBuilder<VideoIsar, VideoIsar, QFilterCondition> {}
 
 extension VideoIsarQuerySortBy on QueryBuilder<VideoIsar, VideoIsar, QSortBy> {
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> sortByCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> sortByCourseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.desc);
+    });
+  }
+
   QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> sortByDownloadLink() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'downloadLink', Sort.asc);
@@ -642,6 +828,18 @@ extension VideoIsarQuerySortBy on QueryBuilder<VideoIsar, VideoIsar, QSortBy> {
 
 extension VideoIsarQuerySortThenBy
     on QueryBuilder<VideoIsar, VideoIsar, QSortThenBy> {
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> thenByCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> thenByCourseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.desc);
+    });
+  }
+
   QueryBuilder<VideoIsar, VideoIsar, QAfterSortBy> thenByDownloadLink() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'downloadLink', Sort.asc);
@@ -705,6 +903,12 @@ extension VideoIsarQuerySortThenBy
 
 extension VideoIsarQueryWhereDistinct
     on QueryBuilder<VideoIsar, VideoIsar, QDistinct> {
+  QueryBuilder<VideoIsar, VideoIsar, QDistinct> distinctByCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'courseId');
+    });
+  }
+
   QueryBuilder<VideoIsar, VideoIsar, QDistinct> distinctByDownloadLink(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -737,6 +941,12 @@ extension VideoIsarQueryProperty
   QueryBuilder<VideoIsar, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<VideoIsar, int, QQueryOperations> courseIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'courseId');
     });
   }
 

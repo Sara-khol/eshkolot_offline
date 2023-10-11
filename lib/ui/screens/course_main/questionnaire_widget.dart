@@ -2,11 +2,11 @@
 import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:eshkolot_offline/models/quiz.dart';
-import 'package:eshkolot_offline/ui/custom_widgets/audio_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+
+import '../../../services/installationDataHelper.dart';
 
 class QuestionnaireWidget extends StatefulWidget {
   // final List<Question> questionnaires;
@@ -28,12 +28,25 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
   late List<Question> questionnaires;
   late TabController _tabController;
 
+
   @override
   void initState() {
     questionnaires = widget.quiz.questionList;
     displayWidget = initialDisplay();
     _tabController = TabController(length: 2, vsync: this);
+    InstallationDataHelper().eventBusQuizPage.on().listen((event) {
+      widget.quiz.isCompletedCurrentUser=event as bool;
+      if(mounted) {
+        setState(() {});
+      }
+    });
+
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   @override

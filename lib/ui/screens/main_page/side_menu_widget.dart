@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../models/course.dart';
 import '../../../models/knowledge.dart';
 import '../../../models/learn_path.dart';
+import '../../../services/installationDataHelper.dart';
+import '../../../services/isar_service.dart';
 import '../home_page.dart';
 import '../how_to_learn.dart';
 import 'main_page.dart';
@@ -24,6 +28,7 @@ class SideMenuWidget extends StatefulWidget {
 class _SideMenuWidgetState extends State<SideMenuWidget> {
   int sIndex = 1;
   Course? lastCourseSelected;
+  late StreamSubscription stream;
 
   late List<LearnPath> pathList;
   late List<Knowledge> knowledgeList;
@@ -34,6 +39,16 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
     super.initState();
     knowledgeCourses = widget.myUser.knowledgeCoursesMap;
     pathList = widget.myUser.pathList;
+
+    stream =
+        InstallationDataHelper().eventBusSideMenu.on().listen((event) async {
+      debugPrint('eventBusSideMenu');
+      User user = IsarService().getCurrentUser();
+      knowledgeCourses = user.knowledgeCoursesMap;
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -214,7 +229,9 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                 //make first course chosen
                 MainPage.of(context)?.mainWidget = MainPageChild(
                     course: courses.first,
-                    knowledgeColor:  knowledge.icon.color!=''?int.parse(knowledge.icon.color):-1);
+                    knowledgeColor: knowledge.icon.color != ''
+                        ? int.parse(knowledge.icon.color)
+                        : -1);
                 courses.first.isSelected = true;
                 sIndex = 0;
                 //for first time
@@ -236,7 +253,9 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                   width: 31.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color:knowledge.icon.color!=''? Color(int.parse(knowledge.icon.color)):Colors.indigo,
+                    color: knowledge.icon.color != ''
+                        ? Color(int.parse(knowledge.icon.color))
+                        : Colors.indigo,
                   ),
                   // child: Image.asset('assets/images/${knowledge.iconPath}.png'),
                   // child: Center(child: HtmlWidget(knowledge.iconPath)),
@@ -270,8 +289,10 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               itemBuilder: (context, index) {
                 return courseItem(
                     knowledgeCourses.values.elementAt(kIndex)[index],
-                    knowledge.icon.color!=''?int.parse(knowledge.icon.color):-1 ,
-                    knowledge.iconPath??'',
+                    knowledge.icon.color != ''
+                        ? int.parse(knowledge.icon.color)
+                        : -1,
+                    knowledge.iconPath ?? '',
                     index);
               }),
         ),
@@ -412,7 +433,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                 return courseItem(
                     path.courses.elementAt(index),
                     path.color.isNotEmpty ? int.parse(path.color) : -1,
-                    path.iconPath??'',
+                    path.iconPath ?? '',
                     index);
               }),
         ),
@@ -437,10 +458,10 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
     setState(() {
       Course? selectedCourse;
       for (var entry in knowledgeCourses.entries) {
-      //  Knowledge knowledge = entry.key;
+        //  Knowledge knowledge = entry.key;
         List<Course> courses = entry.value;
         selectedCourse =
-            courses.firstWhereOrNull((element) => element.serverId == courseId);
+            courses.firstWhereOrNull((element) => element.id == courseId);
         if (selectedCourse != null) {
           selectCourse(selectedCourse);
           break;
@@ -449,7 +470,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
       if (selectedCourse == null) {
         for (LearnPath path in pathList) {
           selectedCourse = path.courses
-              .firstWhereOrNull((element) => element.serverId == courseId);
+              .firstWhereOrNull((element) => element.id == courseId);
           if (selectedCourse != null) {
             selectCourse(selectedCourse);
             break;
@@ -457,5 +478,11 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    stream.hashCode;
+    super.dispose();
   }
 }

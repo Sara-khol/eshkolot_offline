@@ -1,57 +1,72 @@
+import 'package:eshkolot_offline/models/user.dart';
+import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class QuestionnaireEndDialog extends StatelessWidget
-{
-  const QuestionnaireEndDialog({super.key, required this.correctQNum, required this.qNum, required this.grade1, required this.grade2});
+class QuestionnaireEndDialog extends StatelessWidget {
+  const QuestionnaireEndDialog(
+      {super.key, required this.correctQNum, required this.qNum, required this.grade1, required this.grade2, required this.qID});
+
   final int correctQNum;
   final int qNum;
   final int grade1;
   final int grade2;
+  final int qID;
+
   @override
   Widget build(BuildContext context) {
-    num grade=correctQNum==0?0:((correctQNum/qNum)*100).round();
-   int statusGrade= grade<grade1?1:grade>grade2?3:2;
-
+    num grade = correctQNum == 0 ? 0 : ((correctQNum / qNum) * 100).round();
+    int statusGrade = grade < grade1 ? 1 : grade > grade2 ? 3 : 2;
+saveUserGrade(grade);
     return Center(
-            child: AlertDialog(
-              content: SizedBox(
-                height: 640.h,
-                width: 656.w,
+      child: AlertDialog(
+        content: SizedBox(
+          height: 640.h,
+          width: 656.w,
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: TextButton(
+                  child: Image.asset('assets/images/X.jpg', height: 18.h),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(/*top: 45.h,*/
+                    right: 70.w, left: 70.w),
                 child: Column(
                   children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: TextButton(
-                        child: Image.asset('assets/images/X.jpg',height: 18.h),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
+                    Text('תוצאות השאלון',
+                      style: TextStyle(
+                          fontSize: 36.sp, fontWeight: FontWeight.w600),
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.center,
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(/*top: 45.h,*/right: 70.w,left: 70.w),
-                      child: Column(
-                        children: [
-                          Text('תוצאות השאלון',
-                            style: TextStyle(
-                                fontSize: 36.sp, fontWeight: FontWeight.w600),
-                            textDirection: TextDirection.rtl,
-                            textAlign:TextAlign.center,
-                          ),
-                          SizedBox(height: 55.h,),
-                          Text(' הצלחת ${correctQNum} מתוך ${qNum}  שאלות '),
-                          SizedBox(height: 35.h,),
-                          Text('%$grade הציון שלך הוא ',style: TextStyle(fontSize: 30.sp,fontWeight: FontWeight.w600)),
-                          SizedBox(height: 40.h,),
-                          Image.asset('assets/images/grade_$statusGrade.png',height: 253.h)
-                        ],
-                      ),
-                    ),
+                    SizedBox(height: 55.h,),
+                    Text(' הצלחת ${correctQNum} מתוך ${qNum}  שאלות '),
+                    SizedBox(height: 35.h,),
+                    Text('%$grade הציון שלך הוא ', style: TextStyle(
+                        fontSize: 30.sp, fontWeight: FontWeight.w600)),
+                    SizedBox(height: 40.h,),
+                    Image.asset(
+                        'assets/images/grade_$statusGrade.png', height: 253.h)
                   ],
                 ),
               ),
-            ),
-          );
-    }
+            ],
+          ),
+        ),
+      ),
+    );
   }
+
+  saveUserGrade(num grade) async
+  {
+
+    UserGrade userGrade = UserGrade(quizId:qID,percentage: grade as int);
+   await IsarService().updateGrade(userGrade);
+  }
+}

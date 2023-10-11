@@ -62,14 +62,16 @@ part 'vimoe_download.g.dart';
 @JsonSerializable()
 class VimoeVideo
 {
+
   late String link;
   late String uri;
+  late int courseId;
   late List<VimoeDownload> download;
   // late List<VimoeDownload> files;
 
-  VimoeVideo(this.link,this.uri,this.download/*,this.files*/);
+  VimoeVideo(this.link,this.uri,this.download,this.courseId/*,this.files*/);
 
-  factory VimoeVideo.fromJson(Map<String, dynamic> json) => _$VimoeVideoFromJson(json);
+  factory VimoeVideo.fromJson(Map<String, dynamic> json,int courseId) => _$VimoeVideoFromJson(json,courseId);
 
   Map<String, dynamic> toJson() => _$VimoeVideoToJson(this);
 }

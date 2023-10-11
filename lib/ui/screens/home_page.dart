@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
+import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   final knowledgeScrollController = ScrollController();
   bool reversed = false;
   late var dir;
+  late StreamSubscription stream;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -89,10 +92,27 @@ class _HomePageState extends State<HomePage> {
 
   @override
   initState() {
+    debugPrint('initState listen');
+
     knowledgeCourses = widget.user.knowledgeCoursesMap;
     pathList = widget.user.pathList;
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
     VisibilityDetectorController.instance.notifyNow();
+    // MainPage
+    //     .of(context)
+    //     ?.syncUpdate = (){
+    //   setState(() {
+    //     debugPrint('hhhjjjkkk');
+    //   });
+    // };
+     stream= InstallationDataHelper().eventBusHomePage.on().listen((event) async {
+     debugPrint('event listen');
+     User user= IsarService().getCurrentUser();
+     knowledgeCourses = user.knowledgeCoursesMap;
+     if(mounted) {
+        setState(() {
+        });
+      }});
    // initDirectory();
     super.initState();
   }
@@ -309,6 +329,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   knowledgeItem(Knowledge knowledge, int kIndex) {
+    String path= removeHiddenCharsFromPath('${dir.path}/icons/${knowledge.icon.nameIcon}');
     return Column(
       children: [
         Row(
@@ -324,7 +345,8 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Center(
                   child: SvgPicture.file(
-                File('${dir.path}/icons/${knowledge.icon.nameIcon}'),
+                // File('${dir.path}/icons/${knowledge.icon.nameIcon}'),
+                File(path),
                 width: 12.w,
                 height: 12.h,
               )),
@@ -385,12 +407,20 @@ class _HomePageState extends State<HomePage> {
                   knowledge.icon.color != ''
                       ? int.parse(knowledge.icon.color)
                       : -1,
-                  knowledge.icon.nameIcon ?? '',
+                  knowledge.icon.nameIcon,
                   index);
             }),
         SizedBox(height: 24.h),
       ],
     );
+  }
+
+  String removeHiddenCharsFromPath(String path) {
+    // Replace all whitespace characters with empty strings
+    path = path.replaceAll(RegExp(r'\s+'), '');
+
+    // You can add more specific replacements here for other hidden characters if needed.
+    return path;
   }
 
    initDirectory() async {
@@ -430,7 +460,7 @@ class _HomePageState extends State<HomePage> {
                   courseKnowledge.icon.color != ''
                       ? int.parse(courseKnowledge.icon.color)
                       : -1,
-                 courseKnowledge.icon.nameIcon??'' ,
+                 courseKnowledge.icon.nameIcon ,
                   /*path.color.isNotEmpty ? int.parse(path.color) : -1*/
                   index);
             }),
@@ -440,7 +470,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   courseItem(Course course, int color, String icon, int i) {
-    UserCourse? userCourse = IsarService().getUserCourseData(course.serverId);
+    String path=removeHiddenCharsFromPath('${dir.path}/icons/${icon}');
+    UserCourse? userCourse = IsarService().getUserCourseData(course.id);
 
     return Container(
       padding: EdgeInsets.only(top: 10.h, bottom: 10.h /*,left: 10*/),
@@ -455,7 +486,7 @@ class _HomePageState extends State<HomePage> {
             knowledgeColor: color,
           );
           if (MainPage.of(context)?.updateSideMenu != null) {
-            MainPage.of(context)?.updateSideMenu!(course.serverId);
+            MainPage.of(context)?.updateSideMenu!(course.id);
           }
         },
         child: Row(
@@ -502,7 +533,7 @@ class _HomePageState extends State<HomePage> {
                                 // icon.isNotEmpty? HtmlWidget(icon):Container(),
                               if(icon!='')   Center(
                                     child: SvgPicture.file(
-                                      File('${dir.path}/icons/${icon}'),
+                                      File(path),
                                       width: 9.w,
                                       height: 9.h,
                                     )),
@@ -593,6 +624,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     pathScrollController.dispose();
     knowledgeScrollController.dispose();
+    stream.cancel();
     super.dispose();
   }
 }

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:eshkolot_offline/file.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
@@ -139,10 +138,11 @@ Future<void> main() async {
       // if (await IsarService().checkIfDBisEmpty()) {
       // await extractZipFile();
       await InstallationDataHelper().init();
+      await IsarService().cleanDb();
+
       myCourses.addAll(InstallationDataHelper().myCourses);
 
       //  generateJsonData();
-      await IsarService().cleanDb();
 
       List<Quiz> questionnaires = [];
 
@@ -286,76 +286,75 @@ class _MyAppState extends State<MyApp> {
                 title: 'Flutter Demo',
                 theme: ThemeData(
                     primarySwatch: Colors.blue, fontFamily: 'RAG-Sans'),
-                home:
-                    LoginPage() /*FutureBuilder(
-                    future: myFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        vi = snapshot.data ?? [];
-                        if (allDownloaded) return LoginPage();
-                      //???
-                        return */ /*(widget.dataWasFilled &&
-                                    widget.courses.isNotEmpty) ||
-                                !widget.dataWasFilled
-                            ?*/ /*
-                          ChangeNotifierProvider<VimoeService>(
-                                create: (_) => VimoeService(),
-                                builder: (context, child) {
-                                  {
-                                    if (firstTime) {
-                                      context
-                                              .read<VimoeService>()
-                                              .isNetWorkConnection =
-                                          isNetWorkConnection;
-                                      if (widget.courses.isNotEmpty ||
-                                          vi.isEmpty || checkDateExpired()) {
-                                        context.read<VimoeService>().courses =
-                                            widget.courses;
-                                      context.read<VimoeService>().start();
-                                      } else {
-                                        context
-                                            .read<VimoeService>()
-                                            .isarVideoList = vi;
-                                        context
-                                            .read<VimoeService>()
-                                            .startDownLoading();
-                                        context
-                                            .read<VimoeService>()
-                                            .finishConnectToVimoe = true;
-                                      }
-                                      firstTime = false;
-                                    }
-
-                                    return Consumer<VimoeService>(
-                                        builder: (context, vimoeResult, child) {
-                                      switch (vimoeResult.downloadStatus) {
-                                        case DownloadStatus.downloading:
-                                          return displayLoadingDialog(
-                                              false, context, false, false);
-                                        case DownloadStatus.blockError:
-                                          return displayLoadingDialog(
-                                              true, context, true, false);
-                                        case DownloadStatus.error:
-                                          return displayLoadingDialog(
-                                              true, context, false, false);
-                                        case DownloadStatus.downloaded:
-                                          context.read<VimoeService>().dispose();
-                                          return LoginPage();
-                                        case DownloadStatus.netWorkError:
-                                          return displayLoadingDialog(
-                                              false, context, false, true);
-                                      }
-                                    });
-                                  }
-                                })
-                            */ /*: LoginPage()*/ /*;
-                      }
-                      return const Center(
-                        child: Scaffold(
-                            backgroundColor: Colors.white,
-                            body: Center(child: CircularProgressIndicator())),
-                      );
-                    })*/
+                home: LoginPage()
+                // FutureBuilder(
+                //     future: myFuture,
+                //     builder: (context, snapshot) {
+                //       if (snapshot.hasData) {
+                //         vi = snapshot.data ?? [];
+                //         if (allDownloaded) return LoginPage();
+                //       //???
+                //         return  /*(widget.dataWasFilled &&
+                //                     widget.courses.isNotEmpty) ||
+                //                 !widget.dataWasFilled
+                //             ?*/
+                //           ChangeNotifierProvider<VimoeService>(
+                //                 create: (_) => VimoeService(),
+                //                 builder: (context, child) {
+                //                   {
+                //                     if (firstTime) {
+                //                       context
+                //                               .read<VimoeService>()
+                //                               .isNetWorkConnection =
+                //                           isNetWorkConnection;
+                //                       if (widget.courses.isNotEmpty ||
+                //                           vi.isEmpty || checkDateExpired()) {
+                //                         context.read<VimoeService>().courses =
+                //                             widget.courses;
+                //                       context.read<VimoeService>().start();
+                //                       } else {
+                //                         context
+                //                             .read<VimoeService>()
+                //                             .isarVideoList = vi;
+                //                         context
+                //                             .read<VimoeService>()
+                //                             .startDownLoading();
+                //                         context
+                //                             .read<VimoeService>()
+                //                             .finishConnectToVimoe = true;
+                //                       }
+                //                       firstTime = false;
+                //                     }
+                //
+                //                     return Consumer<VimoeService>(
+                //                         builder: (context, vimoeResult, child) {
+                //                       switch (vimoeResult.downloadStatus) {
+                //                         case DownloadStatus.downloading:
+                //                           return displayLoadingDialog(
+                //                               false, context, false, false);
+                //                         case DownloadStatus.blockError:
+                //                           return displayLoadingDialog(
+                //                               true, context, true, false);
+                //                         case DownloadStatus.error:
+                //                           return displayLoadingDialog(
+                //                               true, context, false, false);
+                //                         case DownloadStatus.downloaded:
+                //                           context.read<VimoeService>().dispose();
+                //                           return LoginPage();
+                //                         case DownloadStatus.netWorkError:
+                //                           return displayLoadingDialog(
+                //                               false, context, false, true);
+                //                       }
+                //                     });
+                //                   }
+                //                 });
+                //       }
+                //       return const Center(
+                //         child: Scaffold(
+                //             backgroundColor: Colors.white,
+                //             body: Center(child: CircularProgressIndicator())),
+                //       );
+                //     })
                 );
           }),
     );
@@ -462,9 +461,9 @@ class _MyAppState extends State<MyApp> {
     // isNetWorkConnection = await checkConnectivity();
     isNetWorkConnection = await _networkConnectivity.checkConnectivity();
 
-    allDownloaded = await IsarService().checkIfAllVideosAreDownloaded();
+    allDownloaded = await IsarService().checkIfAllVideosAreDownloaded(true);
     if (!allDownloaded) {
-      return IsarService().getAllVideosToDownload();
+      return IsarService().getAllVideosToDownload([]);
     }
 
     return [];

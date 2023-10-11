@@ -1,9 +1,12 @@
+
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/models/videoIsar.dart';
+import 'package:eshkolot_offline/services/api_service.dart';
+import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -146,25 +149,37 @@ class IsarService {
     return await userCollection.count() == 0;
   }
 
-  Future<bool> checkIfVideoIsarIsEmpty() async {
+  Future<bool> checkIfVideoIsarIsEmpty(List<int> ids) async {
     final isar = await db;
     IsarCollection<VideoIsar> v = isar.collection<VideoIsar>();
-    return await v.count() == 0;
+    int count = await v
+        .filter()
+        .anyOf(ids, (q, int size) => q.courseIdEqualTo(size))
+        .count();
+    // return await v.count() == 0;
+    return count == 0;
   }
 
-  Future<List<VideoIsar>> getAllVideosToDownload() async {
+  Future<List<VideoIsar>> getAllVideosToDownload(List<int> ids) async {
     final isar = await db;
-    final result =
-        await isar.videoIsars.filter().isDownloadEqualTo(false).findAll();
+    final result = await isar.videoIsars
+        .filter()
+        .anyOf(ids, (q, int size) => q.courseIdEqualTo(size))
+        .isDownloadEqualTo(false)
+        .findAll();
+    //   final result= await isar.videoIsars.filter().isDownloadEqualTo(false).findAll();
     return result;
   }
 
-  checkIfAllVideosAreDownloaded() async {
+  checkIfAllVideosAreDownloaded(bool newCourse) async {
     bool b = false;
-    if (await checkIfVideoIsarIsEmpty()) {
-      return b;
+    List<int> ids = getUserUserCoursesId();
+    if (newCourse) {
+      if (await checkIfVideoIsarIsEmpty(ids)) {
+        return b;
+      }
     }
-    await getAllVideosToDownload().then((value) {
+    await getAllVideosToDownload(ids).then((value) {
       b = value.isEmpty;
     });
     return b;
@@ -180,10 +195,11 @@ class IsarService {
     });
   }
 
-  Future<Course?> getFirstCourse() async {
+  Future<Course?> getCourseById(int courseId) async {
     final isar = await db;
     IsarCollection<Course> coursesCollection = isar.collection<Course>();
-    Course? course = await coursesCollection.where().findFirst();
+    Course? course =
+        await coursesCollection.where().idEqualTo(courseId).findFirst();
     return course;
   }
 
@@ -200,22 +216,26 @@ class IsarService {
     return knowledgeCollection;
   }
 
+  Future<List<User>> getAllUsers() async
+  {
+    final isar = await db;
+    List<User> users = await isar.users.where().findAll();
+    return users;
+  }
+
   Future<User?> getUserByTz(String tz) async {
     final isar = await db;
     User? user = await isar.users.where().tzEqualTo(tz).findFirst();
 
     if (user != null) {
       for (int knowledgeId in user.knowledgeIds) {
-        Knowledge? knowledge = await getKnowledgeById(knowledgeId, isar);
+        Knowledge? knowledge = await getKnowledgeById(knowledgeId);
         if (knowledge != null) {
           user.knowledgeCoursesMap[knowledge] = [];
         }
       }
       for (UserCourse userCourse in user.courses) {
-        Course? c = await isar.courses
-            .where()
-            .serverIdEqualTo(userCourse.courseId)
-            .findFirst();
+        Course? c = await getCourseById(userCourse.courseId);
         if (c != null && c.knowledgeId != null) {
           for (var entry in user.knowledgeCoursesMap.entries) {
             Knowledge knowledge = entry.key;
@@ -239,20 +259,16 @@ class IsarService {
       }
 
       for (int lessonId in user.lessonCompleted) {
-        await updateLessonCompleted(lessonId);
+        await updateLessonCompleted(lessonId, updateLesson: true);
       }
-
 
       for (int subjectId in user.subjectCompleted) {
         await updateSubjectCompleted(subjectId);
       }
 
-
       for (int quizId in user.questionCompleted) {
         await updateQuizCompleted(quizId);
       }
-
-
 
       _user = user;
       await isar.writeTxn(() async {
@@ -270,6 +286,14 @@ class IsarService {
     UserCourse? course =
         _user.courses.firstWhereOrNull((course) => course.courseId == courseId);
     return course;
+  }
+
+  List<int> getUserUserCoursesId() {
+    List<int> ids = [];
+    for (UserCourse userCourse in _user.courses) {
+      ids.add(userCourse.courseId);
+    }
+    return ids;
   }
 
   addUserCourseStop(UserCourse newDataCourse) async {
@@ -312,13 +336,125 @@ class IsarService {
     });
   }
 
+  Future<bool> updateCourseData(List<UserCourse> userCourseList) async {
+    bool getVideos = false;
+    List<Course> coursesList = [];
+    final isar = await db;
+
+    for (UserCourse newDataCourse in userCourseList) {
+      UserCourse? course = _user.courses.firstWhereOrNull(
+          (course) => course.courseId == newDataCourse.courseId);
+      Course? c = await getCourseById(newDataCourse.courseId);
+      if (course != null) {
+        //update
+        debugPrint('update progressPercent ${newDataCourse.progressPercent}');
+        _user.courses[_user.courses.indexWhere(
+                (course) => course.courseId == newDataCourse.courseId)] =
+            newDataCourse;
+
+        if (c != null) {
+          for (var courses in _user.knowledgeCoursesMap.values) {
+            for (var i = 0; i < courses.length; i++) {
+              if (courses[i].id == c.id) {
+                courses[i] = c; // Replace the course with the new course
+                break; // Exit the loop once the course is replaced
+              }
+            }
+          }
+        }
+      } else {
+        //??
+        getVideos = true;
+        // _user.courses.add(newDataCourse);
+        // if (!await isCourseExist(newDataCourse.courseId)) {
+        if (c == null) {
+          // getVideos = true;
+          Course? course = await ApiService().getCourseData(
+              id: newDataCourse.courseId, /*onSuccess: (){},*/ onError: () {});
+          if (course != null) coursesList.add(course);
+        } else {
+          // for (var entry in _user.knowledgeCoursesMap.entries) {
+          //   Knowledge knowledge = entry.key;
+          //   if (knowledge.id == c.knowledgeId) {
+          //     _user.knowledgeCoursesMap[knowledge]?.add(c);
+          //   }
+          // }
+
+          Knowledge? knowledge =
+              await IsarService().getKnowledgeById(c.knowledgeId!);
+          if (c.knowledgeId != null &&
+              !_user.knowledgeIds.contains(c.knowledgeId)) {
+            List<int> kList = List.from(_user.knowledgeIds);
+            kList.add(c.knowledgeId!);
+            _user.knowledgeIds = kList;
+            if (knowledge != null) {
+              //  user.knowledgeIds.add(knowledgeId);
+              debugPrint('add knowledge ${c.knowledgeId!}');
+              _user.knowledgeCoursesMap[knowledge] = [c];
+            }
+          } else {
+            debugPrint('update knowledge ${c.knowledgeId!}');
+            // for (var entry in _user.knowledgeCoursesMap.entries) {
+            //   Knowledge knowledge = entry.key;
+            //   if (knowledge.id == c.knowledgeId) {
+            //     _user.knowledgeCoursesMap[knowledge]?.add(c);
+            //     break;
+            //   }
+            // }
+            Knowledge findK = _user.knowledgeCoursesMap.keys
+                .firstWhere((element) => element.id == c.knowledgeId);
+            _user.knowledgeCoursesMap[findK]?.add(c);
+          }
+        }
+        List<UserCourse> courses = List.from(_user.courses);
+        courses.add(newDataCourse);
+        _user.courses = courses;
+
+        // if (c != null) {
+        //   for (var entry in _user.knowledgeCoursesMap.entries) {
+        //     Knowledge knowledge = entry.key;
+        //     if (knowledge.id == c.knowledgeId) {
+        //       _user.knowledgeCoursesMap[knowledge]?.add(c);
+        //     }
+        //   }
+        // }
+      }
+      // //  Course? c = await getCourseById(newDataCourse.courseId);
+      // if (c != null) {
+      //   for (var courses in _user.knowledgeCoursesMap.values) {
+      //     for (var i = 0; i < courses.length; i++) {
+      //       if (courses[i].id == c.id) {
+      //         courses[i] = c; // Replace the course with the new course
+      //         break; // Exit the loop once the course is replaced
+      //       }
+      //     }
+      //   }
+      // }
+    }
+
+    if (coursesList.isNotEmpty) {
+      InstallationDataHelper().eventBusDialogs.fire(coursesList);
+    } else if (getVideos) {
+      InstallationDataHelper().eventBusDialogs.fire('');
+    }
+    await isar.writeTxn(() async {
+      await isar.users.put(_user);
+      // _user = user;
+    });
+    return getVideos;
+  }
+
+  updateKnowledgeMap() {}
+
   Future<List<User>> getUsers() async {
     final isar = await db;
     List<User> users = await isar.users.where().findAll();
     return users;
   }
 
-  Future<Knowledge?> getKnowledgeById(int id, Isar isar) async {
+  Future<Knowledge?> getKnowledgeById(int id) async {
+    final isar = await db;
+
     Knowledge? knowledge = await isar.knowledges.get(id);
     return knowledge;
   }
@@ -336,32 +472,33 @@ class IsarService {
         .watch(fireImmediately: true /*initialReturn: true*/);
   }
 
-  updateLessonCompleted(int id ,[bool updateUser=false]) async {
+  updateLessonCompleted(int id,
+      {bool updateLesson = false, bool updateUser = false}) async {
     final isar = await db;
-      Lesson? lesson;
-      await isar.writeTxn(() async {
-        if(!updateUser) {
-          lesson = await isar.lessons.get(id);
-          lesson!.isCompletedCurrentUser = true;
-          await isar.lessons.put(lesson!);
-        }
-        else{
-          List<int> lessonCompletedList = List.from(_user.lessonCompleted);
+    Lesson? lesson;
+    await isar.writeTxn(() async {
+      if (updateLesson) {
+        lesson = await isar.lessons.get(id);
+        lesson!.isCompletedCurrentUser = true;
+        await isar.lessons.put(lesson!);
+      }
+      if (updateUser) {
+        List<int> lessonCompletedList = List.from(_user.lessonCompleted);
+        if (!lessonCompletedList.contains(id)) {
           lessonCompletedList.add(id);
           _user.lessonCompleted = lessonCompletedList;
-
           await isar.users.put(_user);
         }
-      });
+      }
+    });
   }
 
-  updateCourse(int id,[bool updateComplete=false]) async {
+  updateCourse(int id, [bool updateComplete = false]) async {
     final isar = await db;
     await isar.writeTxn(() async {
-        _user.courses
-            .firstWhere((c) => c.courseId == id)
-            .status =updateComplete? Status.finish:Status.middle;
-        await isar.users.put(_user);
+      _user.courses.firstWhere((c) => c.courseId == id).status =
+          updateComplete ? Status.finish : Status.middle;
+      await isar.users.put(_user);
     });
 
     // _user.knowledgeCoursesMap.values.firstWhere((List<Course> list) => list.firstWhere(
@@ -377,89 +514,151 @@ class IsarService {
     //   {
     //     course.
     //   }
-
   }
 
-  updateSubjectCompleted(int id,[bool updateUser=false]) async {
+  updateSubjectCompleted(int id, [bool updateUser = false]) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      if(!updateUser) {
+      if (!updateUser) {
         Subject? subject = await isar.subjects.get(id);
         subject!.isCompletedCurrentUser = true;
         await isar.subjects.put(subject);
-      }
-      else{
-
+      } else {
         List<int> subjectCompletedList = List.from(_user.subjectCompleted);
-        subjectCompletedList.add(id);
-        _user.subjectCompleted = subjectCompletedList;
+        if (!subjectCompletedList.contains(id)) {
+          subjectCompletedList.add(id);
+          _user.subjectCompleted = subjectCompletedList;
 
-        await isar.users.put(_user);
+          await isar.users.put(_user);
+        }
       }
     });
   }
 
-  updateQuizCompleted(int id,[bool updateUser=false]) async {
+  updateQuizCompleted(int id, [bool updateUser = false]) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      if(!updateUser) {
+      if (!updateUser) {
         Quiz? quiz = await isar.quizs.get(id);
         quiz!.isCompletedCurrentUser = true;
         await isar.quizs.put(quiz);
-      }
-      else{
-
+      } else {
         List<int> quizCompletedList = List.from(_user.questionCompleted);
-        quizCompletedList.add(id);
-        _user.questionCompleted = quizCompletedList;
-
-        await isar.users.put(_user);
+        if (!quizCompletedList.contains(id)) {
+          quizCompletedList.add(id);
+          _user.questionCompleted = quizCompletedList;
+          await isar.users.put(_user);
+        }
       }
     });
   }
 
-// insertFresh(List<Email> emailList) async {
-//   await isarInstance.writeTxn(() async {
-//     await isarInstance.clear();
-//     for (Email element in emailList) {
-//       await isarInstance.emails.put(element);
-//     }
-//   });
-// }
-//
-// insertOne(Email emailItem) async {
-//   late int id;
-//   await isarInstance.writeTxn(() async {
-//     id = await isarInstance.emails.put(emailItem);
-//   });
-//   notifyListeners();
-//   return id;
-// }
-//
-// getItems() async {
-//   IsarCollection<Email> medicineCollection = isarInstance.collection<Email>();
-//   List<Email?> medicines = await medicineCollection.where().findAll();
-//   return medicines;
-// }
-//
-// removeItem(Email email) async {
-//   await isarInstance.writeTxn(() async {
-//     await isarInstance.emails.delete(email.id);
-//   });
-// }
+  updateGrade(UserGrade userGrade) async
+  {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      List<UserGrade> gradeList = List.from(_user.percentages);
+      UserGrade? grade =
+      gradeList.firstWhereOrNull((g) => g.quizId == userGrade.quizId);
+      if(grade==null) {
+        gradeList.add(userGrade);
+      }
+      else{
+        grade=userGrade;
+      }
+      _user.percentages = gradeList;
+      await isar.users.put(_user);
+    });
+  }
 
-// void updateSync(Email email) async {
-// //  email.isSynced = true;
-//   await isarInstance.writeTxn(() async {
-//     await isarInstance.emails.put(email);
-//   });
-// }
-//
-// getUnsyncedData() async {
-//   IsarCollection<Email> emailCollection =
-//   isarInstance.collection<Email>();
-// //  List<Email?> emails =
-//   //await emailCollection.filter().isSyncedEqualTo(false).findAll();
-//   //return emails;
-// }
+  addKnowledge(Knowledge knowledge) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.knowledges.put(knowledge);
+    });
+  }
+
+  addCourse(Course course) async {
+    final isar = await db;
+    await isar.writeTxnSync(() async {
+      await isar.courses.putSync(course);
+    });
+  }
+
+  addSubjects(List<Subject> subjects) async {
+    final isar = await db;
+    await isar.writeTxnSync(() async {
+      isar.subjects.putAllSync(subjects);
+    });
+  }
+
+  addLessons(List<Lesson> lessons) async {
+    final isar = await db;
+    await isar.writeTxnSync(() async {
+      isar.lessons.putAllSync(lessons);
+    });
+  }
+
+  addQuizzes(List<Quiz> quizzes) async {
+    final isar = await db;
+    await isar.writeTxnSync(() async {
+      await isar.quizs.putAllSync(quizzes);
+    });
+  }
+
+  // Check if a course with a specific ID exists
+  Future<bool> isCourseExist(int courseId) async {
+    final isar = await db;
+
+    Course? course = await isar.courses.where().idEqualTo(courseId).findFirst();
+    return course != null;
+  }
+
+  // Check if a course with a specific ID exists
+  Future<bool> isKnowledgeExist(int kId) async {
+    final isar = await db;
+
+    Knowledge? knowledge =
+        await isar.knowledges.where().idEqualTo(kId).findFirst();
+    return knowledge != null;
+  }
+
+
+
+  updateUserCourse( Course course, Knowledge knowledge) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      // User? user = await isar.users.get(_user.id);
+
+      if (!_user.knowledgeIds.contains(knowledge.id)) {
+        List<int> kList = List.from(_user.knowledgeIds);
+        kList.add(knowledge.id);
+        _user.knowledgeIds = kList;
+
+        //  user.knowledgeIds.add(knowledgeId);
+        debugPrint('add knowledge ${knowledge.id}');
+        _user.knowledgeCoursesMap[knowledge] = [course];
+      } else {
+        Knowledge findK = _user.knowledgeCoursesMap.keys
+            .firstWhere((element) => element.id == knowledge.id);
+        _user.knowledgeCoursesMap[findK]?.add(course);
+      }
+      //
+      // //todo not supposed to exist added for checking meanwhile
+      // if (user.courses.firstWhereOrNull((c) => course.id == c.courseId) ==
+      //     null) {
+      //   //todo get correct data from service api
+      //   UserCourse newUserCourse = UserCourse()
+      //     ..courseId = course.id
+      //     ..status = Status.start
+      //     ..progressPercent = 0;
+      //
+      //   List<UserCourse> courses = List.from(user.courses);
+      //   courses.add(newUserCourse);
+      //   user.courses = courses;
+      // }
+      // user.courses.add(newUserCourse);
+      await isar.users.put(_user);
+    });
+  }
 }

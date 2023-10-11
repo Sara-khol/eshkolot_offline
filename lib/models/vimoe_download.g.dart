@@ -6,18 +6,20 @@ part of 'vimoe_download.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-VimoeVideo _$VimoeVideoFromJson(Map<String, dynamic> json) => VimoeVideo(
+VimoeVideo _$VimoeVideoFromJson(Map<String, dynamic> json,int courseId) => VimoeVideo(
       json['link'] as String,
       json['uri'] as String,
       (json['download'] as List<dynamic>)
           .map((e) => VimoeDownload.fromJson(e as Map<String, dynamic>))
           .toList(),
+      courseId,
     );
 
 Map<String, dynamic> _$VimoeVideoToJson(VimoeVideo instance) =>
     <String, dynamic>{
       'link': instance.link,
       'uri': instance.uri,
+      'courseId': instance.courseId,
       'download': instance.download,
     };
 

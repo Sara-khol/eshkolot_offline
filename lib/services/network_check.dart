@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,7 +13,7 @@ class NetworkConnectivity {
   static final _instance = NetworkConnectivity._();
   static NetworkConnectivity get instance => _instance;
   final _networkConnectivity = Connectivity();
-  final _controller = StreamController.broadcast();
+  var _controller = StreamController.broadcast();
   Stream get myStream => _controller.stream;
    bool whileDownloading=false;
    late bool isOnline;
@@ -62,7 +61,12 @@ class NetworkConnectivity {
   sendWhileDownloadingVideos(ConnectivityResult result)
   {
     if(whileDownloading) {
-      _controller.sink.add({result: isOnline});
+      debugPrint('1212');
+      //todo?? remove makes problems
+      if (!_controller.isClosed) {
+        debugPrint('3434');
+        _controller.sink.add({result: isOnline});
+      }
     }
   }
 
@@ -74,6 +78,11 @@ class NetworkConnectivity {
   }
 
   void disposeStream() => _controller.close();
+
+  void reOpen() {
+    _controller.close(); // Dispose of the previous stream controller.
+    _controller = StreamController.broadcast(); // Create a new stream controller.
+  }
 
   // Stop listening to network connectivity changes
   void stopListeningToConnectivity() {
