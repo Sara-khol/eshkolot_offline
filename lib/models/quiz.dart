@@ -8,6 +8,8 @@ class Quiz {
   late String title;
   // @Name('quiz_materials')
   late String quizMaterials;
+  // @Name('quiz_urls')
+  late List<String> quizUrls;
   late String time;
   late List<Question> questionList = [];
   bool isCompletedCurrentUser = false;
@@ -44,6 +46,8 @@ class Question {
   late List<Answer>? ans = [];
   @Name('id_ques')
   late int idQues;
+  @Name('more_data')
+  late int moreData;
   @enumerated
   late QType type;
 
@@ -120,5 +124,29 @@ class Answer {
       this.points = -1,
       this.matrixMatch = ''});
 }
+
+// @Embedded()
+// class MoreData {
+//   late String ans;
+//   @Name('isCurrect')
+//   late bool isCorrect;
+//   late int points;
+//
+//   // @Name('sortString')
+//   late String? matrixMatch;
+//
+//   Answer.fromJson(Map<String, dynamic> json) {
+//     ans = json['answer'] ?? '';
+//     isCorrect = json['isCurrect'] ?? false;
+//     points = json['points'];
+//     matrixMatch = json['sortString'];
+//   }
+//
+//   Answer(
+//       {this.ans = '',
+//         this.isCorrect = false,
+//         this.points = -1,
+//         this.matrixMatch = ''});
+// }
 
 enum QType { radio, checkbox, fillIn, freeChoice, openQ, sort, sortMatrix }

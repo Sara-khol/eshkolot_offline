@@ -25,7 +25,6 @@ class TopBarUserWidget extends StatefulWidget {
 class _TopBarUserWidgetState extends State<TopBarUserWidget>
     with TickerProviderStateMixin {
   late AnimationController controller;
-  Future? _dialog;
 
   @override
   void initState() {
@@ -165,10 +164,10 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
     Function(bool b) updateFunc;
 
     updateFunc = (getVideos) {
-      if (_dialog != null && !getVideos) {
-        debugPrint('111 $_dialog');
-        InstallationDataHelper().eventBusDialogs.fire('');
-      }
+      // if (_dialog != null && !getVideos) {
+      //   debugPrint('111 $_dialog');
+      //   InstallationDataHelper().eventBusDialogs.fire('');
+      // }
       if (MainPage.of(context)?.getMainWidget is HomePage) {
         InstallationDataHelper().eventBusHomePage.fire('event fire');
         debugPrint('eventBusHomePage');

@@ -164,7 +164,7 @@ class IsarService {
     final isar = await db;
     final result = await isar.videoIsars
         .filter()
-        .anyOf(ids, (q, int size) => q.courseIdEqualTo(size))
+        .anyOf(ids, (q, int id) => q.courseIdEqualTo(id))
         .isDownloadEqualTo(false)
         .findAll();
     //   final result= await isar.videoIsars.filter().isDownloadEqualTo(false).findAll();
@@ -367,6 +367,7 @@ class IsarService {
         getVideos = true;
         // _user.courses.add(newDataCourse);
         // if (!await isCourseExist(newDataCourse.courseId)) {
+        //when the course exists by other user
         if (c == null) {
           // getVideos = true;
           Course? course = await ApiService().getCourseData(
@@ -433,8 +434,10 @@ class IsarService {
     }
 
     if (coursesList.isNotEmpty) {
+      debugPrint('sending event full');
       InstallationDataHelper().eventBusDialogs.fire(coursesList);
-    } else if (getVideos) {
+    } else /* if (getVideos)*/ {
+      debugPrint('sending event empty');
       InstallationDataHelper().eventBusDialogs.fire('');
     }
     await isar.writeTxn(() async {

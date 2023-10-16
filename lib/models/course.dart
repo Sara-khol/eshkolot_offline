@@ -95,7 +95,7 @@ class Course {
         countQuiz: parsedJson['countQuiz'],
         countEndQuiz: parsedJson['countEndQuiz'],
         knowledgeNum: parsedJson['knowledge_num'],
-        vimeoId: parsedJson['vimeoId'],
+        vimeoId: parsedJson['vimeoId']??'',
         // serverId: courseId,
         id: courseId,
     );

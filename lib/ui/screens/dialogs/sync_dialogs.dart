@@ -40,8 +40,8 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
  late StreamSubscription subscription;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   Map _source = {ConnectivityResult.none: false};
-  Map _lastSource = {ConnectivityResult.none: false};
   bool onlyOnce = true;
+  late StreamSubscription eventSubscription;
 
   @override
   void initState() {
@@ -49,8 +49,8 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
 
     listenToNetWork();
 
-    InstallationDataHelper().eventBusDialogs.on().listen((event) async {
-
+    eventSubscription=InstallationDataHelper().eventBusDialogs.on().listen((event) async {
+      debugPrint('eventBusDialogs listen event $event');
       if (event == '') {
         vi = await isVideosDownload(false);
         //todo 2
@@ -63,13 +63,16 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
         debugPrint('downloade vimeo');
         vi = await isVideosDownload(true);
         c = event as List<Course>;
+        for (Course course in c) {
+          debugPrint('Course ID: ${course.id}');
+        }
        // c.add(event as Course);
         // vi = await isVideosDownload();
         //todo 2
         if (allDownloaded) {
           updateEndDialog();
         } else {
-          vimeoStart(true);
+          vimeoStart(newCourse: true);
         }
         //   SyncDialogs().showVimeoDialog(context, c, controller);
       }
@@ -99,7 +102,6 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
   listenToNetWork() {
    _networkConnectivity.reOpen();
     subscription = _networkConnectivity.myStream.listen((source) async {
-      _lastSource = source;
       _source = source;
       debugPrint('source11 $_source');
       if (_source.keys.toList()[0] == ConnectivityResult.none) {
@@ -122,6 +124,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
 
 // todo 1
   Future<List<VideoIsar>> isVideosDownload(bool newCourse) async {
+    debugPrint('===isVideosDownload===');
     // isNetWorkConnection = await checkConnectivity();
     isNetWorkConnection = await _networkConnectivity.checkConnectivity();
 
@@ -146,7 +149,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
     );
   }
 
-  vimeoStart([bool newCourse=false]) {
+  vimeoStart({bool newCourse=false, oldLinks=false}) {
   // _networkConnectivity.disposeStream();
     //mmm
     subscription.cancel();
@@ -161,7 +164,11 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
                 debugPrint('hhh');
                 context.read<VimoeService>().finishConnectToVimoe = false;
                 context.read<VimoeService>().courses = c;
-                context.read<VimoeService>().start();
+                if(vi.isNotEmpty)
+                  {
+                    context.read<VimoeService>().isarVideoList=vi;
+                  }
+                context.read<VimoeService>().start(oldLinks: vi.isNotEmpty);
               } else {
                 debugPrint('111');
                 context.read<VimoeService>().isarVideoList = vi;
@@ -559,6 +566,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
    _networkConnectivity.disposeStream();
     _networkConnectivity.whileDownloading = false;
     ApiService().cancelRequests();
+    eventSubscription.cancel();
     super.dispose();
   }
 }

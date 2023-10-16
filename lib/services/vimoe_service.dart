@@ -124,11 +124,9 @@ class VimoeService with ChangeNotifier {
           debugPrint('no connection so cancel downloading');
           Sentry.addBreadcrumb(
               Breadcrumb(message: 'no connection so cancel downloading'));
+        } else {
+          debugPrint('no connection so cancel vimeo connection');
         }
-        else
-          {
-            debugPrint('no connection so cancel vimeo connection');
-          }
         // }
       } else {
         // if (downloadStatus == DownloadStatus.netWorkError) {
@@ -267,7 +265,7 @@ class VimoeService with ChangeNotifier {
     dioDownload.addSentry();
   }
 
-  start({bool notify = false}) async {
+  start({bool notify = false, oldLinks = false}) async {
     debugPrint('kkk');
     if (isNetWorkConnection) {
       downloadStatus = DownloadStatus.downloading;
@@ -283,7 +281,11 @@ class VimoeService with ChangeNotifier {
       if (cancelToken.isCancelled) {
         cancelToken = CancelToken();
       }
-      isarVideoList.clear();
+      if (!oldLinks) {
+        debugPrint('isarVideoList clear');
+        isarVideoList.clear();
+      }
+
 
       if (notify) notifyListeners();
       // if (courses.isEmpty) {
@@ -294,7 +296,8 @@ class VimoeService with ChangeNotifier {
         // if (course.serverId > 1000) {
         // if (course.id == 2567060) {
         //todo
-        projectId = course.id == 69 ? 2651706 : int.parse(course.vimeoId);
+        // projectId = course.id == 69 ? 2651706 : int.parse(course.vimeoId);
+        projectId = course.vimeoId != '' ? int.parse(course.vimeoId) : 10390152;
         courseId = course.id;
         // projectId = course.vimeoId;
         await connectToVimoe();
@@ -303,8 +306,7 @@ class VimoeService with ChangeNotifier {
       //todo
       // if ((courses.length > 1) ||
       //     (numOfAllVideos == 0 && courses.length == 1)) {
-      if(isNetWorkConnection)
-        next();
+      if (isNetWorkConnection) next();
       // } else {
       //   debugPrint('?????');
       // }
@@ -353,7 +355,7 @@ class VimoeService with ChangeNotifier {
 //         }
 //       }
 
-    videoList.addAll(result['data']
+      videoList.addAll(result['data']
           .map<VimoeVideo>((entry) => (VimoeVideo.fromJson(entry, courseId)))
           .toList());
 
@@ -367,7 +369,9 @@ class VimoeService with ChangeNotifier {
   }
 
   next() async {
-    numOfAllVideos = videoList.length;
+    // numOfAllVideos = videoList.length;
+    numOfAllVideos = videoList.length+isarVideoList.length;
+
     debugPrint('numOfAllVideos $numOfAllVideos');
     Sentry.addBreadcrumb(Breadcrumb(message: 'numOfAllVideos $numOfAllVideos'));
     finishConnectToVimoe = true;
@@ -385,7 +389,16 @@ class VimoeService with ChangeNotifier {
     }
     //bool setExpiredDate=false;
     // int expiredDate=-1;
-    int i=0;
+
+    if(isarVideoList.isNotEmpty)
+    {
+      debugPrint('old links');
+      for(VideoIsar videoIsar in isarVideoList)
+      {
+        downloadFile(videoIsar.downloadLink, videoIsar.name, videoIsar.courseId);
+      }
+    }
+    int i = 0;
     for (VimoeVideo v in videoList) {
       //todo change???
       // VimoeFile? download =
@@ -394,11 +407,10 @@ class VimoeService with ChangeNotifier {
           v.download.firstWhereOrNull((d) => d.rendition == '540p');
       currentLink = v.link;
       download ??= v.download.first;
-      if(download.rendition!='540p')
-        {
-          debugPrint('fff ${download.public_name}');
-          debugPrint('fff ${download.link}');
-        }
+      if (download.rendition != '540p') {
+        debugPrint('fff ${download.public_name}');
+        debugPrint('fff ${download.link}');
+      }
       //not sepouse to be null
       if (/*download != null &&*/ download.link != null) {
         //i++;
@@ -421,7 +433,7 @@ class VimoeService with ChangeNotifier {
           ..name = name);
 
         /*await*/
-        downloadFile(download.link!, name, true, v.courseId);
+        downloadFile(download.link!, name, v.courseId);
       } else {
         debugPrint('hhh ??');
       }
@@ -467,10 +479,10 @@ class VimoeService with ChangeNotifier {
         for (VideoIsar v in isarVideoList) {
           if (wasNetWorkProblem) {
             // debugPrint('awaittttttttt');
-            await downloadFile(v.downloadLink, v.name, false, v.courseId);
+            await downloadFile(v.downloadLink, v.name, v.courseId);
           } else {
             // debugPrint('nooo await');
-            downloadFile(v.downloadLink, v.name, false, v.courseId);
+            downloadFile(v.downloadLink, v.name, v.courseId);
           }
         }
       }
@@ -484,7 +496,7 @@ class VimoeService with ChangeNotifier {
   }
 
   Future<void> downloadFile(
-      String url, String name, bool regular, int courseId) async {
+      String url, String name, int courseId) async {
     String progress = '';
     var dir =
         await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline

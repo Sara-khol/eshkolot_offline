@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/lesson_widget.dart';
@@ -33,12 +35,14 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
   late Subject currentSubject;
 
   late var currentMainChild;
+  late StreamSubscription stream;
+
 
   @override
   void initState() {
     currentSubject=widget.subject;
     setSteps();
-    InstallationDataHelper().eventBusSubjectPage.on().listen((event) {
+   stream= InstallationDataHelper().eventBusSubjectPage.on().listen((event) {
       Subject subject=event as Subject;
        currentSubject=subject;
        if(mounted) {
@@ -588,5 +592,11 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
   void didChangeDependencies() {
     currentMainChild = MainPageChild.of(context);
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    stream.cancel();
+    super.dispose();
   }
 }

@@ -40,8 +40,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
     knowledgeCourses = widget.myUser.knowledgeCoursesMap;
     pathList = widget.myUser.pathList;
 
-    stream =
-        InstallationDataHelper().eventBusSideMenu.on().listen((event) async {
+    stream = InstallationDataHelper().eventBusSideMenu.on().listen((event) async {
       debugPrint('eventBusSideMenu');
       User user = IsarService().getCurrentUser();
       knowledgeCourses = user.knowledgeCoursesMap;
@@ -482,7 +481,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
 
   @override
   void dispose() {
-    stream.hashCode;
+    stream.cancel();
     super.dispose();
   }
 }

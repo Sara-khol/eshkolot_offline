@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:eshkolot_offline/models/quiz.dart';
@@ -27,6 +29,8 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
   late Widget displayWidget;
   late List<Question> questionnaires;
   late TabController _tabController;
+  late StreamSubscription stream;
+
 
 
   @override
@@ -34,7 +38,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
     questionnaires = widget.quiz.questionList;
     displayWidget = initialDisplay();
     _tabController = TabController(length: 2, vsync: this);
-    InstallationDataHelper().eventBusQuizPage.on().listen((event) {
+ stream= InstallationDataHelper().eventBusQuizPage.on().listen((event) {
       widget.quiz.isCompletedCurrentUser=event as bool;
       if(mounted) {
         setState(() {});
@@ -60,6 +64,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
   @override
   void dispose() {
     _tabController.dispose();
+    stream.cancel();
     super.dispose();
   }
 
@@ -248,4 +253,6 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
       ],
     ));
   }
+
+
 }

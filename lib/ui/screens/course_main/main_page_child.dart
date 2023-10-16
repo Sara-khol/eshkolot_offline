@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
@@ -30,6 +32,8 @@ class MainPageChild extends StatefulWidget {
 }
 
 class _MainPageChildState extends State<MainPageChild> {
+
+  late StreamSubscription stream;
   late ValueNotifier<Widget> _bodyWidget;
   Widget? _lastBodyWidget;
 
@@ -60,11 +64,11 @@ class _MainPageChildState extends State<MainPageChild> {
         CourseMainPage(course: _currentCourse, controller: myController));
 
     setSteps();
-    _bodyWidget.addListener(doTaskWhenNotified);
+  _bodyWidget.addListener(doTaskWhenNotified);
     setNextData();
     MainPage.of(context)?.setUpdate = saveLastUserPosition;
 
-    InstallationDataHelper().eventBusMainPageChild.on().listen((event) async {
+  stream=  InstallationDataHelper().eventBusMainPageChild.on().listen((event) async {
       debugPrint('eventttt');
       _currentCourse = (await IsarService().getCourseById(_currentCourse.id))!;
       if (_bodyWidget.value is SubjectMainPage) {
@@ -1091,6 +1095,7 @@ class _MainPageChildState extends State<MainPageChild> {
   void dispose() {
     saveLastUserPosition();
     _bodyWidget.dispose();
+    stream.cancel();
     super.dispose();
   }
 
