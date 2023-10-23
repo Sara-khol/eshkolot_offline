@@ -62,7 +62,7 @@ class _FillInState extends State<FillIn> {
   Widget build(BuildContext context) {
     var english = RegExp(r'[a-zA-Z]');
     return Padding(
-      padding: const EdgeInsets.only(top: 25),
+      padding:  EdgeInsets.only(top: 25.h),
       child: Column(
         children: [
           HtmlDataWidget(
@@ -70,8 +70,8 @@ class _FillInState extends State<FillIn> {
             quizId: widget.question
                 .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
           ),
-          const SizedBox(
-            height: 35,
+           SizedBox(
+            height: 35.h,
           ),
           //todo  change to HtmlDataWidget , can be images or audio??
           HtmlWidget(
@@ -100,7 +100,7 @@ class _FillInState extends State<FillIn> {
     fillInQ.forEach((key, value) {
       children.add(HtmlWidget(key /*,style: TextStyle(fontSize: 25),*/));
       if (value.isNotEmpty) {
-        var textEditingController = new TextEditingController(text: 'kkk');
+        var textEditingController = TextEditingController(text: 'kkk');
         myControllers.add(textEditingController);
         children.add(createTextField(textEditingController));
       }

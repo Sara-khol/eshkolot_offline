@@ -25,6 +25,7 @@ class TopBarUserWidget extends StatefulWidget {
 class _TopBarUserWidgetState extends State<TopBarUserWidget>
     with TickerProviderStateMixin {
   late AnimationController controller;
+  Future? _dialog;
 
   @override
   void initState() {

@@ -173,12 +173,11 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     //srcAttribute = '420-ג.jpg';
     String path =
         '${appSupportDir!.path}/${Constants.quizPath}/${widget.quizId}/$srcAttribute';
-    debugPrint('path $path');
     File file = File(path);
     //todo remove
     //File  file= File('${dir.path}/${Constants.quizPath}/118990/$srcAttribute');
 
-    debugPrint('path $path');
+   // debugPrint('path $path');
     if (await file.exists()) {
       debugPrint('truuuuuuuuuu path $path');
       return file;
