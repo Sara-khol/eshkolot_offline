@@ -115,6 +115,7 @@ class Answer {
   @Name('isCurrect')
   late bool isCorrect;
   late int points;
+  late bool html;
 
   // @Name('sortString')
   late String? matrixMatch;
@@ -124,10 +125,13 @@ class Answer {
     isCorrect = json['isCurrect'] ?? false;
     points = json['points'];
     matrixMatch = json['sortString'];
+    html = json['html'];
+
   }
 
   Answer(
       {this.ans = '',
+        this.html=false,
       this.isCorrect = false,
       this.points = -1,
       this.matrixMatch = ''});

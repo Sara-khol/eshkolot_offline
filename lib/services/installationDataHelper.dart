@@ -11,6 +11,7 @@ import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:eshkolot_offline/utils/constants.dart' as constants;
 
 import '../models/course.dart';
 import '../models/user.dart';
@@ -108,62 +109,66 @@ class InstallationDataHelper {
         //     .firstWhere((k) => k.id == course.knowledgeId)
         //     .courses
         //     .add(course);
+        // int i=0;
 
-        for (int subjectId in course.subjectIds) {
-          var s = subjects[subjectId.toString()];
-          Subject subject = Subject.fromJson(s, subjectId);
+        if (myCourses.firstWhereOrNull((element) => element.id == course.id) ==
+            null) {
+          for (int subjectId in course.subjectIds) {
+            var s = subjects[subjectId.toString()];
+            Subject subject = Subject.fromJson(s, subjectId);
 
-          for (int lessonId in subject.lessonsIds) {
-            var l = lessons[lessonId.toString()];
-            Lesson lesson = Lesson.fromJson(l, lessonId);
+            for (int lessonId in subject.lessonsIds) {
+              var l = lessons[lessonId.toString()];
+              Lesson lesson = Lesson.fromJson(l, lessonId, course.id);
 
-            for (int qId in lesson.questionnaireIds) {
+              for (int qId in lesson.questionnaireIds) {
+                var q = questionnaires[qId.toString()];
+
+                Quiz quiz = Quiz.fromJson(q, qId);
+                lesson.questionnaire.add(quiz);
+                myQuizzes.add(quiz);
+              }
+              subject.lessons.add(lesson);
+              myLessons.add(lesson);
+            }
+
+            for (int qId in subject.questionnaireIds) {
               var q = questionnaires[qId.toString()];
 
               Quiz quiz = Quiz.fromJson(q, qId);
-              lesson.questionnaire.add(quiz);
+              subject.questionnaire.add(quiz);
               myQuizzes.add(quiz);
             }
-            subject.lessons.add(lesson);
-            myLessons.add(lesson);
+
+            course.subjects.add(subject);
+            mySubjects.add(subject);
+          }
+          //todo remove  just for testing
+          if (course.id == 78407) {
+            course.questionnaireIds
+                .addAll([66164, 82517, 111897, 128955, 129722]);
           }
 
-          for (int qId in subject.questionnaireIds) {
+          for (int qId in course.questionnaireIds) {
             var q = questionnaires[qId.toString()];
-
+            q ??= questionnairesTest[qId.toString()];
             Quiz quiz = Quiz.fromJson(q, qId);
-            subject.questionnaire.add(quiz);
+            // debugPrint('quiz ${quiz.id}');
+            // for(Question question  in quiz.questionnaireList)
+            //   {
+            //     debugPrint('q ${question.question}');
+            //     debugPrint('op ${question.options}');
+            //
+            //   }
+            course.questionnaires.add(quiz);
             myQuizzes.add(quiz);
+
+            // Subject1 tryQ = Subject1.fromJson( qId);
+            // course.questionnaires.add(tryQ);
+            // myTries.add(tryQ);
           }
-
-          course.subjects.add(subject);
-          mySubjects.add(subject);
+          myCourses.add(course);
         }
-        //todo remove  just for testing
-        if (course.id == 78407) {
-          course.questionnaireIds
-              .addAll([66164, 82517, 111897, 128955, 129722]);
-        }
-
-        for (int qId in course.questionnaireIds) {
-          var q = questionnaires[qId.toString()];
-          q ??= questionnairesTest[qId.toString()];
-          Quiz quiz = Quiz.fromJson(q, qId);
-          // debugPrint('quiz ${quiz.id}');
-          // for(Question question  in quiz.questionnaireList)
-          //   {
-          //     debugPrint('q ${question.question}');
-          //     debugPrint('op ${question.options}');
-          //
-          //   }
-          course.questionnaires.add(quiz);
-          myQuizzes.add(quiz);
-
-          // Subject1 tryQ = Subject1.fromJson( qId);
-          // course.questionnaires.add(tryQ);
-          // myTries.add(tryQ);
-        }
-        myCourses.add(course);
         return userCourse;
       }).toList();
 
@@ -231,6 +236,7 @@ class InstallationDataHelper {
 
     Map<String, dynamic> c = courses.values.first;
     course = Course.fromJson(c, courseId);
+    course.isSync = true;
 
     for (int subjectId in course.subjectIds) {
       var s = subjects[subjectId.toString()];
@@ -238,7 +244,7 @@ class InstallationDataHelper {
 
       for (int lessonId in subject.lessonsIds) {
         var l = lessons[lessonId.toString()];
-        Lesson lesson = Lesson.fromJson(l, lessonId);
+        Lesson lesson = Lesson.fromJson(l, lessonId, course.id);
 
         for (int qId in lesson.questionnaireIds) {
           var q = questionnaires[qId.toString()];
@@ -282,7 +288,7 @@ class InstallationDataHelper {
       await IsarService().addKnowledge(knowledge);
     }
 
-    await IsarService().updateUserCourse( course, knowledge);
+    await IsarService().updateUserCourse(course, knowledge);
     return course;
   }
 
@@ -352,8 +358,97 @@ class InstallationDataHelper {
     for (int qId in questionCompleted) {
       await IsarService().updateQuizCompleted(qId);
     }
-   // if (!getVideos) {
-      onSuccess(getVideos);
- //   }
+    // if (!getVideos) {
+    onSuccess(getVideos);
+    //   }
+  }
+
+  setLessonVideosNum(Course course) async {
+    var dir = await getApplicationSupportDirectory();
+    String courseVideosPath =
+        '${dir.path}/${constants.lessonPath}/${course.id}';
+    if (await Directory(courseVideosPath).exists()) {
+      debugPrint('course.id ${course.id}');
+      List l = Directory(courseVideosPath).listSync();
+      List<String> fileNames = [];
+      List<Lesson> updateLessons = [];
+      for (var d in l) {
+        String fileName =
+            (d.path.split(Platform.pathSeparator)?.last).split('.')[0];
+        //if contains letters
+        if (double.tryParse(fileName) == null) {
+          fileNames.add(fileName);
+        }
+      }
+      int i = 1;
+      List<Lesson>? list = await IsarService().getAllLessonsOfCourse(course.id);
+      if (list != null) {
+        if (fileNames.isEmpty) {
+          int i = 1;
+          for (Lesson lesson in list) {
+            lesson.videoNum = (i++).toString();
+            updateLessons.add(lesson);
+          }
+        } else {
+          String videoNum = i.toString();
+          for (Lesson lesson in list) {
+            //lesson.videoNum = videoNum;
+            if (fileNames.isNotEmpty && double.tryParse(videoNum) != null) {
+              /*if (fileNames.contains('$iא') || fileNames.contains(' א$i')) {
+                debugPrint('yyy');
+                videoNum = '$iא';
+                fileNames.remove('$iא');
+              }*/
+              RegExp pattern = RegExp('^$i\\s*א');
+              String? matchingItem;
+
+              for (String fileName in fileNames) {
+                if (pattern.hasMatch(fileName)) {
+                  matchingItem = fileName;
+                  debugPrint('matchingItem $matchingItem');
+                  break; // Stop iterating after finding the first match
+                }
+              }
+              if (matchingItem != null) {
+                videoNum = matchingItem;
+                fileNames.remove(matchingItem);
+                lesson.videoNum = videoNum;
+              } else {
+                videoNum = i.toString();
+                lesson.videoNum = videoNum;
+                i++;
+              }
+            } else {
+              /* if (fileNames.isNotEmpty && fileNames.contains('$iב')) {
+                videoNum = '$iב';
+                fileNames.remove('$iב');
+              } */
+              RegExp pattern = RegExp('^$i\\s*ב');
+              String? matchingItem;
+
+              for (String fileName in fileNames) {
+                if (pattern.hasMatch(fileName)) {
+                  matchingItem = fileName;
+                  debugPrint('matchingItem $matchingItem');
+                  break; // Stop iterating after finding the first match
+                }
+              }
+              if (matchingItem != null) {
+                videoNum = matchingItem;
+                fileNames.remove(matchingItem);
+                lesson.videoNum = videoNum;
+                i++;
+              } else {
+                videoNum = i.toString();
+                lesson.videoNum = videoNum;
+                i++;
+              }
+            }
+            updateLessons.add(lesson);
+          }
+        }
+        IsarService().updateVideoNum(updateLessons);
+      }
+    }
   }
 }

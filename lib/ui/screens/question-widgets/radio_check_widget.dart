@@ -88,7 +88,7 @@ class _RadioCheckState extends State<RadioCheck> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             child: HtmlDataWidget(
               item.question,
               quizId: widget.question.quizId,
@@ -97,6 +97,7 @@ class _RadioCheckState extends State<RadioCheck> {
           SizedBox(height: 30.h,),
           for(int i=0;i<item.ans!.length;i++)...[
             CheckBoxWidget(
+              quizId: widget.question.quizId,
               label: item.ans![i].ans,
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               value: _isSelected[i],

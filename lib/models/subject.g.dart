@@ -27,8 +27,13 @@ const SubjectSchema = CollectionSchema(
       name: r'name',
       type: IsarType.string,
     ),
-    r'time': PropertySchema(
+    r'subjectId': PropertySchema(
       id: 2,
+      name: r'subjectId',
+      type: IsarType.long,
+    ),
+    r'time': PropertySchema(
+      id: 3,
       name: r'time',
       type: IsarType.string,
     )
@@ -38,7 +43,21 @@ const SubjectSchema = CollectionSchema(
   deserialize: _subjectDeserialize,
   deserializeProp: _subjectDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'subjectId': IndexSchema(
+      id: 440306668014799972,
+      name: r'subjectId',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'subjectId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {
     r'lessons': LinkSchema(
       id: 905957421829937577,
@@ -79,7 +98,8 @@ void _subjectSerialize(
 ) {
   writer.writeBool(offsets[0], object.isCompletedCurrentUser);
   writer.writeString(offsets[1], object.name);
-  writer.writeString(offsets[2], object.time);
+  writer.writeLong(offsets[2], object.subjectId);
+  writer.writeString(offsets[3], object.time);
 }
 
 Subject _subjectDeserialize(
@@ -89,10 +109,11 @@ Subject _subjectDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Subject(
-    id: id,
     name: reader.readStringOrNull(offsets[1]) ?? '',
-    time: reader.readStringOrNull(offsets[2]) ?? '',
+    subjectId: reader.readLongOrNull(offsets[2]) ?? 0,
+    time: reader.readStringOrNull(offsets[3]) ?? '',
   );
+  object.id = id;
   object.isCompletedCurrentUser = reader.readBool(offsets[0]);
   return object;
 }
@@ -109,6 +130,8 @@ P _subjectDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 2:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 3:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -130,10 +153,73 @@ void _subjectAttach(IsarCollection<dynamic> col, Id id, Subject object) {
       .attach(col, col.isar.collection<Quiz>(), r'questionnaire', id);
 }
 
+extension SubjectByIndex on IsarCollection<Subject> {
+  Future<Subject?> getBySubjectId(int subjectId) {
+    return getByIndex(r'subjectId', [subjectId]);
+  }
+
+  Subject? getBySubjectIdSync(int subjectId) {
+    return getByIndexSync(r'subjectId', [subjectId]);
+  }
+
+  Future<bool> deleteBySubjectId(int subjectId) {
+    return deleteByIndex(r'subjectId', [subjectId]);
+  }
+
+  bool deleteBySubjectIdSync(int subjectId) {
+    return deleteByIndexSync(r'subjectId', [subjectId]);
+  }
+
+  Future<List<Subject?>> getAllBySubjectId(List<int> subjectIdValues) {
+    final values = subjectIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'subjectId', values);
+  }
+
+  List<Subject?> getAllBySubjectIdSync(List<int> subjectIdValues) {
+    final values = subjectIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'subjectId', values);
+  }
+
+  Future<int> deleteAllBySubjectId(List<int> subjectIdValues) {
+    final values = subjectIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'subjectId', values);
+  }
+
+  int deleteAllBySubjectIdSync(List<int> subjectIdValues) {
+    final values = subjectIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'subjectId', values);
+  }
+
+  Future<Id> putBySubjectId(Subject object) {
+    return putByIndex(r'subjectId', object);
+  }
+
+  Id putBySubjectIdSync(Subject object, {bool saveLinks = true}) {
+    return putByIndexSync(r'subjectId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllBySubjectId(List<Subject> objects) {
+    return putAllByIndex(r'subjectId', objects);
+  }
+
+  List<Id> putAllBySubjectIdSync(List<Subject> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'subjectId', objects, saveLinks: saveLinks);
+  }
+}
+
 extension SubjectQueryWhereSort on QueryBuilder<Subject, Subject, QWhere> {
   QueryBuilder<Subject, Subject, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterWhere> anySubjectId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'subjectId'),
+      );
     });
   }
 }
@@ -199,6 +285,96 @@ extension SubjectQueryWhere on QueryBuilder<Subject, Subject, QWhereClause> {
         lower: lowerId,
         includeLower: includeLower,
         upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterWhereClause> subjectIdEqualTo(
+      int subjectId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'subjectId',
+        value: [subjectId],
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterWhereClause> subjectIdNotEqualTo(
+      int subjectId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'subjectId',
+              lower: [],
+              upper: [subjectId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'subjectId',
+              lower: [subjectId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'subjectId',
+              lower: [subjectId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'subjectId',
+              lower: [],
+              upper: [subjectId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterWhereClause> subjectIdGreaterThan(
+    int subjectId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'subjectId',
+        lower: [subjectId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterWhereClause> subjectIdLessThan(
+    int subjectId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'subjectId',
+        lower: [],
+        upper: [subjectId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterWhereClause> subjectIdBetween(
+    int lowerSubjectId,
+    int upperSubjectId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'subjectId',
+        lower: [lowerSubjectId],
+        includeLower: includeLower,
+        upper: [upperSubjectId],
         includeUpper: includeUpper,
       ));
     });
@@ -395,6 +571,59 @@ extension SubjectQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'name',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> subjectIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'subjectId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> subjectIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'subjectId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> subjectIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'subjectId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> subjectIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'subjectId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -679,6 +908,18 @@ extension SubjectQuerySortBy on QueryBuilder<Subject, Subject, QSortBy> {
     });
   }
 
+  QueryBuilder<Subject, Subject, QAfterSortBy> sortBySubjectId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'subjectId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy> sortBySubjectIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'subjectId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Subject, Subject, QAfterSortBy> sortByTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'time', Sort.asc);
@@ -731,6 +972,18 @@ extension SubjectQuerySortThenBy
     });
   }
 
+  QueryBuilder<Subject, Subject, QAfterSortBy> thenBySubjectId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'subjectId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterSortBy> thenBySubjectIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'subjectId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Subject, Subject, QAfterSortBy> thenByTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'time', Sort.asc);
@@ -756,6 +1009,12 @@ extension SubjectQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QDistinct> distinctBySubjectId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'subjectId');
     });
   }
 
@@ -785,6 +1044,12 @@ extension SubjectQueryProperty
   QueryBuilder<Subject, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<Subject, int, QQueryOperations> subjectIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'subjectId');
     });
   }
 

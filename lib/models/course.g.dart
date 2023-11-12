@@ -37,23 +37,28 @@ const CourseSchema = CollectionSchema(
       name: r'countQuiz',
       type: IsarType.string,
     ),
-    r'knowledgeId': PropertySchema(
+    r'isSync': PropertySchema(
       id: 4,
+      name: r'isSync',
+      type: IsarType.bool,
+    ),
+    r'knowledgeId': PropertySchema(
+      id: 5,
       name: r'knowledgeId',
       type: IsarType.long,
     ),
     r'knowledgeNum': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'knowledgeNum',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'title',
       type: IsarType.string,
     ),
     r'vimeoId': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'vimeoId',
       type: IsarType.string,
     )
@@ -136,10 +141,11 @@ void _courseSerialize(
   writer.writeString(offsets[1], object.countHours);
   writer.writeString(offsets[2], object.countLesson);
   writer.writeString(offsets[3], object.countQuiz);
-  writer.writeLong(offsets[4], object.knowledgeId);
-  writer.writeString(offsets[5], object.knowledgeNum);
-  writer.writeString(offsets[6], object.title);
-  writer.writeString(offsets[7], object.vimeoId);
+  writer.writeBool(offsets[4], object.isSync);
+  writer.writeLong(offsets[5], object.knowledgeId);
+  writer.writeString(offsets[6], object.knowledgeNum);
+  writer.writeString(offsets[7], object.title);
+  writer.writeString(offsets[8], object.vimeoId);
 }
 
 Course _courseDeserialize(
@@ -154,11 +160,12 @@ Course _courseDeserialize(
     countLesson: reader.readStringOrNull(offsets[2]),
     countQuiz: reader.readStringOrNull(offsets[3]),
     id: id,
-    knowledgeId: reader.readLongOrNull(offsets[4]),
-    knowledgeNum: reader.readStringOrNull(offsets[5]),
-    title: reader.readStringOrNull(offsets[6]) ?? '',
-    vimeoId: reader.readStringOrNull(offsets[7]) ?? '',
+    knowledgeId: reader.readLongOrNull(offsets[5]),
+    knowledgeNum: reader.readStringOrNull(offsets[6]),
+    title: reader.readStringOrNull(offsets[7]) ?? '',
+    vimeoId: reader.readStringOrNull(offsets[8]) ?? '',
   );
+  object.isSync = reader.readBool(offsets[4]);
   return object;
 }
 
@@ -178,12 +185,14 @@ P _courseDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 8:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -917,6 +926,16 @@ extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterFilterCondition> isSyncEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isSync',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1562,6 +1581,18 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSync', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> sortByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'knowledgeId', Sort.asc);
@@ -1672,6 +1703,18 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSync', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsSyncDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSync', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> thenByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'knowledgeId', Sort.asc);
@@ -1750,6 +1793,12 @@ extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
     });
   }
 
+  QueryBuilder<Course, Course, QDistinct> distinctByIsSync() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isSync');
+    });
+  }
+
   QueryBuilder<Course, Course, QDistinct> distinctByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'knowledgeId');
@@ -1806,6 +1855,12 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
   QueryBuilder<Course, String?, QQueryOperations> countQuizProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'countQuiz');
+    });
+  }
+
+  QueryBuilder<Course, bool, QQueryOperations> isSyncProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isSync');
     });
   }
 

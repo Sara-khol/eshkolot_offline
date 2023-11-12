@@ -29,6 +29,7 @@ class _OrderSelectionMatrixWidgetState
    List<String> ans=[];
 
   bool isDragging=false;
+ late bool isHtml;
 
 
   @override
@@ -46,6 +47,7 @@ class _OrderSelectionMatrixWidgetState
 
   initData()
   {
+    isHtml=widget.question.ans!.first.html;
     widget.questionController.isFilled = isFilled;
     widget.questionController.isCorrect = isCorrect;
     matrixMatchList=widget.question.ans!.map((e) => e.matrixMatch ?? '').toList();
@@ -61,6 +63,7 @@ class _OrderSelectionMatrixWidgetState
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('isHtml $isHtml');
     return Column(
       // mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -82,25 +85,9 @@ class _OrderSelectionMatrixWidgetState
                     child: dragWidget(i),
                   ),
                   childWhenDragging: dragWidget(i, changeBackground: true),
-                  // onDragCompleted: () {
-                  //   debugPrint('onDragCompleted');
-                  // //  maxSimultaneousDrags[i] = maxSimultaneousDrags[i] - 1;
-                  //   setState(() {
-                  //     isDragging=false;
-                  //   });
-                  // },
-                  // onDragStarted: (){
-                  //   setState(() {
-                  //     isDragging=true;
-                  //   });
-                  // },
-                  // onDraggableCanceled: (v,o){
-                  //   setState(() {
-                  //     isDragging=false;
-                  //   });
-                  // },
                   child: dragWidget(i),
                 );
+
               })),
         ),
         SizedBox(height: 24.h),
@@ -108,7 +95,7 @@ class _OrderSelectionMatrixWidgetState
           Padding(
             padding: EdgeInsets.only(bottom: 12.h),
             child: Container(
-              height: 75.h,
+              height:isHtml?110.h: 75.h,
               margin: EdgeInsets.only(right: 2.w, left: 2.w),
               decoration: ShapeDecoration(
                 color: const Color(0xFFFCFCFF),
@@ -127,11 +114,12 @@ class _OrderSelectionMatrixWidgetState
                     width: 140.w,
                     padding: EdgeInsets.all(10.h),
                     child: Center(
-                      child: Text(
+                      child:isHtml? HtmlDataWidget(randomList[i], quizId: widget.question.quizId):
+                      Text(
                         randomList[i],
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: colors.blackColorApp,
+                           color: colors.blackColorApp,
                           fontSize: 27.sp,
                           fontWeight: FontWeight.w400,
                           // height: 22,
@@ -141,7 +129,7 @@ class _OrderSelectionMatrixWidgetState
                   ),
                   Expanded(
                     child: Container(
-                      height: 60.h,
+                      height:isHtml?95.h: 60.h,
                       padding: EdgeInsets.only(top: 7.h,bottom: 7.h,right: 10.h,left:10.h),
                       decoration: BoxDecoration(
                         // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),

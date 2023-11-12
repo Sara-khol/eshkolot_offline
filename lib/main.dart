@@ -128,8 +128,8 @@ Future<void> main() async {
     setDataFiles() async {
       final Directory directory = await getApplicationSupportDirectory();
       destDirPath = directory.path;
-      extractZipFile('$destDirPath/${Constants.lessonPath}/');
-      extractZipFile('$destDirPath/${Constants.quizPath}/');
+      await extractZipFile('$destDirPath/${Constants.lessonPath}/');
+      await extractZipFile('$destDirPath/${Constants.quizPath}/');
     }
 
     IsarService().init();
@@ -187,7 +187,10 @@ Future<void> main() async {
       await preferences.setBool('database_initialized', false);
       await initData();
       await preferences.setBool('database_initialized', true);
-      setDataFiles();
+      //  await setDataFiles();
+      // for(Course course in myCourses) {
+      //   InstallationDataHelper().setLessonVideosNum(course);
+      // }
     } else {
       debugPrint('data was filled');
       Sentry.addBreadcrumb(Breadcrumb(message: 'data was filled'));
@@ -254,17 +257,25 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late List<VideoIsar> vi;
   late bool allDownloaded;
-  late Future myFuture;
+   Future? myFuture;
   bool firstTime = true;
   final Connectivity _connectivity = Connectivity();
   late bool isNetWorkConnection;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
+  late String destDirPath;
 
   @override
   void initState() {
     // networkConnectivity.startNetworkConnectivityCheck();
+    // if(!widget.dataWasFilled)
+    //   {
+    //
+
     _networkConnectivity.initialise();
-    myFuture = isVideosDownload();
+    // myFuture = isVideosDownload();
+    if(!widget.dataWasFilled) {
+      myFuture = setDataFiles();
+    }
     super.initState();
   }
 
@@ -286,7 +297,21 @@ class _MyAppState extends State<MyApp> {
                 title: 'Flutter Demo',
                 theme: ThemeData(
                     primarySwatch: Colors.blue, fontFamily: 'RAG-Sans'),
-                home: LoginPage()
+                home: Scaffold(
+                    backgroundColor: Colors.white,
+                    body: widget.dataWasFilled
+                        ? LoginPage()
+                        : FutureBuilder(
+                            future: myFuture,
+                            builder: (context, s) {
+                              if (s.hasData) {
+                                for(Course course in widget.courses) {
+                                  InstallationDataHelper().setLessonVideosNum(course);
+                                }
+                                return LoginPage();
+                              }
+                              return const Center(child: CircularProgressIndicator());
+                            }))
                 // FutureBuilder(
                 //     future: myFuture,
                 //     builder: (context, snapshot) {
@@ -358,6 +383,62 @@ class _MyAppState extends State<MyApp> {
                 );
           }),
     );
+  }
+
+  Future<bool> setDataFiles() async {
+    final Directory directory = await getApplicationSupportDirectory();
+    destDirPath = directory.path;
+    await extractZipFile('$destDirPath/${Constants.lessonPath}/');
+    await extractZipFile('$destDirPath/${Constants.quizPath}/');
+    debugPrint('finish!!!');
+    return true;
+  }
+
+  extractZipFile(String extractPath) async {
+    try {
+      // Get a list of files in the "lessons" folder
+      List<FileSystemEntity> lessonFiles = Directory(extractPath).listSync();
+
+      for (FileSystemEntity file in lessonFiles) {
+        if (file is File && file.path.endsWith('.zip')) {
+          // Extract each zip file
+          String zipFilePath = file.path;
+
+          // Create the destination folder based on the zip file's name
+          String destinationFolderName =
+              file.path.split('/').last.replaceAll('.zip', '');
+          String destinationPath = '$extractPath/$destinationFolderName/';
+
+          // Create the destination folder if it doesn't exist
+          Directory(destinationPath).createSync(recursive: true);
+
+          // Read the zip file
+          List<int> bytes = await file.readAsBytes();
+
+          // Extract the zip contents
+          Archive archive = ZipDecoder().decodeBytes(bytes);
+          for (ArchiveFile archiveFile in archive) {
+            String fileName = archiveFile.name;
+            if (archiveFile.isFile) {
+              // Get the file content as a List<int>
+              List<int> fileData = archiveFile.content as List<int>;
+
+              // Create the file in the destination folder
+              File destinationFile = File('$destinationPath$fileName');
+              destinationFile.createSync(recursive: true);
+              destinationFile.writeAsBytesSync(fileData);
+            } else {
+              // If it's a directory, create the directory in the destination folder
+              Directory('$destinationPath$fileName')
+                  .createSync(recursive: true);
+            }
+          }
+          debugPrint('Zip extraction completed for: $zipFilePath');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error extracting zips: $e');
+    }
   }
 
   Widget displayLoadingDialog(bool isError, BuildContext context,

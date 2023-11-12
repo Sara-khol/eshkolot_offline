@@ -17,23 +17,38 @@ const LessonSchema = CollectionSchema(
   name: r'Lesson',
   id: 6343151657775798464,
   properties: {
-    r'isCompletedCurrentUser': PropertySchema(
+    r'courseId': PropertySchema(
       id: 0,
+      name: r'courseId',
+      type: IsarType.long,
+    ),
+    r'isCompletedCurrentUser': PropertySchema(
+      id: 1,
       name: r'isCompletedCurrentUser',
       type: IsarType.bool,
     ),
+    r'lessonId': PropertySchema(
+      id: 2,
+      name: r'lessonId',
+      type: IsarType.long,
+    ),
     r'name': PropertySchema(
-      id: 1,
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'time': PropertySchema(
-      id: 2,
+      id: 4,
       name: r'time',
       type: IsarType.string,
     ),
+    r'videoNum': PropertySchema(
+      id: 5,
+      name: r'videoNum',
+      type: IsarType.string,
+    ),
     r'vimoe': PropertySchema(
-      id: 3,
+      id: 6,
       name: r'vimoe',
       type: IsarType.string,
     )
@@ -43,7 +58,34 @@ const LessonSchema = CollectionSchema(
   deserialize: _lessonDeserialize,
   deserializeProp: _lessonDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'lessonId': IndexSchema(
+      id: 2130166291500416829,
+      name: r'lessonId',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'lessonId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'courseId': IndexSchema(
+      id: -4937057111615935929,
+      name: r'courseId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'courseId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {
     r'questionnaire': LinkSchema(
       id: 5260463454641152466,
@@ -67,6 +109,7 @@ int _lessonEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.time.length * 3;
+  bytesCount += 3 + object.videoNum.length * 3;
   {
     final value = object.vimeo;
     if (value != null) {
@@ -82,10 +125,13 @@ void _lessonSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeBool(offsets[0], object.isCompletedCurrentUser);
-  writer.writeString(offsets[1], object.name);
-  writer.writeString(offsets[2], object.time);
-  writer.writeString(offsets[3], object.vimeo);
+  writer.writeLong(offsets[0], object.courseId);
+  writer.writeBool(offsets[1], object.isCompletedCurrentUser);
+  writer.writeLong(offsets[2], object.lessonId);
+  writer.writeString(offsets[3], object.name);
+  writer.writeString(offsets[4], object.time);
+  writer.writeString(offsets[5], object.videoNum);
+  writer.writeString(offsets[6], object.vimeo);
 }
 
 Lesson _lessonDeserialize(
@@ -95,12 +141,15 @@ Lesson _lessonDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Lesson(
-    id: id,
-    name: reader.readStringOrNull(offsets[1]) ?? '',
-    time: reader.readStringOrNull(offsets[2]) ?? '',
-    vimeo: reader.readStringOrNull(offsets[3]),
+    courseId: reader.readLongOrNull(offsets[0]) ?? 0,
+    lessonId: reader.readLongOrNull(offsets[2]) ?? 0,
+    name: reader.readStringOrNull(offsets[3]) ?? '',
+    time: reader.readStringOrNull(offsets[4]) ?? '',
+    videoNum: reader.readStringOrNull(offsets[5]) ?? '',
+    vimeo: reader.readStringOrNull(offsets[6]),
   );
-  object.isCompletedCurrentUser = reader.readBool(offsets[0]);
+  object.id = id;
+  object.isCompletedCurrentUser = reader.readBool(offsets[1]);
   return object;
 }
 
@@ -112,12 +161,18 @@ P _lessonDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 1:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readBool(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 3:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 4:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 5:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 6:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -138,10 +193,80 @@ void _lessonAttach(IsarCollection<dynamic> col, Id id, Lesson object) {
       .attach(col, col.isar.collection<Quiz>(), r'questionnaire', id);
 }
 
+extension LessonByIndex on IsarCollection<Lesson> {
+  Future<Lesson?> getByLessonId(int lessonId) {
+    return getByIndex(r'lessonId', [lessonId]);
+  }
+
+  Lesson? getByLessonIdSync(int lessonId) {
+    return getByIndexSync(r'lessonId', [lessonId]);
+  }
+
+  Future<bool> deleteByLessonId(int lessonId) {
+    return deleteByIndex(r'lessonId', [lessonId]);
+  }
+
+  bool deleteByLessonIdSync(int lessonId) {
+    return deleteByIndexSync(r'lessonId', [lessonId]);
+  }
+
+  Future<List<Lesson?>> getAllByLessonId(List<int> lessonIdValues) {
+    final values = lessonIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'lessonId', values);
+  }
+
+  List<Lesson?> getAllByLessonIdSync(List<int> lessonIdValues) {
+    final values = lessonIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'lessonId', values);
+  }
+
+  Future<int> deleteAllByLessonId(List<int> lessonIdValues) {
+    final values = lessonIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'lessonId', values);
+  }
+
+  int deleteAllByLessonIdSync(List<int> lessonIdValues) {
+    final values = lessonIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'lessonId', values);
+  }
+
+  Future<Id> putByLessonId(Lesson object) {
+    return putByIndex(r'lessonId', object);
+  }
+
+  Id putByLessonIdSync(Lesson object, {bool saveLinks = true}) {
+    return putByIndexSync(r'lessonId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByLessonId(List<Lesson> objects) {
+    return putAllByIndex(r'lessonId', objects);
+  }
+
+  List<Id> putAllByLessonIdSync(List<Lesson> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'lessonId', objects, saveLinks: saveLinks);
+  }
+}
+
 extension LessonQueryWhereSort on QueryBuilder<Lesson, Lesson, QWhere> {
   QueryBuilder<Lesson, Lesson, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhere> anyLessonId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'lessonId'),
+      );
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhere> anyCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'courseId'),
+      );
     });
   }
 }
@@ -211,9 +336,242 @@ extension LessonQueryWhere on QueryBuilder<Lesson, Lesson, QWhereClause> {
       ));
     });
   }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> lessonIdEqualTo(
+      int lessonId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'lessonId',
+        value: [lessonId],
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> lessonIdNotEqualTo(
+      int lessonId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'lessonId',
+              lower: [],
+              upper: [lessonId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'lessonId',
+              lower: [lessonId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'lessonId',
+              lower: [lessonId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'lessonId',
+              lower: [],
+              upper: [lessonId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> lessonIdGreaterThan(
+    int lessonId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'lessonId',
+        lower: [lessonId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> lessonIdLessThan(
+    int lessonId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'lessonId',
+        lower: [],
+        upper: [lessonId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> lessonIdBetween(
+    int lowerLessonId,
+    int upperLessonId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'lessonId',
+        lower: [lowerLessonId],
+        includeLower: includeLower,
+        upper: [upperLessonId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> courseIdEqualTo(
+      int courseId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'courseId',
+        value: [courseId],
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> courseIdNotEqualTo(
+      int courseId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [],
+              upper: [courseId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [courseId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [courseId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'courseId',
+              lower: [],
+              upper: [courseId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> courseIdGreaterThan(
+    int courseId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'courseId',
+        lower: [courseId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> courseIdLessThan(
+    int courseId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'courseId',
+        lower: [],
+        upper: [courseId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterWhereClause> courseIdBetween(
+    int lowerCourseId,
+    int upperCourseId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'courseId',
+        lower: [lowerCourseId],
+        includeLower: includeLower,
+        upper: [upperCourseId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> courseIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'courseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> courseIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'courseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> courseIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'courseId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> courseIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'courseId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -272,6 +630,59 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isCompletedCurrentUser',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> lessonIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lessonId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> lessonIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lessonId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> lessonIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lessonId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> lessonIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lessonId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -534,6 +945,136 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'videoNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'videoNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'videoNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'videoNum',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'videoNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'videoNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'videoNum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'videoNum',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'videoNum',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> videoNumIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'videoNum',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterFilterCondition> vimeoIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -746,6 +1287,18 @@ extension LessonQueryLinks on QueryBuilder<Lesson, Lesson, QFilterCondition> {
 }
 
 extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByCourseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByIsCompletedCurrentUser() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isCompletedCurrentUser', Sort.asc);
@@ -756,6 +1309,18 @@ extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
       sortByIsCompletedCurrentUserDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByLessonId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lessonId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByLessonIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lessonId', Sort.desc);
     });
   }
 
@@ -783,6 +1348,18 @@ extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVideoNum() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'videoNum', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVideoNumDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'videoNum', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByVimeo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'vimoe', Sort.asc);
@@ -797,6 +1374,18 @@ extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
 }
 
 extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByCourseIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -819,6 +1408,18 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
       thenByIsCompletedCurrentUserDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isCompletedCurrentUser', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByLessonId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lessonId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByLessonIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lessonId', Sort.desc);
     });
   }
 
@@ -846,6 +1447,18 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVideoNum() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'videoNum', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVideoNumDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'videoNum', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByVimeo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'vimoe', Sort.asc);
@@ -860,9 +1473,21 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
 }
 
 extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByCourseId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'courseId');
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QDistinct> distinctByIsCompletedCurrentUser() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isCompletedCurrentUser');
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByLessonId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lessonId');
     });
   }
 
@@ -877,6 +1502,13 @@ extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'time', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByVideoNum(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'videoNum', caseSensitive: caseSensitive);
     });
   }
 
@@ -895,10 +1527,22 @@ extension LessonQueryProperty on QueryBuilder<Lesson, Lesson, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Lesson, int, QQueryOperations> courseIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'courseId');
+    });
+  }
+
   QueryBuilder<Lesson, bool, QQueryOperations>
       isCompletedCurrentUserProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isCompletedCurrentUser');
+    });
+  }
+
+  QueryBuilder<Lesson, int, QQueryOperations> lessonIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lessonId');
     });
   }
 
@@ -911,6 +1555,12 @@ extension LessonQueryProperty on QueryBuilder<Lesson, Lesson, QQueryProperty> {
   QueryBuilder<Lesson, String, QQueryOperations> timeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'time');
+    });
+  }
+
+  QueryBuilder<Lesson, String, QQueryOperations> videoNumProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'videoNum');
     });
   }
 

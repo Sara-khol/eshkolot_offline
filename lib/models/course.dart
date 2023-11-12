@@ -1,6 +1,9 @@
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/subject.dart';
+import 'package:eshkolot_offline/models/user.dart';
 import 'package:isar/isar.dart';
+
+import 'lesson.dart';
 // import 'package:json_annotation/json_annotation.dart';
 
 part 'course.g.dart';
@@ -53,6 +56,17 @@ class Course {
 
   @Ignore()
   int currentSteps=0;
+  bool isSync=false;
+
+  @Ignore()
+  UserCourse? userCourse;
+
+  @Ignore()
+  Lesson? lastLesson;
+  @Ignore()
+  Subject? lastSubject;
+  @Ignore()
+  Quiz? lastQuestionnaire;
 
   Map<String, dynamic> toJson() {
     return {

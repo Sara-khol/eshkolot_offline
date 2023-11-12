@@ -289,7 +289,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
             data!.questionnaireStopId != 0)) {
       if (data!.subjectStopId != 0) {
         for (int i = 0; i < widget.course.subjects.length; i++) {
-          if (widget.course.subjects.elementAt(i).id == data!.subjectStopId) {
+          if (widget.course.subjects.elementAt(i).subjectId == data!.subjectStopId) {
             lastSubject = widget.course.subjects.elementAt(i);
             data!.subjectIndex = i;
             break;
@@ -304,7 +304,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
       // s.id == data!.subjectStopId) : null;
       if (data!.lessonStopId != 0) {
         for (int i = 0; i < lastSubject!.lessons.length; i++) {
-          if (lastSubject!.lessons.elementAt(i).id == data!.lessonStopId) {
+          if (lastSubject!.lessons.elementAt(i).lessonId == data!.lessonStopId) {
             lastLesson = lastSubject!.lessons.elementAt(i);
             data!.lessonIndex = i;
             break;

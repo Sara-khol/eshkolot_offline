@@ -1,5 +1,5 @@
+import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CheckBoxWidget extends StatelessWidget {
 
@@ -7,10 +7,11 @@ class CheckBoxWidget extends StatelessWidget {
     required this.label,
     required this.padding,
     required this.value,
-    required this.onChanged,
+    required this.onChanged, required this.quizId,
   });
 
   final String label;
+  final int quizId;
   final EdgeInsets padding;
   final bool value;
   final Function onChanged;
@@ -32,7 +33,7 @@ class CheckBoxWidget extends StatelessWidget {
                 onChanged(newValue);
               },
             ),
-            Expanded(child: Text(label,style: TextStyle(fontSize: 27.sp),)),
+            Expanded(child: HtmlDataWidget(label, quizId: quizId)),
           ],
         ),
       ),

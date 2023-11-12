@@ -4,14 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:eshkolot_offline/utils/constants.dart' as Constants;
+import 'package:eshkolot_offline/utils/constants.dart' as constants;
 
-import 'main_page_child.dart';
 
 class VideoWidget extends StatefulWidget {
   final String? vimoeId;
+  final int fileId;
+  final double width;
+  final double height;
+  final bool isQuiz;
+  final String videoNum;
 
-  const VideoWidget({super.key, required this.vimoeId});
+  const VideoWidget(
+      {super.key,
+      required this.vimoeId,
+      required this.videoNum,
+      required this.fileId,
+      this.isQuiz = false,
+      this.width = 0,
+      this.height = 0});
 
   @override
   State<VideoWidget> createState() => _VideoWidgetState();
@@ -45,15 +56,15 @@ class _VideoWidgetState extends State<VideoWidget>
         ? videoExists!
             ? Video(
                 player: player,
-                height: 515.h,
-                width: 914.w,
+                height: widget.height==0?515.h:widget.height,
+                width: widget.width==0?914.w:widget.width,
                 scale: 1.0,
                 // default
                 showControls: true,
               )
             : Container(
-                height: 515.h,
-                width: 914.w,
+                height: widget.height==0?515.h:widget.height,
+                width: widget.width==0?914.w:widget.width,
                 decoration:
                     BoxDecoration(border: Border.all(color: Colors.black38)),
                 child: Center(
@@ -70,12 +81,14 @@ class _VideoWidgetState extends State<VideoWidget>
     if (widget.vimoeId != null) {
       var dir =
           await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
-      File file = File(
-          '${dir.path}/${Constants.lessonPath}/${MainPageChild.of(context)?.widget.course.id}/${widget.vimoeId}.mp4');
+      String path =
+          '${dir.path}/${widget.isQuiz ? constants.quizPath : constants.lessonPath}/${widget.fileId}/${widget.vimoeId}.mp4';
+      File file = File(path);
       videoExists = await file.exists();
 
       player = Player(
-          id: int.parse(widget.vimoeId!),
+          //id: widget.isQuiz ? widget.fileId : int.parse(widget.vimoeId!),
+          id: widget.fileId,
           videoDimensions: const VideoDimensions(640, 360));
       debugPrint(' videoInit vimoeId ${widget.vimoeId}');
 

@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
+import 'package:eshkolot_offline/models/lesson.dart';
+import 'package:eshkolot_offline/models/quiz.dart';
+import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
@@ -39,6 +42,8 @@ class _HomePageState extends State<HomePage> {
   bool reversed = false;
   late var dir;
   late StreamSubscription stream;
+
+  late int currentColor;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -105,108 +110,106 @@ class _HomePageState extends State<HomePage> {
     //     debugPrint('hhhjjjkkk');
     //   });
     // };
-     stream= InstallationDataHelper().eventBusHomePage.on().listen((event) async {
-     debugPrint('event listen');
-     User user= IsarService().getCurrentUser();
-     knowledgeCourses = user.knowledgeCoursesMap;
-     if(mounted) {
-        setState(() {
-        });
-      }});
-   // initDirectory();
+    stream =
+        InstallationDataHelper().eventBusHomePage.on().listen((event) async {
+      debugPrint('event listen');
+      User user = IsarService().getCurrentUser();
+      knowledgeCourses = user.knowledgeCoursesMap;
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    // initDirectory();
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder(
-      future: initDirectory(),
-      builder: (context,snapshot) {
-        if(snapshot.hasData) {
-          if (!buildCalledYet) {
-            buildCalledYet = true;
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                showMoreKnowledge =
-                    knowledgeScrollController.position.maxScrollExtent > 0;
-                showMorePath = pathScrollController.position.maxScrollExtent > 0;
+        future: initDirectory(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            if (!buildCalledYet) {
+              buildCalledYet = true;
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  showMoreKnowledge =
+                      knowledgeScrollController.position.maxScrollExtent > 0;
+                  showMorePath =
+                      pathScrollController.position.maxScrollExtent > 0;
+                });
               });
-            });
+            }
+            return Scaffold(
+                backgroundColor: Colors.white,
+                body: Padding(
+                  padding: EdgeInsets.only(
+                      top: 78
+                          .h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
+                  child: Column(
+                    children: [
+                      Center(
+                          child: Text('שלום ${widget.user.name}',
+                              style: TextStyle(
+                                  color: colors.blackColorApp,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 32.sp))),
+                      SizedBox(height: 26.h),
+                      Container(
+                          height: 51.h,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: colors.blackColorApp, width: 1.h),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50))),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                topInformation(
+                                    Icons.check,
+                                    'הושלם',
+                                    widget.user.courses
+                                        .where((c) =>
+                                            c.status == Status.synchronized)
+                                        .length),
+                                Container(
+                                    height: 27.h,
+                                    width: 1.w,
+                                    color: colors.blackColorApp),
+                                topInformation(
+                                    Icons.refresh,
+                                    'ממתין לסינכרון',
+                                    widget.user.courses
+                                        .where((c) => c.status == Status.finish)
+                                        .length),
+                                Container(
+                                    height: 27.h,
+                                    width: 1.w,
+                                    color: colors.blackColorApp),
+                                topInformation(
+                                    Icons.star_outlined,
+                                    'תעודות',
+                                    widget.user.courses
+                                        .where((c) =>
+                                            c.status == Status.synchronized)
+                                        .length),
+                              ])),
+                      SizedBox(height: 35.h),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
+                          children: [
+                            myCoursesWidget(false),
+                            SizedBox(width: 36.w),
+                            myCoursesWidget(true)
+                          ])
+                    ],
+                  ),
+                ));
           }
-          return Scaffold(
-              backgroundColor: Colors.white,
-              body: Padding(
-                padding: EdgeInsets.only(
-                    top: 78
-                        .h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
-                child: Column(
-                  children: [
-                    Center(
-                        child: Text('שלום ${widget.user.name}',
-                            style: TextStyle(
-                                color: colors.blackColorApp,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 32.sp))),
-                    SizedBox(height: 26.h),
-                    Container(
-                        height: 51.h,
-                        decoration: BoxDecoration(
-                            border:
-                            Border.all(color: colors.blackColorApp, width: 1.h),
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(50))),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              topInformation(
-                                  Icons.check,
-                                  'הושלם',
-                                  widget.user.courses
-                                      .where((c) =>
-                                  c.status == Status.synchronized)
-                                      .length),
-                              Container(
-                                  height: 27.h,
-                                  width: 1.w,
-                                  color: colors.blackColorApp),
-                              topInformation(
-                                  Icons.refresh,
-                                  'ממתין לסינכרון',
-                                  widget.user.courses
-                                      .where((c) => c.status == Status.finish)
-                                      .length),
-                              Container(
-                                  height: 27.h,
-                                  width: 1.w,
-                                  color: colors.blackColorApp),
-                              topInformation(
-                                  Icons.star_outlined,
-                                  'תעודות',
-                                  widget.user.courses
-                                      .where((c) =>
-                                  c.status == Status.synchronized)
-                                      .length),
-                            ])),
-                    SizedBox(height: 35.h),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
-                        children: [
-                          myCoursesWidget(false),
-                          SizedBox(width: 36.w),
-                          myCoursesWidget(true)
-                        ])
-                  ],
-                ),
-              ));
-        }
-        return const CircularProgressIndicator();
-      }
-    );
+          return const CircularProgressIndicator();
+        });
   }
 
   topInformation(IconData iconData, String s, int num) {
@@ -329,7 +332,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   knowledgeItem(Knowledge knowledge, int kIndex) {
-    String path= removeHiddenCharsFromPath('${dir.path}/icons/${knowledge.icon.nameIcon}');
+    String path = removeHiddenCharsFromPath(
+        '${dir.path}/icons/${knowledge.icon.nameIcon}');
     return Column(
       children: [
         Row(
@@ -402,11 +406,12 @@ class _HomePageState extends State<HomePage> {
               //     //     visible: enAbleScrollKnowledge ||
               //     //         knowledge.courses.elementAt(index).isFullyDisplayed,
               //     //     child:
+              currentColor = knowledge.icon.color != ''
+                  ? int.parse(knowledge.icon.color)
+                  : -1;
               return courseItem(
                   knowledgeCourses.values.elementAt(kIndex)[index],
-                  knowledge.icon.color != ''
-                      ? int.parse(knowledge.icon.color)
-                      : -1,
+                  currentColor,
                   knowledge.icon.nameIcon,
                   index);
             }),
@@ -423,7 +428,7 @@ class _HomePageState extends State<HomePage> {
     return path;
   }
 
-   initDirectory() async {
+  initDirectory() async {
     dir = await getApplicationSupportDirectory();
     return dir;
   }
@@ -454,13 +459,16 @@ class _HomePageState extends State<HomePage> {
             shrinkWrap: true,
             itemCount: path.courses.length,
             itemBuilder: (context, index) {
-           Knowledge courseKnowledge=  knowledgeCourses.keys.firstWhere((k) => k.id==path.courses.elementAt(index).knowledgeId);
+              Knowledge courseKnowledge = knowledgeCourses.keys.firstWhere(
+                  (k) => k.id == path.courses.elementAt(index).knowledgeId);
+
+              currentColor = courseKnowledge.icon.color != ''
+                  ? int.parse(courseKnowledge.icon.color)
+                  : -1;
               return courseItem(
                   path.courses.elementAt(index),
-                  courseKnowledge.icon.color != ''
-                      ? int.parse(courseKnowledge.icon.color)
-                      : -1,
-                 courseKnowledge.icon.nameIcon ,
+                  currentColor,
+                  courseKnowledge.icon.nameIcon,
                   /*path.color.isNotEmpty ? int.parse(path.color) : -1*/
                   index);
             }),
@@ -470,7 +478,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   courseItem(Course course, int color, String icon, int i) {
-    String path=removeHiddenCharsFromPath('${dir.path}/icons/${icon}');
+    String path = removeHiddenCharsFromPath('${dir.path}/icons/${icon}');
     UserCourse? userCourse = IsarService().getUserCourseData(course.id);
 
     return Container(
@@ -481,6 +489,7 @@ class _HomePageState extends State<HomePage> {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
+          debugPrint('1212');
           MainPage.of(context)?.mainWidget = MainPageChild(
             course: course,
             knowledgeColor: color,
@@ -503,6 +512,7 @@ class _HomePageState extends State<HomePage> {
                       right: 32.w,
                       child: GestureDetector(
                         onTap: () {
+                          debugPrint('3434');
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -531,12 +541,13 @@ class _HomePageState extends State<HomePage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 // icon.isNotEmpty? HtmlWidget(icon):Container(),
-                              if(icon!='')   Center(
-                                    child: SvgPicture.file(
-                                      File(path),
-                                      width: 9.w,
-                                      height: 9.h,
-                                    )),
+                                if (icon != '')
+                                  Center(
+                                      child: SvgPicture.file(
+                                    File(path),
+                                    width: 9.w,
+                                    height: 9.h,
+                                  )),
                                 SizedBox(width: 15.w),
                                 Text(
                                   '${course.knowledgeNum}',
@@ -547,7 +558,7 @@ class _HomePageState extends State<HomePage> {
                                 )
                               ])))
                 ]),
-            displayActionByStatus(userCourse.status)
+            displayActionByStatus(userCourse.status, course)
           ],
         ),
       ),
@@ -581,43 +592,194 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  displayActionByStatus(Status status) {
+  displayActionByStatus(Status status, Course course) {
     switch (status) {
       case Status.start:
-        return statusWidget('', 'התחל ללמוד');
+        return statusWidget('', 'התחל ללמוד', course);
 
       case Status.middle:
-        return statusWidget('המשך מהמקום שעצרת', 'מילות יחס');
+        return FutureBuilder<String>(
+            future: getLastPositionInCourse(course),
+            builder: (c, s) {
+              if (s.hasData) {
+                if (s.data!.isNotEmpty) {
+                  return statusWidget(
+                      'המשך מהמקום שעצרת', s.data ?? '', course, true);
+                }
+                return statusWidget('המשך', '', course, false);
+
+              }
+              return const CircularProgressIndicator();
+            });
+
       case Status.finish:
-        return statusWidget('הקורס הושלם בהצלחה!', 'סינכרון נתונים');
+        return statusWidget('הקורס הושלם בהצלחה!', 'סינכרון נתונים', course);
       case Status.synchronized:
-        return statusWidget('נתוני הקורס סונכרנו!', 'להורת התעודה');
+        return statusWidget('נתוני הקורס סונכרנו!', 'להורת התעודה', course);
     }
   }
 
-  statusWidget(String text, String buttonText) {
+  statusWidget(String text, String buttonText, Course course,
+      [bool isContinue = false]) {
     return Row(children: [
       if (text != '')
         Text(text, style: TextStyle(fontSize: 14.sp, color: Color(0xff6E7072))),
       if (text != '') SizedBox(width: 7.w),
-      Container(
-        decoration: BoxDecoration(
-            color: colors.lightGrey1ColorApp,
-            borderRadius: BorderRadius.all(Radius.circular(30))),
-        padding:
-            EdgeInsets.only(right: 11.w, left: 11.w, top: 5.h, bottom: 5.h),
-        child: Row(
-          children: [
-            Text(
-              buttonText,
-              style: TextStyle(fontSize: 14.sp, color: colors.blackColorApp),
-            ),
-            SizedBox(width: 3.w),
-            Icon(Icons.arrow_forward, size: 14.sp)
-          ],
+      GestureDetector(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 130.w), // Set your maximum width
+          decoration: BoxDecoration(
+              color: colors.lightGrey1ColorApp,
+              borderRadius: BorderRadius.all(Radius.circular(30))),
+          padding:
+              EdgeInsets.only(right: 11.w, left: 11.w, top: 5.h, bottom: 5.h),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Center(
+                  child: Text(
+                    buttonText,
+                   overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 14.sp, color: colors.blackColorApp),
+                  ),
+                ),
+              ),
+             // SizedBox(width: 3.w),
+              Icon(Icons.arrow_forward, size: 14.sp),
+            ],
+          ),
         ),
+        onTap: () {
+          if (isContinue && course.userCourse != null) {
+            if (MainPage.of(context)?.updateSideMenu != null) {
+              MainPage.of(context)?.updateSideMenu!(course.id);
+            }
+            if (!course.userCourse!.isQuestionnaire) {
+              MainPage.of(context)?.mainWidget = MainPageChild(
+                course: course,
+                knowledgeColor: currentColor,
+                lessonPickedIndex: course.userCourse!.lessonIndex,
+                subjectPickedIndex: course.userCourse!.subjectIndex,
+                isContinue: 1,
+              );
+            } else {
+              MainPage.of(context)?.mainWidget = MainPageChild(
+                course: course,
+                knowledgeColor: currentColor,
+                lessonPickedIndex: course.userCourse!.lessonIndex,
+                subjectPickedIndex: course.userCourse!.subjectIndex,
+                questionPickedIndex: course.userCourse!.questionIndex,
+                isContinue: 2,
+              );
+
+              // currentMainChild?.questionPickedIndex =
+              //     currentCourse.userCourse!.questionIndex;
+              // currentMainChild?.subjectPickedIndex =
+              //     currentCourse.userCourse!.subjectIndex;
+              // currentMainChild?.lessonPickedIndex =
+              //     currentCourse.userCourse!.lessonIndex;
+              // MainPageChild.of(context)?.bodyWidget =
+              //     QuestionnaireWidget(
+              //       quiz: lastQuestionnaire!,
+              //     );
+            }
+          }
+        },
       )
     ]);
+  }
+
+  Future<String> getLastPositionInCourse(Course course,
+      {bool refresh = true}) async {
+    // debugPrint('getLastPositionInCourse');
+    UserCourse? data = IsarService().getUserCourseData(course.id);
+    Subject? lastSubject;
+    Quiz? lastQuestionnaire;
+    Lesson? lastLesson;
+    String lastTextButton = '';
+    if (data != null &&
+        (data.subjectStopId != 0 ||
+            data.lessonStopId != 0 ||
+            data.questionnaireStopId != 0)) {
+      if (data.subjectStopId != 0) {
+        for (int i = 0; i < course.subjects.length; i++) {
+          if (course.subjects.elementAt(i).subjectId == data.subjectStopId) {
+            lastSubject = course.subjects.elementAt(i);
+            data.subjectIndex = i;
+            break;
+          }
+        }
+      } else {
+        lastSubject = null;
+      }
+
+      // lastSubject =
+      // data!.subjectStopId != 0 ? widget.course.subjects.firstWhere((s) =>
+      // s.id == data!.subjectStopId) : null;
+      if (data.lessonStopId != 0) {
+        for (int i = 0; i < lastSubject!.lessons.length; i++) {
+          if (lastSubject.lessons.elementAt(i).lessonId == data.lessonStopId) {
+            lastLesson = lastSubject.lessons.elementAt(i);
+            data.lessonIndex = i;
+            break;
+          }
+        }
+      } else {
+        lastLesson = null;
+      }
+
+      if (!data.isQuestionnaire) {
+        lastTextButton = lastLesson!.name;
+      } else {
+        if (data.subjectStopId == 0) {
+          //questionnaire of course
+          //lastQuestionnaire = widget.course.questionnaires.firstWhere((q) => q.id==data!.questionnaireStopId);
+
+          for (int i = 0; i < course.questionnaires.length; i++) {
+            if (course.questionnaires.elementAt(i).id ==
+                data.questionnaireStopId) {
+              lastQuestionnaire = course.questionnaires.elementAt(i);
+              data.questionIndex = i;
+              break;
+            }
+          }
+        } else if (data.lessonStopId == 0) {
+          //questionnaire of subject
+          // lastQuestionnaire = lastSubject!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
+
+          for (int i = 0; i < lastSubject!.questionnaire.length; i++) {
+            if (lastSubject.questionnaire.elementAt(i).id ==
+                data.questionnaireStopId) {
+              lastQuestionnaire = lastSubject.questionnaire.elementAt(i);
+              data.questionIndex = i;
+              break;
+            }
+          }
+        } else {
+          //questionnaire of lesson
+          // lastQuestionnaire = lastLesson!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
+
+          for (int i = 0; i < lastLesson!.questionnaire.length; i++) {
+            if (lastLesson.questionnaire.elementAt(i).id ==
+                data.questionnaireStopId) {
+              lastQuestionnaire = lastLesson.questionnaire.elementAt(i);
+              data.questionIndex = i;
+              break;
+            }
+          }
+        }
+        lastTextButton = lastQuestionnaire!.title;
+      }
+    }
+    // }
+
+    course.userCourse = data;
+    course.lastLesson = lastLesson;
+    course.lastSubject = lastSubject;
+    course.lastQuestionnaire = lastQuestionnaire;
+
+    return lastTextButton;
   }
 
   @override

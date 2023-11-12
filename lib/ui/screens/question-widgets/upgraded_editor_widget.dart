@@ -17,12 +17,13 @@ class UpgradedEditorWidget extends StatefulWidget {
 }
 
 class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
-  final double increaseSize = 1.5;
+   double increaseSize = 1.5;
   late MoreData customData;
   List<Widget> positionedItems = [];
   late List<String> ans = [];
   List<TextEditingController> myControllers = [];
-
+  late double myWidth;
+  late double myHeight;
 
   @override
   void initState() {
@@ -47,22 +48,32 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
 
   setPositionItems() {
     positionedItems.clear();
-    Widget myTextField=Container();
+    Widget myTextField = Container();
+    if(double.parse(customData.customQuizQuestionsWidth)<300) {
+      increaseSize=3;
+    }
+    debugPrint('increaseSize $increaseSize');
+    myWidth =
+        double.parse(customData.customQuizQuestionsWidth) * increaseSize.w;
+    myHeight =
+        double.parse(customData.customQuizQuestionsHeight) * increaseSize.h;
     for (var field in customData.quizFields) {
-      if (field.name.isNotEmpty && field.xPosition.isNotEmpty && field.yPosition.isNotEmpty) {
+      if (field.name.isNotEmpty &&
+          field.xPosition.isNotEmpty &&
+          field.yPosition.isNotEmpty) {
         double xPosition = double.parse(field.xPosition) * increaseSize;
         double yPosition = double.parse(field.yPosition) * increaseSize;
         double itemWidth =
-        field.width != '' ? double.parse(field.width) * increaseSize : 0;
+            field.width != '' ? double.parse(field.width) * increaseSize : 0;
         double itemHeight =
-        field.height != '' ? double.parse(field.height) * increaseSize : 0;
+            field.height != '' ? double.parse(field.height) * increaseSize : 0;
 
         if (field.editable.isNotEmpty) {
           ans.add(field.correctAnswer);
           var textEditingController = TextEditingController();
           myControllers.add(textEditingController);
 
-           myTextField = Container(
+          myTextField = Container(
               width: field.maxWidth != ''
                   ? double.parse(field.maxWidth) * increaseSize.w
                   : null,
@@ -76,34 +87,31 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                       isDense: true,
-                      contentPadding: EdgeInsets.only(
-                          top: 10.h, bottom: 10.h),
+                      contentPadding: EdgeInsets.only(top: 10.h, bottom: 10.h),
                       border: const OutlineInputBorder(),
                       enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.black, width: 0.0),
+                        borderSide: BorderSide(color: Colors.black, width: 0.0),
                       ),
                       focusedBorder: const OutlineInputBorder(
-                        borderSide:
-                        BorderSide(color: Colors.black),
+                        borderSide: BorderSide(color: Colors.black),
                       ),
                       hintText: field.defaultValue),
-                  cursorColor: field.color != ''
-                      ? Color(int.parse(field.color))
-                      : null,
+                  cursorColor:
+                      field.color != '' ? Color(int.parse(field.color)) : null,
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   textDirection: field.direction == 'rtl'
                       ? TextDirection.rtl
                       : TextDirection.ltr,
                   style: TextStyle(
-                    fontWeight: field.bold.isNotEmpty?FontWeight.bold:FontWeight.normal,
+                    fontWeight: field.bold.isNotEmpty
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     height: 1,
                     color: field.color != ''
                         ? Color(int.parse(field.color))
                         : null,
-                    fontSize:
-                    double.parse(field.fontSize) * increaseSize.sp,
+                    fontSize: double.parse(field.fontSize) * increaseSize.sp,
                     //   decoration: question.txtbox[i].txtdeco,
 
                     //  color: question.txtbox[i].color,
@@ -118,40 +126,43 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                   }));
         }
 
-          positionedItems.add(Positioned(
-              left: xPosition.w,
-              top: yPosition.h,
-              child: field.type == 'image'
-              //image
-                  ? SizedBox(
-                  width: itemWidth.w,
-                  height: itemHeight.h,
-                  child: Image.network(
-                    field.defaultValue,
-                  )):field.editable.isEmpty?
-              //text
-                   SizedBox(
-                width: field.maxWidth != ''
-                    ? double.parse(field.maxWidth) * increaseSize.w
-                    : null,
-                //goes on top of image and see some white
-                // color:  field.background != ''
-                //     ? Color(int.parse(field.background))
-                //     : null,
-                child: Text(field.defaultValue,
-                    style: TextStyle(
-                        fontWeight: field.bold.isNotEmpty?FontWeight.bold:FontWeight.normal,
-                        fontSize:
-                        double.parse(field.fontSize) * increaseSize.sp,
-                        color: field.color != ''
-                            ? Color(int.parse(field.color))
-                            : null),
-                    textDirection: field.direction == 'rtl'
-                        ? TextDirection.rtl
-                        : TextDirection.ltr),
-              ):
-              myTextField));
-
+        positionedItems.add(Positioned(
+            left: xPosition.w,
+            top: yPosition.h,
+            child: field.type == 'image'
+                //image
+                ? SizedBox(
+                    width: itemWidth.w,
+                    height: itemHeight.h,
+                    child: Image.network(
+                      field.defaultValue,
+                    ))
+                : field.editable.isEmpty
+                    ?
+                    //text
+                    SizedBox(
+                        width: field.maxWidth != ''
+                            ? double.parse(field.maxWidth) * increaseSize.w
+                            : null,
+                        //goes on top of image and see some white
+                        // color:  field.background != ''
+                        //     ? Color(int.parse(field.background))
+                        //     : null,
+                        child: Text(field.defaultValue,
+                            style: TextStyle(
+                                fontWeight: field.bold.isNotEmpty
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: double.parse(field.fontSize) *
+                                    increaseSize.sp,
+                                color: field.color != ''
+                                    ? Color(int.parse(field.color))
+                                    : null),
+                            textDirection: field.direction == 'rtl'
+                                ? TextDirection.rtl
+                                : TextDirection.ltr),
+                      )
+                    : myTextField));
       }
     }
   }
@@ -164,25 +175,21 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     // }
     // debugPrint('${question.anss}  ${question.ans}');
     return Padding(
-      //padding: const EdgeInsets.all(100),
+        //padding: const EdgeInsets.all(100),
         padding: EdgeInsets.only(top: 25.h),
-        child: Column(
-            children: [
-              HtmlDataWidget(widget.question.question,
-                  quizId: widget.question.quizId),
-              SizedBox(
-                height: 35.h,
-              ),
-              SizedBox(
-                  width: double.parse(customData.customQuizQuestionsWidth) *
-                      increaseSize.w,
-                  height:
-                  double.parse(customData.customQuizQuestionsHeight) *
-                      increaseSize.h,
-                  child: Stack(
-                    children: positionedItems,
-                  ))
-            ]));
+        child: Column(children: [
+          HtmlDataWidget(widget.question.question,
+              quizId: widget.question.quizId),
+          SizedBox(
+            height: 35.h,
+          ),
+          SizedBox(
+              width: myWidth,
+              height: myHeight,
+              child: Stack(
+                children: positionedItems,
+              ))
+        ]));
 
     // floatingActionButton: FloatingActionButton(
     //   onPressed: () {

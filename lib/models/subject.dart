@@ -7,7 +7,12 @@ part 'subject.g.dart';
 
 @Collection()
 class Subject {
-  late Id id/* = Isar.autoIncrement*/;
+  // late Id id;
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true,replace: true)
+  late int subjectId;
+
   late String name;
   late String time;
 
@@ -40,7 +45,7 @@ class Subject {
       time:parsedJson['time'],
       lessonsIds: parsedJson['lessons'],
       questionnaireIds: parsedJson['questionnaire'],
-      id:subjectId ,
+      subjectId:subjectId ,
     );
   }
 
@@ -50,7 +55,7 @@ class Subject {
     this.time='',
     this.lessonsIds=const [ ],
     this.questionnaireIds=const [],
-    this.id=0,
+    this.subjectId=0,
   });
 }
 

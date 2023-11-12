@@ -19,10 +19,16 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 class MainPageChild extends StatefulWidget {
   MainPageChild(
-      {super.key, required this.course, required this.knowledgeColor});
+      {super.key, required this.course, required this.knowledgeColor, this.isContinue = 0,
+        this.lessonPickedIndex = -1, this.questionPickedIndex = -1, this.subjectPickedIndex = -1});
 
   final Course course;
   final int knowledgeColor;
+  final int isContinue;
+  final int lessonPickedIndex;
+  final int questionPickedIndex;
+  final int subjectPickedIndex;
+
 
   static _MainPageChildState? of(BuildContext context) =>
       context.findAncestorStateOfType<_MainPageChildState>();
@@ -32,7 +38,6 @@ class MainPageChild extends StatefulWidget {
 }
 
 class _MainPageChildState extends State<MainPageChild> {
-
   late StreamSubscription stream;
   late ValueNotifier<Widget> _bodyWidget;
   Widget? _lastBodyWidget;
@@ -47,8 +52,8 @@ class _MainPageChildState extends State<MainPageChild> {
   late int totalSteps;
   late int currentStep;
   late int progressPercent;
-  late bool doShowNext;
-  late String nextButtonText;
+  late bool doShowNext = false;
+  late String nextButtonText = '';
   final CoursePageController myController = CoursePageController();
   UserCourse? userCourse;
   late Course _currentCourse; // Variable to hold the current course value
@@ -59,16 +64,61 @@ class _MainPageChildState extends State<MainPageChild> {
   void initState() {
     super.initState();
     _currentCourse = widget.course;
+
     userCourse = IsarService().getUserCourseData(_currentCourse.id);
-    _bodyWidget = ValueNotifier(
-        CourseMainPage(course: _currentCourse, controller: myController));
 
+    if (widget.isContinue > 0) {
+      switch (widget.isContinue) {
+        case 1:
+          {
+            lessonPickedIndex = widget.lessonPickedIndex;
+            subjectPickedIndex = widget.subjectPickedIndex;
+            _bodyWidget = ValueNotifier(
+                LessonWidget(lesson: widget.course.lastLesson!,
+                  onNext: widget.course.userCourse!.lessonIndex + 1 <
+                      widget.course.lastSubject!.lessons.length
+                      ? () =>
+                      goToNextLesson(
+                          widget.course.lastSubject!,
+                          widget.course.userCourse!.subjectIndex,
+                          widget.course.lastSubject!.lessons.elementAt(
+                              widget.course.userCourse!.lessonIndex + 1),
+                          widget.course.userCourse!.lessonIndex + 1)
+                      : null,
+                  updateComplete:updateCompleteLesson,));
+
+          }
+          break;
+        case 2:
+          {
+          questionPickedIndex = widget.course.userCourse!.questionIndex;
+           subjectPickedIndex =
+               widget.course.userCourse!.subjectIndex;
+          lessonPickedIndex =
+              widget.course.userCourse!.lessonIndex;
+            _bodyWidget = ValueNotifier( QuestionnaireWidget(
+              quiz: widget.course.lastQuestionnaire!));
+   ;
+          }
+          break;
+      }
+    }
+    else {
+      _bodyWidget = ValueNotifier(
+          CourseMainPage(course: _currentCourse, controller: myController));
+    }
     setSteps();
-  _bodyWidget.addListener(doTaskWhenNotified);
-    setNextData();
-    MainPage.of(context)?.setUpdate = saveLastUserPosition;
+    _bodyWidget.addListener(doTaskWhenNotified);
+    if (widget.isContinue == 0)
+      setNextData();
+    MainPage
+        .of(context)
+        ?.setUpdate = saveLastUserPosition;
 
-  stream=  InstallationDataHelper().eventBusMainPageChild.on().listen((event) async {
+    stream = InstallationDataHelper()
+        .eventBusMainPageChild
+        .on()
+        .listen((event) async {
       debugPrint('eventttt');
       _currentCourse = (await IsarService().getCourseById(_currentCourse.id))!;
       if (_bodyWidget.value is SubjectMainPage) {
@@ -76,38 +126,29 @@ class _MainPageChildState extends State<MainPageChild> {
             .eventBusSubjectPage
             .fire(_currentCourse.subjects.elementAt(subjectPickedIndex));
       } else if (_bodyWidget.value is LessonWidget) {
-        _bodyWidget.value =
-            LessonWidget(
-              lesson: _currentCourse.subjects
+        _bodyWidget.value = LessonWidget(
+          lesson: _currentCourse.subjects
+              .elementAt(subjectPickedIndex)
+              .lessons
+              .elementAt(lessonPickedIndex),
+          updateComplete: updateCompleteLesson,
+          onNext: lessonPickedIndex + 1 <
+              _currentCourse.subjects
                   .elementAt(subjectPickedIndex)
                   .lessons
-                  .elementAt(
-                  lessonPickedIndex),
-              updateComplete:
-              updateCompleteLesson,
-              onNext: lessonPickedIndex +
-                  1 <
+                  .length
+              ? () =>
+              goToNextLesson(
+                  _currentCourse.subjects.elementAt(subjectPickedIndex),
+                  subjectPickedIndex,
                   _currentCourse.subjects
                       .elementAt(subjectPickedIndex)
                       .lessons
-                      .length
-                  ? () =>
-                  goToNextLesson(
-                      _currentCourse.subjects
-                          .elementAt(subjectPickedIndex),
-                      subjectPickedIndex,
-                      _currentCourse.subjects
-                          .elementAt(subjectPickedIndex)
-                          .lessons
-                          .elementAt(
-                          lessonPickedIndex +
-                              1),
-                      lessonPickedIndex +
-                          1)
-                  : null,
-            );
-      }
-      else if(_bodyWidget.value is QuestionnaireWidget) {
+                      .elementAt(lessonPickedIndex + 1),
+                  lessonPickedIndex + 1)
+              : null,
+        );
+      } else if (_bodyWidget.value is QuestionnaireWidget) {
         Quiz currentQuiz;
         if (subjectPickedIndex != -1) {
           Subject currentSubject =
@@ -120,15 +161,17 @@ class _MainPageChildState extends State<MainPageChild> {
           } else
             //quiz of subject
               {
-            currentQuiz = currentSubject.questionnaire
-                .elementAt(questionPickedIndex);
+            currentQuiz =
+                currentSubject.questionnaire.elementAt(questionPickedIndex);
           }
         } else {
-          currentQuiz = _currentCourse.questionnaires
-              .elementAt(questionPickedIndex);
+          currentQuiz =
+              _currentCourse.questionnaires.elementAt(questionPickedIndex);
         }
-        InstallationDataHelper().eventBusQuizPage.fire(currentQuiz.isCompletedCurrentUser);
-      //  _bodyWidget.value=QuestionnaireWidget(quiz: currentQuiz);
+        InstallationDataHelper()
+            .eventBusQuizPage
+            .fire(currentQuiz.isCompletedCurrentUser);
+        //  _bodyWidget.value=QuestionnaireWidget(quiz: currentQuiz);
       }
       if (mounted) {
         setState(() {});
@@ -136,9 +179,12 @@ class _MainPageChildState extends State<MainPageChild> {
     });
   }
 
+//  List<String> fileNames = [];
+
   void doTaskWhenNotified() async {
     await saveLastUserPosition(refresh: true);
-    setNextData(refresh: true);
+    if (widget.isContinue == 0)
+      setNextData(refresh: true);
   }
 
   @override
@@ -181,8 +227,8 @@ class _MainPageChildState extends State<MainPageChild> {
     currentStep += _currentCourse.questionnaires
         .where((item) => item.isCompletedCurrentUser == true)
         .length;
-    //  progressPercent = ((currentStep / totalSteps) * 100).round();
-    progressPercent = userCourse!.progressPercent;
+    progressPercent = ((currentStep / totalSteps) * 100).round();
+    // progressPercent = userCourse!.progressPercent;
   }
 
   @override
@@ -196,9 +242,9 @@ class _MainPageChildState extends State<MainPageChild> {
             progressBar(),
             Expanded(
                 child: Padding(
-              padding: EdgeInsets.only(top: 60.h, right: 138.w),
-              child: _bodyWidget.value,
-            )),
+                  padding: EdgeInsets.only(top: 60.h, right: 138.w),
+                  child: _bodyWidget.value,
+                )),
           ],
         ),
       )
@@ -209,7 +255,7 @@ class _MainPageChildState extends State<MainPageChild> {
     return Container(
       height: 74.h,
       decoration:
-          BoxDecoration(border: Border.all(color: colors.grey2ColorApp)),
+      BoxDecoration(border: Border.all(color: colors.grey2ColorApp)),
       child: Row(
         children: [
           Expanded(
@@ -224,15 +270,15 @@ class _MainPageChildState extends State<MainPageChild> {
                     child: Row(
                       children: [
                         Text(
-                          '${/*userCourse!.progressPercent*/ progressPercent}% הושלמו',
+                          '${ /*userCourse!.progressPercent*/ progressPercent}% הושלמו',
                           style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color:
-                                  //todo change get color or from knowledge or from path
-                                  Color(
-                                      /*widget.knowledgeColor != -1 ? widget.knowledgeColor:*/
-                                      0xff32D489)),
+                              //todo change get color or from knowledge or from path
+                              Color(
+                                /*widget.knowledgeColor != -1 ? widget.knowledgeColor:*/
+                                  0xff32D489)),
                           // Color(widget.course.knowledge.value??widget.course.knowledge.value!.color)),
                         ),
                         SizedBox(
@@ -254,7 +300,7 @@ class _MainPageChildState extends State<MainPageChild> {
                     progressColor: colors.lightGreen1ColorApp,
                     lineHeight: 5,
                     percent: /*userCourse!.progressPercent*/
-                        (progressPercent >= 100 ? 100 : progressPercent) / 100,
+                    (progressPercent >= 100 ? 100 : progressPercent) / 100,
                     isRTL: true,
                   ),
                 ],
@@ -327,134 +373,151 @@ class _MainPageChildState extends State<MainPageChild> {
                                             child: Column(children: [
                                               Visibility(
                                                 visible:
-                                                    currentSubject.isTapped,
+                                                currentSubject.isTapped,
                                                 child: ListView.builder(
                                                   shrinkWrap: true,
                                                   itemCount: currentSubject
                                                       .lessons.length,
                                                   itemBuilder: (ctx, lIndex) {
                                                     Lesson currentLesson =
-                                                        currentSubject.lessons
-                                                            .elementAt(lIndex);
+                                                    currentSubject.lessons
+                                                        .elementAt(lIndex);
                                                     return Center(
                                                         child: Column(
-                                                      children: [
-                                                        lessonOrQuestionnaireItem(
-                                                            true,
-                                                            currentLesson
-                                                                .isCompletedCurrentUser,
-                                                            lIndex == 0,
-                                                            currentLesson
+                                                          children: [
+                                                            lessonOrQuestionnaireItem(
+                                                                true,
+                                                                currentLesson
+                                                                    .isCompletedCurrentUser,
+                                                                lIndex == 0,
+                                                                currentLesson
                                                                     .questionnaire
                                                                     .isEmpty &&
-                                                                currentSubject
-                                                                    .questionnaire
-                                                                    .isEmpty &&
-                                                                lIndex ==
                                                                     currentSubject
+                                                                        .questionnaire
+                                                                        .isEmpty &&
+                                                                    lIndex ==
+                                                                        currentSubject
                                                                             .lessons
                                                                             .length -
-                                                                        1,
-                                                            lIndex,
-                                                            currentLesson.name,
-                                                            lessonPickedIndex == lIndex &&
-                                                                subjectPickedIndex ==
-                                                                    sIndex &&
-                                                                _bodyWidget
+                                                                            1,
+                                                                lIndex,
+                                                                currentLesson
+                                                                    .name,
+                                                                lessonPickedIndex ==
+                                                                    lIndex &&
+                                                                    subjectPickedIndex ==
+                                                                        sIndex &&
+                                                                    _bodyWidget
                                                                         .value
                                                                     is LessonWidget,
-                                                            () {
-                                                          setState(() {
-                                                            lessonPickedIndex =
-                                                                lIndex;
-                                                            subjectPickedIndex =
-                                                                sIndex;
-                                                            questionPickedIndex =
-                                                                -1;
-                                                            _bodyWidget.value =
-                                                                LessonWidget(
-                                                                  lesson: currentSubject
-                                                                      .lessons
-                                                                      .elementAt(
-                                                                      lessonPickedIndex),
-                                                                  updateComplete:
-                                                                  updateCompleteLesson,
-                                                                  onNext: lessonPickedIndex +
-                                                                      1 <
-                                                                      currentSubject
-                                                                          .lessons
-                                                                          .length
-                                                                      ? () => goToNextLesson(
-                                                                      currentSubject,
-                                                                      subjectPickedIndex,
-                                                                      currentSubject
-                                                                          .lessons
-                                                                          .elementAt(lessonPickedIndex +
-                                                                          1),
-                                                                      lessonPickedIndex +
-                                                                          1)
-                                                                      : null,
-                                                                );
-                                                            // nextLesson:currentSubject.lessons.length>lessonPickedIndex+1 ?setNextLesson(currentSubject.lessons,lessonPickedIndex+1):null);
-                                                          });
-                                                        }),
-                                                        if (currentLesson
-                                                            .questionnaire
-                                                            .isNotEmpty)
-                                                          ListView.builder(
-                                                              shrinkWrap: true,
-                                                              itemCount:
+                                                                    () {
+                                                                  setState(() {
+                                                                    lessonPickedIndex =
+                                                                        lIndex;
+                                                                    subjectPickedIndex =
+                                                                        sIndex;
+                                                                    questionPickedIndex =
+                                                                    -1;
+                                                                    _bodyWidget
+                                                                        .value =
+                                                                        LessonWidget(
+                                                                          lesson: currentSubject
+                                                                              .lessons
+                                                                              .elementAt(
+                                                                              lessonPickedIndex),
+                                                                          updateComplete:
+                                                                          updateCompleteLesson,
+                                                                          onNext: lessonPickedIndex +
+                                                                              1 <
+                                                                              currentSubject
+                                                                                  .lessons
+                                                                                  .length
+                                                                              ? () =>
+                                                                              goToNextLesson(
+                                                                                  currentSubject,
+                                                                                  subjectPickedIndex,
+                                                                                  currentSubject
+                                                                                      .lessons
+                                                                                      .elementAt(
+                                                                                      lessonPickedIndex +
+                                                                                          1),
+                                                                                  lessonPickedIndex +
+                                                                                      1)
+                                                                              : null,
+                                                                        );
+                                                                    // nextLesson:currentSubject.lessons.length>lessonPickedIndex+1 ?setNextLesson(currentSubject.lessons,lessonPickedIndex+1):null);
+                                                                  });
+                                                                }),
+                                                            if (currentLesson
+                                                                .questionnaire
+                                                                .isNotEmpty)
+                                                              ListView.builder(
+                                                                  shrinkWrap: true,
+                                                                  itemCount:
                                                                   currentLesson
                                                                       .questionnaire
                                                                       .length,
-                                                              itemBuilder: (ctx,
-                                                                  qIndex) {
-                                                                return lessonOrQuestionnaireItem(
-                                                                    false,
-                                                                    currentLesson
-                                                                        .questionnaire
-                                                                        .elementAt(
-                                                                            qIndex)
-                                                                        .isCompletedCurrentUser,
-                                                                    false,
-                                                                    // currentLesson.questionnaire.first.questionnaireList.isEmpty &&
-                                                                    qIndex ==
-                                                                            currentLesson.questionnaire.length -
-                                                                                1 &&
-                                                                        lIndex ==
-                                                                            currentSubject.lessons.length -
-                                                                                1 &&
-                                                                        currentSubject
+                                                                  itemBuilder: (
+                                                                      ctx,
+                                                                      qIndex) {
+                                                                    return lessonOrQuestionnaireItem(
+                                                                        false,
+                                                                        currentLesson
                                                                             .questionnaire
-                                                                            .isEmpty,
-                                                                    lIndex,
-                                                                    currentLesson
-                                                                        .questionnaire
-                                                                        .elementAt(
+                                                                            .elementAt(
                                                                             qIndex)
-                                                                        .title,
-                                                                    lessonPickedIndex == lIndex &&
-                                                                        subjectPickedIndex ==
-                                                                            sIndex &&
-                                                                        questionPickedIndex ==
-                                                                            qIndex &&
-                                                                        _bodyWidget.value
+                                                                            .isCompletedCurrentUser,
+                                                                        false,
+                                                                        // currentLesson.questionnaire.first.questionnaireList.isEmpty &&
+                                                                        qIndex ==
+                                                                            currentLesson
+                                                                                .questionnaire
+                                                                                .length -
+                                                                                1 &&
+                                                                            lIndex ==
+                                                                                currentSubject
+                                                                                    .lessons
+                                                                                    .length -
+                                                                                    1 &&
+                                                                            currentSubject
+                                                                                .questionnaire
+                                                                                .isEmpty,
+                                                                        lIndex,
+                                                                        currentLesson
+                                                                            .questionnaire
+                                                                            .elementAt(
+                                                                            qIndex)
+                                                                            .title,
+                                                                        lessonPickedIndex ==
+                                                                            lIndex &&
+                                                                            subjectPickedIndex ==
+                                                                                sIndex &&
+                                                                            questionPickedIndex ==
+                                                                                qIndex &&
+                                                                            _bodyWidget
+                                                                                .value
                                                                             is QuestionnaireWidget,
-                                                                    () =>
-                                                                        setState(
-                                                                            () {
-                                                                          lessonPickedIndex =
-                                                                              lIndex;
-                                                                          subjectPickedIndex =
-                                                                              sIndex;
-                                                                          questionPickedIndex =
-                                                                              qIndex;
-                                                                          _bodyWidget.value =
-                                                                              QuestionnaireWidget(quiz: currentLesson.questionnaire.elementAt(qIndex));
-                                                                        }));
-                                                              })
-                                                      ],
-                                                    ));
+                                                                            () =>
+                                                                            setState(
+                                                                                    () {
+                                                                                  lessonPickedIndex =
+                                                                                      lIndex;
+                                                                                  subjectPickedIndex =
+                                                                                      sIndex;
+                                                                                  questionPickedIndex =
+                                                                                      qIndex;
+                                                                                  _bodyWidget
+                                                                                      .value =
+                                                                                      QuestionnaireWidget(
+                                                                                          quiz: currentLesson
+                                                                                              .questionnaire
+                                                                                              .elementAt(
+                                                                                              qIndex));
+                                                                                }));
+                                                                  })
+                                                          ],
+                                                        ));
                                                   },
                                                 ),
                                               ),
@@ -462,13 +525,13 @@ class _MainPageChildState extends State<MainPageChild> {
                                                   .questionnaire.isNotEmpty)
                                                 Visibility(
                                                     visible:
-                                                        currentSubject.isTapped,
+                                                    currentSubject.isTapped,
                                                     child: ListView.builder(
                                                         shrinkWrap: true,
                                                         itemCount:
-                                                            currentSubject
-                                                                .questionnaire
-                                                                .length,
+                                                        currentSubject
+                                                            .questionnaire
+                                                            .length,
                                                         itemBuilder:
                                                             (ctx, qIndex) {
                                                           return lessonOrQuestionnaireItem(
@@ -476,30 +539,31 @@ class _MainPageChildState extends State<MainPageChild> {
                                                               currentSubject
                                                                   .questionnaire
                                                                   .elementAt(
-                                                                      qIndex)
+                                                                  qIndex)
                                                                   .isCompletedCurrentUser,
                                                               false,
                                                               qIndex ==
                                                                   currentSubject
-                                                                          .questionnaire
-                                                                          .length -
+                                                                      .questionnaire
+                                                                      .length -
                                                                       1,
                                                               -1,
                                                               currentSubject
                                                                   .questionnaire
                                                                   .elementAt(
-                                                                      qIndex)
+                                                                  qIndex)
                                                                   .title,
                                                               lessonPickedIndex ==
-                                                                      -1 &&
+                                                                  -1 &&
                                                                   subjectPickedIndex ==
                                                                       sIndex &&
                                                                   questionPickedIndex ==
                                                                       qIndex,
-                                                              () =>
+                                                                  () =>
                                                                   setState(() {
                                                                     debugPrint(
-                                                                        'currentSubject.questionnaire ${currentSubject.questionnaire}');
+                                                                        'currentSubject.questionnaire ${currentSubject
+                                                                            .questionnaire}');
                                                                     subjectPickedIndex =
                                                                         sIndex;
                                                                     // todo??
@@ -507,14 +571,17 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                         sIndex;
 
                                                                     lessonPickedIndex =
-                                                                        -1;
+                                                                    -1;
                                                                     questionPickedIndex =
                                                                         qIndex;
                                                                     _bodyWidget
-                                                                            .value =
+                                                                        .value =
                                                                         QuestionnaireWidget(
                                                                             quiz:
-                                                                                currentSubject.questionnaire.elementAt(qIndex));
+                                                                            currentSubject
+                                                                                .questionnaire
+                                                                                .elementAt(
+                                                                                qIndex));
                                                                   }));
                                                         }))
                                             ])),
@@ -528,7 +595,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                 ListView.builder(
                                     shrinkWrap: true,
                                     itemCount:
-                                        _currentCourse.questionnaires.length,
+                                    _currentCourse.questionnaires.length,
                                     itemBuilder: (ctx, qIndex) {
                                       return lessonOrQuestionnaireItem(
                                           false,
@@ -538,7 +605,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                           qIndex == 0,
                                           qIndex ==
                                               _currentCourse
-                                                      .questionnaires.length -
+                                                  .questionnaires.length -
                                                   1,
                                           -1,
                                           _currentCourse.questionnaires
@@ -547,7 +614,8 @@ class _MainPageChildState extends State<MainPageChild> {
                                           lessonPickedIndex == -1 &&
                                               subjectPickedIndex == -1 &&
                                               questionPickedIndex == qIndex,
-                                          () => setState(() {
+                                              () =>
+                                              setState(() {
                                                 subjectPickedIndex = -1;
                                                 lessonPickedIndex = -1;
                                                 questionPickedIndex = qIndex;
@@ -557,7 +625,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                                             .questionnaires
                                                             .elementAt(qIndex));
                                               })
-                                          /* Container(
+                                        /* Container(
                                               width: double.infinity,
                                               padding:
                                                   EdgeInsets.only(right: 10.w),
@@ -579,7 +647,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                                         color:
                                                             Color(0xFF2D2828))),
                                               ])))*/
-                                          );
+                                      );
                                     })
                             ],
                           ),
@@ -618,7 +686,7 @@ class _MainPageChildState extends State<MainPageChild> {
                   //overflow: TextOverflow.ellipsis,
                   //softWrap: false,
                   style:
-                      TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
+                  TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
             ),
             // Spacer(),
             Icon(Icons.arrow_drop_down_sharp)
@@ -640,7 +708,8 @@ class _MainPageChildState extends State<MainPageChild> {
             subjectIndex: subjectPickedIndex,
             subject: currentSubject,
             onNext: subjectPickedIndex + 1 < _currentCourse.subjects.length
-                ? () => goToNextSubject(
+                ? () =>
+                goToNextSubject(
                     _currentCourse.subjects.elementAt(subjectPickedIndex + 1),
                     subjectPickedIndex + 1)
                 : null,
@@ -653,22 +722,21 @@ class _MainPageChildState extends State<MainPageChild> {
   statusIconSubjectWidget(Subject currentSubject) {
     return currentSubject.isCompletedCurrentUser
         ? Icon(Icons.check_circle,
-            color: colors.lightGreen1ColorApp, size: 22.sp)
+        color: colors.lightGreen1ColorApp, size: 22.sp)
         : currentSubject.lessons
-                    .any((lesson) => lesson.isCompletedCurrentUser) ||
-                currentSubject.lessons.any((lesson) =>
-                    lesson.isCompletedCurrentUser ||
-                    lesson.questionnaire
-                        .any((q) => q.isCompletedCurrentUser)) ||
-                currentSubject.questionnaire
-                    .any((q) => q.isCompletedCurrentUser)
-            ? Image.asset('assets/images/procces_circle.png')
-            : Icon(Icons.circle_outlined,
-                color: colors.grey2ColorApp, size: 22.sp);
+        .any((lesson) => lesson.isCompletedCurrentUser) ||
+        currentSubject.lessons.any((lesson) =>
+        lesson.isCompletedCurrentUser ||
+            lesson.questionnaire
+                .any((q) => q.isCompletedCurrentUser)) ||
+        currentSubject.questionnaire
+            .any((q) => q.isCompletedCurrentUser)
+        ? Image.asset('assets/images/procces_circle.png')
+        : Icon(Icons.circle_outlined,
+        color: colors.grey2ColorApp, size: 22.sp);
   }
 
-  lessonOrQuestionnaireItem(
-      bool isLesson,
+  lessonOrQuestionnaireItem(bool isLesson,
       bool isLessonCompleted,
       bool isFirst,
       bool isLastLesson,
@@ -696,10 +764,10 @@ class _MainPageChildState extends State<MainPageChild> {
               //currentSubject.lessons.isNotEmpty &&
               isLessonCompleted
                   ? Icon(
-                      Icons.check_circle,
-                      color: colors.lightGreen1ColorApp,
-                      size: 20.sp,
-                    )
+                Icons.check_circle,
+                color: colors.lightGreen1ColorApp,
+                size: 20.sp,
+              )
                   : circleNotCompletedIcon()
             ],
           ),
@@ -712,9 +780,9 @@ class _MainPageChildState extends State<MainPageChild> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
                   tileColor:
-                      isSelect ? colors.grey2ColorApp : Colors.transparent,
+                  isSelect ? colors.grey2ColorApp : Colors.transparent,
                   contentPadding:
-                      EdgeInsets.only(right: 20.h, bottom: 20.h, left: 20.h),
+                  EdgeInsets.only(right: 20.h, bottom: 20.h, left: 20.h),
                   // hoverColor: colors.grey2ColorApp,
                   title: Row(
                     children: [
@@ -722,8 +790,8 @@ class _MainPageChildState extends State<MainPageChild> {
                         isLesson
                             ? Icons.videocam_outlined
                             : lIndex == -1
-                                ? Icons.star_outline
-                                : Icons.create_outlined,
+                            ? Icons.star_outline
+                            : Icons.create_outlined,
                         size: 22.sp,
                         color: Colors.black,
                       ),
@@ -804,18 +872,19 @@ class _MainPageChildState extends State<MainPageChild> {
                   //  int nextS=subjectPickedIndex+1;
                   if (_bodyWidget.value is LessonWidget) {
                     Subject mySubject =
-                        _currentCourse.subjects.elementAt(subjectPickedIndex);
+                    _currentCourse.subjects.elementAt(subjectPickedIndex);
                     lessonPickedIndex = lessonPickedIndex + 1;
                     _bodyWidget.value = LessonWidget(
                       lesson: mySubject.lessons.elementAt(lessonPickedIndex),
                       updateComplete: updateCompleteLesson,
                       onNext: lessonPickedIndex + 1 < mySubject.lessons.length
-                          ? () => goToNextLesson(
-                          mySubject,
-                          subjectPickedIndex,
-                          mySubject.lessons
-                              .elementAt(lessonPickedIndex + 1),
-                          lessonPickedIndex + 1)
+                          ? () =>
+                          goToNextLesson(
+                              mySubject,
+                              subjectPickedIndex,
+                              mySubject.lessons
+                                  .elementAt(lessonPickedIndex + 1),
+                              lessonPickedIndex + 1)
                           : null,
                     );
                   } else {
@@ -824,7 +893,7 @@ class _MainPageChildState extends State<MainPageChild> {
                       if (_bodyWidget.value is SubjectMainPage) {
                         subjectPickedIndex++;
                       } else //courseMainPage - go to first subject
-                      {
+                          {
                         subjectPickedIndex = 0;
                       }
                       _bodyWidget.value = SubjectMainPage(
@@ -832,8 +901,9 @@ class _MainPageChildState extends State<MainPageChild> {
                           subject: _currentCourse.subjects
                               .elementAt(subjectPickedIndex),
                           onNext: subjectPickedIndex + 1 <
-                                  _currentCourse.subjects.length
-                              ? () => goToNextSubject(
+                              _currentCourse.subjects.length
+                              ? () =>
+                              goToNextSubject(
                                   _currentCourse.subjects
                                       .elementAt(subjectPickedIndex + 1),
                                   subjectPickedIndex + 1)
@@ -852,7 +922,7 @@ class _MainPageChildState extends State<MainPageChild> {
 
     if (_lastBodyWidget != null) {
       if ((_bodyWidget.value is! QuestionnaireWidget &&
-              _bodyWidget.value is! LessonWidget) ||
+          _bodyWidget.value is! LessonWidget) ||
           !refresh) {
         if (_lastBodyWidget is QuestionnaireWidget ||
             _lastBodyWidget is LessonWidget) {
@@ -861,9 +931,9 @@ class _MainPageChildState extends State<MainPageChild> {
           if (_lastBodyWidget is LessonWidget ||
               _bodyWidget.value is! SubjectMainPage) {
             saveSubjectIndex =
-                lastSubjectPickedIndex != -1 /*|| lastQuestionPickedIndex!=-1*/
-                    ? lastSubjectPickedIndex
-                    : subjectPickedIndex;
+            lastSubjectPickedIndex != -1 /*|| lastQuestionPickedIndex!=-1*/
+                ? lastSubjectPickedIndex
+                : subjectPickedIndex;
 
             debugPrint('111 saveSubjectIndex $saveSubjectIndex');
           } else {
@@ -876,13 +946,15 @@ class _MainPageChildState extends State<MainPageChild> {
               : questionPickedIndex;
           debugPrint(
               'subjectPickedIndex: $subjectPickedIndex lessonPickedIndex: $lessonPickedIndex '
-              'saveSubjectIndex: $saveSubjectIndex');
+                  'saveSubjectIndex: $saveSubjectIndex');
           int qId = -1;
           if (_lastBodyWidget is QuestionnaireWidget) {
             debugPrint('questionPickedIndex: $questionPickedIndex');
             debugPrint('saveQIndex: $saveQIndex');
             if (saveSubjectIndex == -1 /*|| questionPickedIndex==-1*/) {
-              qId = course.questionnaires.elementAt(saveQIndex).id;
+              qId = course.questionnaires
+                  .elementAt(saveQIndex)
+                  .id;
             } else {
               if (lessonPickedIndex == -1) {
                 qId = course.subjects
@@ -905,14 +977,16 @@ class _MainPageChildState extends State<MainPageChild> {
 
           UserCourse userCourse = UserCourse()
             ..subjectStopId = saveSubjectIndex != -1
-                ? course.subjects.elementAt(saveSubjectIndex).id
+                ? course.subjects
+                .elementAt(saveSubjectIndex)
+                .subjectId
                 : 0
             ..lessonStopId = lessonPickedIndex != -1
                 ? course.subjects
-                    .elementAt(saveSubjectIndex)
-                    .lessons
-                    .elementAt(lessonPickedIndex)
-                    .id
+                .elementAt(saveSubjectIndex)
+                .lessons
+                .elementAt(lessonPickedIndex)
+                .lessonId
                 : 0
             ..questionnaireStopId = qId
             ..isQuestionnaire = _lastBodyWidget is QuestionnaireWidget
@@ -945,7 +1019,8 @@ class _MainPageChildState extends State<MainPageChild> {
           lesson: currentLesson,
           updateComplete: updateCompleteLesson,
           onNext: nextIndex < currentSubject.lessons.length
-              ? () => goToNextLesson(currentSubject, subjectIndex,
+              ? () =>
+              goToNextLesson(currentSubject, subjectIndex,
                   currentSubject.lessons.elementAt(nextIndex), nextIndex)
               : null);
     });
@@ -960,7 +1035,8 @@ class _MainPageChildState extends State<MainPageChild> {
           subjectIndex: nextIndex,
           subject: currentSubject,
           onNext: nextIndex < _currentCourse.subjects.length
-              ? () => goToNextSubject(
+              ? () =>
+              goToNextSubject(
                   _currentCourse.subjects.elementAt(nextIndex), nextIndex)
               : null);
     });
@@ -973,7 +1049,7 @@ class _MainPageChildState extends State<MainPageChild> {
 
   updateCompleteLesson(int lessonId) async {
     Subject currentSubject =
-        _currentCourse.subjects.elementAt(subjectPickedIndex);
+    _currentCourse.subjects.elementAt(subjectPickedIndex);
     if (!currentSubject.lessons
         .elementAt(lessonPickedIndex)
         .isCompletedCurrentUser) {
@@ -991,11 +1067,11 @@ class _MainPageChildState extends State<MainPageChild> {
     //if all lessons and quizs in subject are completed set subject as completed
     if (!currentSubject.isCompletedCurrentUser &&
         currentSubject.lessons.every((l) =>
-            l.isCompletedCurrentUser &&
+        l.isCompletedCurrentUser &&
             l.questionnaire.every((q) => q.isCompletedCurrentUser)) &&
         currentSubject.questionnaire.every((q) => q.isCompletedCurrentUser)) {
       currentSubject.isCompletedCurrentUser = true;
-      IsarService().updateSubjectCompleted(currentSubject.id, true);
+      IsarService().updateSubjectCompleted(currentSubject.subjectId, true);
       updateCourseStatus(checkCompleted: true, updateMiddle: true);
     } else {
       updateCourseStatus(updateMiddle: true);
@@ -1024,7 +1100,7 @@ class _MainPageChildState extends State<MainPageChild> {
     int? lessonId;
     if (subjectPickedIndex != -1) {
       Subject currentSubject =
-          _currentCourse.subjects.elementAt(subjectPickedIndex);
+      _currentCourse.subjects.elementAt(subjectPickedIndex);
       if (lessonPickedIndex != -1) {
         if (!currentSubject.lessons
             .elementAt(lessonPickedIndex)
@@ -1051,13 +1127,15 @@ class _MainPageChildState extends State<MainPageChild> {
                   .elementAt(lessonPickedIndex)
                   .isCompletedCurrentUser = true;
               numUpdate++;
-              lessonId = currentSubject.lessons.elementAt(lessonPickedIndex).id;
+              lessonId = currentSubject.lessons
+                  .elementAt(lessonPickedIndex)
+                  .lessonId;
             }
           }
         }
       } else
-      //quiz of subject
-      {
+        //quiz of subject
+          {
         if (!currentSubject.questionnaire
             .elementAt(questionPickedIndex)
             .isCompletedCurrentUser) {

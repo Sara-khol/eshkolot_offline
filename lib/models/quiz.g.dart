@@ -2219,18 +2219,23 @@ const AnswerSchema = Schema(
       name: r'ans',
       type: IsarType.string,
     ),
-    r'isCurrect': PropertySchema(
+    r'html': PropertySchema(
       id: 1,
+      name: r'html',
+      type: IsarType.bool,
+    ),
+    r'isCurrect': PropertySchema(
+      id: 2,
       name: r'isCurrect',
       type: IsarType.bool,
     ),
     r'matrixMatch': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'matrixMatch',
       type: IsarType.string,
     ),
     r'points': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'points',
       type: IsarType.long,
     )
@@ -2264,9 +2269,10 @@ void _answerSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.ans);
-  writer.writeBool(offsets[1], object.isCorrect);
-  writer.writeString(offsets[2], object.matrixMatch);
-  writer.writeLong(offsets[3], object.points);
+  writer.writeBool(offsets[1], object.html);
+  writer.writeBool(offsets[2], object.isCorrect);
+  writer.writeString(offsets[3], object.matrixMatch);
+  writer.writeLong(offsets[4], object.points);
 }
 
 Answer _answerDeserialize(
@@ -2277,9 +2283,10 @@ Answer _answerDeserialize(
 ) {
   final object = Answer(
     ans: reader.readStringOrNull(offsets[0]) ?? '',
-    isCorrect: reader.readBoolOrNull(offsets[1]) ?? false,
-    matrixMatch: reader.readStringOrNull(offsets[2]),
-    points: reader.readLongOrNull(offsets[3]) ?? -1,
+    html: reader.readBoolOrNull(offsets[1]) ?? false,
+    isCorrect: reader.readBoolOrNull(offsets[2]) ?? false,
+    matrixMatch: reader.readStringOrNull(offsets[3]),
+    points: reader.readLongOrNull(offsets[4]) ?? -1,
   );
   return object;
 }
@@ -2296,8 +2303,10 @@ P _answerDeserializeProp<P>(
     case 1:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
       return (reader.readLongOrNull(offset) ?? -1) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2429,6 +2438,15 @@ extension AnswerQueryFilter on QueryBuilder<Answer, Answer, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'ans',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Answer, Answer, QAfterFilterCondition> htmlEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'html',
+        value: value,
       ));
     });
   }

@@ -12,7 +12,11 @@ class LessonWidget extends StatefulWidget {
   final VoidCallback? onNext;
   final Function(int) updateComplete;
 
-  const LessonWidget({super.key, required this.lesson, required this.onNext, required this.updateComplete});
+  const LessonWidget(
+      {super.key,
+      required this.lesson,
+      required this.onNext,
+      required this.updateComplete});
 
   @override
   State<LessonWidget> createState() => _LessonWidgetState();
@@ -36,13 +40,13 @@ class _LessonWidgetState extends State<LessonWidget> {
     // });
 
     debugPrint('lesson initState isComplete ${lesson.isCompletedCurrentUser}');
-
   }
 
   @override
   void didUpdateWidget(covariant LessonWidget oldWidget) {
     lesson = widget.lesson;
-    debugPrint('lesson didUpdateWidget isComplete ${lesson.isCompletedCurrentUser}');
+    debugPrint(
+        'lesson didUpdateWidget isComplete ${lesson.isCompletedCurrentUser}');
 
     // if (widget.lesson.id != oldWidget.lesson.id) {
     //   player.dispose();
@@ -96,7 +100,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                     ),
                     Expanded(
                       child: Text(
-                        lesson.name,
+                        '${lesson.name} ${lesson.videoNum}',
                         // overflow:TextOverflow.ellipsis ,
                         style: TextStyle(
                             fontSize: 36.sp, fontWeight: FontWeight.w600),
@@ -113,23 +117,30 @@ class _LessonWidgetState extends State<LessonWidget> {
                       width: 7.w,
                     ),
                     Text(
-                     widget.lesson.time,
-                      style: TextStyle(fontSize: 16.sp, color: colors.blackColorApp),
+                      widget.lesson.time,
+                      style: TextStyle(
+                          fontSize: 16.sp, color: colors.blackColorApp),
                     ),
                     SizedBox(width: 10.w),
                     Container(
-                      height: 20.h,
-                      width: 70.w,
-                      decoration: BoxDecoration(
-                          color:lesson.isCompletedCurrentUser? colors.lightGreen2ColorApp:colors.lightBlueColorApp,
-                          borderRadius: const BorderRadius.all(Radius.circular(10))),
-                      child: Center(
-                        child: Text(
-                         lesson.isCompletedCurrentUser?'הושלם':'בלמידה',
-                          //  textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13.sp, color: colors.blackColorApp,fontWeight: FontWeight.w600),
+                        height: 20.h,
+                        width: 70.w,
+                        decoration: BoxDecoration(
+                            color: lesson.isCompletedCurrentUser
+                                ? colors.lightGreen2ColorApp
+                                : colors.lightBlueColorApp,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10))),
+                        child: Center(
+                          child: Text(
+                            lesson.isCompletedCurrentUser ? 'הושלם' : 'בלמידה',
+                            //  textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 13.sp,
+                                color: colors.blackColorApp,
+                                fontWeight: FontWeight.w600),
                           ),
-                      )),
+                        )),
                     SizedBox(
                       width: 18.w,
                     ),
@@ -141,7 +152,11 @@ class _LessonWidgetState extends State<LessonWidget> {
                 /*videoWidget*/
                 VideoWidget(
                     key: Key(lesson.vimeo.toString()),
-                    vimoeId: lesson.vimeo /*, player: player*/),
+                    videoNum: lesson.videoNum,
+                    fileId: MainPageChild.of(context)!.widget.course.id,
+                    vimoeId: MainPageChild.of(context)!.widget.course.isSync
+                        ? lesson.vimeo
+                        : lesson.videoNum),
                 SizedBox(
                   height: 22.h,
                 )
@@ -165,7 +180,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                     return Container(
                       padding: EdgeInsets.only(left: 18.w, right: 18.w),
                       height: 66.h,
-                      width:  950.w,
+                      width: 950.w,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -178,15 +193,13 @@ class _LessonWidgetState extends State<LessonWidget> {
                           ),
                           Expanded(
                             child: Text(
-                              'תרגול - ${lesson.name} ${qIndex+1}',
+                              'תרגול - ${lesson.name} ${qIndex + 1}',
                               style: TextStyle(
                                   fontSize: 22.sp, fontWeight: FontWeight.w600),
                             ),
                           ),
                           SizedBox(width: 65.h),
-                          Icon(
-                            Icons.access_time,
-                            size: 14.sp),
+                          Icon(Icons.access_time, size: 14.sp),
                           Text(
                             "  30 דק'  ",
                             style: TextStyle(fontSize: 16.sp),
@@ -219,8 +232,8 @@ class _LessonWidgetState extends State<LessonWidget> {
                               ),
                               onPressed: () {
                                 setState(() {
-
-                                  MainPageChild.of(context)?.questionPickedIndex=qIndex;
+                                  MainPageChild.of(context)
+                                      ?.questionPickedIndex = qIndex;
                                   MainPageChild.of(context)?.bodyWidget =
                                       QuestionnaireWidget(
                                           quiz: lesson.questionnaire
@@ -243,9 +256,9 @@ class _LessonWidgetState extends State<LessonWidget> {
             child: Row(
               children: [
                 Spacer(),
-                Visibility (
+                Visibility(
                   visible: widget.onNext != null,
-                  child: Container (
+                  child: Container(
                     height: 40.h,
                     margin: EdgeInsets.only(bottom: 37.h),
                     decoration: BoxDecoration(
@@ -269,9 +282,9 @@ class _LessonWidgetState extends State<LessonWidget> {
                         ],
                       ),
                       onPressed: () async {
-                      // lesson= await IsarService().updateLessonCompleted(lesson.id);
-                        widget.updateComplete(widget.lesson.id);
-                       widget.onNext!();
+                        // lesson= await IsarService().updateLessonCompleted(lesson.id);
+                        widget.updateComplete(widget.lesson.lessonId);
+                        widget.onNext!();
                         setState(() {});
                       },
                     ),

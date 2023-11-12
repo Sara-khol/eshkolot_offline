@@ -481,7 +481,8 @@ class IsarService {
     Lesson? lesson;
     await isar.writeTxn(() async {
       if (updateLesson) {
-        lesson = await isar.lessons.get(id);
+        // lesson = await isar.lessons.get(id);
+        lesson = await isar.lessons.where().lessonIdEqualTo(id).findFirst();
         lesson!.isCompletedCurrentUser = true;
         await isar.lessons.put(lesson!);
       }
@@ -523,7 +524,9 @@ class IsarService {
     final isar = await db;
     await isar.writeTxn(() async {
       if (!updateUser) {
-        Subject? subject = await isar.subjects.get(id);
+        // Subject? subject = await isar.subjects.get(id);
+        Subject? subject = await isar.subjects.where().subjectIdEqualTo(id).findFirst();
+
         subject!.isCompletedCurrentUser = true;
         await isar.subjects.put(subject);
       } else {
@@ -554,6 +557,19 @@ class IsarService {
         }
       }
     });
+  }
+
+  updateVideoNum(List<Lesson> list) async {
+    final isar = await db;
+    await isar.writeTxnSync(() async {
+      isar.lessons.putAllSync(list);
+    });
+  }
+  
+  Future<List<Lesson>?> getAllLessonsOfCourse(int  courseId) async
+  {
+    final isar = await db;
+    return   isar.lessons.where().courseIdEqualTo(courseId).findAll();
   }
 
   updateGrade(UserGrade userGrade) async
