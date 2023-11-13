@@ -299,7 +299,8 @@ class IsarService {
   addUserCourseStop(UserCourse newDataCourse) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      User? user = await isar.users.get(_user.id);
+    //  User? user = await isar.users.get(_user.id);
+      User? user = _user;
       UserCourse? course = user!.courses.firstWhereOrNull(
           (course) => course.courseId == newDataCourse.courseId);
 
@@ -491,6 +492,8 @@ class IsarService {
         if (!lessonCompletedList.contains(id)) {
           lessonCompletedList.add(id);
           _user.lessonCompleted = lessonCompletedList;
+          debugPrint('knowledgeCoursesMap ${_user.knowledgeCoursesMap.length}');
+          debugPrint('name ${_user.name}');
           await isar.users.put(_user);
         }
       }

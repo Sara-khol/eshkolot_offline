@@ -95,6 +95,8 @@ class _HomePageState extends State<HomePage> {
         },
       );
 
+  late Future myFuture;
+
   @override
   initState() {
     debugPrint('initState listen');
@@ -110,12 +112,14 @@ class _HomePageState extends State<HomePage> {
     //     debugPrint('hhhjjjkkk');
     //   });
     // };
+    myFuture=initDirectory();
     stream =
         InstallationDataHelper().eventBusHomePage.on().listen((event) async {
       debugPrint('event listen');
       User user = IsarService().getCurrentUser();
       knowledgeCourses = user.knowledgeCoursesMap;
       if (mounted) {
+     //   await initDirectory();
         setState(() {});
       }
     });
@@ -125,21 +129,21 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!buildCalledYet) {
+      buildCalledYet = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          showMoreKnowledge =
+              knowledgeScrollController.position.maxScrollExtent > 0;
+          showMorePath =
+              pathScrollController.position.maxScrollExtent > 0;
+        });
+      });
+    }
     return FutureBuilder(
-        future: initDirectory(),
+        future: myFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            if (!buildCalledYet) {
-              buildCalledYet = true;
-              SchedulerBinding.instance.addPostFrameCallback((_) {
-                setState(() {
-                  showMoreKnowledge =
-                      knowledgeScrollController.position.maxScrollExtent > 0;
-                  showMorePath =
-                      pathScrollController.position.maxScrollExtent > 0;
-                });
-              });
-            }
             return Scaffold(
                 backgroundColor: Colors.white,
                 body: Padding(
@@ -296,6 +300,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+    return Container();
   }
 
   mainList(bool isPath) {
@@ -510,21 +515,9 @@ class _HomePageState extends State<HomePage> {
 
                   Positioned(
                       right: 32.w,
-                      child: GestureDetector(
-                        onTap: () {
-                          debugPrint('3434');
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MainPageChild(
-                                        course: course,
-                                        knowledgeColor: color,
-                                      )));
-                        },
-                        child: Text('${course.title}',
-                            style: TextStyle(
-                                fontSize: 18.sp, color: colors.blackColorApp)),
-                      )),
+                      child: Text('${course.title}',
+                          style: TextStyle(
+                              fontSize: 18.sp, color: colors.blackColorApp))),
                   //  SizedBox(width: 63.w),
                   Positioned(
                       right: 200.w,
@@ -558,7 +551,7 @@ class _HomePageState extends State<HomePage> {
                                 )
                               ])))
                 ]),
-            displayActionByStatus(userCourse.status, course)
+            displayActionByStatus(userCourse.status, course,color)
           ],
         ),
       ),
@@ -592,10 +585,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  displayActionByStatus(Status status, Course course) {
+  displayActionByStatus(Status status, Course course,int color) {
     switch (status) {
       case Status.start:
-        return statusWidget('', 'התחל ללמוד', course);
+        return statusWidget('', 'התחל ללמוד', course,color);
 
       case Status.middle:
         return FutureBuilder<String>(
@@ -604,22 +597,22 @@ class _HomePageState extends State<HomePage> {
               if (s.hasData) {
                 if (s.data!.isNotEmpty) {
                   return statusWidget(
-                      'המשך מהמקום שעצרת', s.data ?? '', course, true);
+                      'המשך מהמקום שעצרת', s.data ?? '', course,color, true);
                 }
-                return statusWidget('המשך', '', course, false);
+                return statusWidget('', 'המשך', course,color, false);
 
               }
               return const CircularProgressIndicator();
             });
 
       case Status.finish:
-        return statusWidget('הקורס הושלם בהצלחה!', 'סינכרון נתונים', course);
+        return statusWidget('הקורס הושלם בהצלחה!', 'סינכרון נתונים', course,color);
       case Status.synchronized:
-        return statusWidget('נתוני הקורס סונכרנו!', 'להורת התעודה', course);
+        return statusWidget('נתוני הקורס סונכרנו!', 'להורת התעודה', course,color);
     }
   }
 
-  statusWidget(String text, String buttonText, Course course,
+  statusWidget(String text, String buttonText, Course course,int color,
       [bool isContinue = false]) {
     return Row(children: [
       if (text != '')
@@ -651,10 +644,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         onTap: () {
+          if (MainPage.of(context)?.updateSideMenu != null) {
+            MainPage.of(context)?.updateSideMenu!(course.id);
+          }
           if (isContinue && course.userCourse != null) {
-            if (MainPage.of(context)?.updateSideMenu != null) {
-              MainPage.of(context)?.updateSideMenu!(course.id);
-            }
             if (!course.userCourse!.isQuestionnaire) {
               MainPage.of(context)?.mainWidget = MainPageChild(
                 course: course,
@@ -673,17 +666,13 @@ class _HomePageState extends State<HomePage> {
                 isContinue: 2,
               );
 
-              // currentMainChild?.questionPickedIndex =
-              //     currentCourse.userCourse!.questionIndex;
-              // currentMainChild?.subjectPickedIndex =
-              //     currentCourse.userCourse!.subjectIndex;
-              // currentMainChild?.lessonPickedIndex =
-              //     currentCourse.userCourse!.lessonIndex;
-              // MainPageChild.of(context)?.bodyWidget =
-              //     QuestionnaireWidget(
-              //       quiz: lastQuestionnaire!,
-              //     );
             }
+          }
+          else{
+            MainPage.of(context)?.mainWidget = MainPageChild(
+              course: course,
+              knowledgeColor: color,
+            );
           }
         },
       )

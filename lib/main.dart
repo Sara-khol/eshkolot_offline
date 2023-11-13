@@ -75,68 +75,11 @@ Future<void> main() async {
 
     DartVLC.initialize();
 
-    late String destDirPath;
     List<Course> myCourses = [];
-
-    extractZipFile(String extractPath) async {
-      try {
-        // Get a list of files in the "lessons" folder
-        List<FileSystemEntity> lessonFiles = Directory(extractPath).listSync();
-
-        for (FileSystemEntity file in lessonFiles) {
-          if (file is File && file.path.endsWith('.zip')) {
-            // Extract each zip file
-            String zipFilePath = file.path;
-
-            // Create the destination folder based on the zip file's name
-            String destinationFolderName =
-                file.path.split('/').last.replaceAll('.zip', '');
-            String destinationPath = '$extractPath/$destinationFolderName/';
-
-            // Create the destination folder if it doesn't exist
-            Directory(destinationPath).createSync(recursive: true);
-
-            // Read the zip file
-            List<int> bytes = await file.readAsBytes();
-
-            // Extract the zip contents
-            Archive archive = ZipDecoder().decodeBytes(bytes);
-            for (ArchiveFile archiveFile in archive) {
-              String fileName = archiveFile.name;
-              if (archiveFile.isFile) {
-                // Get the file content as a List<int>
-                List<int> fileData = archiveFile.content as List<int>;
-
-                // Create the file in the destination folder
-                File destinationFile = File('$destinationPath$fileName');
-                destinationFile.createSync(recursive: true);
-                destinationFile.writeAsBytesSync(fileData);
-              } else {
-                // If it's a directory, create the directory in the destination folder
-                Directory('$destinationPath$fileName')
-                    .createSync(recursive: true);
-              }
-            }
-            debugPrint('Zip extraction completed for: $zipFilePath');
-          }
-        }
-      } catch (e) {
-        debugPrint('Error extracting zips: $e');
-      }
-    }
-
-    setDataFiles() async {
-      final Directory directory = await getApplicationSupportDirectory();
-      destDirPath = directory.path;
-      await extractZipFile('$destDirPath/${Constants.lessonPath}/');
-      await extractZipFile('$destDirPath/${Constants.quizPath}/');
-    }
 
     IsarService().init();
 
     initData() async {
-      // if (await IsarService().checkIfDBisEmpty()) {
-      // await extractZipFile();
       await InstallationDataHelper().init();
       await IsarService().cleanDb();
 
