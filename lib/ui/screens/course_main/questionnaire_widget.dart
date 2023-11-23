@@ -73,8 +73,8 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
     return Container(
       width: 950.w,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          border: Border.all(color: Color(0xFFE4E6E9))),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          border: Border.all(color: const Color(0xFFE4E6E9))),
       child: Padding(
         padding:
             EdgeInsets.only(right: 19.w, left: 19.w, top: 32.h, bottom: 20.h),
@@ -199,7 +199,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                 width: 171.w,
                 height: 40.h,
                 decoration: ShapeDecoration(
-                  color: Color(0xFF2D2828),
+                  color: const Color(0xFF2D2828),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),

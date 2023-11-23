@@ -18,7 +18,7 @@ import 'course_main_page.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 class MainPageChild extends StatefulWidget {
-  MainPageChild(
+  const MainPageChild(
       {super.key, required this.course, required this.knowledgeColor, this.isContinue = 0,
         this.lessonPickedIndex = -1, this.questionPickedIndex = -1, this.subjectPickedIndex = -1});
 
@@ -98,7 +98,6 @@ class _MainPageChildState extends State<MainPageChild> {
               widget.course.userCourse!.lessonIndex;
             _bodyWidget = ValueNotifier( QuestionnaireWidget(
               quiz: widget.course.lastQuestionnaire!));
-   ;
           }
           break;
       }
@@ -109,8 +108,9 @@ class _MainPageChildState extends State<MainPageChild> {
     }
     setSteps();
     _bodyWidget.addListener(doTaskWhenNotified);
-    if (widget.isContinue == 0)
+    if (widget.isContinue == 0) {
       setNextData();
+    }
     MainPage
         .of(context)
         ?.setUpdate = saveLastUserPosition;
@@ -183,8 +183,9 @@ class _MainPageChildState extends State<MainPageChild> {
 
   void doTaskWhenNotified() async {
     await saveLastUserPosition(refresh: true);
-    if (widget.isContinue == 0)
+    if (widget.isContinue == 0) {
       setNextData(refresh: true);
+    }
   }
 
   @override
@@ -270,13 +271,13 @@ class _MainPageChildState extends State<MainPageChild> {
                     child: Row(
                       children: [
                         Text(
-                          '${ /*userCourse!.progressPercent*/ progressPercent}% הושלמו',
+                          '$progressPercent% הושלמו',
                           style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color:
                               //todo change get color or from knowledge or from path
-                              Color(
+                              const Color(
                                 /*widget.knowledgeColor != -1 ? widget.knowledgeColor:*/
                                   0xff32D489)),
                           // Color(widget.course.knowledge.value??widget.course.knowledge.value!.color)),
@@ -296,7 +297,7 @@ class _MainPageChildState extends State<MainPageChild> {
                   ),
                   LinearPercentIndicator(
                     /* width: 765.w,*/
-                    backgroundColor: Color(0xFFF4F4F3),
+                    backgroundColor: const Color(0xFFF4F4F3),
                     progressColor: colors.lightGreen1ColorApp,
                     lineHeight: 5,
                     percent: /*userCourse!.progressPercent*/
@@ -326,7 +327,7 @@ class _MainPageChildState extends State<MainPageChild> {
           Container(
             width: double.infinity,
             height: 74.h,
-            color: Color(0xFF32D489),
+            color: const Color(0xFF32D489),
             child: TextButton(
                 child: Text(
                   _currentCourse.title,
@@ -689,12 +690,12 @@ class _MainPageChildState extends State<MainPageChild> {
                   TextStyle(fontWeight: FontWeight.w600, fontSize: 18.sp)),
             ),
             // Spacer(),
-            Icon(Icons.arrow_drop_down_sharp)
+            const Icon(Icons.arrow_drop_down_sharp)
           ],
         ),
       ),
       mouseCursor: SystemMouseCursors.click,
-      textColor: Color(0xFF2D2828),
+      textColor: const Color(0xFF2D2828),
       onTap: () {
         setState(() {
           currentSubject.isTapped = !currentSubject.isTapped;
@@ -821,7 +822,7 @@ class _MainPageChildState extends State<MainPageChild> {
       decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(color: colors.grey2ColorApp, width: 3.w),
-          color: Color(0xFFFAFAFA)),
+          color: const Color(0xFFFAFAFA)),
     );
   }
 
@@ -846,7 +847,7 @@ class _MainPageChildState extends State<MainPageChild> {
             margin: EdgeInsets.only(left: 40.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
-              color: Color(0xFF32D489),
+              color: const Color(0xFF32D489),
             ),
             child: TextButton(
                 child: Row(

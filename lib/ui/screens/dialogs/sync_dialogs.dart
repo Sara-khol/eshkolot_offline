@@ -348,7 +348,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
               Container(
                 height: 40.h,
                 width: 171.w,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     color: Color(0xFF2D2828),
                     borderRadius: BorderRadius.all(Radius.circular(30))),
                 child: TextButton(
@@ -434,7 +434,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
               Container(
                 height: 40.h,
                 width: 171.w,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     color: Color(0xFF2D2828),
                     borderRadius: BorderRadius.all(Radius.circular(30))),
                 child: TextButton(
@@ -465,7 +465,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
           children:*/
         mainAxisAlignment: MainAxisAlignment.center,
         children:  <Widget>[
-            Center(child: Text('!ישנה בעיה')),
+            const Center(child: Text('!ישנה בעיה')),
             if (isBlockedLinks)
               const Center(child: Text('נראה שהלינקים הלללו חסומים ברשת האינטרנט שלך')),
             if (isBlockedLinks)
@@ -511,13 +511,13 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
                   //     .read<VimoeService>()
                   //     .start(notify: true);
                 },
-                child: Text('נסה שנית')),
+                child: const Text('נסה שנית')),
             SizedBox(height: 20.h),
             ElevatedButton(
                 onPressed: () {
             Navigator.pop(context);
                 },
-                child: Text('סגור'))
+                child: const Text('סגור'))
           ]),
     );
   }
@@ -527,11 +527,11 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
     for (String link in context.read<VimoeService>().blockLinks) {
       // myLinks.add(SelectableText(link,style: TextStyle(decoration: TextDecoration.underline),));
       myLinks.add(Padding(
-        padding: EdgeInsets.only(bottom: 7),
+        padding: const EdgeInsets.only(bottom: 7),
         child: Center(
           child: InkWell(
             child: Text(link,
-                style: TextStyle(decoration: TextDecoration.underline)),
+                style: const TextStyle(decoration: TextDecoration.underline)),
             onTap: () => _launchUrl(link),
           ),
         ),

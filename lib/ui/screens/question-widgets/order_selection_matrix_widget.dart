@@ -2,7 +2,6 @@ import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter/foundation.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 import '../course_main/questionnaire_tab.dart';
@@ -12,7 +11,7 @@ class OrderSelectionMatrixWidget extends StatefulWidget {
   final Question question;
   final QuestionController questionController;
 
-  OrderSelectionMatrixWidget(this.question,
+  const OrderSelectionMatrixWidget(this.question,
       {super.key, required this.questionController});
 
   @override
@@ -171,7 +170,7 @@ class _OrderSelectionMatrixWidgetState
       padding:
           EdgeInsets.only(bottom: 11.h, top: 11.h, right: 24.h, left: 24.h),
       decoration: BoxDecoration(
-          color: changeBackground ? colors.grey2ColorApp : Color(0xffe5e4f6),
+          color: changeBackground ? colors.grey2ColorApp : const Color(0xffe5e4f6),
           borderRadius: BorderRadius.circular(3)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -208,7 +207,7 @@ class _OrderSelectionMatrixWidgetState
   }
 
   bool isCorrect() {
-    debugPrint('ans ${ans}');
+    debugPrint('ans $ans');
 
     for (int i = 0; i < ans.length; i++) {
       Answer? answer = widget.question.ans

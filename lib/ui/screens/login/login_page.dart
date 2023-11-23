@@ -3,14 +3,13 @@ import 'package:eshkolot_offline/ui/screens/main_page/main_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../models/user.dart';
 import '../../../services/isar_service.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({super.key});
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -30,8 +29,9 @@ class _LoginPageState extends State<LoginPage> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
           backgroundColor: Colors.white,
-          body: Column(children: [
-            TitleBarWidget(),
+          body: ListView(shrinkWrap: true,
+              children: [
+            const TitleBarWidget(),
             Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                   Container(
                     height: 50.h,
                     width: 389.w,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         color: Color(0xFFF4F4F3),
                         borderRadius: BorderRadius.all(Radius.circular(30))),
                     child: TextField(
@@ -82,13 +82,13 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: Color(0xffF4F4F3))),
+                              borderSide: const BorderSide(color: Color(0xffF4F4F3))),
                           enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: Color(0xffF4F4F3))),
+                              borderSide: const BorderSide(color: Color(0xffF4F4F3))),
                           //contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 15),
                           hintStyle: TextStyle(
-                              fontSize: 18.sp, color: Color(0xff6E7072)),
+                              fontSize: 18.sp, color: const Color(0xff6E7072)),
                           hintText: 'תעודת זהות',
                         )),
                   ),
@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) =>
-                            ForgotPasswordDialog(),
+                            const ForgotPasswordDialog(),
                       );
                     },
                     child: Row(
@@ -117,64 +117,69 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   SizedBox(height: 30.h),
                 ]),
-            InkWell(
-              onTap: () async {
-               // if (controller.text.isNotEmpty) {
-                  User? user = await IsarService().getUserByTz(controller.text);
-                  if (user != null && user.knowledgeCoursesMap.isNotEmpty) {
-                    if (mounted) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MainPage(user: user)));
-                    }
-                  } else {
-                      setState(() {
-                     user==null?   isError = true:isErrorNoCourses=true;
-                      });
-                  }
-                // } else {
-                //   setState(() {
-                //     isError = true;
-                //   });
-                // }
-              },
-              child: Container(
-                height: 40.h,
-                width: 171.w,
-                decoration: BoxDecoration(
-                    color: myColor,
-                    borderRadius: BorderRadius.all(Radius.circular(30))),
-                child: Center(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'התחברות ',
-                        style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white),
-                      ),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 15.sp,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
+        Align(
+          alignment: Alignment.center,
+          child:InkWell(
+            onTap: () async {
+              // if (controller.text.isNotEmpty) {
+              User? user = await IsarService().getUserByTz(controller.text);
+              if (user != null && user.knowledgeCoursesMap.isNotEmpty) {
+                if (mounted) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MainPage(user: user)));
+                }
+              } else {
+                setState(() {
+                  user==null?   isError = true:isErrorNoCourses=true;
+                });
+              }
+              // } else {
+              //   setState(() {
+              //     isError = true;
+              //   });
+              // }
+            },
+            child: Container(
+              height: 40.h,
+              width: 171.w,
+              decoration: BoxDecoration(
+                  color: myColor,
+                  borderRadius: const BorderRadius.all(Radius.circular(30))),
+              child: Center(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'התחברות ',
+                      style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white),
+                    ),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 15.sp,
+                      color: Colors.white,
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
+        ),
             SizedBox(height: 20.h),
             Visibility(
                 visible: isError || isErrorNoCourses,
-                child: Text(
-                    controller.text.isEmpty
-                        ? 'נא להזין תעודת זהות'
-                        :isError? 'התעודת זהות שהזנת שגויה':'למשתמש אין קורסים שרשום אליהם',
-                    style: TextStyle(fontSize: 20.sp, color: Colors.red)))
+                child: Center(
+                  child: Text(
+                      controller.text.isEmpty
+                          ? 'נא להזין תעודת זהות'
+                          :isError? 'התעודת זהות שהזנת שגויה':'למשתמש אין קורסים שרשום אליהם',
+                      style: TextStyle(fontSize: 20.sp, color: Colors.red)),
+                ))
           ]),
           floatingActionButton:kDebugMode? FloatingActionButton(onPressed: ()
           async {

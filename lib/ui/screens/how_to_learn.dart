@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 
 class HowToLearn extends StatefulWidget {
-  const HowToLearn({Key? key}) : super(key: key);
+  const HowToLearn({super.key});
 
   @override
   State<HowToLearn> createState() => _HowToLearnState();
@@ -50,9 +47,9 @@ class _HowToLearnState extends State<HowToLearn> {
                 height: 124.h,
                 width: 296.w,
                 decoration: BoxDecoration(
-                  color: Color(0xFFB9FFDD),
+                  color: const Color(0xFFB9FFDD),
                   border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.all(Radius.circular(5))
+                  borderRadius: const BorderRadius.all(Radius.circular(5))
                 ),
                 child: Padding(
                   padding: EdgeInsets.only(top: 20.h,right: 19.w),
@@ -62,7 +59,7 @@ class _HowToLearnState extends State<HowToLearn> {
                       Container(
                         height: 40.h,
                         width: 40.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white
                         ),
@@ -92,9 +89,9 @@ class _HowToLearnState extends State<HowToLearn> {
                 height: 124.h,
                 width: 296.w,
                 decoration: BoxDecoration(
-                    color: Color(0xFFE5E4F6),
+                    color: const Color(0xFFE5E4F6),
                     border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.all(Radius.circular(5))
+                    borderRadius: const BorderRadius.all(Radius.circular(5))
                 ),
                 child: Padding(
                   padding: EdgeInsets.only(top: 20.h,right: 19.w),
@@ -104,7 +101,7 @@ class _HowToLearnState extends State<HowToLearn> {
                       Container(
                         height: 40.h,
                         width: 40.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white
                         ),
@@ -132,9 +129,9 @@ class _HowToLearnState extends State<HowToLearn> {
                 height: 124.h,
                 width: 296.w,
                 decoration: BoxDecoration(
-                    color: Color(0xFFFFF7E8),
+                    color: const Color(0xFFFFF7E8),
                     border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.all(Radius.circular(5))
+                    borderRadius: const BorderRadius.all(Radius.circular(5))
                 ),
                 child: Padding(
                   padding: EdgeInsets.only(top: 20.h,right: 19.w),
@@ -144,7 +141,7 @@ class _HowToLearnState extends State<HowToLearn> {
                       Container(
                         height: 40.h,
                         width: 40.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white
                         ),
@@ -173,7 +170,7 @@ class _HowToLearnState extends State<HowToLearn> {
           Container(
             width:944.w ,
             height: 450.h,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
@@ -184,7 +181,7 @@ class _HowToLearnState extends State<HowToLearn> {
                 children: [
                   Text('אודות התוכנה',style: TextStyle(fontSize: 18.sp,fontWeight: FontWeight.w600),),
                   SizedBox(height: 17.h,),
-                  Divider(),
+                  const Divider(),
                   SizedBox(height: 17.h,),
                   Expanded(
                     child: SingleChildScrollView(
@@ -227,7 +224,7 @@ class _HowToLearnState extends State<HowToLearn> {
             child: Row(
               children: [
                 Text(question,style: TextStyle(fontSize: 18.sp),),
-                Spacer(),
+                const Spacer(),
                 Icon(isOpen[index]?Icons.arrow_drop_up:Icons.arrow_drop_down,size: 15.sp,)
               ],
             ),

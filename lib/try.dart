@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(QuizApp());
+  runApp(const QuizApp());
 }
 
 class QuizApp extends StatelessWidget {
+  const QuizApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -12,12 +14,14 @@ class QuizApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: QuizPage(),
+      home: const QuizPage(),
     );
   }
 }
 
 class QuizPage extends StatefulWidget {
+  const QuizPage({super.key});
+
   @override
   _QuizPageState createState() => _QuizPageState();
 }
@@ -30,19 +34,19 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter Quiz'),
+        title: const Text('Flutter Quiz'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Expanded(
             child: ReorderableListView(
-              padding: EdgeInsets.symmetric(vertical: 20.0),
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
               children: List.generate(list1.length, (index) {
                 return ListTile(
                   key: Key('$index'),
                   title: Text(list1[index]),
-                  trailing: Icon(Icons.drag_handle),
+                  trailing: const Icon(Icons.drag_handle),
                 );
               }),
               onReorder: (oldIndex, newIndex) {
@@ -56,7 +60,7 @@ class _QuizPageState extends State<QuizPage> {
           ),
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 20.0),
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
               itemCount: list2.length,
               itemBuilder: (context, index) {
                 return ListTile(
@@ -67,12 +71,12 @@ class _QuizPageState extends State<QuizPage> {
                         context: context,
                         builder: (context) {
                           return AlertDialog(
-                            title: Text('Match'),
+                            title: const Text('Match'),
                             content: Text(
                                 'You matched ${list1[index]} with ${list2[index]}.'),
                             actions: <Widget>[
                               TextButton(
-                                child: Text('OK'),
+                                child: const Text('OK'),
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },

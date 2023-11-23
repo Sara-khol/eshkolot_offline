@@ -129,21 +129,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!buildCalledYet) {
-      buildCalledYet = true;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          showMoreKnowledge =
-              knowledgeScrollController.position.maxScrollExtent > 0;
-          showMorePath =
-              pathScrollController.position.maxScrollExtent > 0;
-        });
-      });
-    }
+
     return FutureBuilder(
         future: myFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            if (!buildCalledYet) {
+              buildCalledYet = true;
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  showMoreKnowledge =
+                      knowledgeScrollController.position.maxScrollExtent > 0 ;
+                  showMorePath =
+                      pathScrollController.position.maxScrollExtent > 0;
+                });
+              });
+            }
             return Scaffold(
                 backgroundColor: Colors.white,
                 body: Padding(
@@ -165,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                               border: Border.all(
                                   color: colors.blackColorApp, width: 1.h),
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(50))),
+                                  const BorderRadius.all(Radius.circular(50))),
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
@@ -280,9 +281,11 @@ class _HomePageState extends State<HomePage> {
             )),
             SizedBox(height: 28.h),
             Visibility(
-                visible: isPath
+                visible: false
+                //todo
+                /*isPath
                     ? !enableScrollPath && showMorePath
-                    : !enAbleScrollKnowledge && showMoreKnowledge,
+                    : !enAbleScrollKnowledge && showMoreKnowledge*/,
                 child: GestureDetector(
                   onTap: () => setState(() {
                     //isPath?showMorePath=false:showMoreKnowledge=false;
@@ -294,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerLeft,
                       child: Text('הצג עוד',
                           style: TextStyle(
-                              fontSize: 15.sp, color: Color(0xff6E7072)))),
+                              fontSize: 15.sp, color: const Color(0xff6E7072)))),
                 ))
           ],
         ),
@@ -307,10 +310,10 @@ class _HomePageState extends State<HomePage> {
     return ListView.builder(
         controller: isPath ? pathScrollController : knowledgeScrollController,
         //   shrinkWrap: true,
-        physics: (isPath ? enableScrollPath : enAbleScrollKnowledge)
-            ? AlwaysScrollableScrollPhysics()
-            : NeverScrollableScrollPhysics(),
-
+        //todo
+        // physics: (isPath ? enableScrollPath : enAbleScrollKnowledge)
+        //     ? AlwaysScrollableScrollPhysics()
+        //     : NeverScrollableScrollPhysics(),
         /*crossAxisAlignment: CrossAxisAlignment.start, */
         // children: [
         //   ListView.builder(
@@ -483,7 +486,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   courseItem(Course course, int color, String icon, int i) {
-    String path = removeHiddenCharsFromPath('${dir.path}/icons/${icon}');
+    String path = removeHiddenCharsFromPath('${dir.path}/icons/$icon');
     UserCourse? userCourse = IsarService().getUserCourseData(course.id);
 
     return Container(
@@ -515,7 +518,7 @@ class _HomePageState extends State<HomePage> {
 
                   Positioned(
                       right: 32.w,
-                      child: Text('${course.title}',
+                      child: Text(course.title,
                           style: TextStyle(
                               fontSize: 18.sp, color: colors.blackColorApp))),
                   //  SizedBox(width: 63.w),
@@ -525,7 +528,7 @@ class _HomePageState extends State<HomePage> {
                           decoration: BoxDecoration(
                               color: color != -1 ? Color(color) : Colors.indigo,
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(30))),
+                                  const BorderRadius.all(Radius.circular(30))),
                           padding: EdgeInsets.only(
                               top: 5.h, bottom: 5.h, left: 9.w, right: 9.w),
                           // width: 35.w,
@@ -616,14 +619,14 @@ class _HomePageState extends State<HomePage> {
       [bool isContinue = false]) {
     return Row(children: [
       if (text != '')
-        Text(text, style: TextStyle(fontSize: 14.sp, color: Color(0xff6E7072))),
+        Text(text, style: TextStyle(fontSize: 14.sp, color: const Color(0xff6E7072))),
       if (text != '') SizedBox(width: 7.w),
       GestureDetector(
         child: Container(
           constraints: BoxConstraints(maxWidth: 130.w), // Set your maximum width
           decoration: BoxDecoration(
               color: colors.lightGrey1ColorApp,
-              borderRadius: BorderRadius.all(Radius.circular(30))),
+              borderRadius: const BorderRadius.all(Radius.circular(30))),
           padding:
               EdgeInsets.only(right: 11.w, left: 11.w, top: 5.h, bottom: 5.h),
           child: Row(

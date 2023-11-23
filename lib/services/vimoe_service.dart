@@ -102,7 +102,7 @@ class VimoeService with ChangeNotifier {
     debugPrint("VimoeService");
 
     dio.options.headers['content-Type'] = 'application/json;charset=UTF-8';
-    dio.options.headers['authorization'] = "bearer ${token}";
+    dio.options.headers['authorization'] = "bearer $token";
     dio.options.headers['Connection'] = "keep-alive";
 
     _networkConnectivity.whileDownloading = true;
@@ -193,9 +193,9 @@ class VimoeService with ChangeNotifier {
           debugPrint('hhh');
         } */
         else {
-          debugPrint('my error ${error} $vimoeId');
+          debugPrint('my error $error $vimoeId');
           Sentry.addBreadcrumb(
-              Breadcrumb(message: 'my error ${error} $vimoeId'));
+              Breadcrumb(message: 'my error $error $vimoeId'));
 
           // if(error.error is SocketException) {
           //   debugPrint('SocketException');
@@ -323,10 +323,10 @@ class VimoeService with ChangeNotifier {
     if (notify) notifyListeners();
 
     url = url == ''
-        ? 'https://api.vimeo.com/me/projects/${projectId}/videos'
+        ? 'https://api.vimeo.com/me/projects/$projectId/videos'
             '?fields=uri,link,download.link,download.size_short,download.height,'
             'download.width,download.rendition,download.quality'
-        : 'https://api.vimeo.com${url}';
+        : 'https://api.vimeo.com$url';
 
     // url = url == ''
     //     ? 'https://api.vimeo.com/me/projects/${projectId}/videos'
@@ -557,7 +557,7 @@ class VimoeService with ChangeNotifier {
     if (timer == null || !timer!.isActive) {
       // int minuteToWait = ((numOfAllVideos * 12) / 60).ceil();
       int minuteToWait = 30;
-      debugPrint('minuteToWait ${minuteToWait}');
+      debugPrint('minuteToWait $minuteToWait');
       Sentry.addBreadcrumb(Breadcrumb(message: 'minuteToWait $minuteToWait'));
       timer = Timer(Duration(minutes: minuteToWait), () async {
         tryAgainFromStart();
@@ -626,7 +626,7 @@ class VimoeService with ChangeNotifier {
       token = await AuthJWT();
       token = '';
       dio.options.headers['content-Type'] = 'application/json;charset=UTF-8';
-      dio.options.headers['authorization'] = "bearer ${token}";
+      dio.options.headers['authorization'] = "bearer $token";
       String url =
           'https://eshkolot.net/wp-json/ldlms/v1/sfwd-courses/71/steps';
 
@@ -651,7 +651,7 @@ class VimoeService with ChangeNotifier {
       //   "Content-Type": "application/json"
       // }
       String basicAuth =
-          'Basic ' + base64.encode(utf8.encode('$username:$password'));
+          'Basic ${base64.encode(utf8.encode('$username:$password'))}';
       debugPrint('basicAuth $basicAuth');
       dio.options.headers['authorization'] = basicAuth;
       dio.options.headers['content-Type'] = 'application/json;charset=UTF-8';

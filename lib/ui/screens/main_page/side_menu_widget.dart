@@ -22,7 +22,7 @@ import 'package:collection/collection.dart';
 class SideMenuWidget extends StatefulWidget {
   final User myUser;
 
-  SideMenuWidget({super.key, required this.myUser});
+  const SideMenuWidget({super.key, required this.myUser});
 
   @override
   State<SideMenuWidget> createState() => _SideMenuWidgetState();

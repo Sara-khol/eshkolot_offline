@@ -157,7 +157,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                         shape: const RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(12))),
-                        backgroundColor: Color(0xFF5956DA)),
+                        backgroundColor: const Color(0xFF5956DA)),
                     child: const Text(
                       "חזרה",
                       style: TextStyle(color: Colors.white),
@@ -169,7 +169,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                   style: ElevatedButton.styleFrom(
                       shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12))),
-                      backgroundColor: Color(0xFF5956DA)),
+                      backgroundColor: const Color(0xFF5956DA)),
                   child: Text(
                     selected == widget.quiz.questionList.length
                         ? "סיום שאלון"

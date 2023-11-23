@@ -31,7 +31,7 @@ class _TitleBarWidgetState extends State<TitleBarWidget> {
   Widget build(BuildContext context) {
     return Container(
       // height: 29.h,
-      color: Color(0xff393535),
+      color: const Color(0xff393535),
       child: WindowTitleBarBox(
         child: Row(
           // mainAxisAlignment: MainAxisAlignment.end,

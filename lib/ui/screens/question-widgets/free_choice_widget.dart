@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
@@ -63,7 +62,7 @@ class _FreeChoiceState extends State<FreeChoice> {
 
   Widget createTextField(TextEditingController controller) {
     return Container(
-        padding: EdgeInsets.only(right: 5, left: 5),
+        padding: const EdgeInsets.only(right: 5, left: 5),
         //   margin: EdgeInsets.only(top: 15.h,bottom: 15.h),
         width: 80,
         height: 50.h,

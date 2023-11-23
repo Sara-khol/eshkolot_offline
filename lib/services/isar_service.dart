@@ -300,8 +300,8 @@ class IsarService {
     final isar = await db;
     await isar.writeTxn(() async {
     //  User? user = await isar.users.get(_user.id);
-      User? user = _user;
-      UserCourse? course = user!.courses.firstWhereOrNull(
+     // User? user = _user;
+      UserCourse? course = _user.courses.firstWhereOrNull(
           (course) => course.courseId == newDataCourse.courseId);
 
       // // not supposed to get to here
@@ -325,14 +325,14 @@ class IsarService {
         //  course.questionnaireStopId=userCourse.questionnaireStopId;
 
         // user.courses[user.courses.indexWhere((course) => course.courseId == newDataCourse.courseId)] = newDataCourse;
-        user.courses[user.courses.indexWhere(
+        _user.courses[_user.courses.indexWhere(
             (course) => course.courseId == newDataCourse.courseId)] = course;
 
         // course=userCourse;
         // user.courses.add(userCourse);
       }
-      await isar.users.put(user);
-      _user = user;
+      await isar.users.put(_user);
+     // _user = user;
       debugPrint('update ${isar.users.toString()}');
     });
   }
@@ -603,7 +603,7 @@ class IsarService {
   addCourse(Course course) async {
     final isar = await db;
     await isar.writeTxnSync(() async {
-      await isar.courses.putSync(course);
+      isar.courses.putSync(course);
     });
   }
 
@@ -624,7 +624,7 @@ class IsarService {
   addQuizzes(List<Quiz> quizzes) async {
     final isar = await db;
     await isar.writeTxnSync(() async {
-      await isar.quizs.putAllSync(quizzes);
+      isar.quizs.putAllSync(quizzes);
     });
   }
 

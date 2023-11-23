@@ -61,13 +61,13 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: const BoxDecoration(
-                    shape: BoxShape.circle, color: Color(0xffF4F4F3)),
-                child: const Icon(Icons.search),
-              ),
+              // Container(
+              //   width: 40.w,
+              //   height: 40.w,
+              //   decoration: const BoxDecoration(
+              //       shape: BoxShape.circle, color: Color(0xffF4F4F3)),
+              //   child: const Icon(Icons.search),
+              // ),
               SizedBox(width: 12.w),
               InkWell(
                 onTap: () async {
@@ -84,7 +84,7 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                           context: context,
                           barrierDismissible: false,
                           builder: (BuildContext context) {
-                            return SyncDialogs();
+                            return const SyncDialogs();
                           });
                     }
                   }
@@ -129,12 +129,12 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
               InkWell(
                 onTap: () {
                   Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
+                      MaterialPageRoute(builder: (context) => const LoginPage()));
                 },
                 child: Container(
                   height: 40.h,
                   width: 175.w,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: Row(

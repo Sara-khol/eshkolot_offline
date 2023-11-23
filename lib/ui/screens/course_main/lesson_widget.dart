@@ -76,8 +76,8 @@ class _LessonWidgetState extends State<LessonWidget> {
             // height: 624.h,
             width: 950.w,
             decoration: BoxDecoration(
-                border: Border.all(color: Color(0xFFE4E6E9)),
-                borderRadius: BorderRadius.all(Radius.circular(10))),
+                border: Border.all(color: const Color(0xFFE4E6E9)),
+                borderRadius: const BorderRadius.all(Radius.circular(10))),
             child: Column(
               children: [
                 SizedBox(
@@ -171,8 +171,8 @@ class _LessonWidgetState extends State<LessonWidget> {
               width: 950.w,
               // height: 66.h,
               decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xFFE4E6E9)),
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
+                  border: Border.all(color: const Color(0xFFE4E6E9)),
+                  borderRadius: const BorderRadius.all(Radius.circular(10))),
               child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: lesson.questionnaire.length,
@@ -209,7 +209,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                           Container(
                             height: 20.h,
                             //width: 70.w,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(10)),
                                 color: Color(0xFFF4F4F3)),
@@ -221,12 +221,12 @@ class _LessonWidgetState extends State<LessonWidget> {
                                     style: TextStyle(
                                         fontSize: 12.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFF2D2828)),
+                                        color: const Color(0xFF2D2828)),
                                   ),
                                   Icon(
                                     Icons.arrow_forward,
                                     size: 10.sp,
-                                    color: Color(0xFF2D2828),
+                                    color: const Color(0xFF2D2828),
                                   )
                                 ],
                               ),
@@ -255,13 +255,13 @@ class _LessonWidgetState extends State<LessonWidget> {
             width: 950.w,
             child: Row(
               children: [
-                Spacer(),
+                const Spacer(),
                 Visibility(
                   visible: widget.onNext != null,
                   child: Container(
                     height: 40.h,
                     margin: EdgeInsets.only(bottom: 37.h),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(30)),
                         color: Color(0xFF32D489)),
                     child: TextButton(

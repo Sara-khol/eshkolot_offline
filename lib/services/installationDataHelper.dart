@@ -49,7 +49,7 @@ class InstallationDataHelper {
     final Directory directory = await getApplicationSupportDirectory();
     destDirPath = directory.path;
     //  try {
-    final file = await File('$destDirPath/download_software.json');
+    final file = File('$destDirPath/${constants.dataPath}/download_software.json');
     //  final file = await File('$destDirPath/download_software(2).json');
     //  final file = await File('$destDirPath/download_software(7).json');
     final contents = await file.readAsString();
@@ -363,10 +363,10 @@ class InstallationDataHelper {
     //   }
   }
 
-  setLessonVideosNum(Course course) async {
+ Future<bool> setLessonVideosNum(Course course) async {
     var dir = await getApplicationSupportDirectory();
     String courseVideosPath =
-        '${dir.path}/${constants.lessonPath}/${course.id}';
+        '${dir.path}${Platform.pathSeparator}${constants.lessonPath}${Platform.pathSeparator}${course.id}';
     if (await Directory(courseVideosPath).exists()) {
       debugPrint('course.id ${course.id}');
       List l = Directory(courseVideosPath).listSync();
@@ -399,7 +399,7 @@ class InstallationDataHelper {
                 videoNum = '$iא';
                 fileNames.remove('$iא');
               }*/
-              RegExp pattern = RegExp('^$i\\s*א');
+              RegExp pattern = RegExp('^$i\\s*a');
               String? matchingItem;
 
               for (String fileName in fileNames) {
@@ -423,7 +423,7 @@ class InstallationDataHelper {
                 videoNum = '$iב';
                 fileNames.remove('$iב');
               } */
-              RegExp pattern = RegExp('^$i\\s*ב');
+              RegExp pattern = RegExp('^$i\\s*b');
               String? matchingItem;
 
               for (String fileName in fileNames) {
@@ -449,6 +449,10 @@ class InstallationDataHelper {
         }
         IsarService().updateVideoNum(updateLessons);
       }
+      return true;
     }
+    return false;
   }
+
+
 }

@@ -10,10 +10,10 @@ import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class HtmlDataWidget extends StatefulWidget {
-  HtmlDataWidget(this.text, {super.key, required this.quizId});
+   const HtmlDataWidget(this.text, {super.key, required this.quizId});
 
   final String text;
-  late final int quizId;
+   final int quizId;
 
   @override
   State<HtmlDataWidget> createState() => _HtmlDataWidgetState();

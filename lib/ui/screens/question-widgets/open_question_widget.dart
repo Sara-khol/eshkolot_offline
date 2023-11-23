@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
@@ -11,7 +10,7 @@ class OpenQuestion extends StatefulWidget {
   final Question question;
   final QuestionController questionController;
 
-  OpenQuestion(this.question,{super.key, required this.questionController,});
+  const OpenQuestion(this.question,{super.key, required this.questionController,});
   
   @override
   State<OpenQuestion> createState() => _OpenQuestionState();
@@ -62,7 +61,7 @@ class _OpenQuestionState extends State<OpenQuestion> {
 
   Widget createTextField(TextEditingController controller) {
     return Container(
-        padding: EdgeInsets.only(right: 5, left: 5),
+        padding: const EdgeInsets.only(right: 5, left: 5),
         //   margin: EdgeInsets.only(top: 15.h,bottom: 15.h),
         width: 800.w,
         height: 400.h,
@@ -78,9 +77,9 @@ class _OpenQuestionState extends State<OpenQuestion> {
             style: TextStyle(fontSize: 20.sp),
             decoration: InputDecoration(
               hintText: 'נא הזן את תשובתך',
-              border: OutlineInputBorder(
+              border: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.black12)),
-              focusedBorder: OutlineInputBorder(
+              focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.black)),
               contentPadding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 20.h ),
               isDense: true,

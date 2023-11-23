@@ -1,9 +1,7 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 import '../../../models/quiz.dart';
 import '../../custom_widgets/html_data_widget.dart';
@@ -131,7 +129,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
   }
 
   bool isCorrect() {
-    debugPrint('list answer ${randomList}');
+    debugPrint('list answer $randomList');
     if (listEquals(
         randomList, widget.question.ans!.map((e) => e.ans).toList())) {
       return true;

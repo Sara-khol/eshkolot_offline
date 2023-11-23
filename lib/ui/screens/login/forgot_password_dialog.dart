@@ -10,7 +10,7 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 
 class ForgotPasswordDialog extends StatefulWidget {
-  ForgotPasswordDialog({super.key});
+  const ForgotPasswordDialog({super.key});
 
   @override
   State<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
@@ -257,11 +257,11 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide:
-                BorderSide(color: Color(0xffF4F4F3))),
+                const BorderSide(color: Color(0xffF4F4F3))),
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide:
-                BorderSide(color: Color(0xffF4F4F3))),
+                const BorderSide(color: Color(0xffF4F4F3))),
             //contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 15),
             hintStyle: TextStyle(
                 fontSize: 18.sp, color: colors.grey1ColorApp),
@@ -274,7 +274,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
     String p =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
 
-    RegExp regExp = new RegExp(p);
+    RegExp regExp = RegExp(p);
 
     return regExp.hasMatch(em);
   }

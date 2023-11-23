@@ -76,7 +76,7 @@ class _MainPageState extends State<MainPage> {
             SideMenuWidget(myUser: widget.user),
             Expanded(
                 child: Column(children: [
-              TopBarUserWidget(/*updateLastPosition: updateSync!*/),
+              const TopBarUserWidget(/*updateLastPosition: updateSync!*/),
               Expanded(child: _mainWidget)
             ]))
           ]))

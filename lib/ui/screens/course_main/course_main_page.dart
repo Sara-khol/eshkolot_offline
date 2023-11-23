@@ -3,7 +3,6 @@ import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/lesson_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/subject_main_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../models/course.dart';

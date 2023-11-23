@@ -148,9 +148,9 @@ class _FillInState extends State<FillIn> {
                 ),
                 decoration: InputDecoration(
                   // isCollapsed: true,
-                  border: OutlineInputBorder(
+                  border: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black)),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black)),
                   contentPadding:
                       EdgeInsets.only(top: 10.h, right: 10.w, left: 10.w),

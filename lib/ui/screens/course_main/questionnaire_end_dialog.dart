@@ -46,7 +46,7 @@ saveUserGrade(grade);
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 55.h,),
-                    Text(' הצלחת ${correctQNum} מתוך ${qNum}  שאלות '),
+                    Text(' הצלחת $correctQNum מתוך $qNum  שאלות '),
                     SizedBox(height: 35.h,),
                     Text('%$grade הציון שלך הוא ', style: TextStyle(
                         fontSize: 30.sp, fontWeight: FontWeight.w600)),

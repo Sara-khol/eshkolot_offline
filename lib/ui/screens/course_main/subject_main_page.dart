@@ -4,9 +4,7 @@ import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/lesson_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../services/installationDataHelper.dart';
@@ -56,6 +54,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
   @override
   void didUpdateWidget(covariant SubjectMainPage oldWidget) {
     if (oldWidget.subject != widget.subject) {
+      currentSubject=widget.subject;
       setSteps();
     }
     super.didUpdateWidget(oldWidget);
@@ -124,8 +123,8 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
         width: 950.w,
         height: 755.h,
         decoration: BoxDecoration(
-            border: Border.all(color: Color(0xFFE4E6E9)),
-            borderRadius: BorderRadius.all(Radius.circular(10))),
+            border: Border.all(color: const Color(0xFFE4E6E9)),
+            borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: SingleChildScrollView(
             child: Padding(
                 padding: EdgeInsets.only(
@@ -203,9 +202,9 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                               style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFFACAEAF)),
+                                  color: const Color(0xFFACAEAF)),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 12,
                             ),
                             Text(
@@ -213,7 +212,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                               style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w400,
-                                  color: Color(0xFFACAEAF)),
+                                  color: const Color(0xFFACAEAF)),
                             )
                           ],
                         ),
@@ -237,7 +236,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                        color: Color(0xFF2D2828), width: 1.w),
+                                        color: const Color(0xFF2D2828), width: 1.w),
                                   ),
                                   child: Center(
                                       child: Text("${index + 1}.",
@@ -294,10 +293,10 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                   fontWeight: FontWeight.w600,
                                                 )),
                                           ),
-                                          Spacer(),
+                                          const Spacer(),
                                           Container(
                                             height: 20.h,
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               color: Color(0xFFF4F4F3),
                                               borderRadius: BorderRadius.all(
                                                   Radius.circular(10)),
@@ -312,12 +311,12 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         color:
-                                                            Color(0xFF2D2828)),
+                                                            const Color(0xFF2D2828)),
                                                   ),
                                                   Icon(
                                                     Icons.arrow_forward,
                                                     size: 10.sp,
-                                                    color: Color(0xFF2D2828),
+                                                    color: const Color(0xFF2D2828),
                                                   )
                                                 ],
                                               ),
@@ -457,14 +456,14 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
       alignment: AlignmentDirectional.center,
       children: [
         VerticalDivider(
-            color: isCompleted ? Color(0xFF62FFB8) : colors.grey2ColorApp,
+            color: isCompleted ? const Color(0xFF62FFB8) : colors.grey2ColorApp,
             thickness: 3.w,
             indent: index == 0 && isLesson ? 25.h : null,
             endIndent: isLast ? 20.h : null),
         isCompleted
             ? Icon(
                 Icons.check_circle,
-                color: Color(0xFF62FFB8),
+                color: const Color(0xFF62FFB8),
                 size: 20.sp,
               )
             : Container(
@@ -473,7 +472,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: colors.grey2ColorApp, width: 3.w),
-                    color: Color(0xFFFAFAFA)),
+                    color: const Color(0xFFFAFAFA)),
               )
       ],
     );
@@ -506,10 +505,10 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
               style: TextStyle(fontSize: 16.sp),
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Container(
             height: 20.h,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color(0xFFF4F4F3),
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
@@ -521,12 +520,12 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                     style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D2828)),
+                        color: const Color(0xFF2D2828)),
                   ),
                   Icon(
                     Icons.arrow_forward,
                     size: 10.sp,
-                    color: Color(0xFF2D2828),
+                    color: const Color(0xFF2D2828),
                   )
                 ],
               ),

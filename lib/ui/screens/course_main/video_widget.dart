@@ -96,7 +96,7 @@ class _VideoWidgetState extends State<VideoWidget>
         final myFile = Media.file(file);
         player!.open(myFile, autoStart: false);
       }
-      debugPrint('videoExists  ${videoExists}');
+      debugPrint('videoExists  $videoExists');
       setState(() {});
     } else {
       videoExists = false;
