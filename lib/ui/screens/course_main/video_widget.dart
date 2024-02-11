@@ -8,19 +8,19 @@ import 'package:eshkolot_offline/utils/constants.dart' as constants;
 
 
 class VideoWidget extends StatefulWidget {
-  final String? vimoeId;
+  final String? videoId;
   final int fileId;
   final double width;
   final double height;
-  final bool isQuiz;
+  final bool isVimeo;
   final String videoNum;
 
   const VideoWidget(
       {super.key,
-      required this.vimoeId,
+      required this.videoId,
       required this.videoNum,
       required this.fileId,
-      this.isQuiz = false,
+      this.isVimeo = false,
       this.width = 0,
       this.height = 0});
 
@@ -78,11 +78,11 @@ class _VideoWidgetState extends State<VideoWidget>
   }
 
   videoInit() async {
-    if (widget.vimoeId != null) {
+    if (widget.videoId != null) {
       var dir =
           await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
       String path =
-          '${dir.path}/${widget.isQuiz ? constants.quizPath : constants.lessonPath}/${widget.fileId}/${widget.vimoeId}.mp4';
+          '${dir.path}/${widget.isVimeo ? constants.lessonPath : constants.quizPath}/${widget.fileId}/${widget.videoId}.mp4';
       File file = File(path);
       videoExists = await file.exists();
 
@@ -90,7 +90,7 @@ class _VideoWidgetState extends State<VideoWidget>
           //id: widget.isQuiz ? widget.fileId : int.parse(widget.vimoeId!),
           id: widget.fileId,
           videoDimensions: const VideoDimensions(640, 360));
-      debugPrint(' videoInit vimoeId ${widget.vimoeId}');
+      debugPrint(' videoInit videoId ${widget.videoId}');
 
       if (videoExists!) {
         final myFile = Media.file(file);

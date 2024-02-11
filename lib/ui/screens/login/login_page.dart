@@ -181,7 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(fontSize: 20.sp, color: Colors.red)),
                 ))
           ]),
-          floatingActionButton:kDebugMode? FloatingActionButton(onPressed: ()
+          floatingActionButton:kDebugMode? FloatingActionButton(backgroundColor: Colors.blue,
+              onPressed: ()
           async {
             IsarService().cleanDb();
           }):null)

@@ -28,13 +28,22 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   int selected = 1;
   int index = 0;
   late QuestionController myQController = QuestionController();
-  int correctQNum = 0;
   int qNum = 0;
+  late List<Widget> displayAllWithAnswers;
+  late List<bool> statusAnswers;
 
   @override
   void initState() {
     //displayWidget=getQuestionnaireByType(widget.questionnaire.elementAt(0));
     // debugPrint(widget.questionnaire.elementAt(0).question);
+    displayAllWithAnswers = List.generate(
+      widget.quiz.questionList.length,
+      (index) => Container(),
+    );
+    statusAnswers = List.generate(
+      widget.quiz.questionList.length,
+          (index) => false,
+    );
     super.initState();
   }
 
@@ -48,29 +57,61 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
         Wrap(
           children: [
             for (int i = 1; i <= widget.quiz.questionList.length; i++) ...[
-              Container(
-                width: 45.w,
-                decoration: BoxDecoration(
-                  color: i == selected
-                      ? const Color((0xFF5956DA))
-                      : Colors.transparent,
-                ),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    alignment: Alignment.center,
-                    foregroundColor: i == selected
-                        ? Colors.white
-                        : const Color((0xFF2D2828)),
-                    textStyle: TextStyle(fontSize: 18.w),
+              GestureDetector(
+                child: Container(
+                  width: 65.w,
+                  padding: EdgeInsets.all(20.h),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    color: i == selected
+                        ? const Color((0xFF5956DA))
+                        : Colors.transparent,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      selected = i;
-                      index = i - 1;
-                    });
-                  },
-                  child: Text('$i', style: TextStyle(fontSize: 18.w)),
+                  child: /*TextButton(
+                    style: TextButton.styleFrom(
+                      alignment: Alignment.center,
+                      foregroundColor: i == selected
+                          ? Colors.white
+                          : const Color((0xFF2D2828)),
+                      textStyle: TextStyle(fontSize: 18.w),
+                    ),
+                    onPressed: ,
+                    child:*/
+                      Text('$i',
+                          style: TextStyle(
+                              fontSize: 22.sp,
+                              color: i == selected
+                                  ? Colors.white
+                                  : const Color((0xFF2D2828)),
+                              fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.center),
+                  // ),
                 ),
+                onTap: () {
+                  if (myQController.isFilled != null &&
+                      myQController.isFilled!()) {
+                    widget.quiz.questionList.elementAt(selected - 1).isFilled =
+                        true;
+
+                    if (myQController.isCorrect != null) {
+                      widget.quiz.questionList
+                          .elementAt(selected - 1)
+                          .isCorrect = myQController.isCorrect!();
+                      debugPrint(
+                          'iscorrect ${widget.quiz.questionList.elementAt(selected - 1).isCorrect}');
+                    }
+
+                    displayAllWithAnswers[index] =
+                        myQController.displayWithAnswers ??
+                            const Text('problem');
+                  }
+
+
+                  setState(() {
+                    selected = i;
+                    index = i - 1;
+                  });
+                },
               ),
               //),
             ]
@@ -146,9 +187,9 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             // getQuestionnaireByType(widget.questionnaire.elementAt(index)),
             getQuestionnaireByType(
                 widget.quiz.questionList.elementAt(selected - 1)),
-          SizedBox(height: 20.h),
+            SizedBox(height: 20.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Visibility(
                   visible: selected != 1,
@@ -158,9 +199,12 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                             borderRadius:
                                 BorderRadius.all(Radius.circular(12))),
                         backgroundColor: const Color(0xFF5956DA)),
-                    child: const Text(
+                    child: Text(
                       "חזרה",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 25.sp),
                     ),
                     onPressed: () => onBackClick(),
                   ),
@@ -174,7 +218,10 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                     selected == widget.quiz.questionList.length
                         ? "סיום שאלון"
                         : "הבא",
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 25.sp),
                   ),
                   onPressed: () => selected == widget.quiz.questionList.length
                       ? onFinishClick()
@@ -225,29 +272,47 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
         debugPrint(
             'iscorrect ${widget.quiz.questionList.elementAt(selected - 1).isCorrect}');
       }
+
+      displayAllWithAnswers[index] =
+          myQController.displayWithAnswers ?? const Text('problem');
       if (!isLast) {
         setState(() {
           index++;
           selected++;
         });
       }
+      // else
+      //   {
+      //     bool isAllFilled = widget.quiz.questionList.every((item) {
+      //       // Check if the item is not null and not empty
+      //       return item.isFilled;
+      //     });
+      //     if(isAllFilled)
+      //       {
+      //         return true;
+      //       }
+      //     else{
+      //       CommonFuncs().showMyToast('נא למלא את כל השאלות');
+      //       return false;
+      //     }
+      //   }
     } else {
       if (myQController.isFilled != null) {
         CommonFuncs().showMyToast('הינך חייב לענות על השאלה');
         return false;
       }
       // not supposed to get to here for meanwhile
-      else {
-        //todo change , not allow to go next
-        // CommonFuncs().showMyToast(
-        //     'בעיה');
-        if (!isLast) {
-          setState(() {
-            index++;
-            selected++;
-          });
-        }
-      }
+      // else {
+      //   //todo change , not allow to go next
+      //   // CommonFuncs().showMyToast(
+      //   //     'בעיה');
+      //   if (!isLast) {
+      //     setState(() {
+      //       index++;
+      //       selected++;
+      //     });
+      //   }
+      // }
     }
     return true;
   }
@@ -255,31 +320,38 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   onFinishClick() {
     if (onNextClick(isLast: true)) {
       if (checkAnswers()) {
-        QuestionnaireWidget.of(context)?.setInitialDisplay();
+        // QuestionnaireWidget.of(context)?.setInitialDisplay();
         MainPageChild.of(context)?.updateCompleteQuiz(widget.quiz.id);
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return QuestionnaireEndDialog(
-                qID: widget.quiz.id,
-                  qNum: qNum,
-                  correctQNum: correctQNum,
-                  grade1: widget.quiz.grade1,
-                  grade2: widget.quiz.grade2);
-            });
+        QuestionnaireWidget.of(context)?.setEndQuestionnaire(
+          statusAnswers: statusAnswers,
+            grade1: widget.quiz.grade1,
+            grade2: widget.quiz.grade2,
+            qID: widget.quiz.id,
+            displayAnswersWidget: displayAllWithAnswers);
+        // showDialog(
+        //     context: context,
+        //     builder: (BuildContext context) {
+        //       return QuestionnaireEndDialog(
+        //           qID: widget.quiz.id,
+        //           qNum: qNum,
+        //           correctQNum: correctQNum,
+        //           grade1: widget.quiz.grade1,
+        //           grade2: widget.quiz.grade2);
+        //     });
       }
     }
   }
 
   bool checkAnswers() {
+    qNum=0;
     for (Question q in widget.quiz.questionList) {
-      if (q.isCorrect) {
-        correctQNum++;
-      } else if (!q.isFilled) {
+      if (!q.isFilled) {
         CommonFuncs().showMyToast('ישנם שאלות שלא מולאו');
         return false;
       }
-
+     else if (q.isCorrect) {
+       statusAnswers[qNum]=true;
+      }
       qNum++;
     }
     return true;
@@ -297,9 +369,28 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     debugPrint('qu didChangeDependencies');
     super.didChangeDependencies();
   }
+
+// @override
+// void dispose() {
+//   debugPrint('fff restartQ $restartQ');
+//   for (Question question in widget.quiz.questionList) {
+//     // for (Answer answer in question.ans!)
+//     //   {
+//     //     debugPrint('=====');
+//     //     debugPrint('${answer.ans} isSelected ${answer.isSelected} isCorrect ${answer.isCorrect}');
+//     //   }
+//   }
+//   if(restartQ) {
+//     for (Question question in widget.quiz.questionList) {
+//       question.setAllAnswersToFalse();
+//     }
+//   }
+//   super.dispose();
+// }
 }
 
 class QuestionController {
   bool Function()? isFilled;
   bool Function()? isCorrect;
+  Widget? displayWithAnswers;
 }

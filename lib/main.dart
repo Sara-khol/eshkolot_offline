@@ -28,6 +28,8 @@ import 'models/quiz.dart';
 import 'dart:convert';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
+import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
+
 
 Future<void> main() async {
   runZonedGuarded(() async {
@@ -56,7 +58,7 @@ Future<void> main() async {
         // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
         // We recommend adjusting this value in production.
         options.tracesSampleRate = 1.0;
-        // options.debug = true;
+         //options.debug = true;
         options.sendDefaultPii = true;
         options.enablePrintBreadcrumbs = true;
 
@@ -255,7 +257,9 @@ class _MyAppState extends State<MyApp> {
                 debugShowCheckedModeBanner: false,
                 title: 'Flutter Demo',
                 theme: ThemeData(
-                    primarySwatch: Colors.blue, fontFamily: 'RAG-Sans'),
+                    primaryColor: Colors.blue, fontFamily: 'RAG-Sans',
+                textTheme:
+                TextTheme(bodyMedium: TextStyle(color: colors.blackColorApp))),
                 home: Scaffold(
                     backgroundColor: Colors.white,
                     body: widget.dataWasFilled && didGetVideosCorrect && extractWorked
@@ -267,8 +271,7 @@ class _MyAppState extends State<MyApp> {
                                 ? const LoginPage()
                                 : Center(
                                     child: Text(!extractWorked?'ישנה בעיה 1':'ישנה בעיה 2',
-                                        style: TextStyle(fontSize: 30.sp)),
-                                  )));
+                                        style: TextStyle(fontSize: 30.sp)))));
           }),
     );
   }
@@ -346,6 +349,7 @@ Future<bool> extractZipFileUsingIsolate(List<String> extractPath) async {
 
     final res = await receivePort.first;
     debugPrint('result $res');
+    Sentry.addBreadcrumb(Breadcrumb(message:'result from extract $res' ));
 
     // if (res is String) {
     //   return res == 'finish';

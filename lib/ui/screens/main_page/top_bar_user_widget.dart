@@ -1,3 +1,4 @@
+import 'package:eshkolot_offline/services/download_data_service.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/home_page.dart';
@@ -11,6 +12,8 @@ import '../../../services/installationDataHelper.dart';
 import '../../../services/network_check.dart';
 import '../dialogs/sync_dialogs.dart';
 import 'main_page.dart';
+import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
+
 
 class TopBarUserWidget extends StatefulWidget {
   // final void Function() updateLastPosition;
@@ -119,6 +122,7 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                       Text(
                         '  סינכרון נתונים  ',
                         style: TextStyle(
+                            color: colors.blackColorApp,
                             fontSize: 18.sp, fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -134,8 +138,8 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                 child: Container(
                   height: 40.h,
                   width: 175.w,
-                  decoration: const BoxDecoration(
-                      color: Colors.black,
+                  decoration:  BoxDecoration(
+                      color: colors.blackColorApp,
                       borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -195,7 +199,7 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
       'coursesCompleted': courseCompleted,
       'percentages': jsonList
     };
-
+   DownloadService().blockLinks=[];
     ApiService().syncData(onSuccess: updateFunc, onError: () {}, jsonMap: map);
   }
 }

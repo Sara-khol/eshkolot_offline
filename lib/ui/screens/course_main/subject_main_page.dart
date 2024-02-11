@@ -77,9 +77,11 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
             child: Container(
               height: 40.h,
               width: 175.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFF32D489),
-                borderRadius: BorderRadius.all(Radius.circular(30)),
+              decoration:  BoxDecoration(
+                color: Color( MainPageChild.of(context)!.widget.knowledgeColor != -1
+                    ? MainPageChild.of(context)!.widget.knowledgeColor
+                    : 0xFF32D489),
+                borderRadius: const BorderRadius.all(Radius.circular(30)),
               ),
               child: TextButton(
                 style: TextButton.styleFrom(
@@ -141,6 +143,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                               child: Text(
                                 currentSubject.name,
                                 style: TextStyle(
+                                  color: colors.blackColorApp,
                                     fontSize: 36.sp,
                                     fontWeight: FontWeight.w600),
                               ),
@@ -154,7 +157,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                               ),
                               SizedBox(width: (7.5).w),
                               Text(currentSubject.time,
-                                  style: TextStyle(fontSize: 16.sp))
+                                  style: TextStyle( color: colors.blackColorApp,fontSize: 16.sp))
                             ],
                           ),
                           SizedBox(width: 10.w),
@@ -189,7 +192,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                             top: 20.h, bottom: 40.h, right: 42.w),
                         child: Text(
                           'בנושא זה ${currentSubject.lessons.length} שיעורים, בהצלחה בלמידה!',
-                          style: TextStyle(
+                          style: TextStyle( color: colors.blackColorApp,
                               fontSize: 20.sp, fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -228,7 +231,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                           Lesson currentLesson =
                               currentSubject.lessons.elementAt(index);
                           return Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
                                   height: 31.h,
@@ -241,6 +244,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                   child: Center(
                                       child: Text("${index + 1}.",
                                           style: TextStyle(
+                                              color: colors.blackColorApp,
                                               fontSize: 16.sp,
                                               fontFamily: 'RAG-Sans'))),
                                 ),
@@ -284,16 +288,26 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                           ),
                                           SizedBox(width: 14.h),
                                           Expanded(
-                                            child: Text(
-                                                currentSubject.lessons
+                                            child: Align(
+                                              alignment: Alignment.centerRight,
+                                              child: TextButton(
+                                                  style: TextButton.styleFrom(
+                                                       padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
+                                                      minimumSize: Size.zero,
+                                                     // tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                  ),
+                                                  onPressed: () => goToLesson(index),
+                                                child:Text( currentSubject.lessons
                                                     .elementAt(index)
                                                     .name,
-                                                style: TextStyle(
-                                                  fontSize: 16.sp,
-                                                  fontWeight: FontWeight.w600,
-                                                )),
+                                                    style: TextStyle(
+                                                      color: colors.blackColorApp,
+                                                      fontSize: 16.sp,
+                                                      fontWeight: FontWeight.w600,
+                                                    ))),
+                                            ),
                                           ),
-                                          const Spacer(),
+                                       //   const Spacer(),
                                           Container(
                                             height: 20.h,
                                             decoration: const BoxDecoration(
@@ -310,48 +324,18 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                         fontSize: 12.sp,
                                                         fontWeight:
                                                             FontWeight.w600,
-                                                        color:
-                                                            const Color(0xFF2D2828)),
+                                                        color: colors.blackColorApp),
                                                   ),
                                                   Icon(
                                                     Icons.arrow_forward,
                                                     size: 10.sp,
-                                                    color: const Color(0xFF2D2828),
+                                                    color:  colors.blackColorApp,
                                                   )
                                                 ],
                                               ),
-                                              onPressed: () {
-                                                setState(() {
-                                                  debugPrint(currentSubject.lessons
-                                                      .elementAt(index)
-                                                      .name);
-                                                  currentMainChild
-                                                          ?.lessonPickedIndex =
-                                                      index;
-                                                  currentMainChild
-                                                          ?.lastSubjectPickedIndex =
-                                                      widget.subjectIndex;
-                                                  currentMainChild?.bodyWidget = LessonWidget(
-                                                      updateComplete: currentMainChild
-                                                          .updateCompleteLesson,
-                                                      lesson: currentSubject.lessons
-                                                          .elementAt(index),
-                                                      onNext: index + 1 <
-                                                          currentSubject
-                                                                  .lessons
-                                                                  .length
-                                                          ? () => currentMainChild.goToNextLesson(
-                                                              currentSubject,
-                                                              widget
-                                                                  .subjectIndex,
-                                                              currentSubject
-                                                                  .lessons
-                                                                  .elementAt(index + 1),
-                                                              index + 1)
-                                                          : null);
-                                                });
-                                              },
-                                            ),
+                                        onPressed: () => goToLesson(index),
+
+                                    ),
                                           ),
                                         ],
                                       ),
@@ -473,7 +457,8 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                     shape: BoxShape.circle,
                     border: Border.all(color: colors.grey2ColorApp, width: 3.w),
                     color: const Color(0xFFFAFAFA)),
-              )
+              ),
+
       ],
     );
   }
@@ -500,12 +485,23 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
           ),
           SizedBox(width: 14.h),
           Expanded(
-            child: Text(
-              name,
-              style: TextStyle(fontSize: 16.sp),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: (){
+                  onPress();
+                },
+               style: TextButton.styleFrom(
+              padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
+                      minimumSize: Size.zero,
+              ),
+                child: Text(
+                  name,
+                  style: TextStyle( color: colors.blackColorApp,fontSize: 16.sp),
+                )),
             ),
           ),
-          const Spacer(),
+         // const Spacer(),
           Container(
             height: 20.h,
             decoration: const BoxDecoration(
@@ -520,38 +516,16 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                     style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF2D2828)),
+                      color: colors.blackColorApp),
                   ),
                   Icon(
                     Icons.arrow_forward,
                     size: 10.sp,
-                    color: const Color(0xFF2D2828),
+                      color: colors.blackColorApp
                   )
                 ],
               ),
               onPressed: () {
-                // setState(() {
-                //   currentMainChild
-                //       ?.lessonPickedIndex =
-                //       subjectIndex;
-                //   currentMainChild
-                //       ?.lastSubjectPickedIndex =
-                //       widget
-                //           .subjectIndex;
-                //   currentMainChild
-                //       ?.questionPickedIndex =
-                //       qIndex;
-                //   MainPageChild.of(
-                //       context)
-                //       ?.bodyWidget =
-                //       QuestionnaireWidget(
-                //           title:
-                //           name,
-                //           questionnaires: widget.subject
-                //               .questionnaire
-                //               .elementAt(qIndex)
-                //               .questionnaireList);
-                // });
                 onPress();
               },
             ),
@@ -585,6 +559,39 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
         .length;
 
     //  progressPercent = ((currentStep / totalSteps) * 100).round();
+  }
+
+  goToLesson(int index)
+  {
+    setState(() {
+      debugPrint(currentSubject.lessons
+          .elementAt(index)
+          .name);
+      currentMainChild
+          ?.lessonPickedIndex =
+          index;
+      currentMainChild
+          ?.lastSubjectPickedIndex =
+          widget.subjectIndex;
+      currentMainChild?.bodyWidget = LessonWidget(
+          updateComplete: currentMainChild
+              .updateCompleteLesson,
+          lesson: currentSubject.lessons
+              .elementAt(index),
+          onNext: index + 1 <
+              currentSubject
+                  .lessons
+                  .length
+              ? () => currentMainChild.goToNextLesson(
+              currentSubject,
+              widget
+                  .subjectIndex,
+              currentSubject
+                  .lessons
+                  .elementAt(index + 1),
+              index + 1)
+              : null);
+    });
   }
 
   @override

@@ -112,14 +112,14 @@ class _HomePageState extends State<HomePage> {
     //     debugPrint('hhhjjjkkk');
     //   });
     // };
-    myFuture=initDirectory();
+    myFuture = initDirectory();
     stream =
         InstallationDataHelper().eventBusHomePage.on().listen((event) async {
       debugPrint('event listen');
       User user = IsarService().getCurrentUser();
       knowledgeCourses = user.knowledgeCoursesMap;
       if (mounted) {
-     //   await initDirectory();
+        //   await initDirectory();
         setState(() {});
       }
     });
@@ -129,7 +129,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder(
         future: myFuture,
         builder: (context, snapshot) {
@@ -139,7 +138,7 @@ class _HomePageState extends State<HomePage> {
               SchedulerBinding.instance.addPostFrameCallback((_) {
                 setState(() {
                   showMoreKnowledge =
-                      knowledgeScrollController.position.maxScrollExtent > 0 ;
+                      knowledgeScrollController.position.maxScrollExtent > 0;
                   showMorePath =
                       pathScrollController.position.maxScrollExtent > 0;
                 });
@@ -285,7 +284,8 @@ class _HomePageState extends State<HomePage> {
                 //todo
                 /*isPath
                     ? !enableScrollPath && showMorePath
-                    : !enAbleScrollKnowledge && showMoreKnowledge*/,
+                    : !enAbleScrollKnowledge && showMoreKnowledge*/
+                ,
                 child: GestureDetector(
                   onTap: () => setState(() {
                     //isPath?showMorePath=false:showMoreKnowledge=false;
@@ -297,7 +297,8 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.centerLeft,
                       child: Text('הצג עוד',
                           style: TextStyle(
-                              fontSize: 15.sp, color: const Color(0xff6E7072)))),
+                              fontSize: 15.sp,
+                              color: const Color(0xff6E7072)))),
                 ))
           ],
         ),
@@ -421,7 +422,8 @@ class _HomePageState extends State<HomePage> {
                   knowledgeCourses.values.elementAt(kIndex)[index],
                   currentColor,
                   knowledge.icon.nameIcon,
-                  index);
+                  index,
+                  knowLedgeId: knowledge.id);
             }),
         SizedBox(height: 24.h),
       ],
@@ -477,15 +479,16 @@ class _HomePageState extends State<HomePage> {
                   path.courses.elementAt(index),
                   currentColor,
                   courseKnowledge.icon.nameIcon,
-                  /*path.color.isNotEmpty ? int.parse(path.color) : -1*/
-                  index);
+                  index,
+                  knowLedgeId: courseKnowledge.id);
             }),
         SizedBox(height: 24.h),
       ],
     );
   }
 
-  courseItem(Course course, int color, String icon, int i) {
+  courseItem(Course course, int color, String icon, int i,
+      {required int knowLedgeId}) {
     String path = removeHiddenCharsFromPath('${dir.path}/icons/$icon');
     UserCourse? userCourse = IsarService().getUserCourseData(course.id);
 
@@ -499,6 +502,7 @@ class _HomePageState extends State<HomePage> {
         onTap: () {
           debugPrint('1212');
           MainPage.of(context)?.mainWidget = MainPageChild(
+            knowLedgeId: knowLedgeId,
             course: course,
             knowledgeColor: color,
           );
@@ -513,7 +517,10 @@ class _HomePageState extends State<HomePage> {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  getIconByStatus(userCourse!.status),
+                  //todo
+                  userCourse != null
+                      ? getIconByStatus(userCourse.status)
+                      : Container(),
                   // SizedBox(width: 12.w),
 
                   Positioned(
@@ -554,7 +561,12 @@ class _HomePageState extends State<HomePage> {
                                 )
                               ])))
                 ]),
-            displayActionByStatus(userCourse.status, course,color)
+            displayActionByStatus(
+              //todo
+                userCourse != null ? userCourse.status : Status.start,
+                course,
+                color,
+                knowledgeId: knowLedgeId)
           ],
         ),
       ),
@@ -588,10 +600,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  displayActionByStatus(Status status, Course course,int color) {
+  displayActionByStatus(Status status, Course course, int color,
+      {required int knowledgeId}) {
     switch (status) {
       case Status.start:
-        return statusWidget('', 'התחל ללמוד', course,color);
+        return statusWidget('', 'התחל ללמוד', course, color, knowledgeId);
 
       case Status.middle:
         return FutureBuilder<String>(
@@ -599,31 +612,36 @@ class _HomePageState extends State<HomePage> {
             builder: (c, s) {
               if (s.hasData) {
                 if (s.data!.isNotEmpty) {
-                  return statusWidget(
-                      'המשך מהמקום שעצרת', s.data ?? '', course,color, true);
+                  return statusWidget('המשך מהמקום שעצרת', s.data ?? '', course,
+                      color, knowledgeId, true);
                 }
-                return statusWidget('', 'המשך', course,color, false);
-
+                return statusWidget(
+                    '', 'המשך', course, color, knowledgeId, false);
               }
               return const CircularProgressIndicator();
             });
 
       case Status.finish:
-        return statusWidget('הקורס הושלם בהצלחה!', 'סינכרון נתונים', course,color);
+        return statusWidget('הקורס הושלם בהצלחה!', 'סינכרון נתונים', course,
+            color, knowledgeId);
       case Status.synchronized:
-        return statusWidget('נתוני הקורס סונכרנו!', 'להורת התעודה', course,color);
+        return statusWidget(
+            'נתוני הקורס סונכרנו!', 'להורת התעודה', course, color, knowledgeId);
     }
   }
 
-  statusWidget(String text, String buttonText, Course course,int color,
+  statusWidget(
+      String text, String buttonText, Course course, int color, int knowledgeId,
       [bool isContinue = false]) {
     return Row(children: [
       if (text != '')
-        Text(text, style: TextStyle(fontSize: 14.sp, color: const Color(0xff6E7072))),
+        Text(text,
+            style: TextStyle(fontSize: 14.sp, color: const Color(0xff6E7072))),
       if (text != '') SizedBox(width: 7.w),
       GestureDetector(
         child: Container(
-          constraints: BoxConstraints(maxWidth: 130.w), // Set your maximum width
+          constraints: BoxConstraints(maxWidth: 130.w),
+          // Set your maximum width
           decoration: BoxDecoration(
               color: colors.lightGrey1ColorApp,
               borderRadius: const BorderRadius.all(Radius.circular(30))),
@@ -636,12 +654,13 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                   child: Text(
                     buttonText,
-                   overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 14.sp, color: colors.blackColorApp),
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        TextStyle(fontSize: 14.sp, color: colors.blackColorApp),
                   ),
                 ),
               ),
-             // SizedBox(width: 3.w),
+              // SizedBox(width: 3.w),
               Icon(Icons.arrow_forward, size: 14.sp),
             ],
           ),
@@ -653,6 +672,7 @@ class _HomePageState extends State<HomePage> {
           if (isContinue && course.userCourse != null) {
             if (!course.userCourse!.isQuestionnaire) {
               MainPage.of(context)?.mainWidget = MainPageChild(
+                knowLedgeId: knowledgeId,
                 course: course,
                 knowledgeColor: currentColor,
                 lessonPickedIndex: course.userCourse!.lessonIndex,
@@ -661,18 +681,17 @@ class _HomePageState extends State<HomePage> {
               );
             } else {
               MainPage.of(context)?.mainWidget = MainPageChild(
-                course: course,
-                knowledgeColor: currentColor,
-                lessonPickedIndex: course.userCourse!.lessonIndex,
-                subjectPickedIndex: course.userCourse!.subjectIndex,
-                questionPickedIndex: course.userCourse!.questionIndex,
-                isContinue: 2,
-              );
-
+                  course: course,
+                  knowledgeColor: currentColor,
+                  lessonPickedIndex: course.userCourse!.lessonIndex,
+                  subjectPickedIndex: course.userCourse!.subjectIndex,
+                  questionPickedIndex: course.userCourse!.questionIndex,
+                  isContinue: 2,
+                  knowLedgeId: knowledgeId);
             }
-          }
-          else{
+          } else {
             MainPage.of(context)?.mainWidget = MainPageChild(
+              knowLedgeId: knowledgeId,
               course: course,
               knowledgeColor: color,
             );

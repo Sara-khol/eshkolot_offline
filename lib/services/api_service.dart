@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:eshkolot_offline/models/course.dart';
+import 'package:eshkolot_offline/services/download_data_service.dart';
 import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -115,6 +116,7 @@ class ApiService {
     Response response = await _dio.get(url,cancelToken: cancelToken);
     if (response.statusCode == 200) {
       debugPrint('okkkk');
+      DownloadService().init();
       Course course = await InstallationDataHelper().setSyncNewCourse(response.data);
       return course;
       // InstallationDataHelper().eventBusDialogs.fire(course);

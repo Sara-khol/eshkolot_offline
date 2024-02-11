@@ -20,7 +20,7 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 class MainPageChild extends StatefulWidget {
   const MainPageChild(
       {super.key, required this.course, required this.knowledgeColor, this.isContinue = 0,
-        this.lessonPickedIndex = -1, this.questionPickedIndex = -1, this.subjectPickedIndex = -1});
+        this.lessonPickedIndex = -1, this.questionPickedIndex = -1, this.subjectPickedIndex = -1, required this.knowLedgeId});
 
   final Course course;
   final int knowledgeColor;
@@ -28,6 +28,7 @@ class MainPageChild extends StatefulWidget {
   final int lessonPickedIndex;
   final int questionPickedIndex;
   final int subjectPickedIndex;
+  final int knowLedgeId;
 
 
   static _MainPageChildState? of(BuildContext context) =>
@@ -275,11 +276,7 @@ class _MainPageChildState extends State<MainPageChild> {
                           style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color:
-                              //todo change get color or from knowledge or from path
-                              const Color(
-                                /*widget.knowledgeColor != -1 ? widget.knowledgeColor:*/
-                                  0xff32D489)),
+                              color: const Color(0xFF62FFB8)),
                           // Color(widget.course.knowledge.value??widget.course.knowledge.value!.color)),
                         ),
                         SizedBox(
@@ -297,7 +294,7 @@ class _MainPageChildState extends State<MainPageChild> {
                   ),
                   LinearPercentIndicator(
                     /* width: 765.w,*/
-                    backgroundColor: const Color(0xFFF4F4F3),
+                    backgroundColor: const Color(0xFF62FFB8),
                     progressColor: colors.lightGreen1ColorApp,
                     lineHeight: 5,
                     percent: /*userCourse!.progressPercent*/
@@ -327,7 +324,7 @@ class _MainPageChildState extends State<MainPageChild> {
           Container(
             width: double.infinity,
             height: 74.h,
-            color: const Color(0xFF32D489),
+            color: Color(widget.knowledgeColor != -1 ? widget.knowledgeColor:0xFF32D489),
             child: TextButton(
                 child: Text(
                   _currentCourse.title,
@@ -775,39 +772,44 @@ class _MainPageChildState extends State<MainPageChild> {
           SizedBox(width: 11.w),
           Expanded(
             child: Material(
-              child: ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(vertical: -4),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)),
-                  tileColor:
+              child: Container(
+                margin: EdgeInsets.only(left: 20.w),
+                padding: EdgeInsets.only(right: 20.w,left: 7.w,top:7.h,bottom: 4.h ),
+                //  dense: true,
+                 // visualDensity: const VisualDensity(vertical: -4),
+                  decoration:BoxDecoration(color:
                   isSelect ? colors.grey2ColorApp : Colors.transparent,
-                  contentPadding:
-                  EdgeInsets.only(right: 20.h, bottom: 20.h, left: 20.h),
+                      borderRadius: BorderRadius.circular(20.0))  ,
+
+                 // contentPadding:
+                  //EdgeInsets.only(right: 20.h, /*bottom: 20.h, */left: 20.h),
                   // hoverColor: colors.grey2ColorApp,
-                  title: Row(
-                    children: [
-                      Icon(
-                        isLesson
-                            ? Icons.videocam_outlined
-                            : lIndex == -1
-                            ? Icons.star_outline
-                            : Icons.create_outlined,
-                        size: 22.sp,
-                        color: Colors.black,
-                      ),
-                      SizedBox(width: 14.w),
-                      Expanded(
-                        child: Text(name,
-                            style: TextStyle(
-                                fontWeight: isLesson
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                fontSize: 16.sp)),
-                      ),
-                    ],
-                  ),
-                  onTap: onPress),
+                  child: GestureDetector(
+                    onTap: onPress,
+                    child: Row(
+                      children: [
+                        Icon(
+                          isLesson
+                              ? Icons.videocam_outlined
+                              : lIndex == -1
+                              ? Icons.star_outline
+                              : Icons.create_outlined,
+                          size: 22.sp,
+                          color: Colors.black,
+                        ),
+                        SizedBox(width: 14.w),
+                        Expanded(
+                          child: Text(name,
+                              style: TextStyle(
+                                height: 1,
+                                  fontWeight: isLesson
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  fontSize: 16.sp)),
+                        ),
+                      ],
+                    ),
+                  )),
             ),
           ),
         ],
@@ -847,7 +849,7 @@ class _MainPageChildState extends State<MainPageChild> {
             margin: EdgeInsets.only(left: 40.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
-              color: const Color(0xFF32D489),
+              color:  Color(widget.knowledgeColor != -1 ? widget.knowledgeColor:0xFF32D489),
             ),
             child: TextButton(
                 child: Row(

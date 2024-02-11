@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
+import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_end_dialog.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_tab.dart';
@@ -223,7 +224,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                           style: TextStyle(
                               fontSize: 18.sp,
                               color: Colors.white,
-                              fontFamily: 'RAG-Sans')),
+                             /* fontFamily: 'RAG-Sans'*/)),
                       Icon(
                         Icons.arrow_forward,
                         size: 15.sp,
@@ -240,7 +241,18 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
 
   setInitialDisplay() {
     setState(() {
+      for (Question question in widget.quiz.questionList) {
+        question.isFilled=false;
+        
+        question.setAllAnswersToFalse();
+      }
       displayWidget = initialDisplay();
+    });
+  }
+
+  setEndQuestionnaire({required List<bool> statusAnswers, required grade1, required grade2, required qID,required displayAnswersWidget}) {
+    setState(() {
+      displayWidget = QuestionnaireEndDialog(statusAnswers:statusAnswers/*,correctQNum: correctQNum, qNum: qNum*/, grade1: grade1, grade2: grade2, qID: qID,displayAnswersWidget: displayAnswersWidget,);
     });
   }
 

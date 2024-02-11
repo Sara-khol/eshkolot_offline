@@ -2,6 +2,7 @@
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
+import 'package:eshkolot_offline/models/linkQuizIsar.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/user.dart';
 import 'package:eshkolot_offline/models/videoIsar.dart';
@@ -47,6 +48,7 @@ class IsarService {
         UserSchema,
         LearnPathSchema,
         VideoIsarSchema,
+        LinkQuizIsarSchema,
       ], inspector: true, directory: dir.path);
     }
     return Future.value(Isar.getInstance());
@@ -103,6 +105,7 @@ class IsarService {
       //    isar.users.importJsonSync([user]);
       // }
       isar.videoIsars.clearSync();
+      isar.linkQuizIsars.clearSync();
     });
   }
 
@@ -113,6 +116,20 @@ class IsarService {
     });
   }
 
+  addIsarQuiz(LinkQuizIsar linkQuizIsar) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.linkQuizIsars.put(linkQuizIsar);
+    });
+  }
+
+ Future<bool> checkIsarQuizExistes(int id) async {
+    final isar = await db;
+    LinkQuizIsar? linkQuizIsar = await isar.linkQuizIsars.get(id);
+    return linkQuizIsar!=null;
+  }
+
+
   updateIsarVideo(int id) async {
     final isar = await db;
     await isar.writeTxn(() async {
@@ -121,6 +138,15 @@ class IsarService {
       await isar.videoIsars.put(vi);
     });
   }
+
+  // updateIsarLinkQuiz(int quizId,String name) async {
+  //   final isar = await db;
+  //   await isar.writeTxn(() async {
+  //     LinkQuizIsar? linkQuizIsar = await isar.linkQuizIsars.where();
+  //     linkQuizIsar!.isDownload = true;
+  //     await isar.linkQuizIsars.put(linkQuizIsar);
+  //   });
+  // }
 
   setExpitedDateToFirstItem(int date) async {
     final isar = await db;
@@ -160,6 +186,17 @@ class IsarService {
     return count == 0;
   }
 
+  Future<bool> checkIfLinkIsarIsEmpty(List<int> ids) async {
+    final isar = await db;
+    IsarCollection<LinkQuizIsar> v = isar.collection<LinkQuizIsar>();
+    int count = await v
+        .filter()
+        .anyOf(ids, (q, int size) => q.courseIdEqualTo(size))
+        .count();
+    // return await v.count() == 0;
+    return count == 0;
+  }
+
   Future<List<VideoIsar>> getAllVideosToDownload(List<int> ids) async {
     final isar = await db;
     final result = await isar.videoIsars
@@ -168,6 +205,17 @@ class IsarService {
         .isDownloadEqualTo(false)
         .findAll();
     //   final result= await isar.videoIsars.filter().isDownloadEqualTo(false).findAll();
+    return result;
+  }
+
+  Future<List<LinkQuizIsar>> getAllLinksToDownload(List<int> ids) async {
+    final isar = await db;
+    final result = await isar.linkQuizIsars
+        .filter()
+        //.anyOf(ids, (q, int id) => q.courseIdEqualTo(id))
+        .isDownloadEqualTo(false)
+        .findAll();
+    debugPrint('getAllLinksToDownload $result');
     return result;
   }
 
@@ -185,6 +233,20 @@ class IsarService {
     return b;
   }
 
+  checkIfAllLinksAreDownloaded(bool newCourse) async {
+    bool b = false;
+    List<int> ids = getUserUserCoursesId();
+    if (newCourse) {
+      if (await checkIfLinkIsarIsEmpty(ids)) {
+        return b;
+      }
+    }
+    await getAllLinksToDownload(ids).then((value) {
+      b = value.isEmpty;
+    });
+    return b;
+  }
+
   clearVideoIsar() async {
     final isar = await db;
     // IsarCollection<VideoIsar> v = isar.collection<VideoIsar>();
@@ -192,6 +254,16 @@ class IsarService {
 
     await isar.writeTxn(() async {
       await isar.videoIsars.deleteAll(videoIds);
+    });
+  }
+
+  clearLinkIsar() async {
+    final isar = await db;
+    // IsarCollection<VideoIsar> v = isar.collection<VideoIsar>();
+    final linkIds = await isar.linkQuizIsars.where().idProperty().findAll();
+
+    await isar.writeTxn(() async {
+      await isar.linkQuizIsars.deleteAll(linkIds);
     });
   }
 
@@ -373,7 +445,12 @@ class IsarService {
           // getVideos = true;
           Course? course = await ApiService().getCourseData(
               id: newDataCourse.courseId, /*onSuccess: (){},*/ onError: () {});
-          if (course != null) coursesList.add(course);
+
+          if (course != null) {
+            debugPrint('course.isDownLoadData true');
+            course.isDownLoadData=true;
+            coursesList.add(course);
+          }
         } else {
           // for (var entry in _user.knowledgeCoursesMap.entries) {
           //   Knowledge knowledge = entry.key;
@@ -434,12 +511,22 @@ class IsarService {
       // }
     }
 
-    if (coursesList.isNotEmpty) {
-      debugPrint('sending event full');
-      InstallationDataHelper().eventBusDialogs.fire(coursesList);
-    } else /* if (getVideos)*/ {
+    //todo ?????
+    // if (coursesList.isNotEmpty) {
+    //   debugPrint('sending event full');
+    //   InstallationDataHelper().eventBusDialogs.fire(coursesList);
+    // } else /* if (getVideos)*/ {
+    //   debugPrint('sending event empty');
+    //   InstallationDataHelper().eventBusDialogs.fire('');
+    // }
+
+    if (coursesList.isEmpty) {
       debugPrint('sending event empty');
       InstallationDataHelper().eventBusDialogs.fire('');
+    }
+    else{
+      InstallationDataHelper().downLoadQuizFiles(coursesList);
+      InstallationDataHelper().coursesList=coursesList;
     }
     await isar.writeTxn(() async {
       await isar.users.put(_user);
@@ -492,8 +579,6 @@ class IsarService {
         if (!lessonCompletedList.contains(id)) {
           lessonCompletedList.add(id);
           _user.lessonCompleted = lessonCompletedList;
-          debugPrint('knowledgeCoursesMap ${_user.knowledgeCoursesMap.length}');
-          debugPrint('name ${_user.name}');
           await isar.users.put(_user);
         }
       }
@@ -683,4 +768,15 @@ class IsarService {
       await isar.users.put(_user);
     });
   }
+
+  Future<List<int>> getAllCourseIds() async {
+    final isar = await db;
+
+   List<int> courseIds=await isar.videoIsars.where(distinct: true).anyCourseId().courseIdProperty().findAll();
+
+    print('All distinct courseIds: $courseIds');
+    return courseIds;
+  }
+
+
 }

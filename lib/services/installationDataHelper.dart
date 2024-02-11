@@ -1,15 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:collection/src/iterable_extensions.dart';
+import 'package:dio/dio.dart';
 
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/models/subject.dart';
+import 'package:eshkolot_offline/services/download_data_service.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as constants;
 
@@ -44,12 +47,17 @@ class InstallationDataHelper {
   EventBus eventBusVimeo = EventBus();
   EventBus eventBusDialogs = EventBus();
 
+  int numOfQuizUrls = 0;
+
+  List<Course> coursesList = [];
+
   init() async {
     late String destDirPath;
     final Directory directory = await getApplicationSupportDirectory();
     destDirPath = directory.path;
     //  try {
-    final file = File('$destDirPath/${constants.dataPath}/download_software.json');
+    final file =
+        File('$destDirPath/${constants.dataPath}/download_software.json');
     //  final file = await File('$destDirPath/download_software(2).json');
     //  final file = await File('$destDirPath/download_software(7).json');
     final contents = await file.readAsString();
@@ -143,11 +151,11 @@ class InstallationDataHelper {
             course.subjects.add(subject);
             mySubjects.add(subject);
           }
-          //todo remove  just for testing
-          if (course.id == 78407) {
-            course.questionnaireIds
-                .addAll([66164, 82517, 111897, 128955, 129722]);
-          }
+          // //todo remove  just for testing
+          // if (course.id == 78407) {
+          //   course.questionnaireIds
+          //       .addAll([66164, 82517, 111897, 128955, 129722]);
+          // }
 
           for (int qId in course.questionnaireIds) {
             var q = questionnaires[qId.toString()];
@@ -248,10 +256,13 @@ class InstallationDataHelper {
 
         for (int qId in lesson.questionnaireIds) {
           var q = questionnaires[qId.toString()];
-
+          debugPrint('===qId $qId====');
           Quiz quiz = Quiz.fromJson(q, qId);
           lesson.questionnaire.add(quiz);
           myQuizzes.add(quiz);
+          numOfQuizUrls += quiz.quizUrls.length;
+          // await DownloadService()
+          //     .downloadQuizFiles(quiz.quizUrls, quiz.id, courseId);
         }
         subject.lessons.add(lesson);
         myLessons.add(lesson);
@@ -259,9 +270,10 @@ class InstallationDataHelper {
 
       for (int qId in subject.questionnaireIds) {
         var q = questionnaires[qId.toString()];
-
+        debugPrint('===qId $qId====');
         Quiz quiz = Quiz.fromJson(q, qId);
         subject.questionnaire.add(quiz);
+        numOfQuizUrls += quiz.quizUrls.length;
         myQuizzes.add(quiz);
       }
 
@@ -271,11 +283,13 @@ class InstallationDataHelper {
 
     for (int qId in course.questionnaireIds) {
       var q = questionnaires[qId.toString()];
+      debugPrint('===qId $qId====');
       Quiz quiz = Quiz.fromJson(q, qId);
       course.questionnaires.add(quiz);
+      numOfQuizUrls += quiz.quizUrls.length;
       myQuizzes.add(quiz);
     }
-
+    debugPrint('numOfQuizUrls $numOfQuizUrls');
     await IsarService().addQuizzes(myQuizzes);
     await IsarService().addLessons(myLessons);
     await IsarService().addSubjects(mySubjects);
@@ -363,7 +377,7 @@ class InstallationDataHelper {
     //   }
   }
 
- Future<bool> setLessonVideosNum(Course course) async {
+  Future<bool> setLessonVideosNum(Course course) async {
     var dir = await getApplicationSupportDirectory();
     String courseVideosPath =
         '${dir.path}${Platform.pathSeparator}${constants.lessonPath}${Platform.pathSeparator}${course.id}';
@@ -454,5 +468,33 @@ class InstallationDataHelper {
     return false;
   }
 
-
+  downLoadQuizFiles(List<Course> courses) {
+    debugPrint('downLoadQuizFiles==');
+    DownloadService().cancelToken=CancelToken();
+    DownloadService().tryAgain=false;
+    for (Course course in courses) {
+      if (course.questionnaires.isNotEmpty) {
+        for (Quiz quiz in course.questionnaires) {
+          DownloadService()
+              .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
+        }
+      }
+      for (Subject subject in course.subjects) {
+        if (subject.questionnaire.isNotEmpty) {
+          for (Quiz quiz in subject.questionnaire) {
+            DownloadService()
+                .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
+          }
+        }
+        for (Lesson lesson in subject.lessons) {
+          if (lesson.questionnaire.isNotEmpty) {
+            for (Quiz quiz in lesson.questionnaire) {
+              DownloadService()
+                  .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
+            }
+          }
+        }
+      }
+    }
+  }
 }

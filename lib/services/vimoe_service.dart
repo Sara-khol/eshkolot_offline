@@ -26,6 +26,7 @@ class VimoeService with ChangeNotifier {
   Dio dioDownload = Dio();
   List<VimoeVideo> videoList = [];
   List<VideoIsar> isarVideoList = [];
+  List<String> quizLinks = [];
   int numDownloadFiles = 0;
   late DownloadStatus downloadStatus, lastDownLoadStatus;
   late String currentLink;
@@ -408,7 +409,7 @@ class VimoeService with ChangeNotifier {
       currentLink = v.link;
       download ??= v.download.first;
       if (download.rendition != '540p') {
-        debugPrint('fff ${download.public_name}');
+        debugPrint('fff ${download.rendition}');
         debugPrint('fff ${download.link}');
       }
       //not sepouse to be null
@@ -599,7 +600,7 @@ class VimoeService with ChangeNotifier {
               'my downloading data blocked links error ');
           //todo change..
           downloadStatus = DownloadStatus.blockError;
-          //downloadStatus = DownloadStatus.downloaded;
+          // downloadStatus = DownloadStatus.downloaded;
 
           notifyListeners();
         }

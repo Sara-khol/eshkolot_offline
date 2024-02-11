@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:eshkolot_offline/models/linkQuizIsar.dart';
 import 'package:eshkolot_offline/services/api_service.dart';
+import 'package:eshkolot_offline/services/download_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -25,19 +27,22 @@ class SyncDialogs extends StatefulWidget {
   State<SyncDialogs> createState() => _SyncDialogsState();
 }
 
-class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin {
+class _SyncDialogsState extends State<SyncDialogs>
+    with TickerProviderStateMixin {
   late Widget mainWidget;
   Widget? lastMainWidget;
   late AnimationController controller;
-  late bool allDownloaded;
+  late bool allDownloadedVideos;
+  late bool allDownloadedLinks;
   late List<VideoIsar> vi;
-  bool firstTime = true;
-  late List<Course> c;
+  late List<LinkQuizIsar> linkList;
+  bool firstTimeVimeo = true;
+  List<Course> c = [];
 
   //todo
   late bool isNetWorkConnection = true;
 
- late StreamSubscription subscription;
+  late StreamSubscription subscription;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   Map _source = {ConnectivityResult.none: false};
   bool onlyOnce = true;
@@ -45,35 +50,57 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
 
   @override
   void initState() {
-     _networkConnectivity.whileDownloading = true;
+    _networkConnectivity.whileDownloading = true;
 
     listenToNetWork();
 
-    eventSubscription=InstallationDataHelper().eventBusDialogs.on().listen((event) async {
+    eventSubscription =
+        InstallationDataHelper().eventBusDialogs.on().listen((event) async {
       debugPrint('eventBusDialogs listen event $event');
       if (event == '') {
         vi = await isVideosDownload(false);
-        //todo 2
-        if (allDownloaded) {
+        linkList = await isLinksDownload(false);
+        if (allDownloadedVideos && allDownloadedLinks) {
           updateEndDialog();
+        } else if (!allDownloadedLinks) {
+          downloadLinksStart();
         } else {
           vimeoStart();
         }
       } else {
-        debugPrint('downloade vimeo');
-        vi = await isVideosDownload(true);
-        c = event as List<Course>;
-        for (Course course in c) {
-          debugPrint('Course ID: ${course.id}');
+        if (event is List<Course>) {
+          debugPrint('downloade vimeo');
+          vi = await isVideosDownload(true);
+          linkList = await isLinksDownload(false);
+          c = event as List<Course>;
+          for (Course course in c) {
+            debugPrint('Course ID: ${course.id}');
+          }
+          if (allDownloadedVideos && allDownloadedLinks) {
+            debugPrint('111');
+            updateEndDialog();
+          } else {
+            debugPrint('222');
+
+            if (!allDownloadedVideos) {
+              debugPrint('333');
+              vimeoStart(newCourse: true);
+            } else {
+              downloadLinksStart(newCourse: true);
+            }
+          }
         }
-       // c.add(event as Course);
-        // vi = await isVideosDownload();
-        //todo 2
-        if (allDownloaded) {
-          updateEndDialog();
-        } else {
-          vimeoStart(newCourse: true);
-        }
+        else
+          {
+            debugPrint('4444');
+            if(!allDownloadedVideos) {
+              vimeoStart();
+            } else {
+              mainWidget= showErrorDialog(context,isVimeo: false);
+              setState(() {});
+            }
+
+          }
         //   SyncDialogs().showVimeoDialog(context, c, controller);
       }
     });
@@ -100,12 +127,12 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
   }
 
   listenToNetWork() {
-   _networkConnectivity.reOpen();
+    _networkConnectivity.reOpen();
     subscription = _networkConnectivity.myStream.listen((source) async {
       _source = source;
       debugPrint('source11 $_source');
       if (_source.keys.toList()[0] == ConnectivityResult.none) {
-        onlyOnce=true;
+        onlyOnce = true;
         isNetWorkConnection = false;
         lastMainWidget = mainWidget;
         mainWidget = showOfflineSyncWidget();
@@ -114,9 +141,9 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
         if (mounted) {
           setState(() {});
         }
-      } else if(onlyOnce) {
+      } else if (onlyOnce) {
         isNetWorkConnection = true;
-        onlyOnce=false;
+        onlyOnce = false;
         Navigator.of(context).pop();
       }
     });
@@ -128,9 +155,26 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
     // isNetWorkConnection = await checkConnectivity();
     isNetWorkConnection = await _networkConnectivity.checkConnectivity();
 
-    allDownloaded = await IsarService().checkIfAllVideosAreDownloaded(newCourse);
-    if (!allDownloaded) {
-      return IsarService().getAllVideosToDownload(IsarService(). getUserUserCoursesId());
+    allDownloadedVideos =
+        await IsarService().checkIfAllVideosAreDownloaded(newCourse);
+    if (!allDownloadedVideos) {
+      return IsarService()
+          .getAllVideosToDownload(IsarService().getUserUserCoursesId());
+    }
+
+    return [];
+  }
+
+  Future<List<LinkQuizIsar>> isLinksDownload(bool newCourse) async {
+    debugPrint('isLinksDownload');
+    // isNetWorkConnection = await checkConnectivity();
+    isNetWorkConnection = await _networkConnectivity.checkConnectivity();
+
+    allDownloadedLinks =
+        await IsarService().checkIfAllLinksAreDownloaded(newCourse);
+    if (!allDownloadedLinks) {
+      return IsarService()
+          .getAllLinksToDownload(IsarService().getUserUserCoursesId());
     }
 
     return [];
@@ -140,50 +184,85 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     return Center(
       child: AlertDialog(
-        content: SizedBox(
-          height: 640.h,
-          width: 656.w,
-          child: mainWidget
-        ),
+        contentPadding: EdgeInsets.zero,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        content: Container(
+            height: 640.h,
+            width: 656.w,
+            // padding: EdgeInsets.only(top: 51.h),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            child: mainWidget),
       ),
     );
   }
 
-  vimeoStart({bool newCourse=false, oldLinks=false}) {
-  // _networkConnectivity.disposeStream();
+  vimeoStart({bool newCourse = false, oldLinks = false}) async {
+    // _networkConnectivity.disposeStream();
     //mmm
     subscription.cancel();
+
+    late List<int> ids;
+    bool didDateExpired = checkDateExpired();
+    // bool didDateExpired = true;
+    if (didDateExpired) {
+      ids = await IsarService().getAllCourseIds();
+      for (int cId in ids) {
+        Course? course = await IsarService().getCourseById(cId);
+        if (course != null) {
+          c.add(course);
+          debugPrint('cId $cId added');
+        }
+      }
+    }
+
     mainWidget = ChangeNotifierProvider<VimoeService>(
         create: (_) => VimoeService(),
         builder: (context, child) {
           {
-            if (firstTime) {
+            if (firstTimeVimeo) {
               context.read<VimoeService>().isNetWorkConnection =
                   isNetWorkConnection;
-              if (/*vi.isEmpty*/ newCourse || checkDateExpired()) {
+
+              if (/*vi.isEmpty*/ newCourse || didDateExpired) {
                 debugPrint('hhh');
-                context.read<VimoeService>().finishConnectToVimoe = false;
-                context.read<VimoeService>().courses = c;
-                if(vi.isNotEmpty)
-                  {
-                    context.read<VimoeService>().isarVideoList=vi;
+                if (didDateExpired) {
+                  context.read<VimoeService>().courses = c;
+                  context.read<VimoeService>().start();
+                } else {
+                  context.read<VimoeService>().finishConnectToVimoe = false;
+                  context.read<VimoeService>().courses = c;
+
+                  if (vi.isNotEmpty) {
+                    context.read<VimoeService>().isarVideoList = vi;
                   }
-                context.read<VimoeService>().start(oldLinks: vi.isNotEmpty);
+                  context.read<VimoeService>().start(oldLinks: vi.isNotEmpty);
+                }
               } else {
                 debugPrint('111');
                 context.read<VimoeService>().isarVideoList = vi;
                 context.read<VimoeService>().startDownLoading();
                 context.read<VimoeService>().finishConnectToVimoe = true;
               }
-              firstTime = false;
+              firstTimeVimeo = false;
             }
+
             return Consumer<VimoeService>(
                 builder: (context, vimoeResult, child) {
-              debugPrint('downloadStatus ${vimoeResult.downloadStatus}');
+              // debugPrint('downloadStatus ${vimoeResult.downloadStatus}');
               if (vimoeResult.downloadStatus == DownloadStatus.downloaded) {
                 context.read<VimoeService>().dispose();
-                // vimeoWidget= showEndSyncWidget();
-                return showEndSyncWidget();
+                if (linkList.isEmpty) {
+                  debugPrint('111');
+                  // vimeoWidget= showEndSyncWidget();
+                  return showEndSyncWidget();
+                } else {
+                  if (newCourse)
+                    return showErrorDialog(context,isBlockedLinks: false);
+                  else
+                    downloadLinksStart(newCourse: newCourse);
+                  return showSyncWidget();
+                }
                 // setState(() {});
               } else if (vimoeResult.downloadStatus ==
                   DownloadStatus.netWorkError) {
@@ -194,12 +273,17 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
               } else if (vimoeResult.downloadStatus == DownloadStatus.error) {
                 return showErrorDialog(context, isBlockedLinks: false);
               }
-              return showSyncWidget(true);
+              return showSyncWidget();
             });
           }
         });
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
   }
+
+  downloadLinksStart({bool newCourse = false, oldLinks = false}) async {
+    await DownloadService().startDownLoadingBlockedLinks(linkList);
+  }
+
 
   checkDateExpired() {
     int currentTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -215,7 +299,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
     return false;
   }
 
-  showSyncWidget([bool isVimeo = false]) {
+  showSyncWidget() {
     // _networkConnectivity.reOpen();
     // if(!isVimeo) {
     //
@@ -234,10 +318,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
         //   ),
         // ),
         Padding(
-          padding: EdgeInsets.only(
-              /*top: 45.h,*/
-              right: 70.w,
-              left: 70.w),
+          padding: EdgeInsets.only(top: 51.h, right: 70.w, left: 70.w),
           child: Column(
             children: [
               Image.asset('assets/images/sync.jpg', height: 153.h),
@@ -299,10 +380,11 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
   showEndSyncWidget() {
     return Column(
       children: [
+        SizedBox(height: 19.h),
         Align(
           alignment: Alignment.topRight,
           child: TextButton(
-            child: Image.asset('assets/images/X.jpg', height: 18.h),
+            child: Image.asset('assets/images/X.jpg', height: 22.h),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -317,7 +399,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
             children: [
               Image.asset('assets/images/sync_done.jpg', height: 153.h),
               SizedBox(
-                height: 40.h,
+                height: 15.h,
               ),
               Text(
                 'מצוין! המערכת סיימה לסנכרן את נתוני הלמידה',
@@ -326,7 +408,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
                 textAlign: TextAlign.center,
               ),
               SizedBox(
-                height: 45.h,
+                height: 35.h,
               ),
               Text(
                   'במידה והשלמתם קורס התעודה מחכה לכם באזור האישי\n'
@@ -335,7 +417,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.center),
               SizedBox(
-                height: 35.h,
+                height: 25.h,
               ),
               Text(
                 'כל הכבוד על ההתמדה והלמידה!',
@@ -386,10 +468,13 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
   showOfflineSyncWidget() {
     return Column(
       children: [
+        SizedBox(
+          height: 19.h,
+        ),
         Align(
           alignment: Alignment.topRight,
           child: TextButton(
-            child: Image.asset('assets/images/X.jpg', height: 18.h),
+            child: Image.asset('assets/images/X.jpg', height: 22.h),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -404,7 +489,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
             children: [
               Image.asset('assets/images/offline.jpg', height: 153.h),
               SizedBox(
-                height: 70.h,
+                height: 40.h,
               ),
               Text(
                 'המערכת במצב לא מקוון',
@@ -429,7 +514,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
                 textDirection: TextDirection.rtl,
               ),
               SizedBox(
-                height: 40.h,
+                height: 27.h,
               ),
               Container(
                 height: 40.h,
@@ -457,80 +542,107 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
     );
   }
 
-  showErrorDialog(BuildContext context, {bool isBlockedLinks = true}) {
+  showErrorDialog(BuildContext context, {bool isBlockedLinks = true,bool isVimeo=true}) {
     return Center(
-      child: Column(/*SimpleDialog(
-          contentPadding: EdgeInsets.all(30),
-          title: Center(child: Text('!ישנה בעיה')),
-          children:*/
-        mainAxisAlignment: MainAxisAlignment.center,
-        children:  <Widget>[
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 51.h,
+            ),
             const Center(child: Text('!ישנה בעיה')),
             if (isBlockedLinks)
-              const Center(child: Text('נראה שהלינקים הלללו חסומים ברשת האינטרנט שלך')),
+              const Center(
+                  child: Text('נראה שהלינקים הלללו חסומים ברשת האינטרנט שלך')),
             if (isBlockedLinks)
               const Center(
-                  child: Text('נא פנה לספק האינטרנט שלך על מנת להסדיר את הענין')),
+                  child:
+                      Text('נא פנה לספק האינטרנט שלך על מנת להסדיר את הענין')),
             if (isBlockedLinks)
               const SizedBox(
                 height: 15,
               ),
-            if (isBlockedLinks)
-              // SizedBox(
-              //   width: double.minPositive,
-              //   child:
-                Expanded(
-                  child: ListView(
-                      shrinkWrap: true, children: displayBlockedLinks(context)
-      //),
+            if (isBlockedLinks && isVimeo) const Text('סרטוני וידאו'),
+            if (isBlockedLinks && isVimeo)
+              Expanded(
+                flex: 3,
+                child: ListView(
+                    shrinkWrap: true,
+                    children: displayBlockedLinks(
+                        context, context.read<VimoeService>().blockLinks)
+                    //),
+                    ),
               ),
-                ),
-          if (isBlockedLinks)
-            const SizedBox(
-              height: 15,
-            ),
-             ElevatedButton(
+            if (DownloadService().blockLinks.isNotEmpty)
+              const Text('חומרים בשאלונים'),
+            if (DownloadService().blockLinks.isNotEmpty)
+              Expanded(
+                flex: 1,
+                child: ListView(
+                    shrinkWrap: true,
+                    children: displayBlockedLinks(
+                        context, DownloadService().blockLinks)
+                    //),
+                    ),
+              ),
+            if (isBlockedLinks)
+              const SizedBox(
+                height: 15,
+              ),
+            ElevatedButton(
                 onPressed: () {
-                  //if started from going to vimeo will try again
-
-                  if (vi.isEmpty || checkDateExpired()) {
-                    context.read<VimoeService>().finishConnectToVimoe = false;
-                    context.read<VimoeService>().courses = c;
-                    context.read<VimoeService>().start(notify: true);
-                  } else {
-                    //if did start from videos that were saved and did not go to vimeo will get to here
-                    context.read<VimoeService>().isarVideoList = vi;
-                    context.read<VimoeService>().startDownLoading();
-                    context.read<VimoeService>().finishConnectToVimoe = true;
+                  if(isVimeo) {
+                    //if started from going to vimeo will try again
+                    if (vi.isEmpty || checkDateExpired()) {
+                      context
+                          .read<VimoeService>()
+                          .finishConnectToVimoe = false;
+                      context
+                          .read<VimoeService>()
+                          .courses = c;
+                      context.read<VimoeService>().start(notify: true);
+                    } else {
+                      //if did start from videos that were saved and did not go to vimeo will get to here
+                      context
+                          .read<VimoeService>()
+                          .isarVideoList = vi;
+                      context.read<VimoeService>().startDownLoading(notify: true);
+                      context
+                          .read<VimoeService>()
+                          .finishConnectToVimoe = true;
+                    }
                   }
-                  // context
-                  //     .read<VimoeService>().startDownLoading(
-                  //     notify: true);
-
-                  // context
-                  //     .read<VimoeService>()
-                  //     .start(notify: true);
+                  if (DownloadService().blockLinks.isNotEmpty) {
+                    if(!isVimeo)
+                      {
+                        mainWidget=showSyncWidget();
+                        setState(() {});
+                      }
+                    DownloadService().startDownLoadingBlockedLinks(linkList);
+                  }
                 },
                 child: const Text('נסה שנית')),
             SizedBox(height: 20.h),
             ElevatedButton(
                 onPressed: () {
-            Navigator.pop(context);
+                  Navigator.pop(context);
                 },
-                child: const Text('סגור'))
+                child: const Text('סגור')),
+            SizedBox(height: 30.h),
           ]),
     );
   }
 
-  displayBlockedLinks(BuildContext context) {
+  displayBlockedLinks(BuildContext context, List<String> links) {
     List<Widget> myLinks = [];
-    for (String link in context.read<VimoeService>().blockLinks) {
+    for (String link in links) {
       // myLinks.add(SelectableText(link,style: TextStyle(decoration: TextDecoration.underline),));
       myLinks.add(Padding(
-        padding: const EdgeInsets.only(bottom: 7),
+        padding: EdgeInsets.only(bottom: 7, right: 10.w, left: 10.w),
         child: Center(
           child: InkWell(
             child: Text(link,
+                textAlign: TextAlign.center,
                 style: const TextStyle(decoration: TextDecoration.underline)),
             onTap: () => _launchUrl(link),
           ),
@@ -563,7 +675,7 @@ class _SyncDialogsState extends State<SyncDialogs> with TickerProviderStateMixin
 
     subscription.cancel();
     //mmm
-   _networkConnectivity.disposeStream();
+    _networkConnectivity.disposeStream();
     _networkConnectivity.whileDownloading = false;
     ApiService().cancelRequests();
     eventSubscription.cancel();

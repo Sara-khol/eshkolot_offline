@@ -20,11 +20,24 @@ class Quiz {
 
   Quiz.fromJson(Map<String, dynamic> parsedJson, int qId) {
     id = qId;
+
     title = parsedJson['title'] ?? '';
     grade1 = parsedJson['grade1'] ?? 0;
     grade2 = parsedJson['grade2'] ?? 0;
-    quizMaterials = parsedJson['quiz_materials'] ?? '';
+   quizMaterials = parsedJson['quiz_materials'] ?? '';
+   // quizUrls = parsedJson['quiz_urls'] ?? '';
     time = parsedJson['time'] ?? '';
+
+    if(parsedJson['quiz_urls']!=null) {
+      for (String url in parsedJson['quiz_urls']) {
+        if(url.contains('wordpress-775052-2636048.cloudwaysapps.com')) {
+        url=  url.replaceAll('wordpress-775052-2636048.cloudwaysapps.com', 'eshkolot.net');
+        }
+        quizUrls.add(url);
+      }
+    }
+
+
     for (var questionnaire in parsedJson['questionList']) {
       Question question = Question.fromJson(questionnaire);
       questionList.add(question);
@@ -60,6 +73,12 @@ class Question {
   bool isFilled = false;
   @Ignore()
   int quizId = 0;
+
+  void setAllAnswersToFalse() {
+    ans?.forEach((answer) {
+      answer.isSelected = false;
+    });
+  }
 
   Question.fromJson(Map<String, dynamic> json) {
     question = json['question'] ?? '';
@@ -119,6 +138,8 @@ class Answer {
 
   // @Name('sortString')
   late String? matrixMatch;
+  @Ignore()
+   bool isSelected=false;
 
   Answer.fromJson(Map<String, dynamic> json) {
     ans = json['answer'] ?? '';

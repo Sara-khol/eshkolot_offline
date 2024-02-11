@@ -42,6 +42,7 @@ class Course {
 
   // @Name('knowledge_num')
   late String? knowledgeNum;
+  bool isDownLoadData=false;
 
   // @Backlink(to: "courses")
   // final knowledge = IsarLink<Knowledge>();

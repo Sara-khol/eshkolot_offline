@@ -31,6 +31,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
   UserCourse? data;
   late String lastTextButton = '';
   late var currentMainChild;
+  late String imagePath;
 
   @override
   initState() {
@@ -38,11 +39,13 @@ class _CourseMainPageState extends State<CourseMainPage> {
     widget.controller.method = getLastPositionInCourse;
     widget.controller.checkIfCreated = checkIfCreated;
     getLastPositionInCourse(refresh: false);
+    imagePath = setKnowledgeImagePath();
   }
 
   @override
   void didUpdateWidget(covariant CourseMainPage oldWidget) {
     getLastPositionInCourse(refresh: false);
+    imagePath = setKnowledgeImagePath();
     super.didUpdateWidget(oldWidget);
   }
 
@@ -64,7 +67,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
               SizedBox(
                 height: 90.h,
               ),
-              Image.asset('assets/images/logo_english.jpg', height: 147.h),
+              Image.asset(imagePath, height: 147.h),
               SizedBox(
                 height: 23.h,
               ),
@@ -233,9 +236,12 @@ class _CourseMainPageState extends State<CourseMainPage> {
             child: Container(
               height: 40.h,
               width: 175.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFF32D489),
-                borderRadius: BorderRadius.all(Radius.circular(30)),
+              decoration: BoxDecoration(
+                color: Color(
+                    MainPageChild.of(context)!.widget.knowledgeColor != -1
+                        ? MainPageChild.of(context)!.widget.knowledgeColor
+                        : 0xFF32D489),
+                borderRadius: const BorderRadius.all(Radius.circular(30)),
               ),
               child: Center(
                 child: TextButton(
@@ -288,7 +294,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
             data!.questionnaireStopId != 0)) {
       if (data!.subjectStopId != 0) {
         for (int i = 0; i < widget.course.subjects.length; i++) {
-          if (widget.course.subjects.elementAt(i).subjectId == data!.subjectStopId) {
+          if (widget.course.subjects.elementAt(i).subjectId ==
+              data!.subjectStopId) {
             lastSubject = widget.course.subjects.elementAt(i);
             data!.subjectIndex = i;
             break;
@@ -303,7 +310,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
       // s.id == data!.subjectStopId) : null;
       if (data!.lessonStopId != 0) {
         for (int i = 0; i < lastSubject!.lessons.length; i++) {
-          if (lastSubject!.lessons.elementAt(i).lessonId == data!.lessonStopId) {
+          if (lastSubject!.lessons.elementAt(i).lessonId ==
+              data!.lessonStopId) {
             lastLesson = lastSubject!.lessons.elementAt(i);
             data!.lessonIndex = i;
             break;
@@ -365,6 +373,21 @@ class _CourseMainPageState extends State<CourseMainPage> {
       }
     }
     // }
+  }
+
+  String setKnowledgeImagePath() {
+    switch (MainPageChild.of(context)!.widget.knowLedgeId) {
+      case 61: //Physics
+        return 'assets/images/logo_english.jpg';
+      case 63: //english
+        return 'assets/images/logo_physics.png';
+      case 155: //math
+        return 'assets/images/logo_math.png';
+      case 215: //אוריינות
+        return 'assets/images/logo_literacy.png';
+      default:
+        return 'assets/images/logo_literacy.png';
+    }
   }
 
   @override

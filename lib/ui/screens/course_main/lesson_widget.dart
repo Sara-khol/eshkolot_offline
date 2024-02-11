@@ -103,6 +103,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                         '${lesson.name} ${lesson.videoNum}',
                         // overflow:TextOverflow.ellipsis ,
                         style: TextStyle(
+                        height: 1,
                             fontSize: 36.sp, fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -154,11 +155,11 @@ class _LessonWidgetState extends State<LessonWidget> {
                     key: Key(lesson.vimeo.toString()),
                     videoNum: lesson.videoNum,
                     fileId: MainPageChild.of(context)!.widget.course.id,
-                    vimoeId: MainPageChild.of(context)!.widget.course.isSync
+                    videoId: MainPageChild.of(context)!.widget.course.isSync
                         ? lesson.vimeo
                         : lesson.videoNum),
                 SizedBox(
-                  height: 22.h,
+                  height: 21.h,
                 )
               ],
             ),
@@ -169,7 +170,7 @@ class _LessonWidgetState extends State<LessonWidget> {
           if (lesson.questionnaire.isNotEmpty)
             Container(
               width: 950.w,
-              // height: 66.h,
+             // height: 66.h,
               decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFE4E6E9)),
                   borderRadius: const BorderRadius.all(Radius.circular(10))),
@@ -192,13 +193,26 @@ class _LessonWidgetState extends State<LessonWidget> {
                             width: 33.w,
                           ),
                           Expanded(
-                            child: Text(
-                              'תרגול - ${lesson.name} ${qIndex + 1}',
-                              style: TextStyle(
-                                  fontSize: 22.sp, fontWeight: FontWeight.w600),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () =>goToQuiz(qIndex),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
+                                  minimumSize: Size.zero,
+                              ),
+                                child: Text(
+
+                                  lesson.questionnaire.elementAt(qIndex).title,
+                                  style: TextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                      color: colors.blackColorApp,
+                                      fontSize: 22.sp, fontWeight: FontWeight.w600),
+                                )),
                             ),
                           ),
-                          SizedBox(width: 65.h),
+                         // Spacer(),
+                          SizedBox(width: 65.w),
                           Icon(Icons.access_time, size: 14.sp),
                           Text(
                             "  30 דק'  ",
@@ -230,17 +244,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                                   )
                                 ],
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  MainPageChild.of(context)
-                                      ?.questionPickedIndex = qIndex;
-                                  MainPageChild.of(context)?.bodyWidget =
-                                      QuestionnaireWidget(
-                                          quiz: lesson.questionnaire
-                                              .elementAt(qIndex));
-                                });
-                                // QuestionnaireWidget(key: UniqueKey(),questionnaires: widget.subject.lessons.elementAt(lessonIndex).questionnaire);
-                              },
+                              onPressed: () =>goToQuiz(qIndex),
                             ),
                           )
                         ],
@@ -249,7 +253,8 @@ class _LessonWidgetState extends State<LessonWidget> {
                   }),
             ),
           SizedBox(
-            height: 62.h,
+            // height: 62.h,
+            height: 60.h,
           ),
           SizedBox(
             width: 950.w,
@@ -260,10 +265,12 @@ class _LessonWidgetState extends State<LessonWidget> {
                   visible: widget.onNext != null,
                   child: Container(
                     height: 40.h,
-                    margin: EdgeInsets.only(bottom: 37.h),
-                    decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
-                        color: Color(0xFF32D489)),
+                    margin: EdgeInsets.only(bottom: 20.h /*37.h*/),
+                    decoration:  BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(30)),
+                        color: Color( MainPageChild.of(context)!.widget.knowledgeColor != -1
+                            ? MainPageChild.of(context)!.widget.knowledgeColor
+                            : 0xFF32D489)),
                     child: TextButton(
                       child: Row(
                         children: [
@@ -296,6 +303,18 @@ class _LessonWidgetState extends State<LessonWidget> {
         ],
       ),
     );
+  }
+
+  goToQuiz(int qIndex)
+  {
+    setState(() {
+      MainPageChild.of(context)
+          ?.questionPickedIndex = qIndex;
+      MainPageChild.of(context)?.bodyWidget =
+          QuestionnaireWidget(
+              quiz: lesson.questionnaire
+                  .elementAt(qIndex));
+    });
   }
 
   @override
