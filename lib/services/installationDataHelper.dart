@@ -311,7 +311,13 @@ class InstallationDataHelper {
 
     input.forEach((key, value) {
       if (value is String) {
-        result[key] = value.replaceAll('\n', '');
+       // if(key!='answer') {
+          result[key] = value.replaceAll('\n', '');
+     //   }
+     //    else{
+     //      result[key]=value;
+     //      debugPrint('result[key] $key value $value }');
+     //    }
       } else if (value is Map<String, dynamic>) {
         result[key] = removeNewlines(value);
       } else if (value is List) {

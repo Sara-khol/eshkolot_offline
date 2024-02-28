@@ -216,6 +216,15 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                 MainPageChild.of(context)?.bodyWidget =
                                     QuestionnaireWidget(
                                   quiz: lastQuestionnaire!,
+                                      onNext: data!.lessonIndex + 1 <
+                                          lastSubject!.lessons.length
+                                          ? () => currentMainChild.goToNextLesson(
+                                          lastSubject!,
+                                          data!.subjectIndex,
+                                          lastSubject!.lessons.elementAt(
+                                              data!.lessonIndex + 1),
+                                          data!.lessonIndex + 1)
+                                          : null,
                                 );
                               }
                             }),

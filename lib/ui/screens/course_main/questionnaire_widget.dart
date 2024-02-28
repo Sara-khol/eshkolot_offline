@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
@@ -14,9 +13,9 @@ import '../../../services/installationDataHelper.dart';
 class QuestionnaireWidget extends StatefulWidget {
   // final List<Question> questionnaires;
   final Quiz quiz;
+  final VoidCallback? onNext;
 
-  const QuestionnaireWidget(
-      {super.key, required this.quiz});
+  const QuestionnaireWidget({super.key, required this.quiz, this.onNext});
 
   @override
   State<QuestionnaireWidget> createState() => _QuestionnaireWidgetState();
@@ -32,16 +31,14 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
   late TabController _tabController;
   late StreamSubscription stream;
 
-
-
   @override
   void initState() {
     questionnaires = widget.quiz.questionList;
     displayWidget = initialDisplay();
     _tabController = TabController(length: 2, vsync: this);
- stream= InstallationDataHelper().eventBusQuizPage.on().listen((event) {
-      widget.quiz.isCompletedCurrentUser=event as bool;
-      if(mounted) {
+    stream = InstallationDataHelper().eventBusQuizPage.on().listen((event) {
+      widget.quiz.isCompletedCurrentUser = event as bool;
+      if (mounted) {
         setState(() {});
       }
     });
@@ -127,8 +124,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                       style: TextStyle(fontSize: 18.sp))
                 ],
               ),
-            if (questionnaires.isNotEmpty &&
-                widget.quiz.quizMaterials != '')
+            if (questionnaires.isNotEmpty && widget.quiz.quizMaterials != '')
               TabBar(
                 labelColor: const Color.fromARGB(255, 45, 40, 40),
                 unselectedLabelColor: const Color.fromARGB(255, 172, 174, 175),
@@ -167,7 +163,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
               // height: MediaQuery.of(context).size.height+10000.h,
               child: ClipRect(
                 child: questionnaires.isNotEmpty &&
-                    widget.quiz.quizMaterials != ''
+                        widget.quiz.quizMaterials != ''
                     ? TabBarView(
                         physics: const NeverScrollableScrollPhysics(),
                         controller: _tabController,
@@ -213,8 +209,12 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                   ),
                   onPressed: () {
                     setState(() {
-                      displayWidget =
-                          QuestionnaireTab(quiz:widget.quiz);
+                      for (Question question in widget.quiz.questionList) {
+                        question.isFilled = false;
+
+                        question.setAllAnswersToFalse();
+                      }
+                      displayWidget = QuestionnaireTab(quiz: widget.quiz);
                     });
                   },
                   child: Row(
@@ -222,9 +222,9 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                     children: [
                       Text(' התחל שאלון ',
                           style: TextStyle(
-                              fontSize: 18.sp,
-                              color: Colors.white,
-                             /* fontFamily: 'RAG-Sans'*/)),
+                            fontSize: 18.sp,
+                            color: Colors.white, /* fontFamily: 'RAG-Sans'*/
+                          )),
                       Icon(
                         Icons.arrow_forward,
                         size: 15.sp,
@@ -241,18 +241,25 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
 
   setInitialDisplay() {
     setState(() {
-      for (Question question in widget.quiz.questionList) {
-        question.isFilled=false;
-        
-        question.setAllAnswersToFalse();
-      }
       displayWidget = initialDisplay();
     });
   }
 
-  setEndQuestionnaire({required List<bool> statusAnswers, required grade1, required grade2, required qID,required displayAnswersWidget}) {
+  setEndQuestionnaire(
+      {required List<bool> statusAnswers,
+      required grade1,
+      required grade2,
+      required qID,
+      required displayAnswersWidget}) {
     setState(() {
-      displayWidget = QuestionnaireEndDialog(statusAnswers:statusAnswers/*,correctQNum: correctQNum, qNum: qNum*/, grade1: grade1, grade2: grade2, qID: qID,displayAnswersWidget: displayAnswersWidget,);
+      displayWidget = QuestionnaireEndDialog(
+        statusAnswers: statusAnswers /*,correctQNum: correctQNum, qNum: qNum*/,
+        grade1: grade1,
+        grade2: grade2,
+        qID: qID,
+        displayAnswersWidget: displayAnswersWidget,
+        onNext: widget.onNext,
+      );
     });
   }
 
@@ -261,10 +268,8 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
         child: Column(
       children: [
         // AudioWidget(path: ''),
-        HtmlDataWidget(widget.quiz.quizMaterials,quizId:widget.quiz.id ),
+        HtmlDataWidget(widget.quiz.quizMaterials, quizId: widget.quiz.id),
       ],
     ));
   }
-
-
 }

@@ -1,4 +1,4 @@
-
+import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,45 +35,48 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
 
   @override
   void didUpdateWidget(covariant OrderSelectionWidget oldWidget) {
-    initData();
+    initData(false);
     super.didUpdateWidget(oldWidget);
   }
 
-  initData() {
+  initData([bool reset=true]) {
     widget.questionController.isFilled = isFilled;
     widget.questionController.isCorrect = isCorrect;
-    randomList.clear();
-    for (Answer answer in widget.question.ans!) {
-      randomList.add(answer.ans);
+    if(reset) {
+      randomList.clear();
+      for (Answer answer in widget.question.ans!) {
+        randomList.add(answer.ans);
+      }
+      randomList.shuffle();
     }
-    randomList.shuffle();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 25.h),
-        HtmlDataWidget(widget.question.question,quizId: widget.question.quizId,),
-        SizedBox(height: 30.h),
-        ReorderableListView(
-          proxyDecorator: proxyDecorator,
-          buildDefaultDragHandles: false,
-          shrinkWrap: true,
-          children: _listOfItems(),
-          onReorder: (int oldIndex, int newIndex) {
-            if (!didChange) didChange = true;
-            setState(() {
-              if (oldIndex < newIndex) {
-                newIndex -= 1;
-              }
-              final String item = randomList.removeAt(oldIndex);
-              randomList.insert(newIndex, item);
-            });
-          },
-        ),
-      ],
-    );
+    return Column(children: [
+      SizedBox(height: 25.h),
+      HtmlDataWidget(
+        widget.question.question,
+        quizId: widget.question.quizId,
+      ),
+      SizedBox(height: 30.h),
+      ReorderableListView(
+        proxyDecorator: proxyDecorator,
+        buildDefaultDragHandles: false,
+        shrinkWrap: true,
+        children: _listOfItems(),
+        onReorder: (int oldIndex, int newIndex) {
+          if (!didChange) didChange = true;
+          setState(() {
+            if (oldIndex < newIndex) {
+              newIndex -= 1;
+            }
+            final String item = randomList.removeAt(oldIndex);
+            randomList.insert(newIndex, item);
+          });
+        },
+      ),
+    ]);
   }
 
   _listOfItems() {
@@ -101,13 +104,76 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(randomList[i],style: TextStyle(fontSize: 27.sp)),
+                Text(randomList[i], style: TextStyle(fontSize: 27.sp)),
               ],
             ),
           ),
         ),
       ]
     ];
+  }
+
+  listOfItemsWithAnswer() {
+    bool isOk = isCorrect();
+    return Column(children: [
+      SizedBox(height: 25.h),
+      HtmlDataWidget(
+        widget.question.question,
+        quizId: widget.question.quizId,
+      ),
+      SizedBox(height: 30.h),
+      Column(children: [
+        for (int i = 0; i < randomList.length; i++) ...[
+          Container(
+            height: 60.h,
+            width: double.infinity,
+            padding: EdgeInsets.only(right: 15.w, left: 15.w),
+            margin: EdgeInsets.only(right: 2.w, left: 2.w, bottom: 12.h),
+            decoration: ShapeDecoration(
+              color: randomList[i] == widget.question.ans![i].ans
+                  ? Colors.green.withOpacity(0.7)
+                  : const Color(0xFFFCFCFF),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  width: 1.w,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                  color: randomList[i] == widget.question.ans![i].ans
+                      ? Colors.green
+                      : Colors.red,
+                ),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.question.ans![i].ans,
+                    style: TextStyle(
+                        fontSize: 27.sp,
+                        fontWeight: FontWeight.w500,
+                        color: randomList[i] == widget.question.ans![i].ans
+                            ? Colors.white
+                            : Colors.red)),
+              ],
+            ),
+          ),
+        ]
+      ]),
+      Container(
+        height: 80.h,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            color: isOk
+                ? Colors.greenAccent.withOpacity(0.5)
+                : Colors.redAccent.withOpacity(0.5)),
+        child: Center(
+            child: Text(
+          isOk ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
+          style: TextStyle(fontSize: 20.sp),
+        )),
+      ),
+    ]);
   }
 
   Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
@@ -125,6 +191,9 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
   }
 
   bool isFilled() {
+    if (didChange) {
+      widget.questionController.displayWithAnswers = displayWithAnswers();
+    }
     return didChange;
   }
 
@@ -135,5 +204,11 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
       return true;
     }
     return false;
+  }
+
+  displayWithAnswers() {
+
+    return Padding(
+        padding: EdgeInsets.only(top: 20.h), child: listOfItemsWithAnswer());
   }
 }

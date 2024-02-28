@@ -30,14 +30,34 @@ class _RadioCheckState extends State<RadioCheck> {
     widget.questionController.isCorrect = verifyCheck;
 
     _isSelected = List<bool>.filled(widget.question.ans!.length, false);
+
+
+    if (widget.question.type == QType.checkbox) {
+      _isSelected = List<bool>.filled(widget.question.ans!.length, false);
+
+      int i = 0;
+      for (Answer answer in widget.question.ans!) {
+        _isSelected[i] = answer.isSelected;
+        i++;
+      }
+    }
+    // _character = '';
+    //_character= widget.question.ans!.firstWhereOrNull((element) => element.isSelected).ans??'';
+    else {
+      _character = widget.question.ans!
+          .firstWhereOrNull((element) => element.isSelected)
+          ?.ans ??
+          '';
+    }
   }
 
   @override
   void didUpdateWidget(covariant RadioCheck oldWidget) {
     if (oldWidget.question != widget.question) {
-      //  _isSelected = List<bool>.filled(widget.question.ans!.length, false);
      if (widget.question.type == QType.checkbox) {
-        int i = 0;
+       _isSelected = List<bool>.filled(widget.question.ans!.length, false);
+
+       int i = 0;
         for (Answer answer in widget.question.ans!) {
           _isSelected[i] = answer.isSelected;
           i++;
@@ -54,7 +74,6 @@ class _RadioCheckState extends State<RadioCheck> {
     }
     widget.questionController.isFilled = isFilled;
     widget.questionController.isCorrect = verifyCheck;
-    widget.questionController.displayWithAnswers = displayWithAnswers();
     super.didUpdateWidget(oldWidget);
   }
 
@@ -183,7 +202,7 @@ class _RadioCheckState extends State<RadioCheck> {
                       : Colors.redAccent.withOpacity(0.5)),
               child: Center(
                   child: Text(
-                    isCorrect ? 'תשובה נכונה!' : 'תשובה לא נכונה',
+                    isCorrect ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
                     style: TextStyle(fontSize: 20.sp),
                   )),
             ),

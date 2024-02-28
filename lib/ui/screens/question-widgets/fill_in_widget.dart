@@ -1,5 +1,8 @@
+import 'package:eshkolot_offline/utils/my_colors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
@@ -62,7 +65,7 @@ class _FillInState extends State<FillIn> {
   Widget build(BuildContext context) {
     var english = RegExp(r'[a-zA-Z]');
     return Padding(
-      padding:  EdgeInsets.only(top: 25.h),
+      padding: EdgeInsets.only(top: 25.h),
       child: Column(
         children: [
           HtmlDataWidget(
@@ -70,7 +73,7 @@ class _FillInState extends State<FillIn> {
             quizId: widget.question
                 .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
           ),
-           SizedBox(
+          SizedBox(
             height: 35.h,
           ),
           //todo  change to HtmlDataWidget , can be images or audio??
@@ -106,6 +109,61 @@ class _FillInState extends State<FillIn> {
       }
     });
     return children;
+  }
+
+  buildWithAnswers() {
+    bool isOk = isCorrect();
+    return Padding(
+        padding: EdgeInsets.only(top: 25.h),
+        child: Column(children: [
+          HtmlDataWidget(
+            widget.question.question,
+            quizId: widget.question
+                .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
+          ),
+          SizedBox(
+            height: 35.h,
+          ),
+          //todo  change to HtmlDataWidget , can be images or audio??
+          HtmlWidget(
+              replaceCurlyBracesWithTextFields(widget.question.ans!.first.ans,true),
+              textStyle: TextStyle(fontSize: 27.sp),
+             customWidgetBuilder: (element) {
+            if (element.localName == 'input') {
+              String? value = element.attributes['value'];
+              String? userInput = element.attributes['dirname'];
+
+              // Do something with the value attribute
+              print('Value attribute of input element: $value userInput $userInput');
+             // debugPrint('text ${element.text}');
+              //final text = element.text;
+
+              // var textEditingController = TextEditingController();
+              // myControllers.add(textEditingController);
+              //  if (text != null && text.startsWith('{') && text.endsWith('}')) {
+              return displayItemAnswer(
+                  value!, userInput!);
+            }
+            // else if (element.localName == 'br') {
+            //          return SizedBox(height: 0); // Hide the line break
+            //        }
+            return null;
+          }
+                 ),
+          Container(
+            height: 80.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: isOk
+                    ? Colors.greenAccent.withOpacity(0.5)
+                    : Colors.redAccent.withOpacity(0.5)),
+            child: Center(
+                child: Text(
+              isOk ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
+              style: TextStyle(fontSize: 20.sp),
+            )),
+          )
+        ]));
   }
 
   Widget createTextField(TextEditingController controller) {
@@ -170,24 +228,49 @@ class _FillInState extends State<FillIn> {
             );
   }
 
-  ///Check answer's correctness
-  bool validAnswer() {
-    int i = 0;
-    for (var ans in fillInQ.values) {
-      if (ans.isNotEmpty) {
-        if (!ans.contains(myControllers[i].text)) return false;
-      }
-      i++;
-    }
-    return true;
+  Widget displayItemAnswer(String correctAnswer, String displayUserAnswer) {
+
+    return FittedBox(
+      child: Container(
+          //width: 200.w,
+          padding: EdgeInsets.all(7.h),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                border: Border.all(color: grey2ColorApp),
+                borderRadius: BorderRadius.circular(5)),
+            margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+              if (correctAnswer != displayUserAnswer)
+                Container(
+                  padding: EdgeInsets.only(right: 12.w,left: 12.w),
+                 /// width: double.infinity,
+                    color: Colors.redAccent.withOpacity(0.7),
+                    child: Text(displayUserAnswer,
+                        style: TextStyle(color: blackColorApp))),
+              Container(
+                  padding: EdgeInsets.only(right: 12.w,left: 12.w),
+                  color: correctAnswer == displayUserAnswer?Colors.greenAccent.withOpacity(0.7):null,
+                  child:
+                      Text(correctAnswer == displayUserAnswer?correctAnswer:'($correctAnswer)', style: TextStyle(color: blackColorApp)))
+            ]))
+    );
   }
 
-  String replaceCurlyBracesWithTextFields(String htmlContent) {
+  String replaceCurlyBracesWithTextFields(String htmlContent,[displayAnswer=false]) {
+    int i=0;
     final regex = RegExp(r'{([^}]+)}');
     return htmlContent.replaceAllMapped(regex, (match) {
       final initialValue = match.group(1) ?? '';
-      correctAnswers.add(initialValue);
-      return '<input type="text" value="$initialValue" />';
+      if(!displayAnswer) {
+        correctAnswers.add(initialValue);
+     }
+      // if(displayAnswer)debugPrint('uuu ${'<input type="text" value="$initialValue" dirname="${myControllers[i].text}"  />'}');
+      // else debugPrint('uuu ${'<input type="text" value="$initialValue"   />'}');
+      if(displayAnswer)
+      return '<input type="text" value="$initialValue" dirname="${myControllers[i++]
+          .text}"  />';
+      else return '<input type="text" value="$initialValue" />';
     });
   }
 
@@ -218,6 +301,7 @@ class _FillInState extends State<FillIn> {
         return false;
       }
     }
+    widget.questionController.displayWithAnswers = buildWithAnswers();
     return true;
   }
 

@@ -1,3 +1,4 @@
+import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -63,27 +64,80 @@ class _FreeChoiceState extends State<FreeChoice> {
   Widget createTextField(TextEditingController controller) {
     return Container(
         padding: const EdgeInsets.only(right: 5, left: 5),
-        //   margin: EdgeInsets.only(top: 15.h,bottom: 15.h),
+          // margin: EdgeInsets.only(bottom: 5),
         width: 80,
         height: 50.h,
-        child: IntrinsicWidth(
-          child: TextField(
-              controller: controller,
-              cursorColor:  Colors.black,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20.sp),
-              decoration:const InputDecoration(
-                border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 15 ),
-                isDense: true,
-              )),
-        ));
+        child: TextField(
+            controller: controller,
+
+
+            obscureText: false,
+            textAlignVertical: TextAlignVertical.center,
+
+
+            cursorColor:  Colors.black,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 22.sp,height: 1),
+            decoration: InputDecoration(
+              border:  OutlineInputBorder(
+                  borderSide: BorderSide(color: blackColorApp)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: blackColorApp)),
+              contentPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 15 ),
+              isDense: true,
+            )));
+  }
+
+  buildWithAnswers()
+  {
+    return Padding(
+      padding: EdgeInsets.only(top: 25.h),
+      child: Column(
+        children: [
+          HtmlDataWidget(widget.question.question,quizId: widget.question.quizId,),
+          createItemAnswer(myController.text)
+        ],
+      ),
+    );
+  }
+
+  createItemAnswer(String ans)
+  {
+   bool isOk=isCorrect();
+   debugPrint('isOk $isOk');
+   return Column(
+     children: [
+       Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(top: 7.h,bottom: 7.h),
+          decoration: BoxDecoration(border:Border.all(color: isOk?Colors.green:Colors.redAccent )),
+          child: Center(
+            child: Text(ans ,style: TextStyle(fontSize: 22.sp))
+          ),
+        ),
+       SizedBox(height: 10.h),
+       Container(
+         height: 80.h,
+         width: double.infinity,
+         decoration: BoxDecoration(
+             color: isOk
+                 ? Colors.greenAccent.withOpacity(0.5)
+                 : Colors.redAccent.withOpacity(0.5)),
+         child: Center(
+             child: Text(
+               isOk ? 'תשובה נכונה!' : 'תשובה לא נכונה',
+               style: TextStyle(fontSize: 20.sp),
+             )),
+       ),
+     ],
+   );
   }
 
   bool isFilled() {
+    if(myController.text.isNotEmpty)
+      {
+        widget.questionController.displayWithAnswers=buildWithAnswers();
+      }
     return myController.text.isNotEmpty;
   }
 

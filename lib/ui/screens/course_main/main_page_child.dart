@@ -85,7 +85,14 @@ class _MainPageChildState extends State<MainPageChild> {
                           widget.course.lastSubject!.lessons.elementAt(
                               widget.course.userCourse!.lessonIndex + 1),
                           widget.course.userCourse!.lessonIndex + 1)
-                      : null,
+                      : widget.course.userCourse!.subjectIndex+1 <
+          widget.course.subjects.length? () =>
+                      goToNextLesson(
+                          widget.course.subjects.elementAt(widget.course.userCourse!.subjectIndex+1),
+                          widget.course.userCourse!.subjectIndex+1,
+                          widget.course.subjects.elementAt(widget.course.userCourse!.subjectIndex+1).lessons.elementAt(
+                             0),
+                         0):null,
                   updateComplete:updateCompleteLesson,));
 
           }

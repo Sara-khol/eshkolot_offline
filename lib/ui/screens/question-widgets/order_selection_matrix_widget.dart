@@ -6,7 +6,6 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 import '../course_main/questionnaire_tab.dart';
 
-
 class OrderSelectionMatrixWidget extends StatefulWidget {
   final Question question;
   final QuestionController questionController;
@@ -21,15 +20,14 @@ class OrderSelectionMatrixWidget extends StatefulWidget {
 
 class _OrderSelectionMatrixWidgetState
     extends State<OrderSelectionMatrixWidget> {
- // List<int> maxSimultaneousDrags = [];
+  // List<int> maxSimultaneousDrags = [];
   List<String> randomList = [];
   List<String> matrixMatchList = [];
-  List<String> correctAnswersList = [];
-   List<String> ans=[];
-
-  bool isDragging=false;
- late bool isHtml;
-
+  // List<String> correctAnswersList = [];
+  List<String> ans = [];
+  List<bool> isCorrectList = [];
+  bool isDragging = false;
+  late bool isHtml;
 
   @override
   void initState() {
@@ -40,23 +38,24 @@ class _OrderSelectionMatrixWidgetState
 
   @override
   void didUpdateWidget(covariant OrderSelectionMatrixWidget oldWidget) {
-   initData();
+    initData();
     super.didUpdateWidget(oldWidget);
   }
 
-  initData()
-  {
-    isHtml=widget.question.ans!.first.html;
+  initData() {
+    isHtml = widget.question.ans!.first.html;
     widget.questionController.isFilled = isFilled;
     widget.questionController.isCorrect = isCorrect;
-    matrixMatchList=widget.question.ans!.map((e) => e.matrixMatch ?? '').toList();
-    correctAnswersList = widget.question.ans!.map((e) => e.ans).toList();
-    ans=List<String>.generate(correctAnswersList.length, (index) => '');
+    matrixMatchList =
+        widget.question.ans!.map((e) => e.matrixMatch ?? '').toList();
+    List<String>   correctAnswersList = widget.question.ans!.map((e) => e.ans).toList();
+    ans = List<String>.generate(correctAnswersList.length, (index) => '');
+    isCorrectList = List<bool>.generate(correctAnswersList.length, (index) => false);
     // dragQ = DragQ(widget.question.ans!.map((e) => e.matrixMatch ?? '').toList(),
     //     widget.question.ans!.map((e) => e.ans).toList(), {});
     randomList.clear();
     randomList = List.from(correctAnswersList);
-    randomList= randomList.map((str) => str.replaceAll('\n', '')).toList();
+    randomList = randomList.map((str) => str.replaceAll('\n', '')).toList();
     randomList.shuffle();
   }
 
@@ -67,7 +66,10 @@ class _OrderSelectionMatrixWidgetState
       // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(height: 25.h),
-        HtmlDataWidget(widget.question.question,quizId:  widget.question.quizId,),
+        HtmlDataWidget(
+          widget.question.question,
+          quizId: widget.question.quizId,
+        ),
         SizedBox(height: 20.h),
         SizedBox(
           width: MediaQuery.sizeOf(context).width,
@@ -76,17 +78,18 @@ class _OrderSelectionMatrixWidgetState
               spacing: 10.w,
               runSpacing: 10.w,
               children: List.generate(matrixMatchList.length, (i) {
-                return Draggable<String>(
-                  // maxSimultaneousDrags: maxSimultaneousDrags[i],
-                  // Data is the value this Draggable stores.
-                  data: matrixMatchList[i],
-                  feedback: Material(
+                return IgnorePointer(
+                  ignoring:ans.contains(matrixMatchList[i]) ,
+                  child: Draggable<String>(
+                    // Data is the value this Draggable stores.
+                    data: matrixMatchList[i],
+                    feedback: Material(
+                      child: dragWidget(i),
+                    ),
+                    childWhenDragging: dragWidget(i, changeBackground: true),
                     child: dragWidget(i),
                   ),
-                  childWhenDragging: dragWidget(i, changeBackground: true),
-                  child: dragWidget(i),
                 );
-
               })),
         ),
         SizedBox(height: 24.h),
@@ -94,7 +97,7 @@ class _OrderSelectionMatrixWidgetState
           Padding(
             padding: EdgeInsets.only(bottom: 12.h),
             child: Container(
-              height:isHtml?110.h: 75.h,
+              // height:isHtml?110.h: 75.h,
               margin: EdgeInsets.only(right: 2.w, left: 2.w),
               decoration: ShapeDecoration(
                 color: const Color(0xFFFCFCFF),
@@ -113,27 +116,30 @@ class _OrderSelectionMatrixWidgetState
                     width: 140.w,
                     padding: EdgeInsets.all(10.h),
                     child: Center(
-                      child:isHtml? HtmlDataWidget(randomList[i], quizId: widget.question.quizId):
-                      Text(
-                        randomList[i],
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                           color: colors.blackColorApp,
-                          fontSize: 27.sp,
-                          fontWeight: FontWeight.w400,
-                          // height: 22,
-                        ),
-                      ),
+                      child: isHtml
+                          ? HtmlDataWidget(randomList[i],
+                              quizId: widget.question.quizId)
+                          : Text(
+                              randomList[i],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: colors.blackColorApp,
+                                fontSize: 27.sp,
+                                fontWeight: FontWeight.w400,
+                                // height: 22,
+                              ),
+                            ),
                     ),
                   ),
                   Expanded(
                     child: Container(
-                      height:isHtml?95.h: 60.h,
-                      padding: EdgeInsets.only(top: 7.h,bottom: 7.h,right: 10.h,left:10.h),
+                      height: isHtml ? 95.h : 60.h,
+                      padding: EdgeInsets.only(
+                          top: 7.h, bottom: 7.h, right: 10.h, left: 10.h),
                       decoration: BoxDecoration(
-                        // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),
+                          // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),
                           border: Border(
-                        right:BorderSide(
+                        right: BorderSide(
                           width: 1.w,
                           color: const Color(0xFFE5E4F6),
                         ),
@@ -141,11 +147,33 @@ class _OrderSelectionMatrixWidgetState
                       child: DragTarget<String>(
                         builder: (BuildContext context, List<dynamic> accepted,
                             List<dynamic> rejected) {
-                          return  ans[i] != ''?dragWidget(i,isAnswer: true):Container();
+                          return
+                            // ans[i] != ''
+                            //   ? dragWidget(i, isAnswer: true)
+                            //   : Container();
+
+                            Draggable<String>(
+                              // maxSimultaneousDrags: maxSimultaneousDrags[i],
+                              // Data is the value this Draggable stores.
+                              data: ans[i],
+                              feedback: Material(
+                                child: dragWidget(i,isAnswer: true),
+                              ),
+                              childWhenDragging: dragWidget(i, changeBackground: true,isAnswer: true),
+                              child:/* dragWidget(i)*/
+                              ans[i] != ''
+                                ? dragWidget(i, isAnswer: true)
+                                : Container(),
+                            );
                         },
                         onAccept: (data) {
                           debugPrint(data);
+                          // ans.remove(data);
+
                           setState(() {
+                            if(ans.contains(data)) {
+                              ans [ans.indexOf(data)]='';
+                            }
                             ans[i] = data;
                           });
                           debugPrint('=====$i=======');
@@ -163,27 +191,31 @@ class _OrderSelectionMatrixWidgetState
     );
   }
 
-  Widget dragWidget(int i, {bool changeBackground = false, bool isAnswer=false}) {
+  Widget dragWidget(int i,
+      {bool changeBackground = false, bool isAnswer = false,displayAnswer=false}) {
+
     return Container(
       // height: 40.h,
       // width: 80.w,
       padding:
           EdgeInsets.only(bottom: 11.h, top: 11.h, right: 24.h, left: 24.h),
       decoration: BoxDecoration(
-          color: changeBackground ? colors.grey2ColorApp : const Color(0xffe5e4f6),
+          color:
+            !displayAnswer?  changeBackground||(ans.contains(matrixMatchList[i])&& !isAnswer) ? colors.grey2ColorApp : const Color(0xffe5e4f6):
+            isCorrectList[i]?Colors.green:const Color(0xffe5e4f6),
           borderRadius: BorderRadius.circular(3)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.menu),
+           Icon(Icons.menu,color: !displayAnswer?colors.blackColorApp:isCorrectList[i]?Colors.white:Colors.red),
           Text(
-          isAnswer?ans[i]:  matrixMatchList[i],
+            isAnswer ? ans[i] : matrixMatchList[i],
             style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w400,
-                color: colors.blackColorApp),
+                color: !displayAnswer?colors.blackColorApp:isCorrectList[i]?Colors.white:Colors.red),
             textAlign: TextAlign.center,
           ),
         ],
@@ -203,22 +235,125 @@ class _OrderSelectionMatrixWidgetState
   }
 
   bool isFilled() {
+    if (ans.every((item) => item.isNotEmpty)) {
+      widget.questionController.displayWithAnswers = displayWithAnswers();
+    }
     return ans.every((item) => item.isNotEmpty);
   }
 
   bool isCorrect() {
-    debugPrint('ans $ans');
 
-    for (int i = 0; i < ans.length; i++) {
+    // for (int i = 0; i < ans.length; i++) {
+    //   Answer? answer = widget.question.ans
+    //       ?.firstWhere((answer) => answer.matrixMatch == ans[i]);
+    //   debugPrint('answer.ans ${answer != null ? answer.ans : 'null'}');
+    //   debugPrint('randomList ${randomList[i]}');
+    //
+    //   if (answer != null && answer.ans != randomList[i]) {
+    //     return false;
+    //   }
+    // }
+    // return true;
+
+    if (isCorrectList.every((element) => element == true)) {
+      return true;
+    }
+    return false;
+  }
+
+  displayWithAnswers() {
+    for (int i = 0; i < randomList.length; i++) {
       Answer? answer = widget.question.ans
           ?.firstWhere((answer) => answer.matrixMatch == ans[i]);
-      debugPrint('answer.ans ${answer != null ? answer.ans : 'null'}');
-      debugPrint('randomList ${randomList[i]}');
-
-      if (answer != null && answer.ans != randomList[i]) {
-        return false;
-      }
+      isCorrectList[i] = answer != null && answer.ans == randomList[i];
     }
-    return true;
+    return Padding(
+        padding: EdgeInsets.only(top: 20.h),
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: 25.h),
+            HtmlDataWidget(
+              widget.question.question,
+              quizId: widget.question.quizId,
+            ),
+            SizedBox(height: 24.h),
+            for (int i = 0; i < randomList.length; i++) ...[
+              Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: Container(
+                  // height:isHtml?110.h: 75.h,
+                  margin: EdgeInsets.only(right: 2.w, left: 2.w),
+                  decoration: ShapeDecoration(
+                    // color: isCorrectList[i]?Colors.greenAccent:const Color(0xFFFCFCFF),
+                    color: const Color(0xFFFCFCFF),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        width: 1.w,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                        color: isCorrectList[i] ? Colors.green : Colors.red,
+                      ),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                       // color: isCorrectList[i]?Colors.greenAccent:null,
+                        width: 140.w,
+                        padding: EdgeInsets.all(10.h),
+                        child: Center(
+                          child: isHtml
+                              ? HtmlDataWidget(randomList[i],
+                                  quizId: widget.question.quizId)
+                              : Text(
+                                  randomList[i],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: colors.blackColorApp,
+                                    fontSize: 27.sp,
+                                    fontWeight: FontWeight.w400,
+                                    // height: 22,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: isHtml ? 95.h : 60.h,
+                          padding: EdgeInsets.only(
+                              top: 7.h, bottom: 7.h, right: 10.h, left: 10.h),
+                          decoration: BoxDecoration(
+                           // color: isCorrectList[i]?Colors.greenAccent:null,
+                              // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),
+                              border: Border(
+                            right: BorderSide(
+                              width: 1.w,
+                              color: const Color(0xFFE5E4F6),
+                            ),
+                          )),
+                          child: dragWidget(i,isAnswer: true,displayAnswer: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
+            Container(
+              height: 80.h,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  color: isCorrectList.every((element) => element == true)
+                      ? Colors.greenAccent.withOpacity(0.5)
+                      : Colors.redAccent.withOpacity(0.5)),
+              child: Center(
+                  child: Text(
+                    isCorrectList.every((element) => element == true) ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
+                    style: TextStyle(fontSize: 20.sp),
+                  )),
+            ),
+          ],
+        ));
   }
 }

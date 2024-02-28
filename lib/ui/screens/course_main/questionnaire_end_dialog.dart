@@ -7,13 +7,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../utils/my_colors.dart';
 
 class QuestionnaireEndDialog extends StatefulWidget {
-  const QuestionnaireEndDialog(
-      {super.key,
-      required this.statusAnswers,
-      required this.grade1,
-      required this.grade2,
-      required this.qID,
-      required this.displayAnswersWidget});
+  const QuestionnaireEndDialog({super.key,
+    required this.statusAnswers,
+    required this.grade1,
+    required this.grade2,
+    required this.qID,
+    required this.displayAnswersWidget, this.onNext});
 
   // final int correctQNum;
   // final int qNum;
@@ -22,6 +21,8 @@ class QuestionnaireEndDialog extends StatefulWidget {
   final int qID;
   final List<Widget> displayAnswersWidget;
   final List<bool> statusAnswers;
+  final VoidCallback? onNext;
+
 
   @override
   State<QuestionnaireEndDialog> createState() => _QuestionnaireEndDialogState();
@@ -32,6 +33,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
   late int statusGrade;
   late int numCorrectAnswers;
   late int numQ;
+  late String questionnaireText;
 
   @override
   void initState() {
@@ -41,13 +43,19 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
         .toList()
         .length;
     grade =
-        numCorrectAnswers == 0 ? 0 : ((numCorrectAnswers / numQ) * 100).round();
+    numCorrectAnswers == 0 ? 0 : ((numCorrectAnswers / numQ) * 100).round();
     statusGrade = grade < widget.grade1
         ? 1
         : grade > widget.grade2
-            ? 3
-            : 2;
+        ? 3
+        : 2;
     saveUserGrade(grade);
+    questionnaireText = statusGrade == 1
+        ? 'לא נורא, ניתן לחזור שנית על החומר ולהצליח.'
+        : statusGrade == 2
+        ? 'ברכות , עברת !\nבאפשרותך לחזור שנית ולשפר את הישגך'
+        : 'וואו. כל הכבוד! עברת בהצלחה רבה.';
+
     super.initState();
   }
 
@@ -59,9 +67,9 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
       child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(
-              /*top: 45.h,*/
-              right: 70.w,
-              left: 70.w),
+            /*top: 45.h,*/
+              right: 0.w,
+              left: 0.w),
           child: Column(
             children: [
               Text(
@@ -79,14 +87,20 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
               ),
               Text(' הציון שלך הוא %$grade',
                   style:
-                      TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w600)),
+                  TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w600)),
               SizedBox(
-                height: 40.h,
+                height: 10.h,
               ),
               Image.asset('assets/images/grade_$statusGrade.png',
                   height: 253.h),
               SizedBox(
                 height: 25.h,
+              ),
+              Text(questionnaireText,
+                  style: TextStyle(fontSize: 30.sp, color: blackColorApp,),
+                  textAlign: TextAlign.center),
+              SizedBox(
+                height: 30.h,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -95,7 +109,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                       style: ElevatedButton.styleFrom(
                         shape: const RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.all(Radius.circular(12))),
+                            BorderRadius.all(Radius.circular(12))),
                         backgroundColor: blueColorApp,
                       ),
                       onPressed: () {
@@ -105,7 +119,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                       },
                       child: Text(
                         'הצג שאלות',
-                        style: TextStyle(color: Colors.white, fontSize: 20.sp),
+                        style: TextStyle(color: Colors.white, fontSize: 25.sp,fontWeight: FontWeight.w600),
                       )),
                   SizedBox(
                     width: 25.w,
@@ -115,7 +129,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                           shape: RoundedRectangleBorder(
                             side: BorderSide(color: blueColorApp),
                             borderRadius:
-                                const BorderRadius.all(Radius.circular(12)),
+                            const BorderRadius.all(Radius.circular(12)),
                           ),
                           backgroundColor: Colors.white),
                       onPressed: () {
@@ -123,8 +137,28 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                       },
                       child: Text(
                         'התחל שאלון מחדש',
-                        style: TextStyle(color: blueColorApp, fontSize: 20.sp),
-                      ))
+                        style: TextStyle(color: blueColorApp, fontSize: 25.sp,fontWeight: FontWeight.w600),
+                      )),
+                  SizedBox(width: 25.w),
+               if(widget.onNext!=null)   ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: const RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(12))),
+                        backgroundColor: Colors.greenAccent,
+                      ),
+                      onPressed: () {
+                        if( widget.onNext!=null) {
+                          widget.onNext!();
+                        }
+                        else{
+                          debugPrint('jjj');
+                        }
+                      },
+                      child: Text(
+                        'לחצו כאן כדי להמשיך',
+                        style: TextStyle(color: blackColorApp, fontSize: 25.sp,fontWeight: FontWeight.w600),
+                      )),
                 ],
               ),
               SizedBox(
@@ -137,7 +171,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                     for (int i = 1; i <= numQ; i++) ...[
                       Container(
                         width: 65.w,
-                        margin: EdgeInsets.only(left: 10.w),
+                        margin: EdgeInsets.only(left: 10.w,bottom: 10.h),
                         padding: EdgeInsets.all(20.h),
                         decoration: BoxDecoration(
                           shape: BoxShape.rectangle,
@@ -159,7 +193,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
               Visibility(
                   visible: showAnswers,
                   child: Container(
-                    margin: EdgeInsets.only(top:20.h),
+                    margin: EdgeInsets.only(top: 20.h),
                     child: Column(
                       children: widget.displayAnswersWidget,
                     ),
@@ -173,7 +207,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
 
   saveUserGrade(num grade) async {
     UserGrade userGrade =
-        UserGrade(quizId: widget.qID, percentage: grade as int);
+    UserGrade(quizId: widget.qID, percentage: grade as int);
     await IsarService().updateGrade(userGrade);
   }
 }

@@ -313,7 +313,7 @@ class _LessonWidgetState extends State<LessonWidget> {
       MainPageChild.of(context)?.bodyWidget =
           QuestionnaireWidget(
               quiz: lesson.questionnaire
-                  .elementAt(qIndex));
+                  .elementAt(qIndex),onNext: widget.onNext,);
     });
   }
 

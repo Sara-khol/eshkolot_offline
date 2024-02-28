@@ -1,6 +1,8 @@
 import 'package:eshkolot_offline/models/quiz.dart';
+import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:isar/isar.dart';
 
 import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
@@ -17,9 +19,10 @@ class UpgradedEditorWidget extends StatefulWidget {
 }
 
 class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
-   double increaseSize = 1.5;
+  double increaseSize = 1.5;
   late MoreData customData;
   List<Widget> positionedItems = [];
+
   late List<String> ans = [];
   List<TextEditingController> myControllers = [];
   late double myWidth;
@@ -49,8 +52,8 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
   setPositionItems() {
     positionedItems.clear();
     Widget myTextField = Container();
-    if(double.parse(customData.customQuizQuestionsWidth)<300) {
-      increaseSize=3;
+    if (double.parse(customData.customQuizQuestionsWidth) < 300) {
+      increaseSize = 3;
     }
     debugPrint('increaseSize $increaseSize');
     myWidth =
@@ -126,17 +129,22 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                   }));
         }
 
+        if(field.type=='image')
+          {
+            debugPrint('image=== ${field.defaultValue}');
+          }
+
         positionedItems.add(Positioned(
             left: xPosition.w,
             top: yPosition.h,
             child: field.type == 'image'
                 //image
-                ? SizedBox(
+                ?  field.defaultValue.isNotEmpty?SizedBox(
                     width: itemWidth.w,
                     height: itemHeight.h,
                     child: Image.network(
                       field.defaultValue,
-                    ))
+                    )):SizedBox()
                 : field.editable.isEmpty
                     ?
                     //text
@@ -170,26 +178,23 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
   //List<String> ans=[];
   @override
   Widget build(BuildContext context) {
-    // for (int i = 0; i < question.txtbox.length; i++) {
-    //   ans[i] = question.txtbox[i].correctAns;
-    // }
-    // debugPrint('${question.anss}  ${question.ans}');
-    return Padding(
-        //padding: const EdgeInsets.all(100),
-        padding: EdgeInsets.only(top: 25.h),
-        child: Column(children: [
-          HtmlDataWidget(widget.question.question,
-              quizId: widget.question.quizId),
-          SizedBox(
-            height: 35.h,
-          ),
-          SizedBox(
-              width: myWidth,
-              height: myHeight,
-              child: Stack(
-                children: positionedItems,
-              ))
-        ]));
+  return  Padding(
+    //padding: const EdgeInsets.all(100),
+      padding: EdgeInsets.only(top: 25.h),
+      child: Column(children: [
+        HtmlDataWidget(widget.question.question,
+            quizId: widget.question.quizId),
+        SizedBox(
+          height: 35.h,
+        ),
+        SizedBox(
+            width: myWidth,
+            height: myHeight,
+            child: Stack(
+              // children: displayAnswers?positionedItemsAnswers:positionedItems,
+              children: positionedItems,
+            ))
+      ]));
 
     // floatingActionButton: FloatingActionButton(
     //   onPressed: () {
@@ -209,12 +214,165 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     // ),
   }
 
+
+  Widget buildQAnswers() {
+    bool isOk=isCorrect();
+    return Padding(
+      //padding: const EdgeInsets.all(100),
+        padding: EdgeInsets.only(top: 25.h),
+        child: Column(children: [
+          HtmlDataWidget(widget.question.question,
+              quizId: widget.question.quizId),
+          SizedBox(
+            height: 35.h,
+          ),
+          SizedBox(
+              width: myWidth,
+              height: myHeight,
+              child: Stack(
+                children: setPositionItemsAnswer(),
+              )),
+          Container(
+            height: 80.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: isOk
+                    ? Colors.greenAccent.withOpacity(0.5)
+                    : Colors.redAccent.withOpacity(0.5)),
+            child: Center(
+                child: Text(
+                  isOk ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
+                  style: TextStyle(fontSize: 20.sp),
+                )),
+          )
+        ]));
+  }
+
+  List<Widget> setPositionItemsAnswer() {
+    List<Widget> positionedItemsAnswers = [];
+    Widget myTextField = Container();
+    if (double.parse(customData.customQuizQuestionsWidth) < 300) {
+      increaseSize = 3;
+    }
+    debugPrint('increaseSize $increaseSize');
+    myWidth =
+        double.parse(customData.customQuizQuestionsWidth) * increaseSize.w;
+    myHeight =
+        double.parse(customData.customQuizQuestionsHeight) * increaseSize.h;
+    int i = 0;
+    for (var field in customData.quizFields) {
+      if (field.name.isNotEmpty &&
+          field.xPosition.isNotEmpty &&
+          field.yPosition.isNotEmpty) {
+        double xPosition = double.parse(field.xPosition) * increaseSize;
+        double yPosition = double.parse(field.yPosition) * increaseSize;
+        double itemWidth =
+            field.width != '' ? double.parse(field.width) * increaseSize : 0;
+        double itemHeight =
+            field.height != '' ? double.parse(field.height) * increaseSize : 0;
+
+        if (field.editable.isNotEmpty) {
+          bool isCorrect = myControllers[i].text == ans[i];
+
+          myTextField = Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                  width: field.maxWidth != ''
+                      ? double.parse(field.maxWidth) * increaseSize.w
+                      : null,
+                  // height: 35.h,
+                  decoration: BoxDecoration(
+                      color: isCorrect ? Colors.greenAccent : Colors.redAccent.withOpacity(0.5),
+                      border:
+                          Border.all(color: isCorrect ? Colors.green : Colors.red)),
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    myControllers[i].text,
+                    style: TextStyle(
+                      fontWeight: field.bold.isNotEmpty
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      height: 1,
+                      color: field.color != ''
+                          ? Color(int.parse(field.color))
+                          : null,
+                      fontSize: double.parse(field.fontSize) * increaseSize.sp),
+                  )),
+            if(!isCorrect) /* SizedBox(
+                  width: field.maxWidth != ''
+                      ? double.parse(field.maxWidth) * increaseSize.w
+                      : null,
+                  child:*/
+              Text(
+                   '(${ans[i]})',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontWeight: field.bold.isNotEmpty
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        height: 1,
+                        color: blackColorApp,
+                        fontSize: double.parse(field.fontSize) * increaseSize.sp),
+                  )
+    //)
+            ],
+          );
+          i++;
+        }
+
+        positionedItemsAnswers.add(Positioned(
+            left: xPosition.w,
+            top: yPosition.h,
+            child: field.type == 'image'
+                //image
+                ?field.defaultValue.isNotEmpty? SizedBox(
+                    width: itemWidth.w,
+                    height: itemHeight.h,
+                    child: Image.network(
+                      field.defaultValue,
+                    )):const SizedBox()
+                : field.editable.isEmpty
+                    ?
+                    //text
+                    SizedBox(
+                        width: field.maxWidth != ''
+                            ? double.parse(field.maxWidth) * increaseSize.w
+                            : null,
+                        //goes on top of image and see some white
+                        // color:  field.background != ''
+                        //     ? Color(int.parse(field.background))
+                        //     : null,
+                        child: Text(field.defaultValue,
+                            style: TextStyle(
+                                fontWeight: field.bold.isNotEmpty
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: double.parse(field.fontSize) *
+                                    increaseSize.sp,
+                                color: field.color != ''
+                                    ? Color(int.parse(field.color))
+                                    : null),
+                            textDirection: field.direction == 'rtl'
+                                ? TextDirection.rtl
+                                : TextDirection.ltr),
+                      )
+                    : myTextField));
+      }
+
+    }
+    return  positionedItemsAnswers;
+  }
+
   bool isFilled() {
     for (var controller in myControllers) {
       if (controller.text.isEmpty) {
         return false;
       }
     }
+   // setPositionItemsAnswer();
+    widget.questionController.displayWithAnswers=buildQAnswers();
     return true;
   }
 

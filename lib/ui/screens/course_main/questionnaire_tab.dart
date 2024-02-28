@@ -88,29 +88,29 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                   // ),
                 ),
                 onTap: () {
-                  if (myQController.isFilled != null &&
-                      myQController.isFilled!()) {
-                    widget.quiz.questionList.elementAt(selected - 1).isFilled =
-                        true;
-
-                    if (myQController.isCorrect != null) {
-                      widget.quiz.questionList
-                          .elementAt(selected - 1)
-                          .isCorrect = myQController.isCorrect!();
-                      debugPrint(
-                          'iscorrect ${widget.quiz.questionList.elementAt(selected - 1).isCorrect}');
-                    }
-
-                    displayAllWithAnswers[index] =
-                        myQController.displayWithAnswers ??
-                            const Text('problem');
-                  }
-
-
-                  setState(() {
-                    selected = i;
-                    index = i - 1;
-                  });
+                  // if (myQController.isFilled != null &&
+                  //     myQController.isFilled!()) {
+                  //   widget.quiz.questionList.elementAt(selected - 1).isFilled =
+                  //       true;
+                  //
+                  //   if (myQController.isCorrect != null) {
+                  //     widget.quiz.questionList
+                  //         .elementAt(selected - 1)
+                  //         .isCorrect = myQController.isCorrect!();
+                  //     debugPrint(
+                  //         'iscorrect ${widget.quiz.questionList.elementAt(selected - 1).isCorrect}');
+                  //   }
+                  //
+                  //   displayAllWithAnswers[index] =
+                  //       myQController.displayWithAnswers ??
+                  //           const Text('problem');
+                  // }
+                  //
+                  //
+                  // setState(() {
+                  //   selected = i;
+                  //   index = i - 1;
+                  // });
                 },
               ),
               //),
