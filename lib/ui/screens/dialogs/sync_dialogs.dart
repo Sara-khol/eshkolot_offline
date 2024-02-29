@@ -122,7 +122,8 @@ class _SyncDialogsState extends State<SyncDialogs>
     )..addListener(() {
         setState(() {});
       });
-    mainWidget = widget.isOffline ? showOfflineSyncWidget() : showSyncWidget();
+   // mainWidget = widget.isOffline ? showOfflineSyncWidget() : showSyncWidget();
+    mainWidget = showOfflineSyncWidget();
     super.initState();
   }
 
@@ -187,12 +188,16 @@ class _SyncDialogsState extends State<SyncDialogs>
         contentPadding: EdgeInsets.zero,
         elevation: 0,
         backgroundColor: Colors.white,
-        content: Container(
-            height: 640.h,
-            width: 656.w,
-            // padding: EdgeInsets.only(top: 51.h),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-            child: mainWidget),
+        content: Wrap(
+          children: [
+            Container(
+                // height: 640.h,
+                width: 656.w,
+                // padding: EdgeInsets.only(top: 51.h),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: mainWidget),
+          ],
+        ),
       ),
     );
   }
@@ -318,7 +323,8 @@ class _SyncDialogsState extends State<SyncDialogs>
         //   ),
         // ),
         Padding(
-          padding: EdgeInsets.only(top: 51.h, right: 70.w, left: 70.w),
+          // padding: EdgeInsets.only(top: 51.h, right: 70.w, left: 70.w),
+          padding: EdgeInsets.only(top: 80.h, right: 70.w, left: 70.w,bottom: 80.h),
           child: Column(
             children: [
               Image.asset('assets/images/sync.jpg', height: 153.h),
@@ -350,9 +356,9 @@ class _SyncDialogsState extends State<SyncDialogs>
                 'אימייל עדכון ישלח בסיום תהליך הסנכרון',
                 style: TextStyle(fontSize: 18.sp),
               ),
-              SizedBox(
-                height: 30.h,
-              ),
+              // SizedBox(
+              //   height: 30.h,
+              // ),
               //todo remove percent for now
               // LinearProgressIndicator(
               //   color: Color(0xFFFFDA6C),
@@ -457,7 +463,8 @@ class _SyncDialogsState extends State<SyncDialogs>
                     Navigator.pop(context);
                   },
                 ),
-              )
+              ),
+              SizedBox(height: 50.h),
             ],
           ),
         ),
@@ -538,6 +545,7 @@ class _SyncDialogsState extends State<SyncDialogs>
             ],
           ),
         ),
+        SizedBox(height: 50.h),
       ],
     );
   }

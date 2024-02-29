@@ -666,6 +666,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         onTap: () {
+          debugPrint('color $color cc $currentColor');
           if (MainPage.of(context)?.updateSideMenu != null) {
             MainPage.of(context)?.updateSideMenu!(course.id);
           }
@@ -674,7 +675,7 @@ class _HomePageState extends State<HomePage> {
               MainPage.of(context)?.mainWidget = MainPageChild(
                 knowLedgeId: knowledgeId,
                 course: course,
-                knowledgeColor: currentColor,
+                knowledgeColor: color,
                 lessonPickedIndex: course.userCourse!.lessonIndex,
                 subjectPickedIndex: course.userCourse!.subjectIndex,
                 isContinue: 1,
@@ -682,7 +683,7 @@ class _HomePageState extends State<HomePage> {
             } else {
               MainPage.of(context)?.mainWidget = MainPageChild(
                   course: course,
-                  knowledgeColor: currentColor,
+                  knowledgeColor: color,
                   lessonPickedIndex: course.userCourse!.lessonIndex,
                   subjectPickedIndex: course.userCourse!.subjectIndex,
                   questionPickedIndex: course.userCourse!.questionIndex,
