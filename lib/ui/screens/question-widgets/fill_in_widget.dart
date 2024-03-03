@@ -21,7 +21,7 @@ class FillIn extends StatefulWidget {
 
 class _FillInState extends State<FillIn> {
   List<TextEditingController> myControllers = [];
-  List<String> correctAnswers = [];
+  List<List<String>> correctAnswers = [];
   Map<String, TextEditingController> textControllers = {};
 
   late Map<String, String> fillInQ;
@@ -63,7 +63,6 @@ class _FillInState extends State<FillIn> {
 
   @override
   Widget build(BuildContext context) {
-    var english = RegExp(r'[a-zA-Z]');
     return Padding(
       padding: EdgeInsets.only(top: 25.h),
       child: Column(
@@ -82,7 +81,6 @@ class _FillInState extends State<FillIn> {
               textStyle: TextStyle(fontSize: 27.sp),
               customWidgetBuilder: (element) {
             if (element.localName == 'input') {
-              final text = element.text;
               var textEditingController = TextEditingController();
               myControllers.add(textEditingController);
               //  if (text != null && text.startsWith('{') && text.endsWith('}')) {
@@ -131,10 +129,11 @@ class _FillInState extends State<FillIn> {
              customWidgetBuilder: (element) {
             if (element.localName == 'input') {
               String? value = element.attributes['value'];
+              List<String> aa=extractStrings(value!.contains('|')?value.substring(0,value.indexOf('|')):value);
               String? userInput = element.attributes['dirname'];
 
               // Do something with the value attribute
-              print('Value attribute of input element: $value userInput $userInput');
+              print('Value attribute of input element: $aa userInput $userInput');
              // debugPrint('text ${element.text}');
               //final text = element.text;
 
@@ -142,7 +141,7 @@ class _FillInState extends State<FillIn> {
               // myControllers.add(textEditingController);
               //  if (text != null && text.startsWith('{') && text.endsWith('}')) {
               return displayItemAnswer(
-                  value!, userInput!);
+                  aa, userInput!);
             }
             // else if (element.localName == 'br') {
             //          return SizedBox(height: 0); // Hide the line break
@@ -228,8 +227,20 @@ class _FillInState extends State<FillIn> {
             );
   }
 
-  Widget displayItemAnswer(String correctAnswer, String displayUserAnswer) {
+  Widget displayItemAnswer(List<String> correctAnswer, String displayUserAnswer) {
+    String s='';
+   if(!correctAnswer.contains(displayUserAnswer))
+     {
+       for(String a in correctAnswer)
+         {
+           if(s.isEmpty) {
+             s=a;
+           } else {
+             s+=', $a';
+          }
 
+         }
+     }
     return FittedBox(
       child: Container(
           //width: 200.w,
@@ -241,7 +252,7 @@ class _FillInState extends State<FillIn> {
             margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
             child: Column(mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              if (correctAnswer != displayUserAnswer)
+              if (!correctAnswer.contains(displayUserAnswer))
                 Container(
                   padding: EdgeInsets.only(right: 12.w,left: 12.w),
                  /// width: double.infinity,
@@ -250,9 +261,9 @@ class _FillInState extends State<FillIn> {
                         style: TextStyle(color: blackColorApp))),
               Container(
                   padding: EdgeInsets.only(right: 12.w,left: 12.w),
-                  color: correctAnswer == displayUserAnswer?Colors.greenAccent.withOpacity(0.7):null,
+                  color: correctAnswer.contains(displayUserAnswer)?Colors.greenAccent.withOpacity(0.7):null,
                   child:
-                      Text(correctAnswer == displayUserAnswer?correctAnswer:'($correctAnswer)', style: TextStyle(color: blackColorApp)))
+                      Text(correctAnswer.contains(displayUserAnswer)?displayUserAnswer:'($s)', style: TextStyle(color: blackColorApp)))
             ]))
     );
   }
@@ -263,7 +274,9 @@ class _FillInState extends State<FillIn> {
     return htmlContent.replaceAllMapped(regex, (match) {
       final initialValue = match.group(1) ?? '';
       if(!displayAnswer) {
-        correctAnswers.add(initialValue);
+
+        correctAnswers.add(
+        extractStrings(initialValue.contains('|')?initialValue.substring(0,initialValue.indexOf('|')):initialValue));
      }
       // if(displayAnswer)debugPrint('uuu ${'<input type="text" value="$initialValue" dirname="${myControllers[i].text}"  />'}');
       // else debugPrint('uuu ${'<input type="text" value="$initialValue"   />'}');
@@ -272,6 +285,25 @@ class _FillInState extends State<FillIn> {
           .text}"  />';
       else return '<input type="text" value="$initialValue" />';
     });
+  }
+
+  List<String> extractStrings(String input) {
+    debugPrint('input $input');
+    RegExp regExp = RegExp(r'\[([^\[\]]*)\]');
+
+    // Extract substrings within square brackets
+    List<String> matches = regExp.allMatches(input)
+        .map((match) => match.group(1)!).toList();
+
+
+
+    // If no matches found, add the entire string as the first item
+    if (matches.isEmpty) {
+      matches.add(input);
+    }
+
+    print(matches);
+    return matches;
   }
 
   Map<String, String> extractKeyValuePairs(String html) {
@@ -307,9 +339,9 @@ class _FillInState extends State<FillIn> {
 
   bool isCorrect() {
     int i = 0;
-    for (String s in correctAnswers) {
+    for (List<String> s in correctAnswers) {
       if (s.isNotEmpty) {
-        if (s != myControllers[i].text) return false;
+        if (!s.contains(myControllers[i].text) ) return false;
       }
       i++;
     }
