@@ -154,6 +154,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                 VideoWidget(
                     key: Key(lesson.vimeo.toString()),
                     videoNum: lesson.videoNum,
+                    isLesson: true,
                     fileId: MainPageChild.of(context)!.widget.course.id,
                     videoId: MainPageChild.of(context)!.widget.course.isSync
                         ? lesson.vimeo

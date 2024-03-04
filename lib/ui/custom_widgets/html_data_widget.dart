@@ -130,7 +130,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                               height,
                               width,
                               WidgetType.video,
-                              isVimeo: true);
+                              isLesson: false);
                           // }
                         }
                       }
@@ -155,10 +155,10 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
   Widget displayFile(
       String srcAttribute, var height, var width, WidgetType type,
-      {isVimeo = false}) {
+      {isLesson = false}) {
     return FutureBuilder<File?>(
       // future: getCurrentFile(srcAttribute),
-      future: getCurrentFile(srcAttribute.split('/').last, isVimeo),
+      future: getCurrentFile(srcAttribute.split('/').last, isLesson),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator(); // Show a loading indicator
@@ -186,11 +186,11 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                 return Padding(
                     padding: EdgeInsets.only(bottom: 7.h),
                     child: VideoWidget(
-                      isVimeo: isVimeo,
+                      isLesson: isLesson,
                       videoNum: srcAttribute.split('.').first,
                       key: Key(widget.quizId.toString()),
                       videoId: srcAttribute.split('.').first,
-                      fileId: !isVimeo
+                      fileId: !isLesson
                           ? widget.quizId
                           : MainPageChild.of(context)!.widget.course.id,
                       width:
@@ -216,11 +216,11 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     );
   }
 
-  Future<File?> getCurrentFile(String srcAttribute, isVimeo) async {
+  Future<File?> getCurrentFile(String srcAttribute, isLesson) async {
     if (appSupportDir == null) {
       return null;
     }
-    String path = !isVimeo
+    String path = !isLesson
         ? '${appSupportDir!.path}/${Constants.quizPath}/${widget.quizId}/$srcAttribute'
         : '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
     File file = File(path);

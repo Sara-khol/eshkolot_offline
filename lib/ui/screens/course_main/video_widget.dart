@@ -12,7 +12,7 @@ class VideoWidget extends StatefulWidget {
   final int fileId;
   final double width;
   final double height;
-  final bool isVimeo;
+  final bool isLesson;
   final String videoNum;
 
   const VideoWidget(
@@ -20,7 +20,7 @@ class VideoWidget extends StatefulWidget {
       required this.videoId,
       required this.videoNum,
       required this.fileId,
-      this.isVimeo = false,
+      this.isLesson = false,
       this.width = 0,
       this.height = 0});
 
@@ -56,8 +56,8 @@ class _VideoWidgetState extends State<VideoWidget>
         ? videoExists!
             ? Video(
                 player: player,
-                height: widget.height==0?515.h:widget.height,
-                width: widget.width==0?914.w:widget.width,
+                height: widget.height==0||widget.height>515?515.h:widget.height,
+                width: widget.width==0||widget.width>914?914.w:widget.width,
                 scale: 1.0,
                 // default
                 showControls: true,
@@ -82,7 +82,7 @@ class _VideoWidgetState extends State<VideoWidget>
       var dir =
           await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
       String path =
-          '${dir.path}/${widget.isVimeo ? constants.lessonPath : constants.quizPath}/${widget.fileId}/${widget.videoId}.mp4';
+          '${dir.path}/${widget.isLesson ? constants.lessonPath : constants.quizPath}/${widget.fileId}/${widget.videoId}.mp4';
       File file = File(path);
       videoExists = await file.exists();
 

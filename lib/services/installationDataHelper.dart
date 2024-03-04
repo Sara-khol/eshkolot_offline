@@ -12,9 +12,9 @@ import 'package:eshkolot_offline/services/download_data_service.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as constants;
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../models/course.dart';
 import '../models/user.dart';
@@ -311,13 +311,13 @@ class InstallationDataHelper {
 
     input.forEach((key, value) {
       if (value is String) {
-       // if(key!='answer') {
-          result[key] = value.replaceAll('\n', '');
-     //   }
-     //    else{
-     //      result[key]=value;
-     //      debugPrint('result[key] $key value $value }');
-     //    }
+        // if(key!='answer') {
+        result[key] = value.replaceAll('\n', '');
+        //   }
+        //    else{
+        //      result[key]=value;
+        //      debugPrint('result[key] $key value $value }');
+        //    }
       } else if (value is Map<String, dynamic>) {
         result[key] = removeNewlines(value);
       } else if (value is List) {
@@ -387,11 +387,12 @@ class InstallationDataHelper {
     var dir = await getApplicationSupportDirectory();
     String courseVideosPath =
         '${dir.path}${Platform.pathSeparator}${constants.lessonPath}${Platform.pathSeparator}${course.id}';
+    List<Lesson> updateLessons = [];
     if (await Directory(courseVideosPath).exists()) {
       debugPrint('course.id ${course.id}');
       List l = Directory(courseVideosPath).listSync();
       List<String> fileNames = [];
-      List<Lesson> updateLessons = [];
+
       for (var d in l) {
         String fileName =
             (d.path.split(Platform.pathSeparator)?.last).split('.')[0];
@@ -400,7 +401,6 @@ class InstallationDataHelper {
           fileNames.add(fileName);
         }
       }
-      int i = 1;
       List<Lesson>? list = await IsarService().getAllLessonsOfCourse(course.id);
       if (list != null) {
         if (fileNames.isEmpty) {
@@ -410,6 +410,7 @@ class InstallationDataHelper {
             updateLessons.add(lesson);
           }
         } else {
+          int i = 1;
           String videoNum = i.toString();
           for (Lesson lesson in list) {
             //lesson.videoNum = videoNum;
@@ -470,14 +471,31 @@ class InstallationDataHelper {
         IsarService().updateVideoNum(updateLessons);
       }
       return true;
+    } else {
+      //if videos do not exist fill video num with consecutive numbers
+      int i = 1;
+
+      List<Lesson>? list = await IsarService().getAllLessonsOfCourse(course.id);
+      if (list != null) {
+        debugPrint(
+            'course.id ${course.id} videos do not exists fill video num with consecutive numbers');
+        Sentry.addBreadcrumb(Breadcrumb(
+            message:
+                'course.id ${course.id} videos do not exists fill video num with consecutive numbers'));
+        for (Lesson lesson in list) {
+          lesson.videoNum = (i++).toString();
+          updateLessons.add(lesson);
+        }
+        IsarService().updateVideoNum(updateLessons);
+      }
     }
     return false;
   }
 
   downLoadQuizFiles(List<Course> courses) {
     debugPrint('downLoadQuizFiles==');
-    DownloadService().cancelToken=CancelToken();
-    DownloadService().tryAgain=false;
+    DownloadService().cancelToken = CancelToken();
+    DownloadService().tryAgain = false;
     for (Course course in courses) {
       if (course.questionnaires.isNotEmpty) {
         for (Quiz quiz in course.questionnaires) {
