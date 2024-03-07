@@ -12,11 +12,14 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../screens/course_main/main_page_child.dart';
 
+typedef WidgetCallback = Widget Function(List<String?> s);
+
 class HtmlDataWidget extends StatefulWidget {
-  const HtmlDataWidget(this.text, {super.key, required this.quizId});
+   const HtmlDataWidget(this.text, {super.key, required this.quizId,  this.onInputWidgetRequested});
 
   final String text;
   final int quizId;
+   final WidgetCallback? onInputWidgetRequested;
 
   @override
   State<HtmlDataWidget> createState() => _HtmlDataWidgetState();
@@ -42,7 +45,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                 return SelectionArea(
                     focusNode: _focusNode,
                     child: HtmlWidget(convertCustomAudioTags(widget.text),
-                        textStyle: TextStyle(fontSize:/*27.sp*/ 20.sp,fontWeight: FontWeight.w400,color: blackColorApp),
+                        textStyle: TextStyle(fontSize:27.sp /*20.sp*/,fontWeight: FontWeight.w400,color: blackColorApp),
 
                         //textStyle: TextStyle(fontSize: ScreenUtil().setSp(fontSize.toDouble())),
                         customWidgetBuilder: (element) {
@@ -100,16 +103,24 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                           ),
                         );
                       }*/
+                      if (element.localName == 'input' && widget.onInputWidgetRequested!=null) {
+                        debugPrint('onInputWidgetRequested ${element.attributes['value']}');
+                       return widget.onInputWidgetRequested!([element.attributes['value'],element.attributes['dirname']]);
+                      }
                       if (element.localName == 'img') {
                         if (srcAttribute != null) {
-                          return displayFile(
-                              srcAttribute, height, width, WidgetType.image);
+                          return InlineCustomWidget(
+                            child: displayFile(
+                                srcAttribute, height, width, WidgetType.image),
+                          );
                         }
                       }
                       if (element.localName == 'audio') {
                         if (srcAttribute != null) {
-                          return displayFile(
-                              srcAttribute, height, width, WidgetType.audio);
+                          return InlineCustomWidget(
+                            child: displayFile(
+                                srcAttribute, height, width, WidgetType.audio),
+                          );
                         }
                         // else if (element.localName == 'br') {
                         //   return SizedBox(height: 0); // Hide the line break
@@ -119,18 +130,22 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                       if (element.localName == 'iframe') {
                         if (srcAttribute != null) {
                           if (srcAttribute.split('.').last == 'pdf') {
-                            return displayFile(
-                                srcAttribute, height, width, WidgetType.pdf);
+                            return InlineCustomWidget(
+                              child: displayFile(
+                                  srcAttribute, height, width, WidgetType.pdf),
+                            );
                           }
                           // if (srcAttribute.split('.').last == 'mp4') {
-                          return displayFile(
-                              srcAttribute.split('.').last == 'mp4'
-                                  ? srcAttribute
-                                  : '${srcAttribute.split('?').first}.mp4',
-                              height,
-                              width,
-                              WidgetType.video,
-                              isLesson: false);
+                          return InlineCustomWidget(
+                            child: displayFile(
+                                srcAttribute.split('.').last == 'mp4'
+                                    ? srcAttribute
+                                    : '${srcAttribute.split('?').first}.mp4',
+                                height,
+                                width,
+                                WidgetType.video,
+                                isLesson: false),
+                          );
                           // }
                         }
                       }
@@ -152,6 +167,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
             textAlign: TextAlign.right,
           );
   }
+
 
   Widget displayFile(
       String srcAttribute, var height, var width, WidgetType type,
