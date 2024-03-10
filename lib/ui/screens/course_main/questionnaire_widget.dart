@@ -203,9 +203,10 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                 ),
                 child: TextButton(
                   style: TextButton.styleFrom(
+
                     alignment: Alignment.center,
                     //padding: EdgeInsets.only(left: 45.w,right: 45.w,top: 20.h,bottom: 22.h),
-                    textStyle: TextStyle(fontSize: 20.sp),
+                    textStyle: TextStyle(fontSize: 20.sp, fontFamily: 'RAG-Sans'),
                   ),
                   onPressed: () {
                     setState(() {

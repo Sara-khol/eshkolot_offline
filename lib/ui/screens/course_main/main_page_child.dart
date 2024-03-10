@@ -853,74 +853,77 @@ class _MainPageChildState extends State<MainPageChild> {
         children: [
           Container(
             width: 175.w,
-            margin: EdgeInsets.only(left: 40.w),
+          height: 40.h,
+          //  margin: EdgeInsets.only(left: 40.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
               color:  Color(widget.knowledgeColor != -1 ? widget.knowledgeColor:0xFF32D489),
             ),
-            child: TextButton(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      nextButtonText,
-                      style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
-                    ),
-                    SizedBox(width: 6.w),
-                    Icon(
-                      Icons.arrow_forward,
-                      color: Colors.white,
-                      size: 15.sp,
-                    )
-                  ],
-                ),
-                onPressed: () {
-                  //  setState(() {
-                  //  int nextS=subjectPickedIndex+1;
-                  if (_bodyWidget.value is LessonWidget) {
-                    Subject mySubject =
-                    _currentCourse.subjects.elementAt(subjectPickedIndex);
-                    lessonPickedIndex = lessonPickedIndex + 1;
-                    _bodyWidget.value = LessonWidget(
-                      lesson: mySubject.lessons.elementAt(lessonPickedIndex),
-                      updateComplete: updateCompleteLesson,
-                      onNext: lessonPickedIndex + 1 < mySubject.lessons.length
-                          ? () =>
-                          goToNextLesson(
-                              mySubject,
-                              subjectPickedIndex,
-                              mySubject.lessons
-                                  .elementAt(lessonPickedIndex + 1),
-                              lessonPickedIndex + 1)
-                          : null,
-                    );
-                  } else {
-                    {
-                      lastSubjectPickedIndex = subjectPickedIndex;
-                      if (_bodyWidget.value is SubjectMainPage) {
-                        subjectPickedIndex++;
-                      } else //courseMainPage - go to first subject
-                          {
-                        subjectPickedIndex = 0;
+            child: Center(
+              child: TextButton(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        nextButtonText,
+                        style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
+                      ),
+                      SizedBox(width: 6.w),
+                      Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                        size: 15.sp,
+                      )
+                    ],
+                  ),
+                  onPressed: () {
+                    //  setState(() {
+                    //  int nextS=subjectPickedIndex+1;
+                    if (_bodyWidget.value is LessonWidget) {
+                      Subject mySubject =
+                      _currentCourse.subjects.elementAt(subjectPickedIndex);
+                      lessonPickedIndex = lessonPickedIndex + 1;
+                      _bodyWidget.value = LessonWidget(
+                        lesson: mySubject.lessons.elementAt(lessonPickedIndex),
+                        updateComplete: updateCompleteLesson,
+                        onNext: lessonPickedIndex + 1 < mySubject.lessons.length
+                            ? () =>
+                            goToNextLesson(
+                                mySubject,
+                                subjectPickedIndex,
+                                mySubject.lessons
+                                    .elementAt(lessonPickedIndex + 1),
+                                lessonPickedIndex + 1)
+                            : null,
+                      );
+                    } else {
+                      {
+                        lastSubjectPickedIndex = subjectPickedIndex;
+                        if (_bodyWidget.value is SubjectMainPage) {
+                          subjectPickedIndex++;
+                        } else //courseMainPage - go to first subject
+                            {
+                          subjectPickedIndex = 0;
+                        }
+                        _bodyWidget.value = SubjectMainPage(
+                            subjectIndex: subjectPickedIndex,
+                            subject: _currentCourse.subjects
+                                .elementAt(subjectPickedIndex),
+                            onNext: subjectPickedIndex + 1 <
+                                _currentCourse.subjects.length
+                                ? () =>
+                                goToNextSubject(
+                                    _currentCourse.subjects
+                                        .elementAt(subjectPickedIndex + 1),
+                                    subjectPickedIndex + 1)
+                                : null);
                       }
-                      _bodyWidget.value = SubjectMainPage(
-                          subjectIndex: subjectPickedIndex,
-                          subject: _currentCourse.subjects
-                              .elementAt(subjectPickedIndex),
-                          onNext: subjectPickedIndex + 1 <
-                              _currentCourse.subjects.length
-                              ? () =>
-                              goToNextSubject(
-                                  _currentCourse.subjects
-                                      .elementAt(subjectPickedIndex + 1),
-                                  subjectPickedIndex + 1)
-                              : null);
                     }
-                  }
-                }),
+                  }),
+            ),
           ),
         ],
       ),

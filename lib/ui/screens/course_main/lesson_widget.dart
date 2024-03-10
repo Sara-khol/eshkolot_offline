@@ -201,6 +201,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
                                   minimumSize: Size.zero,
+                                  textStyle: TextStyle(fontFamily: 'RAG-Sans')
                               ),
                                 child: Text(
 

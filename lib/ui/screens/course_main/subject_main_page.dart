@@ -292,7 +292,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                               alignment: Alignment.centerRight,
                                               child: TextButton(
                                                   style: TextButton.styleFrom(
-                                                       padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
+                                                       padding: EdgeInsets.only(right: 15.w,left: 15.w,top: 5.h,bottom: 5.h),
                                                       minimumSize: Size.zero,
                                                      // tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                   ),
@@ -492,7 +492,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                   onPress();
                 },
                style: TextButton.styleFrom(
-              padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
+              padding: EdgeInsets.only(right: 15.w,left: 15.w,top: 5.h,bottom: 5.h),
                       minimumSize: Size.zero,
               ),
                 child: Text(

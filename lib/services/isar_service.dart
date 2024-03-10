@@ -303,6 +303,7 @@ class IsarService {
           user.knowledgeCoursesMap[knowledge] = [];
         }
       }
+      user.courses.sort((a, b) => a.courseId.compareTo(b.courseId));
       for (UserCourse userCourse in user.courses) {
         Course? c = await getCourseById(userCourse.courseId);
         if (c != null && c.knowledgeId != null) {
@@ -314,6 +315,10 @@ class IsarService {
           }
         }
       }
+      // Sorting courses by course.id for each knowledge entry in the map
+      user.knowledgeCoursesMap.forEach((knowledge, courses) {
+        courses.sort((a, b) => a.id.compareTo(b.id));
+      });
       for (var entry in user.knowledgeCoursesMap.entries) {
         debugPrint('knowledge ${entry.key.id}');
         for (Course v in entry.value) {

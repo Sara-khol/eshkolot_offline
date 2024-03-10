@@ -105,60 +105,67 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: const RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(12))),
-                        backgroundColor: blueColorApp,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          showAnswers = true;
-                        });
-                      },
-                      child: Text(
-                        'הצג שאלות',
-                        style: TextStyle(color: Colors.white, fontSize: 25.sp,fontWeight: FontWeight.w600),
-                      )),
+                  Container(
+                   // height: 40.h,
+                    width: 175.w,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: blueColorApp,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            showAnswers = true;
+                          });
+                        },
+                        child: Text(
+                          'הצג שאלות',
+                          style: TextStyle(color: Colors.white, fontSize: 18.sp,fontWeight: FontWeight.w600),
+                        )),
+                  ),
                   SizedBox(
                     width: 25.w,
                   ),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(color: blueColorApp),
-                            borderRadius:
-                            const BorderRadius.all(Radius.circular(12)),
-                          ),
-                          backgroundColor: Colors.white),
-                      onPressed: () {
-                        QuestionnaireWidget.of(context)?.setInitialDisplay();
-                      },
-                      child: Text(
-                        'התחל שאלון מחדש',
-                        style: TextStyle(color: blueColorApp, fontSize: 25.sp,fontWeight: FontWeight.w600),
-                      )),
-                  SizedBox(width: 25.w),
-               if(widget.onNext!=null)   ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: const RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(12))),
-                        backgroundColor: Colors.greenAccent,
-                      ),
-                      onPressed: () {
-                        if( widget.onNext!=null) {
-                          widget.onNext!();
-                        }
-                        else{
-                          debugPrint('jjj');
-                        }
-                      },
-                      child: Text(
-                        'לחצו כאן כדי להמשיך',
-                        style: TextStyle(color: blackColorApp, fontSize: 25.sp,fontWeight: FontWeight.w600),
-                      )),
+                  Container(
+                    height: 40.h,
+                    //  width: 175.w,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white),
+                        onPressed: () {
+                          QuestionnaireWidget.of(context)?.setInitialDisplay();
+                        },
+                        child: Text(
+                          'התחל שאלון מחדש',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: blueColorApp, fontSize: 18.sp,fontWeight: FontWeight.w600),
+                        )),
+                  ),
+                  // SizedBox(width: 25.w),
+               // if(widget.onNext!=null)   ElevatedButton(
+               //        style: ElevatedButton.styleFrom(
+               //          shape: const RoundedRectangleBorder(
+               //              borderRadius:
+               //              BorderRadius.all(Radius.circular(12))),
+               //          backgroundColor: Colors.greenAccent,
+               //        ),
+               //        onPressed: () {
+               //          if( widget.onNext!=null) {
+               //            widget.onNext!();
+               //          }
+               //          else{
+               //            debugPrint('jjj');
+               //          }
+               //        },
+               //        child: Text(
+               //          'לחצו כאן כדי להמשיך',
+               //          style: TextStyle(color: blackColorApp, fontSize: 25.sp,fontWeight: FontWeight.w600),
+               //        )),
                 ],
               ),
               SizedBox(

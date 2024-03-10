@@ -122,8 +122,7 @@ class _SyncDialogsState extends State<SyncDialogs>
     )..addListener(() {
         setState(() {});
       });
-   // mainWidget = widget.isOffline ? showOfflineSyncWidget() : showSyncWidget();
-    mainWidget = showOfflineSyncWidget();
+   mainWidget = widget.isOffline ? showOfflineSyncWidget() : showSyncWidget();
     super.initState();
   }
 
@@ -552,8 +551,10 @@ class _SyncDialogsState extends State<SyncDialogs>
 
   showErrorDialog(BuildContext context, {bool isBlockedLinks = true,bool isVimeo=true}) {
     return Center(
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      child: ListView(
+        shrinkWrap: true,
+          // mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             SizedBox(
               height: 51.h,

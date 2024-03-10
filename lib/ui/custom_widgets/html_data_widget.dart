@@ -188,11 +188,11 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                 return Image.file(
                   file,
                   fit: BoxFit.contain,
-                  height: height != null
-                      ? int.parse(height.toString()) * 2.w
-                      : null,
-                  width:
-                      width != null ? int.parse(width.toString()) * 2.h : null,
+                  // height: height != null
+                  //     ? int.parse(height.toString()) * 2.w
+                  //     : null,
+                  // width:
+                  //     width != null ? int.parse(width.toString()) * 2.h : null,
                 );
               case WidgetType.audio:
                 return AudioWidget(

@@ -104,7 +104,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(randomList[i], style: TextStyle(fontSize: 27.sp)),
+                Text(randomList[i], style: TextStyle(fontSize: 20.sp)),
               ],
             ),
           ),
@@ -150,7 +150,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
               children: [
                 Text(widget.question.ans![i].ans,
                     style: TextStyle(
-                        fontSize: 27.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.w500,
                         color: randomList[i] == widget.question.ans![i].ans
                             ? Colors.white

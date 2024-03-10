@@ -59,7 +59,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             for (int i = 1; i <= widget.quiz.questionList.length; i++) ...[
               GestureDetector(
                 child: Container(
-                  width: 65.w,
+                  width: 60.w,
                   padding: EdgeInsets.all(20.h),
                   decoration: BoxDecoration(
                     shape: BoxShape.rectangle,
@@ -79,7 +79,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                     child:*/
                       Text('$i',
                           style: TextStyle(
-                              fontSize: 22.sp,
+                              fontSize: 18.sp,
                               color: i == selected
                                   ? Colors.white
                                   : const Color((0xFF2D2828)),
@@ -193,39 +193,53 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
               children: [
                 Visibility(
                   visible: selected != 1,
+                  child: Container(
+                    height: 40.h,
+                 //  width: 125.w,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                    ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                      //     shape: const RoundedRectangleBorder(
+                      //         borderRadius:
+                      //             BorderRadius.all(Radius.circular(12))),
+                          backgroundColor: const Color(0xFF5956DA)),
+                      child: Text(
+                        "חזרה",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18.sp),
+                      ),
+                      onPressed: () => onBackClick(),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 40.h,
+                 // width: 125.w,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(30)),
+                  ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12))),
+                        // shape: const RoundedRectangleBorder(
+                        //     borderRadius: BorderRadius.all(Radius.circular(30))),
                         backgroundColor: const Color(0xFF5956DA)),
                     child: Text(
-                      "חזרה",
+                      selected == widget.quiz.questionList.length
+                          ? "סיום שאלון"
+                          : "הבא",
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 25.sp),
+                          fontSize: 18.sp),
                     ),
-                    onPressed: () => onBackClick(),
+                    onPressed: () => selected == widget.quiz.questionList.length
+                        ? onFinishClick()
+                        : onNextClick(),
                   ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12))),
-                      backgroundColor: const Color(0xFF5956DA)),
-                  child: Text(
-                    selected == widget.quiz.questionList.length
-                        ? "סיום שאלון"
-                        : "הבא",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 25.sp),
-                  ),
-                  onPressed: () => selected == widget.quiz.questionList.length
-                      ? onFinishClick()
-                      : onNextClick(),
                 ),
               ],
             )

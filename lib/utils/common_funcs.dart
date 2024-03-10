@@ -16,7 +16,7 @@ class CommonFuncs
             color: Colors.black87,
             child: Text(
               message,
-              style: TextStyle(color: Colors.white, fontSize: 20.sp),
+              style: TextStyle(color: Colors.white, fontSize: 20.sp,fontFamily:'RAG-Sans' ),
               textAlign: TextAlign.center,
             ),
           ),
