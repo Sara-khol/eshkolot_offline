@@ -15,11 +15,12 @@ import '../screens/course_main/main_page_child.dart';
 typedef WidgetCallback = Widget Function(List<String?> s);
 
 class HtmlDataWidget extends StatefulWidget {
-   const HtmlDataWidget(this.text, {super.key, required this.quizId,  this.onInputWidgetRequested});
+  const HtmlDataWidget(this.text,
+      {super.key, required this.quizId, this.onInputWidgetRequested});
 
   final String text;
   final int quizId;
-   final WidgetCallback? onInputWidgetRequested;
+  final WidgetCallback? onInputWidgetRequested;
 
   @override
   State<HtmlDataWidget> createState() => _HtmlDataWidgetState();
@@ -45,117 +46,16 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                 return SelectionArea(
                     focusNode: _focusNode,
                     child: HtmlWidget(convertCustomAudioTags(widget.text),
-                        textStyle: TextStyle(fontSize:27.sp /*20.sp*/,fontWeight: FontWeight.w400,color: blackColorApp),
+                        textStyle: TextStyle(
+                            fontSize: 27.sp /*20.sp*/,
+                            fontWeight: FontWeight.w400,
+                            color: blackColorApp),
 
                         //textStyle: TextStyle(fontSize: ScreenUtil().setSp(fontSize.toDouble())),
-                        customWidgetBuilder: (element) {
-                      final srcAttribute = element.attributes['src'];
-                      final width = element.attributes['width'];
-                      final height = element.attributes['height'];
-                      final styleAttribute = element.attributes['style'];
-                      final fontWeightAttribute = element.attributes['font-weight'];
-                      final tagName = element.localName;
-                     // debugPrint('width $width height $height');
-
-                      // Check for HTML tags or attributes that indicate bold text
-                   /*   if (styleAttribute != null &&
-                          styleAttribute.contains('font-weight: bold')) {
-                        return Text(
-                          element.text,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20.sp,
-                            decoration: element.localName == 'u' ? TextDecoration.underline : null,
-                            // You can add more styles as needed
-                          ),
-                        );
-                      }  if (fontWeightAttribute != null &&
-                          fontWeightAttribute.toLowerCase() == 'bold') {
-                        return Text(
-                          element.text,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20.sp,
-                            decoration: element.localName == 'u' ? TextDecoration.underline : null,
-                            // You can add more styles as needed
-                          ),
-                        );
-                      }
-                        else if (tagName == 'b' || tagName == 'strong' || tagName == 'h1' || tagName == 'h2' || tagName == 'h3' || tagName == 'h4' || tagName == 'h5' || tagName == 'h6') {
-                        return Text(
-                          element.text,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20.sp,
-                            decoration: element.localName == 'u' ? TextDecoration.underline : null,
-                            // You can add more styles as needed
-                          ),
-                        );
-                      }
-                      else if (tagName == 'u') {
-                        return Text(
-                          element.text,
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontSize: 20.sp,
-                            //fontWeight: element.style.contains('bold') ? FontWeight.bold : FontWeight.normal,
-                            // You can add more styles as needed
-                          ),
-                        );
-                      }*/
-                      if (element.localName == 'input' && widget.onInputWidgetRequested!=null) {
-                        debugPrint('onInputWidgetRequested ${element.attributes['value']}');
-                       return widget.onInputWidgetRequested!([element.attributes['value'],element.attributes['dirname']]);
-                      }
-                      if (element.localName == 'img') {
-                        if (srcAttribute != null) {
-                          return InlineCustomWidget(
-                            child: displayFile(
-                                srcAttribute, height, width, WidgetType.image),
-                          );
+                        customWidgetBuilder:(element){
+                      return displayWidgetByHtml(element);
                         }
-                      }
-                      if (element.localName == 'audio') {
-                        if (srcAttribute != null) {
-                          return InlineCustomWidget(
-                            child: displayFile(
-                                srcAttribute, height, width, WidgetType.audio),
-                          );
-                        }
-                        // else if (element.localName == 'br') {
-                        //   return SizedBox(height: 0); // Hide the line break
-                        // }
-                        return null;
-                      }
-                      if (element.localName == 'iframe') {
-                        if (srcAttribute != null) {
-                          if (srcAttribute.split('.').last == 'pdf') {
-                            return InlineCustomWidget(
-                              child: displayFile(
-                                  srcAttribute, height, width, WidgetType.pdf),
-                            );
-                          }
-                          // if (srcAttribute.split('.').last == 'mp4') {
-                          return InlineCustomWidget(
-                            child: displayFile(
-                                srcAttribute.split('.').last == 'mp4'
-                                    ? srcAttribute
-                                    : '${srcAttribute.split('?').first}.mp4',
-                                height,
-                                width,
-                                WidgetType.video,
-                                isLesson: false),
-                          );
-                          // }
-                        }
-                      }
-                      // if (element.localName == 'strong') {
-                      //     return Text(
-                      //         'srcAttribute', style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20.sp),);
-                      //
-                      // }
-                      return null;
-                    }));
+                    ));
 
                 // )
               }
@@ -163,11 +63,111 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
             })
         : Text(
             widget.text,
-            style: TextStyle(fontSize: /*27.sp*/20.sp,fontWeight: FontWeight.w400,color: blackColorApp),
+            style: TextStyle(
+                fontSize: /*27.sp*/ 20.sp,
+                fontWeight: FontWeight.w400,
+                color: blackColorApp),
             textAlign: TextAlign.right,
           );
   }
 
+  bool containsUnderlineStyle(dynamic element) {
+    if (/*element.localName == 'span' &&*/
+        element.attributes['style'] != null &&
+        element.attributes['style']!.contains('text-decoration: underline')) {
+      return true;
+    }
+
+    if (element.children.isEmpty) {
+      return false;
+    }
+
+    return element.children.any((child) => containsUnderlineStyle(child));
+  }
+
+  Widget? displayWidgetByHtml(var element) {
+    final srcAttribute = element.attributes['src'];
+    final width = element.attributes['width'];
+    final height = element.attributes['height'];
+    final styleAttribute = element.attributes['style'];
+    final fontWeightAttribute = element.attributes['font-weight'];
+    final tagName = element.localName;
+
+    if (element.localName == 'input' && widget.onInputWidgetRequested != null) {
+      debugPrint('onInputWidgetRequested ${element.attributes['value']}');
+      return widget.onInputWidgetRequested!(
+          [element.attributes['value'], element.attributes['dirname']]);
+    }
+    if (element.localName == 'img') {
+      debugPrint('srcAttribute $srcAttribute');
+      if (srcAttribute != null) {
+        return InlineCustomWidget(
+          child: displayFile(srcAttribute, height, width, WidgetType.image),
+        );
+      }
+    }
+    if (element.localName == 'audio') {
+      if (srcAttribute != null) {
+        return InlineCustomWidget(
+          child: displayFile(srcAttribute, height, width, WidgetType.audio),
+        );
+      }
+      // else if (element.localName == 'br') {
+      //   return SizedBox(height: 0); // Hide the line break
+      // }
+      return null;
+    }
+    if (element.localName == 'iframe') {
+      if (srcAttribute != null) {
+        if (srcAttribute.split('.').last == 'pdf') {
+          return InlineCustomWidget(
+            child: displayFile(srcAttribute, height, width, WidgetType.pdf),
+          );
+        }
+        // if (srcAttribute.split('.').last == 'mp4') {
+        return InlineCustomWidget(
+          child: displayFile(
+              srcAttribute.split('.').last == 'mp4'
+                  ? srcAttribute
+                  : '${srcAttribute.split('?').first}.mp4',
+              height,
+              width,
+              WidgetType.video,
+              isLesson: false),
+        );
+        // }
+      }
+    }
+    // Check if any child element has an underline style
+    bool isUnderlined = element.children.any((child) =>
+        /*child.localName == 'span' &&*/
+        child.attributes['style'] != null &&
+        child.attributes['style']!.contains('text-decoration: underline'));
+    if (element.localName == 'h6') {
+      // Create a list to store the child widgets
+      List<Widget> childrenWidgets = [];
+
+      bool isUnderlined = element.children.any((child) => containsUnderlineStyle(child));
+
+      for (var childElement in element.children) {
+        // Check the type of child element and handle it accordingly
+        childrenWidgets.add(displayWidgetByHtml(childElement) ?? Container());
+      }
+      childrenWidgets.add(Text(element.text,
+          style: TextStyle(
+            fontSize: 27.sp,
+            fontWeight: FontWeight.w800,
+            decoration: isUnderlined ? TextDecoration.underline : null,
+          )));
+      // Return a widget that contains all the child widgets of <h6>
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: childrenWidgets,
+      );
+    }
+
+    return null;
+  }
 
   Widget displayFile(
       String srcAttribute, var height, var width, WidgetType type,

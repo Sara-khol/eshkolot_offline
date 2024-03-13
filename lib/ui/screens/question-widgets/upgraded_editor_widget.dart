@@ -2,7 +2,6 @@ import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:isar/isar.dart';
 
 import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
@@ -25,6 +24,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
 
   late List<String> ans = [];
   List<TextEditingController> myControllers = [];
+  List<FocusNode> focusNodes=[];
   late double myWidth;
   late double myHeight;
 
@@ -41,6 +41,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
   void didUpdateWidget(covariant UpgradedEditorWidget oldWidget) {
     ans.clear();
     myControllers.clear();
+    focusNodes.clear();
     customData = widget.question.moreData!;
     setPositionItems();
     widget.questionController.isCorrect = isCorrect;
@@ -74,8 +75,9 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
         if (field.editable.isNotEmpty) {
           ans.add(field.correctAnswer);
           var textEditingController = TextEditingController();
+          var focusNode = FocusNode();
           myControllers.add(textEditingController);
-
+           focusNodes.add(focusNode);
           myTextField = Container(
               width: field.maxWidth != ''
                   ? double.parse(field.maxWidth) * increaseSize.w
@@ -86,6 +88,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                   : null,
               child: TextField(
                   controller: textEditingController,
+                  focusNode:focusNode ,
                   buildCounter: null,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
@@ -123,10 +126,15 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                     //? FontWeight.bold
                     //: FontWeight.normal
                   ),
-                  onChanged: (txt) {
-                    // debugPrint('fontSIze ${field.fontSize}');
-                    //question.anss[i] = txt;
-                  }));
+                onEditingComplete: () {
+                    int index=focusNodes.indexOf(focusNode);
+                  if (index < myControllers.length - 1) {
+                    FocusScope.of(context).requestFocus(focusNodes[index + 1]);
+                  } else {
+                    FocusScope.of(context).requestFocus(focusNodes[0]);
+                  }
+                },
+                 ));
         }
 
         if(field.type=='image')

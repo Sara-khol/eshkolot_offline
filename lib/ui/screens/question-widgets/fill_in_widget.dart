@@ -2,6 +2,7 @@ import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:eshkolot_offline/models/quiz.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
@@ -21,11 +22,10 @@ class FillIn extends StatefulWidget {
 
 class _FillInState extends State<FillIn> {
   List<TextEditingController> myControllers = [];
- // List textfocus = [];
   List<List<String>> correctAnswers = [];
   Map<String, TextEditingController> textControllers = {};
-  final FocusNode _firstFocus = FocusNode();
-  final FocusNode _secondFocus = FocusNode();
+  List<FocusNode> focusNodes=[];
+  String correctHtml='';
 
 
   @override
@@ -33,7 +33,7 @@ class _FillInState extends State<FillIn> {
     widget.questionController.isCorrect = isCorrect;
     widget.questionController.isFilled = isFilled;
     // debugPrint(replaceCurlyBracesWithTextFields(widget.question.ans!.first.ans));
-
+     correctHtml='';
     super.initState();
   }
 
@@ -45,8 +45,8 @@ class _FillInState extends State<FillIn> {
     widget.questionController.isFilled = isFilled;
     correctAnswers.clear();
     myControllers.clear();
-   // textfocus.clear();
-    // }
+    focusNodes.clear();
+     correctHtml='';
     super.didUpdateWidget(oldWidget);
   }
 
@@ -65,79 +65,43 @@ class _FillInState extends State<FillIn> {
 
   @override
   Widget build(BuildContext context) {
-    int i=0;
-    return Padding(
+     debugPrint('build!!!');
+      int i = 0;
+      int j = 0;
+
+      return Padding(
         padding: EdgeInsets.only(top: 25.h),
-        child:/* FocusTraversalGroup(
+        child: /* FocusTraversalGroup(
           policy: OrderedTraversalPolicy(),
           child:*/ Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                HtmlDataWidget(
-                  widget.question.question,
-                  quizId: widget.question
-                      .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
-                ),
-                SizedBox(
-                  height: 35.h,
-                ),
-                Center(
-                    child: HtmlDataWidget(
-                        replaceCurlyBracesWithTextFields(
-                            widget.question.ans!.first.ans),
-                        quizId: widget.question.quizId,
-                        onInputWidgetRequested: (s) {
-                  // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
-                  // myControllers.add(textEditingController);
-                  return createTextField(myControllers[i++]/*,textfocus[i++]*/);
-                }
-                        )),
-                /*Center(
-                  child: HtmlWidget(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              HtmlDataWidget(
+                widget.question.question,
+                quizId: widget.question
+                    .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
+              ),
+              SizedBox(
+                height: 35.h,
+              ),
+              Center(
+                  child: HtmlDataWidget(correctHtml.isEmpty?
                       replaceCurlyBracesWithTextFields(
-                          widget.question.ans!.first.ans),
-                      textStyle: TextStyle(
-                        fontSize: 27.sp,
-                      ), customWidgetBuilder: (element) {
-                    if (element.localName == 'input') {
-                      String? value = element.attributes['value'];
+                          widget.question.ans!.first.ans):correctHtml,
+                      quizId: widget.question.quizId,
+                      onInputWidgetRequested: (s) {
+                        // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
+                        // myControllers.add(textEditingController);
+                        return createTextField(
+                            myControllers[i++], focusNodes[j++], i - 1);
+                      }
+                  )),
 
-                      var textEditingController =
-                          TextEditingController(text: value ?? '');
-                      myControllers.add(textEditingController);
-                      return InlineCustomWidget(
-                          child: createTextField(textEditingController));
-                    }
-                   }),
-                )*/
-      // FocusTraversalGroup(
-      //     policy: ReadingOrderTraversalPolicy(),
-      //     child: Column(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: [
-      //         TextField(
-      //           focusNode: _firstFocus,
-      //           decoration: InputDecoration(labelText: 'First Input'),
-      //       onEditingComplete: () =>
-      //           FocusScope.of(context).requestFocus(_secondFocus),
-      //
-      //     ),
-      //         SizedBox(height: 20),
-      //         TextField(
-      //           focusNode: _secondFocus,
-      //
-      //           decoration: InputDecoration(labelText: 'Second Input'),
-      //           onEditingComplete: () =>
-      //               FocusScope.of(context).requestFocus(_firstFocus),
-      //         ),
-      //       ],
-      //     ),
-      // )
-              ]),
-       // )
-        );
+            ]),
+      );
+
   }
 
   buildWithAnswers() {
@@ -203,46 +167,66 @@ class _FillInState extends State<FillIn> {
         ]));
   }
 
-  Widget createTextField(TextEditingController controller/*,FocusNode focusNode*/) {
-    return InlineCustomWidget(
-      child: Container(
-          height: 40.h,
-          width: 200.w,
-          padding: EdgeInsets.only(right: 5.w, left: 5.w),
-          alignment: Alignment.center,
-          margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
-          child:
-          //Focus(
-           // focusNode: focusNode,
-           // child:
-        TextFormField(
+  Widget createTextField(TextEditingController controller,FocusNode focusNode,int index) {
+    return  InlineCustomWidget(
+        child:/* KeyboardListener(
+          focusNode: FocusNode(), // Use a focus node to capture key events
+          onKeyEvent: ( event) {
+            if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+              FocusScope.of(context).nextFocus();
+              // if (index < myControllers.length - 1) {
+              //   FocusScope.of(context).requestFocus(focusNodes[index + 1]);
+              // } else {
+              //   // If it's the last field, unfocus the current field
+              //  // focusNodes[index].unfocus();
+              // }
+
+            }
+          },
+          child:*/  Container(
+              height: 40.h,
+              width: 200.w,
+              padding: EdgeInsets.only(right: 5.w, left: 5.w),
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
+              child:
+              TextFormField(
+                textInputAction: TextInputAction.next,
                 obscureText: false,
-                textAlignVertical: TextAlignVertical.center,
-                controller: controller,
-             // focusNode: focusNode,
-                textAlign: TextAlign.center,
-                cursorColor: Colors.black,
-                //   maxLines: null, // Allow multiple lines to handle long text without spaces
-                style: TextStyle(
-                  fontSize: 22.sp,
+                      textAlignVertical: TextAlignVertical.center,
+                      controller: controller,
+                  focusNode: focusNode,
+                      textAlign: TextAlign.center,
+                      cursorColor: Colors.black,
+                      //   maxLines: null, // Allow multiple lines to handle long text without spaces
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                      ),
+                      decoration: InputDecoration(
+                        // isCollapsed: true,
+                        border: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black)),
+                        contentPadding:
+                            EdgeInsets.only(top: 10.h, right: 10.w, left: 10.w),
+                        // isDense: true,
+                      ),
+                onEditingComplete: () {
+                  if (index < myControllers.length - 1) {
+                    FocusScope.of(context).requestFocus(focusNodes[index + 1]);
+                  } else {
+                    FocusScope.of(context).requestFocus(focusNodes[0]);
+                  }
+                },
+                  )
+
                 ),
-                decoration: InputDecoration(
-                  // isCollapsed: true,
-                  border: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black)),
-                  contentPadding:
-                      EdgeInsets.only(top: 10.h, right: 10.w, left: 10.w),
-                  // isDense: true,
-                ),
-              // onEditingComplete: () =>
-              //     FocusScope.of(context).requestFocus(focusNode),
-            ),
-         // )
-    ),
+
     );
   }
+
+
 
   Widget displayItemAnswer(
       List<String> correctAnswer, String displayUserAnswer) {
@@ -290,7 +274,7 @@ class _FillInState extends State<FillIn> {
       [displayAnswer = false]) {
     int i = 0;
     final regex = RegExp(r'{([^}]+)}');
-    return htmlContent.replaceAllMapped(regex, (match) {
+    correctHtml= htmlContent.replaceAllMapped(regex, (match) {
       final initialValue = match.group(1) ?? '';
       if (!displayAnswer) {
         List<String> aa = extractStrings(initialValue.contains('|')
@@ -300,7 +284,7 @@ class _FillInState extends State<FillIn> {
         correctAnswers.add(aa);
         var textEditingController = TextEditingController();
         myControllers.add(textEditingController);
-       // textfocus.add(FocusNode());
+        focusNodes.add(FocusNode());
       }
       if (displayAnswer) {
         debugPrint(
@@ -310,6 +294,7 @@ class _FillInState extends State<FillIn> {
         return '<input type="text" value="$initialValue" />';
       }
     });
+    return correctHtml;
   }
 
   List<String> extractStrings(String input) {
@@ -348,4 +333,5 @@ class _FillInState extends State<FillIn> {
     return true;
   }
 }
+
 
