@@ -7,22 +7,27 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../utils/my_colors.dart';
 
 class QuestionnaireEndDialog extends StatefulWidget {
-  const QuestionnaireEndDialog({super.key,
-    required this.statusAnswers,
-    required this.grade1,
-    required this.grade2,
-    required this.qID,
-    required this.displayAnswersWidget, this.onNext});
+  const QuestionnaireEndDialog(
+      {super.key,
+      required this.statusAnswers,
+      required this.grade1,
+      required this.grade2,
+      required this.qID,
+      required this.displayAnswersWidget,
+      this.onNext,
+      required this.totalPoints,
+      required this.numPoints});
 
   // final int correctQNum;
   // final int qNum;
   final int grade1;
   final int grade2;
   final int qID;
+  final int totalPoints;
+  final int numPoints;
   final List<Widget> displayAnswersWidget;
   final List<bool> statusAnswers;
   final VoidCallback? onNext;
-
 
   @override
   State<QuestionnaireEndDialog> createState() => _QuestionnaireEndDialogState();
@@ -42,19 +47,21 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
         .where((element) => element == true)
         .toList()
         .length;
+    // grade =
+    //     numCorrectAnswers == 0 ? 0 : ((numCorrectAnswers / numQ) * 100).round();
     grade =
-    numCorrectAnswers == 0 ? 0 : ((numCorrectAnswers / numQ) * 100).round();
+    ((widget.numPoints / widget.totalPoints) * 100).round();
     statusGrade = grade < widget.grade1
         ? 1
         : grade > widget.grade2
-        ? 3
-        : 2;
+            ? 3
+            : 2;
     saveUserGrade(grade);
     questionnaireText = statusGrade == 1
         ? 'לא נורא, ניתן לחזור שנית על החומר ולהצליח.'
         : statusGrade == 2
-        ? 'ברכות , עברת !\nבאפשרותך לחזור שנית ולשפר את הישגך'
-        : 'וואו. כל הכבוד! עברת בהצלחה רבה.';
+            ? 'ברכות , עברת !\nבאפשרותך לחזור שנית ולשפר את הישגך'
+            : 'וואו. כל הכבוד! עברת בהצלחה רבה.';
 
     super.initState();
   }
@@ -67,7 +74,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
       child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(
-            /*top: 45.h,*/
+              /*top: 45.h,*/
               right: 0.w,
               left: 0.w),
           child: Column(
@@ -85,7 +92,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
               SizedBox(
                 height: 35.h,
               ),
-              Text(' הציון שלך הוא %$grade',
+              Text(' השגת ${widget.numPoints}  מתוך ${widget.totalPoints} נקודות , ($grade%)',
                   style:
                   TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w600)),
               SizedBox(
@@ -97,7 +104,10 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                 height: 25.h,
               ),
               Text(questionnaireText,
-                  style: TextStyle(fontSize: 30.sp, color: blackColorApp,),
+                  style: TextStyle(
+                    fontSize: 30.sp,
+                    color: blackColorApp,
+                  ),
                   textAlign: TextAlign.center),
               SizedBox(
                 height: 30.h,
@@ -106,7 +116,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                   // height: 40.h,
+                    // height: 40.h,
                     width: 175.w,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -122,7 +132,10 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                         },
                         child: Text(
                           'הצג שאלות',
-                          style: TextStyle(color: Colors.white, fontSize: 18.sp,fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600),
                         )),
                   ),
                   SizedBox(
@@ -143,29 +156,32 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                         child: Text(
                           'התחל שאלון מחדש',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: blueColorApp, fontSize: 18.sp,fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                              color: blueColorApp,
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600),
                         )),
                   ),
                   // SizedBox(width: 25.w),
-               // if(widget.onNext!=null)   ElevatedButton(
-               //        style: ElevatedButton.styleFrom(
-               //          shape: const RoundedRectangleBorder(
-               //              borderRadius:
-               //              BorderRadius.all(Radius.circular(12))),
-               //          backgroundColor: Colors.greenAccent,
-               //        ),
-               //        onPressed: () {
-               //          if( widget.onNext!=null) {
-               //            widget.onNext!();
-               //          }
-               //          else{
-               //            debugPrint('jjj');
-               //          }
-               //        },
-               //        child: Text(
-               //          'לחצו כאן כדי להמשיך',
-               //          style: TextStyle(color: blackColorApp, fontSize: 25.sp,fontWeight: FontWeight.w600),
-               //        )),
+                  // if(widget.onNext!=null)   ElevatedButton(
+                  //        style: ElevatedButton.styleFrom(
+                  //          shape: const RoundedRectangleBorder(
+                  //              borderRadius:
+                  //              BorderRadius.all(Radius.circular(12))),
+                  //          backgroundColor: Colors.greenAccent,
+                  //        ),
+                  //        onPressed: () {
+                  //          if( widget.onNext!=null) {
+                  //            widget.onNext!();
+                  //          }
+                  //          else{
+                  //            debugPrint('jjj');
+                  //          }
+                  //        },
+                  //        child: Text(
+                  //          'לחצו כאן כדי להמשיך',
+                  //          style: TextStyle(color: blackColorApp, fontSize: 25.sp,fontWeight: FontWeight.w600),
+                  //        )),
                 ],
               ),
               SizedBox(
@@ -178,7 +194,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
                     for (int i = 1; i <= numQ; i++) ...[
                       Container(
                         width: 65.w,
-                        margin: EdgeInsets.only(left: 10.w,bottom: 10.h),
+                        margin: EdgeInsets.only(left: 10.w, bottom: 10.h),
                         padding: EdgeInsets.all(20.h),
                         decoration: BoxDecoration(
                           shape: BoxShape.rectangle,
@@ -214,7 +230,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
 
   saveUserGrade(num grade) async {
     UserGrade userGrade =
-    UserGrade(quizId: widget.qID, percentage: grade as int);
+        UserGrade(quizId: widget.qID, percentage: grade as int);
     await IsarService().updateGrade(userGrade);
   }
 }

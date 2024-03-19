@@ -90,7 +90,7 @@ class _OpenQuestionState extends State<OpenQuestion> {
     return myController.text.isNotEmpty;
   }
 
-  bool isCorrect() {
-    return true;
+  int  isCorrect() {
+    return widget.question.points;
   }
 }

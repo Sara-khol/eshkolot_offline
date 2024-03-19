@@ -31,6 +31,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   int qNum = 0;
   late List<Widget> displayAllWithAnswers;
   late List<bool> statusAnswers;
+  int quizPoints = 0, totalQuizPoints = 0;
 
   @override
   void initState() {
@@ -42,7 +43,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     );
     statusAnswers = List.generate(
       widget.quiz.questionList.length,
-          (index) => false,
+      (index) => false,
     );
     super.initState();
   }
@@ -195,15 +196,15 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                   visible: selected != 1,
                   child: Container(
                     height: 40.h,
-                 //  width: 125.w,
+                    //  width: 125.w,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
                     ),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                      //     shape: const RoundedRectangleBorder(
-                      //         borderRadius:
-                      //             BorderRadius.all(Radius.circular(12))),
+                          //     shape: const RoundedRectangleBorder(
+                          //         borderRadius:
+                          //             BorderRadius.all(Radius.circular(12))),
                           backgroundColor: const Color(0xFF5956DA)),
                       child: Text(
                         "חזרה",
@@ -218,7 +219,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                 ),
                 Container(
                   height: 40.h,
-                 // width: 125.w,
+                  // width: 125.w,
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(30)),
                   ),
@@ -281,10 +282,15 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
       widget.quiz.questionList.elementAt(selected - 1).isFilled = true;
 
       if (myQController.isCorrect != null) {
+        int numPoints = myQController.isCorrect!();
+        quizPoints += numPoints;
+        totalQuizPoints +=
+            widget.quiz.questionList.elementAt(selected - 1).points;
         widget.quiz.questionList.elementAt(selected - 1).isCorrect =
-            myQController.isCorrect!();
+            numPoints ==
+                widget.quiz.questionList.elementAt(selected - 1).points;
         debugPrint(
-            'iscorrect ${widget.quiz.questionList.elementAt(selected - 1).isCorrect}');
+            'numPoints $numPoints totalpoints ${widget.quiz.questionList.elementAt(selected - 1).points} iscorrect ${widget.quiz.questionList.elementAt(selected - 1).isCorrect}');
       }
 
       displayAllWithAnswers[index] =
@@ -337,11 +343,13 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
         // QuestionnaireWidget.of(context)?.setInitialDisplay();
         MainPageChild.of(context)?.updateCompleteQuiz(widget.quiz.id);
         QuestionnaireWidget.of(context)?.setEndQuestionnaire(
-          statusAnswers: statusAnswers,
+            statusAnswers: statusAnswers,
             grade1: widget.quiz.grade1,
             grade2: widget.quiz.grade2,
             qID: widget.quiz.id,
-            displayAnswersWidget: displayAllWithAnswers);
+            displayAnswersWidget: displayAllWithAnswers,
+            numPoints: quizPoints,
+            totalPoints: totalQuizPoints);
         // showDialog(
         //     context: context,
         //     builder: (BuildContext context) {
@@ -357,14 +365,13 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   }
 
   bool checkAnswers() {
-    qNum=0;
+    qNum = 0;
     for (Question q in widget.quiz.questionList) {
       if (!q.isFilled) {
         CommonFuncs().showMyToast('ישנם שאלות שלא מולאו');
         return false;
-      }
-     else if (q.isCorrect) {
-       statusAnswers[qNum]=true;
+      } else if (q.isCorrect) {
+        statusAnswers[qNum] = true;
       }
       qNum++;
     }
@@ -405,6 +412,6 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
 
 class QuestionController {
   bool Function()? isFilled;
-  bool Function()? isCorrect;
+  int Function()? isCorrect;
   Widget? displayWithAnswers;
 }

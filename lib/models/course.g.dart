@@ -37,28 +37,33 @@ const CourseSchema = CollectionSchema(
       name: r'countQuiz',
       type: IsarType.string,
     ),
-    r'isSync': PropertySchema(
+    r'isDownLoadData': PropertySchema(
       id: 4,
+      name: r'isDownLoadData',
+      type: IsarType.bool,
+    ),
+    r'isSync': PropertySchema(
+      id: 5,
       name: r'isSync',
       type: IsarType.bool,
     ),
     r'knowledgeId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'knowledgeId',
       type: IsarType.long,
     ),
     r'knowledgeNum': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'knowledgeNum',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'title',
       type: IsarType.string,
     ),
     r'vimeoId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'vimeoId',
       type: IsarType.string,
     )
@@ -141,11 +146,12 @@ void _courseSerialize(
   writer.writeString(offsets[1], object.countHours);
   writer.writeString(offsets[2], object.countLesson);
   writer.writeString(offsets[3], object.countQuiz);
-  writer.writeBool(offsets[4], object.isSync);
-  writer.writeLong(offsets[5], object.knowledgeId);
-  writer.writeString(offsets[6], object.knowledgeNum);
-  writer.writeString(offsets[7], object.title);
-  writer.writeString(offsets[8], object.vimeoId);
+  writer.writeBool(offsets[4], object.isDownLoadData);
+  writer.writeBool(offsets[5], object.isSync);
+  writer.writeLong(offsets[6], object.knowledgeId);
+  writer.writeString(offsets[7], object.knowledgeNum);
+  writer.writeString(offsets[8], object.title);
+  writer.writeString(offsets[9], object.vimeoId);
 }
 
 Course _courseDeserialize(
@@ -160,12 +166,13 @@ Course _courseDeserialize(
     countLesson: reader.readStringOrNull(offsets[2]),
     countQuiz: reader.readStringOrNull(offsets[3]),
     id: id,
-    knowledgeId: reader.readLongOrNull(offsets[5]),
-    knowledgeNum: reader.readStringOrNull(offsets[6]),
-    title: reader.readStringOrNull(offsets[7]) ?? '',
-    vimeoId: reader.readStringOrNull(offsets[8]) ?? '',
+    knowledgeId: reader.readLongOrNull(offsets[6]),
+    knowledgeNum: reader.readStringOrNull(offsets[7]),
+    title: reader.readStringOrNull(offsets[8]) ?? '',
+    vimeoId: reader.readStringOrNull(offsets[9]) ?? '',
   );
-  object.isSync = reader.readBool(offsets[4]);
+  object.isDownLoadData = reader.readBool(offsets[4]);
+  object.isSync = reader.readBool(offsets[5]);
   return object;
 }
 
@@ -187,12 +194,14 @@ P _courseDeserializeProp<P>(
     case 4:
       return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 9:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -926,6 +935,16 @@ extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterFilterCondition> isDownLoadDataEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDownLoadData',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterFilterCondition> isSyncEqualTo(
       bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -1581,6 +1600,18 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsDownLoadData() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownLoadData', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsDownLoadDataDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownLoadData', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> sortByIsSync() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSync', Sort.asc);
@@ -1703,6 +1734,18 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsDownLoadData() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownLoadData', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsDownLoadDataDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDownLoadData', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> thenByIsSync() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSync', Sort.asc);
@@ -1793,6 +1836,12 @@ extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
     });
   }
 
+  QueryBuilder<Course, Course, QDistinct> distinctByIsDownLoadData() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDownLoadData');
+    });
+  }
+
   QueryBuilder<Course, Course, QDistinct> distinctByIsSync() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isSync');
@@ -1855,6 +1904,12 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
   QueryBuilder<Course, String?, QQueryOperations> countQuizProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'countQuiz');
+    });
+  }
+
+  QueryBuilder<Course, bool, QQueryOperations> isDownLoadDataProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDownLoadData');
     });
   }
 

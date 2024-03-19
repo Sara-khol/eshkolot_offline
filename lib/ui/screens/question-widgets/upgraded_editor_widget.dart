@@ -24,7 +24,9 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
 
   late List<String> ans = [];
   List<TextEditingController> myControllers = [];
-  List<FocusNode> focusNodes=[];
+  List<int> pointsList = [];
+
+  List<FocusNode> focusNodes = [];
   late double myWidth;
   late double myHeight;
 
@@ -42,6 +44,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     ans.clear();
     myControllers.clear();
     focusNodes.clear();
+    pointsList.clear();
     customData = widget.question.moreData!;
     setPositionItems();
     widget.questionController.isCorrect = isCorrect;
@@ -77,7 +80,8 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
           var textEditingController = TextEditingController();
           var focusNode = FocusNode();
           myControllers.add(textEditingController);
-           focusNodes.add(focusNode);
+          focusNodes.add(focusNode);
+          pointsList.add(field.points.isNotEmpty ? int.parse(field.points) : 0);
           myTextField = Container(
               width: field.maxWidth != ''
                   ? double.parse(field.maxWidth) * increaseSize.w
@@ -87,72 +91,72 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                   ? Color(int.parse(field.background))
                   : null,
               child: TextField(
-                  controller: textEditingController,
-                  focusNode:focusNode ,
-                  buildCounter: null,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.only(top: 10.h, bottom: 10.h),
-                      border: const OutlineInputBorder(),
-                      enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 0.0),
-                      ),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                      hintText: field.defaultValue),
-                  cursorColor:
+                controller: textEditingController,
+                focusNode: focusNode,
+                buildCounter: null,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.only(top: 10.h, bottom: 10.h),
+                    border: const OutlineInputBorder(),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 0.0),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    hintText: field.defaultValue),
+                cursorColor:
+                    field.color != '' ? Color(int.parse(field.color)) : null,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                textDirection: field.direction == 'rtl'
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
+                style: TextStyle(
+                  fontWeight: field.bold.isNotEmpty
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  height: 1,
+                  color:
                       field.color != '' ? Color(int.parse(field.color)) : null,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  textDirection: field.direction == 'rtl'
-                      ? TextDirection.rtl
-                      : TextDirection.ltr,
-                  style: TextStyle(
-                    fontWeight: field.bold.isNotEmpty
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    height: 1,
-                    color: field.color != ''
-                        ? Color(int.parse(field.color))
-                        : null,
-                    fontSize: double.parse(field.fontSize) * increaseSize.sp,
-                    //   decoration: question.txtbox[i].txtdeco,
+                  fontSize: double.parse(field.fontSize) * increaseSize.sp,
+                  //   decoration: question.txtbox[i].txtdeco,
 
-                    //  color: question.txtbox[i].color,
-                    //backgroundColor: question.txtbox[i].backgroundColor,
-                    // fontWeight: question.txtbox[i].bold
-                    //? FontWeight.bold
-                    //: FontWeight.normal
-                  ),
+                  //  color: question.txtbox[i].color,
+                  //backgroundColor: question.txtbox[i].backgroundColor,
+                  // fontWeight: question.txtbox[i].bold
+                  //? FontWeight.bold
+                  //: FontWeight.normal
+                ),
                 onEditingComplete: () {
-                    int index=focusNodes.indexOf(focusNode);
+                  int index = focusNodes.indexOf(focusNode);
                   if (index < myControllers.length - 1) {
                     FocusScope.of(context).requestFocus(focusNodes[index + 1]);
                   } else {
                     FocusScope.of(context).requestFocus(focusNodes[0]);
                   }
                 },
-                 ));
+              ));
         }
 
-        if(field.type=='image')
-          {
-            debugPrint('image=== ${field.defaultValue}');
-          }
+        if (field.type == 'image') {
+          debugPrint('image=== ${field.defaultValue}');
+        }
 
         positionedItems.add(Positioned(
             left: xPosition.w,
             top: yPosition.h,
             child: field.type == 'image'
                 //image
-                ?  field.defaultValue.isNotEmpty?SizedBox(
-                    width: itemWidth.w,
-                    height: itemHeight.h,
-                    child: Image.network(
-                      field.defaultValue,
-                    )):SizedBox()
+                ? field.defaultValue.isNotEmpty
+                    ? SizedBox(
+                        width: itemWidth.w,
+                        height: itemHeight.h,
+                        child: Image.network(
+                          field.defaultValue,
+                        ))
+                    : SizedBox()
                 : field.editable.isEmpty
                     ?
                     //text
@@ -186,23 +190,23 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
   //List<String> ans=[];
   @override
   Widget build(BuildContext context) {
-  return  Padding(
-    //padding: const EdgeInsets.all(100),
-      padding: EdgeInsets.only(top: 25.h),
-      child: Column(children: [
-        HtmlDataWidget(widget.question.question,
-            quizId: widget.question.quizId),
-        SizedBox(
-          height: 35.h,
-        ),
-        SizedBox(
-            width: myWidth,
-            height: myHeight,
-            child: Stack(
-              // children: displayAnswers?positionedItemsAnswers:positionedItems,
-              children: positionedItems,
-            ))
-      ]));
+    return Padding(
+        //padding: const EdgeInsets.all(100),
+        padding: EdgeInsets.only(top: 25.h),
+        child: Column(children: [
+          HtmlDataWidget(widget.question.question,
+              quizId: widget.question.quizId),
+          SizedBox(
+            height: 35.h,
+          ),
+          SizedBox(
+              width: myWidth,
+              height: myHeight,
+              child: Stack(
+                // children: displayAnswers?positionedItemsAnswers:positionedItems,
+                children: positionedItems,
+              ))
+        ]));
 
     // floatingActionButton: FloatingActionButton(
     //   onPressed: () {
@@ -222,11 +226,10 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     // ),
   }
 
-
   Widget buildQAnswers() {
-    bool isOk=isCorrect();
+    bool isOk = isCorrect() ==widget.question.points;
     return Padding(
-      //padding: const EdgeInsets.all(100),
+        //padding: const EdgeInsets.all(100),
         padding: EdgeInsets.only(top: 25.h),
         child: Column(children: [
           HtmlDataWidget(widget.question.question,
@@ -249,9 +252,9 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                     : Colors.redAccent.withOpacity(0.5)),
             child: Center(
                 child: Text(
-                  isOk ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
-                  style: TextStyle(fontSize: 20.sp),
-                )),
+              isOk ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
+              style: TextStyle(fontSize: 20.sp),
+            )),
           )
         ]));
   }
@@ -292,39 +295,42 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                       : null,
                   // height: 35.h,
                   decoration: BoxDecoration(
-                      color: isCorrect ? Colors.greenAccent : Colors.redAccent.withOpacity(0.5),
-                      border:
-                          Border.all(color: isCorrect ? Colors.green : Colors.red)),
+                      color: isCorrect
+                          ? Colors.greenAccent
+                          : Colors.redAccent.withOpacity(0.5),
+                      border: Border.all(
+                          color: isCorrect ? Colors.green : Colors.red)),
                   child: Text(
                     textAlign: TextAlign.center,
                     myControllers[i].text,
-                    style: TextStyle(
-                      fontWeight: field.bold.isNotEmpty
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      height: 1,
-                      color: field.color != ''
-                          ? Color(int.parse(field.color))
-                          : null,
-                      fontSize: double.parse(field.fontSize) * increaseSize.sp),
-                  )),
-            if(!isCorrect) /* SizedBox(
-                  width: field.maxWidth != ''
-                      ? double.parse(field.maxWidth) * increaseSize.w
-                      : null,
-                  child:*/
-              Text(
-                   '(${ans[i]})',
-                    textAlign: TextAlign.center,
                     style: TextStyle(
                         fontWeight: field.bold.isNotEmpty
                             ? FontWeight.bold
                             : FontWeight.normal,
                         height: 1,
-                        color: blackColorApp,
-                        fontSize: double.parse(field.fontSize) * increaseSize.sp),
-                  )
-    //)
+                        color: field.color != ''
+                            ? Color(int.parse(field.color))
+                            : null,
+                        fontSize:
+                            double.parse(field.fontSize) * increaseSize.sp),
+                  )),
+              if (!isCorrect) /* SizedBox(
+                  width: field.maxWidth != ''
+                      ? double.parse(field.maxWidth) * increaseSize.w
+                      : null,
+                  child:*/
+                Text(
+                  '(${ans[i]})',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontWeight: field.bold.isNotEmpty
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      height: 1,
+                      color: blackColorApp,
+                      fontSize: double.parse(field.fontSize) * increaseSize.sp),
+                )
+              //)
             ],
           );
           i++;
@@ -335,12 +341,14 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
             top: yPosition.h,
             child: field.type == 'image'
                 //image
-                ?field.defaultValue.isNotEmpty? SizedBox(
-                    width: itemWidth.w,
-                    height: itemHeight.h,
-                    child: Image.network(
-                      field.defaultValue,
-                    )):const SizedBox()
+                ? field.defaultValue.isNotEmpty
+                    ? SizedBox(
+                        width: itemWidth.w,
+                        height: itemHeight.h,
+                        child: Image.network(
+                          field.defaultValue,
+                        ))
+                    : const SizedBox()
                 : field.editable.isEmpty
                     ?
                     //text
@@ -368,9 +376,8 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                       )
                     : myTextField));
       }
-
     }
-    return  positionedItemsAnswers;
+    return positionedItemsAnswers;
   }
 
   bool isFilled() {
@@ -379,20 +386,48 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
         return false;
       }
     }
-   // setPositionItemsAnswer();
-    widget.questionController.displayWithAnswers=buildQAnswers();
+    // setPositionItemsAnswer();
+    widget.questionController.displayWithAnswers = buildQAnswers();
     return true;
   }
 
-  bool isCorrect() {
-    int i = 0;
-    for (String s in ans) {
-      if (s.isNotEmpty) {
-        if (s != myControllers[i].text) return false;
+
+  int isCorrect() {
+    debugPrint('list points $pointsList');
+    calculateTotalPoints();
+    if (widget.question.points < 2) {
+      int i = 0;
+      for (String s in ans) {
+        if (s.isNotEmpty) {
+          if (s != myControllers[i].text) return 0;
+        }
+        i++;
       }
-      i++;
+      return 1;
+    } else {
+      int numPoints = 0;
+      int i = 0;
+      for (String s in ans) {
+        if (s.isNotEmpty) {
+          if (s == myControllers[i].text) {
+            numPoints += pointsList[i];
+            i++;
+          }
+        }
+      }
+      return numPoints;
     }
-    return true;
+  }
+
+  calculateTotalPoints()
+  {
+    int totalPoints=0;
+    for(int i in pointsList)
+      {
+        totalPoints+=i;
+      }
+    debugPrint('totalPoints original: ${widget.question.points} calculate: $totalPoints');
+    widget.question.points=totalPoints;
   }
 
   @override

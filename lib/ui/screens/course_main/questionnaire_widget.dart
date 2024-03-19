@@ -251,7 +251,9 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
       required grade1,
       required grade2,
       required qID,
-      required displayAnswersWidget}) {
+      required displayAnswersWidget,
+      required totalPoints,
+      required numPoints}) {
     setState(() {
       displayWidget = QuestionnaireEndDialog(
         statusAnswers: statusAnswers /*,correctQNum: correctQNum, qNum: qNum*/,
@@ -260,6 +262,8 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
         qID: qID,
         displayAnswersWidget: displayAnswersWidget,
         onNext: widget.onNext,
+        numPoints: numPoints,
+        totalPoints: totalPoints
       );
     });
   }

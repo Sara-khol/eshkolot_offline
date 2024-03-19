@@ -66,6 +66,8 @@ class Question {
   late MoreData? moreData;
   @enumerated
   late QType type;
+  late int points;
+
 
   @Ignore()
   bool isCorrect = false;
@@ -94,6 +96,7 @@ class Question {
     moreData = json['more_data'] is List || json['more_data'] == null
         ? null
         : MoreData.fromJson(json['more_data']);
+    points = json['points'];
   }
 
   Question(
@@ -101,7 +104,8 @@ class Question {
       this.options = const [],
       this.ans = const [],
       this.type = QType.checkbox,
-      this.idQues = -1});
+      this.idQues = -1,
+      this.points=0});
 
   QType stringToStatusType(String value) {
     switch (value) {

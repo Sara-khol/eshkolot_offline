@@ -90,7 +90,7 @@ class _RadioCheckState extends State<RadioCheck> {
 
   Widget getRadioWidget(Question item, [bool displayAnswer = false]) {
     bool isCorrect = false;
-    isCorrect = verifyCheck();
+    isCorrect = verifyCheck()==widget.question.points;
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -151,8 +151,10 @@ class _RadioCheckState extends State<RadioCheck> {
   }
 
   Widget getCheckBoxWidget(Question item, [bool displayAnswer = false]) {
-    bool isCorrect = false;
-    isCorrect = verifyCheck();
+    bool isCorrect=false;
+    if(displayAnswer) {
+       isCorrect = verifyCheck() == widget.question.points;
+    }
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -202,7 +204,7 @@ class _RadioCheckState extends State<RadioCheck> {
                       : Colors.redAccent.withOpacity(0.5)),
               child: Center(
                   child: Text(
-                    isCorrect ? 'תשובה נכונה!' : 'אחת או יותר מהתשובות לא נכונות',
+                    isCorrect ? 'תשובה נכונה!' : widget.question.points==1?'תשובה לא נכונה':'אחת או יותר מהתשובות לא נכונות',
                     style: TextStyle(fontSize: 20.sp),
                   )),
             ),
@@ -224,18 +226,37 @@ class _RadioCheckState extends State<RadioCheck> {
     }
   }
 
-  bool verifyCheck() {
+  int verifyCheck() {
     if (widget.question.type == QType.radio) {
       Answer? correctAnswer =
           widget.question.ans!.firstWhere((ans) => ans.isCorrect == true);
-      return _character == correctAnswer.ans;
+      return _character == correctAnswer.ans?widget.question.points:0;
     } else {
-      for (int i = 0; i < widget.question.ans!.length; i++) {
-        if (widget.question.ans![i].isCorrect != _isSelected[i]) {
-          return false;
+      if(widget.question.points>1) {
+        int numPoints = 0;
+        for (int i = 0; i < widget.question.ans!.length; i++) {
+          if (widget.question.ans![i].isCorrect == _isSelected[i]) {
+            numPoints += widget.question.ans![i].points;
+          }
         }
+        return numPoints;
       }
-      return true;
+      else {
+        for (int i = 0; i < widget.question.ans!.length; i++) {
+          if (widget.question.ans![i].isCorrect != _isSelected[i]) {
+            return 0;
+          }
+        }
+          return widget.question.points; //(always 1)
+
+
+        // for (int i = 0; i < widget.question.ans!.length; i++) {
+        //   if (widget.question.ans![i].isCorrect != _isSelected[i]) {
+        //     return false;
+        //   }
+        // }
+        // return true;
+      }
     }
   }
 

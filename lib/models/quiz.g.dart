@@ -1433,13 +1433,18 @@ const QuestionSchema = Schema(
       name: r'options',
       type: IsarType.stringList,
     ),
-    r'question': PropertySchema(
+    r'points': PropertySchema(
       id: 4,
+      name: r'points',
+      type: IsarType.long,
+    ),
+    r'question': PropertySchema(
+      id: 5,
       name: r'question',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'type',
       type: IsarType.byte,
       enumMap: _QuestiontypeEnumValueMap,
@@ -1513,8 +1518,9 @@ void _questionSerialize(
     object.moreData,
   );
   writer.writeStringList(offsets[3], object.options);
-  writer.writeString(offsets[4], object.question);
-  writer.writeByte(offsets[5], object.type.index);
+  writer.writeLong(offsets[4], object.points);
+  writer.writeString(offsets[5], object.question);
+  writer.writeByte(offsets[6], object.type.index);
 }
 
 Question _questionDeserialize(
@@ -1532,8 +1538,9 @@ Question _questionDeserialize(
     ),
     idQues: reader.readLongOrNull(offsets[1]) ?? -1,
     options: reader.readStringList(offsets[3]),
-    question: reader.readStringOrNull(offsets[4]) ?? '',
-    type: _QuestiontypeValueEnumMap[reader.readByteOrNull(offsets[5])] ??
+    points: reader.readLongOrNull(offsets[4]) ?? 0,
+    question: reader.readStringOrNull(offsets[5]) ?? '',
+    type: _QuestiontypeValueEnumMap[reader.readByteOrNull(offsets[6])] ??
         QType.checkbox,
   );
   object.moreData = reader.readObjectOrNull<MoreData>(
@@ -1569,8 +1576,10 @@ P _questionDeserializeProp<P>(
     case 3:
       return (reader.readStringList(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 5:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 6:
       return (_QuestiontypeValueEnumMap[reader.readByteOrNull(offset)] ??
           QType.checkbox) as P;
     default:
@@ -2003,6 +2012,59 @@ extension QuestionQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> pointsEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'points',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> pointsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'points',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> pointsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'points',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> pointsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'points',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 

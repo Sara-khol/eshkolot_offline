@@ -114,7 +114,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
   }
 
   listOfItemsWithAnswer() {
-    bool isOk = isCorrect();
+    bool isOk = isCorrect()==widget.question.points;
     return Column(children: [
       SizedBox(height: 25.h),
       HtmlDataWidget(
@@ -197,13 +197,13 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
     return didChange;
   }
 
-  bool isCorrect() {
+  int isCorrect() {
     debugPrint('list answer $randomList');
     if (listEquals(
         randomList, widget.question.ans!.map((e) => e.ans).toList())) {
-      return true;
+      return widget.question.points;
     }
-    return false;
+    return 0;
   }
 
   displayWithAnswers() {

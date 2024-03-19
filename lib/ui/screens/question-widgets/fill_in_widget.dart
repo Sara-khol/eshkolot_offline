@@ -22,18 +22,18 @@ class FillIn extends StatefulWidget {
 
 class _FillInState extends State<FillIn> {
   List<TextEditingController> myControllers = [];
+  List<int> pointsList = [];
   List<List<String>> correctAnswers = [];
   Map<String, TextEditingController> textControllers = {};
-  List<FocusNode> focusNodes=[];
-  String correctHtml='';
-
+  List<FocusNode> focusNodes = [];
+  String correctHtml = '';
 
   @override
   void initState() {
     widget.questionController.isCorrect = isCorrect;
     widget.questionController.isFilled = isFilled;
     // debugPrint(replaceCurlyBracesWithTextFields(widget.question.ans!.first.ans));
-     correctHtml='';
+    correctHtml = '';
     super.initState();
   }
 
@@ -45,8 +45,9 @@ class _FillInState extends State<FillIn> {
     widget.questionController.isFilled = isFilled;
     correctAnswers.clear();
     myControllers.clear();
+    pointsList.clear();
     focusNodes.clear();
-     correctHtml='';
+    correctHtml = '';
     super.didUpdateWidget(oldWidget);
   }
 
@@ -65,47 +66,47 @@ class _FillInState extends State<FillIn> {
 
   @override
   Widget build(BuildContext context) {
-     debugPrint('build!!!');
-      int i = 0;
-      int j = 0;
+    debugPrint('build!!!');
+    int i = 0;
+    int j = 0;
 
-      return Padding(
-        padding: EdgeInsets.only(top: 25.h),
-        child: /* FocusTraversalGroup(
+    return Padding(
+      padding: EdgeInsets.only(top: 25.h),
+      child: /* FocusTraversalGroup(
           policy: OrderedTraversalPolicy(),
-          child:*/ Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              HtmlDataWidget(
-                widget.question.question,
-                quizId: widget.question
-                    .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
-              ),
-              SizedBox(
-                height: 35.h,
-              ),
-              Center(
-                  child: HtmlDataWidget(correctHtml.isEmpty?
-                      replaceCurlyBracesWithTextFields(
-                          widget.question.ans!.first.ans):correctHtml,
-                      quizId: widget.question.quizId,
-                      onInputWidgetRequested: (s) {
-                        // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
-                        // myControllers.add(textEditingController);
-                        return createTextField(
-                            myControllers[i++], focusNodes[j++], i - 1);
-                      }
-                  )),
-
-            ]),
-      );
-
+          child:*/
+          Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+            HtmlDataWidget(
+              widget.question.question,
+              quizId: widget.question
+                  .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
+            ),
+            SizedBox(
+              height: 35.h,
+            ),
+            Center(
+                child: HtmlDataWidget(
+                    correctHtml.isEmpty
+                        ? replaceCurlyBracesWithTextFields(
+                            widget.question.ans!.first.ans)
+                        : correctHtml,
+                    quizId: widget.question.quizId,
+                    onInputWidgetRequested: (s) {
+              // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
+              // myControllers.add(textEditingController);
+              return createTextField(
+                  myControllers[i++], focusNodes[j++], i - 1);
+            })),
+          ]),
+    );
   }
 
   buildWithAnswers() {
-    bool isOk = isCorrect();
+    bool isOk = isCorrect() == widget.question.points;
     return Padding(
         padding: EdgeInsets.only(top: 25.h),
         child: Column(children: [
@@ -167,9 +168,10 @@ class _FillInState extends State<FillIn> {
         ]));
   }
 
-  Widget createTextField(TextEditingController controller,FocusNode focusNode,int index) {
-    return  InlineCustomWidget(
-        child:/* KeyboardListener(
+  Widget createTextField(
+      TextEditingController controller, FocusNode focusNode, int index) {
+    return InlineCustomWidget(
+      child: /* KeyboardListener(
           focusNode: FocusNode(), // Use a focus node to capture key events
           onKeyEvent: ( event) {
             if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
@@ -183,35 +185,35 @@ class _FillInState extends State<FillIn> {
 
             }
           },
-          child:*/  Container(
+          child:*/
+          Container(
               height: 40.h,
               width: 200.w,
               padding: EdgeInsets.only(right: 5.w, left: 5.w),
               alignment: Alignment.center,
               margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
-              child:
-              TextFormField(
+              child: TextFormField(
                 textInputAction: TextInputAction.next,
                 obscureText: false,
-                      textAlignVertical: TextAlignVertical.center,
-                      controller: controller,
-                  focusNode: focusNode,
-                      textAlign: TextAlign.center,
-                      cursorColor: Colors.black,
-                      //   maxLines: null, // Allow multiple lines to handle long text without spaces
-                      style: TextStyle(
-                        fontSize: 22.sp,
-                      ),
-                      decoration: InputDecoration(
-                        // isCollapsed: true,
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black)),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black)),
-                        contentPadding:
-                            EdgeInsets.only(top: 10.h, right: 10.w, left: 10.w),
-                        // isDense: true,
-                      ),
+                textAlignVertical: TextAlignVertical.center,
+                controller: controller,
+                focusNode: focusNode,
+                textAlign: TextAlign.center,
+                cursorColor: Colors.black,
+                //   maxLines: null, // Allow multiple lines to handle long text without spaces
+                style: TextStyle(
+                  fontSize: 22.sp,
+                ),
+                decoration: InputDecoration(
+                  // isCollapsed: true,
+                  border: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black)),
+                  contentPadding:
+                      EdgeInsets.only(top: 10.h, right: 10.w, left: 10.w),
+                  // isDense: true,
+                ),
                 onEditingComplete: () {
                   if (index < myControllers.length - 1) {
                     FocusScope.of(context).requestFocus(focusNodes[index + 1]);
@@ -219,14 +221,9 @@ class _FillInState extends State<FillIn> {
                     FocusScope.of(context).requestFocus(focusNodes[0]);
                   }
                 },
-                  )
-
-                ),
-
+              )),
     );
   }
-
-
 
   Widget displayItemAnswer(
       List<String> correctAnswer, String displayUserAnswer) {
@@ -241,7 +238,7 @@ class _FillInState extends State<FillIn> {
       }
     }
     return Container(
-    width: 200.w,
+        width: 200.w,
         padding: EdgeInsets.all(7.h),
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -274,7 +271,7 @@ class _FillInState extends State<FillIn> {
       [displayAnswer = false]) {
     int i = 0;
     final regex = RegExp(r'{([^}]+)}');
-    correctHtml= htmlContent.replaceAllMapped(regex, (match) {
+    correctHtml = htmlContent.replaceAllMapped(regex, (match) {
       final initialValue = match.group(1) ?? '';
       if (!displayAnswer) {
         List<String> aa = extractStrings(initialValue.contains('|')
@@ -282,6 +279,9 @@ class _FillInState extends State<FillIn> {
             : initialValue);
         debugPrint('==== correctAnswers $aa');
         correctAnswers.add(aa);
+        pointsList.add(initialValue.contains('|')
+            ? int.parse(initialValue.split('|')[1])
+            : 0);
         var textEditingController = TextEditingController();
         myControllers.add(textEditingController);
         focusNodes.add(FocusNode());
@@ -311,7 +311,6 @@ class _FillInState extends State<FillIn> {
     return matches;
   }
 
-
   bool isFilled() {
     for (var controller in myControllers) {
       if (controller.text.isEmpty) {
@@ -322,16 +321,32 @@ class _FillInState extends State<FillIn> {
     return true;
   }
 
-  bool isCorrect() {
-    int i = 0;
-    for (List<String> s in correctAnswers) {
-      if (s.isNotEmpty) {
-        if (!s.contains(myControllers[i].text)) return false;
+  int isCorrect() {
+    if (widget.question.points == 1) {
+      int i = 0;
+      for (List<String> s in correctAnswers) {
+        if (s.isNotEmpty) {
+          if (!s.contains(myControllers[i].text)) return 0;
+        }
+        i++;
       }
-      i++;
+      return widget.question.points; //always 1
+    } else {
+      int i = 0;
+      int numPoints = 0;
+      for (List<String> s in correctAnswers) {
+        if (s.isNotEmpty) {
+          if (s.contains(myControllers[i].text)) {
+            if (pointsList.length == 1 && pointsList[0] == 0) {
+              numPoints += widget.question.points;
+            } else {
+              numPoints += pointsList[i];
+            }
+          }
+        }
+        i++;
+      }
+      return numPoints;
     }
-    return true;
   }
 }
-
-

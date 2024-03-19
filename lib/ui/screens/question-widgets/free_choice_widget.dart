@@ -103,7 +103,7 @@ class _FreeChoiceState extends State<FreeChoice> {
 
   createItemAnswer(String ans)
   {
-   bool isOk=isCorrect();
+   bool isOk=isCorrect()==widget.question.points;
    debugPrint('isOk $isOk');
    return Column(
      children: [
@@ -141,7 +141,8 @@ class _FreeChoiceState extends State<FreeChoice> {
     return myController.text.isNotEmpty;
   }
 
-  bool isCorrect() {
-   return ansList.any((item) => item.trim() == myController.text);
+  int isCorrect() {
+   return ansList.any((item) => item.trim() == myController.text)?
+   widget.question.points:0;
   }
 }
