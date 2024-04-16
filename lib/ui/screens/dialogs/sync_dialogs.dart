@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:eshkolot_offline/models/linkQuizIsar.dart';
 import 'package:eshkolot_offline/services/api_service.dart';
 import 'package:eshkolot_offline/services/download_data_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -57,15 +58,15 @@ class _SyncDialogsState extends State<SyncDialogs>
     eventSubscription =
         InstallationDataHelper().eventBusDialogs.on().listen((event) async {
       debugPrint('eventBusDialogs listen event $event');
-      if (event == '') {
-        vi = await isVideosDownload(false);
+      if (event is bool) {
+        vi = await isVideosDownload(event);
         linkList = await isLinksDownload(false);
         if (allDownloadedVideos && allDownloadedLinks) {
           updateEndDialog();
         } else if (!allDownloadedLinks) {
           downloadLinksStart();
         } else {
-          vimeoStart();
+          vimeoStart(newCourse: event);
         }
       } else {
         if (event is List<Course>) {
@@ -81,26 +82,26 @@ class _SyncDialogsState extends State<SyncDialogs>
             updateEndDialog();
           } else {
             debugPrint('222');
-
+//todo ???
             if (!allDownloadedVideos) {
-              debugPrint('333');
-              vimeoStart(newCourse: true);
+              // bool allNotCompleted = vi.every((obj) =>
+              //     obj.isDownload == false && obj.isBlockedOrError == false);
+              // debugPrint('allNotCompleted $allNotCompleted');
+              // debugPrint('333');
+              vimeoStart(newCourse: vi.isEmpty /* || allNotCompleted*/);
             } else {
-              downloadLinksStart(newCourse: true);
+              downloadLinksStart();
             }
+          }
+        } else {
+          debugPrint('4444');
+          if (!allDownloadedVideos) {
+            vimeoStart();
+          } else {
+            mainWidget = showErrorDialog(context, isVimeo: false);
+            setState(() {});
           }
         }
-        else
-          {
-            debugPrint('4444');
-            if(!allDownloadedVideos) {
-              vimeoStart();
-            } else {
-              mainWidget= showErrorDialog(context,isVimeo: false);
-              setState(() {});
-            }
-
-          }
         //   SyncDialogs().showVimeoDialog(context, c, controller);
       }
     });
@@ -122,7 +123,7 @@ class _SyncDialogsState extends State<SyncDialogs>
     )..addListener(() {
         setState(() {});
       });
-   mainWidget = widget.isOffline ? showOfflineSyncWidget() : showSyncWidget();
+    mainWidget = widget.isOffline ? showOfflineSyncWidget() : showSyncWidget();
     super.initState();
   }
 
@@ -193,7 +194,8 @@ class _SyncDialogsState extends State<SyncDialogs>
                 // height: 640.h,
                 width: 656.w,
                 // padding: EdgeInsets.only(top: 51.h),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
                 child: mainWidget),
           ],
         ),
@@ -259,12 +261,13 @@ class _SyncDialogsState extends State<SyncDialogs>
                 if (linkList.isEmpty) {
                   debugPrint('111');
                   // vimeoWidget= showEndSyncWidget();
+
                   return showEndSyncWidget();
                 } else {
                   if (newCourse)
-                    return showErrorDialog(context,isBlockedLinks: false);
+                    return showErrorDialog(context, isBlockedLinks: false);
                   else
-                    downloadLinksStart(newCourse: newCourse);
+                    downloadLinksStart();
                   return showSyncWidget();
                 }
                 // setState(() {});
@@ -284,10 +287,10 @@ class _SyncDialogsState extends State<SyncDialogs>
     if (mounted) setState(() {});
   }
 
-  downloadLinksStart({bool newCourse = false, oldLinks = false}) async {
+  downloadLinksStart() async {
+    DownloadService().init();
     await DownloadService().startDownLoadingBlockedLinks(linkList);
   }
-
 
   checkDateExpired() {
     int currentTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -323,7 +326,8 @@ class _SyncDialogsState extends State<SyncDialogs>
         // ),
         Padding(
           // padding: EdgeInsets.only(top: 51.h, right: 70.w, left: 70.w),
-          padding: EdgeInsets.only(top: 80.h, right: 70.w, left: 70.w,bottom: 80.h),
+          padding:
+              EdgeInsets.only(top: 80.h, right: 70.w, left: 70.w, bottom: 80.h),
           child: Column(
             children: [
               Image.asset('assets/images/sync.jpg', height: 153.h),
@@ -383,6 +387,7 @@ class _SyncDialogsState extends State<SyncDialogs>
   }
 
   showEndSyncWidget() {
+    updateDownloadCourses();
     return Column(
       children: [
         SizedBox(height: 19.h),
@@ -549,96 +554,100 @@ class _SyncDialogsState extends State<SyncDialogs>
     );
   }
 
-  showErrorDialog(BuildContext context, {bool isBlockedLinks = true,bool isVimeo=true}) {
-    return Center(
-      child: ListView(
-        shrinkWrap: true,
-          // mainAxisAlignment: MainAxisAlignment.center,
-          // mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            SizedBox(
-              height: 51.h,
-            ),
-            const Center(child: Text('!ישנה בעיה')),
-            if (isBlockedLinks)
-              const Center(
-                  child: Text('נראה שהלינקים הלללו חסומים ברשת האינטרנט שלך')),
-            if (isBlockedLinks)
-              const Center(
-                  child:
-                      Text('נא פנה לספק האינטרנט שלך על מנת להסדיר את הענין')),
-            if (isBlockedLinks)
-              const SizedBox(
-                height: 15,
+  showErrorDialog(BuildContext context,
+      {bool isBlockedLinks = true, bool isVimeo = true}) {
+    updateDownloadCourses();
+    return SizedBox(
+      height: 640.h,
+      child: Center(
+        child: ListView(
+            shrinkWrap: true,
+            // mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(
+                height: 51.h,
               ),
-            if (isBlockedLinks && isVimeo) const Text('סרטוני וידאו'),
-            if (isBlockedLinks && isVimeo)
-              Expanded(
-                flex: 3,
-                child: ListView(
+              const Center(child: Text('!ישנה בעיה')),
+              if (isBlockedLinks)
+                const Center(
+                    child:
+                        Text('נראה שהלינקים הלללו חסומים ברשת האינטרנט שלך')),
+              if (isBlockedLinks)
+                const Center(
+                    child: Text(
+                        'נא פנה לספק האינטרנט שלך על מנת להסדיר את הענין')),
+              if (isBlockedLinks)
+                const SizedBox(
+                  height: 15,
+                ),
+              if (isBlockedLinks && isVimeo)
+                const Center(child: Text('סרטוני וידאו')),
+              if (isBlockedLinks && isVimeo)
+                ListView(
                     shrinkWrap: true,
                     children: displayBlockedLinks(
                         context, context.read<VimoeService>().blockLinks)
                     //),
                     ),
-              ),
-            if (DownloadService().blockLinks.isNotEmpty)
-              const Text('חומרים בשאלונים'),
-            if (DownloadService().blockLinks.isNotEmpty)
-              Expanded(
-                flex: 1,
-                child: ListView(
+              if (DownloadService().blockLinks.isNotEmpty)
+                const Center(child: Text('חומרים בשאלונים')),
+              if (DownloadService().blockLinks.isNotEmpty)
+                ListView(
                     shrinkWrap: true,
                     children: displayBlockedLinks(
                         context, DownloadService().blockLinks)
                     //),
                     ),
-              ),
-            if (isBlockedLinks)
-              const SizedBox(
-                height: 15,
-              ),
-            ElevatedButton(
-                onPressed: () {
-                  if(isVimeo) {
-                    //if started from going to vimeo will try again
-                    if (vi.isEmpty || checkDateExpired()) {
-                      context
-                          .read<VimoeService>()
-                          .finishConnectToVimoe = false;
-                      context
-                          .read<VimoeService>()
-                          .courses = c;
-                      context.read<VimoeService>().start(notify: true);
-                    } else {
-                      //if did start from videos that were saved and did not go to vimeo will get to here
-                      context
-                          .read<VimoeService>()
-                          .isarVideoList = vi;
-                      context.read<VimoeService>().startDownLoading(notify: true);
-                      context
-                          .read<VimoeService>()
-                          .finishConnectToVimoe = true;
-                    }
-                  }
-                  if (DownloadService().blockLinks.isNotEmpty) {
-                    if(!isVimeo)
-                      {
-                        mainWidget=showSyncWidget();
-                        setState(() {});
+              if (isBlockedLinks)
+                const SizedBox(
+                  height: 15,
+                ),
+              Container(
+                margin: EdgeInsets.only(right: 70.w, left: 70.w),
+                child: ElevatedButton(
+                    onPressed: () async {
+                      if (isVimeo) {
+                        //if started from going to vimeo will try again
+                        if (vi.isEmpty || checkDateExpired()) {
+                          context.read<VimoeService>().finishConnectToVimoe =
+                              false;
+                          context.read<VimoeService>().courses = c;
+                          context.read<VimoeService>().start(notify: true);
+                        } else {
+                          //if did start from videos that were saved and did not go to vimeo will get to here
+                          context.read<VimoeService>().isarVideoList = vi;
+                          context
+                              .read<VimoeService>()
+                              .startDownLoading(notify: true);
+                          context.read<VimoeService>().finishConnectToVimoe =
+                              true;
+                        }
                       }
-                    DownloadService().startDownLoadingBlockedLinks(linkList);
-                  }
-                },
-                child: const Text('נסה שנית')),
-            SizedBox(height: 20.h),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('סגור')),
-            SizedBox(height: 30.h),
-          ]),
+                      if (DownloadService().blockLinks.isNotEmpty) {
+                        if (!isVimeo) {
+                          mainWidget = showSyncWidget();
+                          setState(() {});
+                        }
+                        linkList = await isLinksDownload(false);
+                        DownloadService()
+                            .startDownLoadingBlockedLinks(linkList);
+                      }
+                    },
+                    child: const Text('נסה שנית')),
+              ),
+              SizedBox(height: 20.h),
+              Container(
+                margin: EdgeInsets.only(right: 70.w, left: 70.w),
+                child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('סגור')),
+              ),
+              SizedBox(height: 30.h),
+            ]),
+      ),
     );
   }
 
@@ -676,6 +685,11 @@ class _SyncDialogsState extends State<SyncDialogs>
         mainWidget = showEndSyncWidget();
       });
     }
+  }
+
+  updateDownloadCourses() {
+    List<int> courseIds = c.map((course) => course.id).toList();
+    IsarService().updateCourseDownloaded(courseIds);
   }
 
   @override

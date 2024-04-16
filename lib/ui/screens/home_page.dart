@@ -525,12 +525,16 @@ class _HomePageState extends State<HomePage> {
 
                   Positioned(
                       right: 32.w,
-                      child: Text(course.title,
-                          style: TextStyle(
-                              fontSize: 18.sp, color: colors.blackColorApp))),
+                      child: SizedBox(
+                        width: 200.w,
+                        child: Text(course.title,
+                            //overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 18.sp, color: colors.blackColorApp)),
+                      )),
                   //  SizedBox(width: 63.w),
                   Positioned(
-                      right: 200.w,
+                      right: 230.w,
                       child: Container(
                           decoration: BoxDecoration(
                               color: color != -1 ? Color(color) : Colors.indigo,

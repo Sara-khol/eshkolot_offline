@@ -83,6 +83,7 @@ class _VideoWidgetState extends State<VideoWidget>
           await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
       String path =
           '${dir.path}/${widget.isLesson ? constants.lessonPath : constants.quizPath}/${widget.fileId}/${widget.videoId}.mp4';
+     debugPrint('path $path');
       File file = File(path);
       videoExists = await file.exists();
 

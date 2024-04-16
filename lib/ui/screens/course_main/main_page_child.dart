@@ -67,6 +67,8 @@ class _MainPageChildState extends State<MainPageChild> {
   void initState() {
     super.initState();
     _currentCourse = widget.course;
+    // _currentCourse.subjects.sort((a, b) => a.subjectId.compareTo(b.subjectId));
+
 
     userCourse = IsarService().getUserCourseData(_currentCourse.id);
 

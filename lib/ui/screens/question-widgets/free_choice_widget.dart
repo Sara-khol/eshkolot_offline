@@ -28,7 +28,8 @@ class _FreeChoiceState extends State<FreeChoice> {
     widget.questionController.isFilled=isFilled;
     widget.questionController.isCorrect=isCorrect;
     debugPrint(widget.question.ans!.first.ans);
-    ansList = widget.question.ans!.first.ans.split('\n');
+    widget.question.ans!.first.ans=  widget.question.ans!.first.ans.replaceAll('\$\$', '\$');
+    ansList = widget.question.ans!.first.ans.split('\$');
     super.initState();
   }
 
@@ -40,7 +41,8 @@ class _FreeChoiceState extends State<FreeChoice> {
       }
    widget.questionController.isFilled=isFilled;
    widget.questionController.isCorrect=isCorrect;
-   ansList = widget.question.ans!.first.ans.split('\n');
+    widget.question.ans!.first.ans=  widget.question.ans!.first.ans.replaceAll('\$\$', '\$');
+    ansList = widget.question.ans!.first.ans.split('\$');
     super.didUpdateWidget(oldWidget);
   }
 

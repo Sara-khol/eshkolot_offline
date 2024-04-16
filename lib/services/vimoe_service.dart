@@ -176,6 +176,8 @@ class VimoeService with ChangeNotifier {
         final startIndex = url.indexOf(start);
         final endIndex = url.indexOf('/', startIndex + start.length);
         String vimoeId = url.substring(startIndex + start.length, endIndex);
+        // debugPrint('updateIsarVideoError $vimoeId');
+        // IsarService().updateIsarVideoError(int.parse(vimoeId));
         if (error.response?.statusCode == 418) {
           // String url = error.requestOptions.path;
           // // String start = 'download/';
@@ -184,6 +186,7 @@ class VimoeService with ChangeNotifier {
           // final endIndex = url.indexOf('/', startIndex + start.length);
           // String vimoeId = url.substring(startIndex + start.length, endIndex);
           blockLinks.add('https://vimeo.com/$vimoeId');
+
           debugPrint('block $vimoeId');
           Sentry.addBreadcrumb(Breadcrumb(message: 'block $vimoeId'));
 

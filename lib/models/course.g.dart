@@ -47,23 +47,28 @@ const CourseSchema = CollectionSchema(
       name: r'isSync',
       type: IsarType.bool,
     ),
-    r'knowledgeId': PropertySchema(
+    r'isSyncNotCompleted': PropertySchema(
       id: 6,
+      name: r'isSyncNotCompleted',
+      type: IsarType.bool,
+    ),
+    r'knowledgeId': PropertySchema(
+      id: 7,
       name: r'knowledgeId',
       type: IsarType.long,
     ),
     r'knowledgeNum': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'knowledgeNum',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'title',
       type: IsarType.string,
     ),
     r'vimeoId': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'vimeoId',
       type: IsarType.string,
     )
@@ -148,10 +153,11 @@ void _courseSerialize(
   writer.writeString(offsets[3], object.countQuiz);
   writer.writeBool(offsets[4], object.isDownLoadData);
   writer.writeBool(offsets[5], object.isSync);
-  writer.writeLong(offsets[6], object.knowledgeId);
-  writer.writeString(offsets[7], object.knowledgeNum);
-  writer.writeString(offsets[8], object.title);
-  writer.writeString(offsets[9], object.vimeoId);
+  writer.writeBool(offsets[6], object.isSyncNotCompleted);
+  writer.writeLong(offsets[7], object.knowledgeId);
+  writer.writeString(offsets[8], object.knowledgeNum);
+  writer.writeString(offsets[9], object.title);
+  writer.writeString(offsets[10], object.vimeoId);
 }
 
 Course _courseDeserialize(
@@ -166,13 +172,14 @@ Course _courseDeserialize(
     countLesson: reader.readStringOrNull(offsets[2]),
     countQuiz: reader.readStringOrNull(offsets[3]),
     id: id,
-    knowledgeId: reader.readLongOrNull(offsets[6]),
-    knowledgeNum: reader.readStringOrNull(offsets[7]),
-    title: reader.readStringOrNull(offsets[8]) ?? '',
-    vimeoId: reader.readStringOrNull(offsets[9]) ?? '',
+    knowledgeId: reader.readLongOrNull(offsets[7]),
+    knowledgeNum: reader.readStringOrNull(offsets[8]),
+    title: reader.readStringOrNull(offsets[9]) ?? '',
+    vimeoId: reader.readStringOrNull(offsets[10]) ?? '',
   );
   object.isDownLoadData = reader.readBool(offsets[4]);
   object.isSync = reader.readBool(offsets[5]);
+  object.isSyncNotCompleted = reader.readBool(offsets[6]);
   return object;
 }
 
@@ -196,12 +203,14 @@ P _courseDeserializeProp<P>(
     case 5:
       return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 9:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 10:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -955,6 +964,16 @@ extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterFilterCondition> isSyncNotCompletedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isSyncNotCompleted',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterFilterCondition> knowledgeIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1624,6 +1643,18 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsSyncNotCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSyncNotCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByIsSyncNotCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSyncNotCompleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> sortByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'knowledgeId', Sort.asc);
@@ -1758,6 +1789,18 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsSyncNotCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSyncNotCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByIsSyncNotCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSyncNotCompleted', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> thenByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'knowledgeId', Sort.asc);
@@ -1848,6 +1891,12 @@ extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
     });
   }
 
+  QueryBuilder<Course, Course, QDistinct> distinctByIsSyncNotCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isSyncNotCompleted');
+    });
+  }
+
   QueryBuilder<Course, Course, QDistinct> distinctByKnowledgeId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'knowledgeId');
@@ -1916,6 +1965,12 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
   QueryBuilder<Course, bool, QQueryOperations> isSyncProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isSync');
+    });
+  }
+
+  QueryBuilder<Course, bool, QQueryOperations> isSyncNotCompletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isSyncNotCompleted');
     });
   }
 

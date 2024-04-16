@@ -89,6 +89,7 @@ class ApiService {
     // Prints the raw data returned by the server
     debugPrint('response: ${response.data}');
     if (response.statusCode == 200) {
+      DownloadService().init();
       await InstallationDataHelper().syncDataCourse(response.data, onSuccess);
       //todo where and how to put
       //  onSuccess();
@@ -110,6 +111,8 @@ class ApiService {
      /* required Function() onSuccess,*/
       required Function() onError}) async {
     String url = '${_baseUrl}get_course_data/$id';
+    //גאומטריה
+    // String url = '${_baseUrl}get_course_data/55058';
     Course? course;
     debugPrint('url: $url');
     cancelToken = CancelToken();

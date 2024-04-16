@@ -1,21 +1,18 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:eshkolot_offline/models/course.dart';
 import 'package:eshkolot_offline/models/linkQuizIsar.dart';
-import 'package:eshkolot_offline/models/videoIsar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/vimoe_download.dart';
-import 'package:collection/src/iterable_extensions.dart';
 import 'installationDataHelper.dart';
 import 'isar_service.dart';
 import 'network_check.dart';
@@ -27,7 +24,6 @@ class DownloadService with ChangeNotifier {
   int projectId = 0; //english
   int quizId = 0; //english
   Dio dioDownload = Dio();
-  List<VimoeVideo> videoList = [];
   List<LinkQuizIsar> isarLinksList = [];
   int numDownloadFiles = 0, numOfErrorFiles = 0;
   late DownloadStatusData downloadStatus, lastDownLoadStatus;
@@ -40,6 +36,7 @@ class DownloadService with ChangeNotifier {
   CancelToken cancelToken = CancelToken();
   late String path;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
+  List<int> courseIds=[];
 
   Map _source = {ConnectivityResult.none: false};
 
@@ -51,6 +48,8 @@ class DownloadService with ChangeNotifier {
   int captureMessageNum = 1;
   bool wasInit = false;
   bool tryAgain=false;
+  bool coursesNotCompleted=false;
+  bool  didCheckCompleted=false;
   late SharedPreferences preferences;
   DownloadService._privateConstructor(); // Private constructor for singleton
 
@@ -64,7 +63,7 @@ class DownloadService with ChangeNotifier {
   init() async {
     if (!wasInit) {
       debugPrint("downloadService init");
-
+      didCheckCompleted=false;
       // _networkConnectivity.whileDownloading = true;
      // _networkConnectivity.initialise();
        preferences = await SharedPreferences.getInstance();
@@ -105,16 +104,22 @@ class DownloadService with ChangeNotifier {
         //}
       });
 
+      coursesNotCompleted=false;
 
 
       //dioDownload.interceptors.add(interceptorsWrapper);
       dioDownload.addSentry();
       wasInit = true;
+
+    }
+    else{
+      debugPrint("downloadService already init");
     }
   }
 
   downloadQuizFiles(List<String> urls, int quizId, int courseId) {
     //  debugPrint("quizId $quizId length ${urls.length}");
+
     numOfAllFiles = urls.length;
     this.quizId = quizId;
     for (String s in urls) {
@@ -134,7 +139,7 @@ class DownloadService with ChangeNotifier {
     }
   }
 
-  tryAgainFromStart() async {
+ /* tryAgainFromStart() async {
     debugPrint("timer finished ,sending data");
     Sentry.addBreadcrumb(Breadcrumb(
         message: 'videos id that were not downloaded:\n'
@@ -152,12 +157,12 @@ class DownloadService with ChangeNotifier {
 
       // try {
       cancelToken.cancel('wwwwwww');
-      /*} catch (e) {
+      *//*} catch (e) {
         print('errorrrrrrr ${e.toString()}');
         if (e.toString() == 'The request was cancelled') {
           print('ooo');
         }
-      }*/
+      }*//*
       cancelToken = CancelToken();
 
       startDownLoading();
@@ -179,9 +184,9 @@ class DownloadService with ChangeNotifier {
       notifyListeners();
     }
     captureMessageNum++;
-  }
+  }*/
 
-  start({bool notify = false, oldLinks = false}) async {
+  /*start({bool notify = false, oldLinks = false}) async {
     debugPrint('kkk');
     if (isNetWorkConnection) {
       downloadStatus = DownloadStatusData.downloading;
@@ -218,9 +223,9 @@ class DownloadService with ChangeNotifier {
       lastDownLoadStatus = DownloadStatusData.netWorkError;
       debugPrint('no network');
     }
-  }
+  }*/
 
-  next() async {
+/*  next() async {
     // numOfAllVideos = videoList.length;
     numOfAllFiles = isarLinksList.length + isarLinksList.length;
 
@@ -261,7 +266,7 @@ class DownloadService with ChangeNotifier {
         debugPrint('fff ${download.link}');
       }
       //not sepouse to be null
-      if (/*download != null &&*/ download.link != null) {
+      if (*//*download != null &&*//* download.link != null) {
         //i++;
         String name = v.uri.substring(v.uri.lastIndexOf('/'), v.uri.length);
         // isarVideoList.add(VideoIsar()
@@ -280,16 +285,16 @@ class DownloadService with ChangeNotifier {
           ..downloadLink = download.link!
           ..name = name);
 
-        /*await*/
+        *//*await*//*
         //todo problem!!
         downloadFile(download.link!, name, v.courseId, v.courseId);
       } else {
         debugPrint('hhh ??');
       }
     }
-  }
+  }*/
 
-  startDownLoading(
+ /* startDownLoading(
       {bool wasNetWorkProblem = false, bool notify = false}) async {
     debugPrint('=====');
     if (isNetWorkConnection) {
@@ -335,11 +340,12 @@ class DownloadService with ChangeNotifier {
       debugPrint('no network');
       Sentry.addBreadcrumb(Breadcrumb(message: 'no network'));
     }
-  }
+  }*/
 
   startDownLoadingBlockedLinks(List<LinkQuizIsar> list,
       {bool wasNetWorkProblem = false, bool notify = false}) async {
     tryAgain=true;
+    didCheckCompleted=false;
     // if (isNetWorkConnection) {
     debugPrint('startDownLoadingBlockedLinks');
     numOfErrorFiles=0;
@@ -356,14 +362,14 @@ class DownloadService with ChangeNotifier {
     errorLinks = [];
 
     numOfAllFiles = list.length;
-    debugPrint('numOfAllVideos $numOfAllFiles');
+    debugPrint('numOfAllFiles $numOfAllFiles');
     Sentry.addBreadcrumb(Breadcrumb(message: 'numOfAllVideos $numOfAllFiles'));
 
     if (numOfAllFiles == 0) {
       downloadStatus = DownloadStatusData.downloaded;
       notifyListeners();
     } else {
-      setTimer();
+     // setTimer();
 
       for (LinkQuizIsar l in list) {
         if (wasNetWorkProblem) {
@@ -389,11 +395,16 @@ class DownloadService with ChangeNotifier {
     String progress = '';
     var dir =
         await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
+    String path='${dir.path}/${constants.quizPath}/$qId$name';
+   // dir = Directory(path);
+    // if(!dir.existsSync())
+    //   {
+    //     await dir.create();
+    //   }
     await dioDownload.download(
       url,
       cancelToken: cancelToken,
-      // '${dir.path}/videos$name.mp4',
-      '${dir.path}/${constants.quizPath}/$quizId/$name',
+      '${dir.path}/${constants.quizPath}/$qId$name',
       onReceiveProgress: (rec, total) {
         progress = ((rec / total) * 100).toStringAsFixed(0);
       },
@@ -402,11 +413,17 @@ class DownloadService with ChangeNotifier {
         numDownloadFiles++;
         debugPrint(
             'name $name qId $qId numDownloadFiles $numDownloadFiles courseId $courseId');
+       if(isarLinksList.isNotEmpty) {
+         isarLinksList.firstWhere((iv) => iv.name == name && iv.quizId == qId).isDownload=true;
+       }
+       //when downloading again blocked links
+       if(id!=0) {
+         IsarService().updateLinkQuiz(id);
+       }
         checkCompleted();
-        isarLinksList
-            .firstWhere((iv) => iv.name == name && iv.quizId == qId)
-            .isDownload = true;
-        //  IsarService().updateIsarLinkQuiz(int.parse(name.substring(1)));
+
+
+         // IsarService().updateIsarLinkQuiz(int.parse(name.substring(1)));
       }
 
     }).catchError((e) async {
@@ -434,7 +451,7 @@ class DownloadService with ChangeNotifier {
           blockLinks.add(url);
         }
         if (id == 0 || !await IsarService().checkIsarQuizExistes(id)) {
-          IsarService().addIsarQuiz(LinkQuizIsar()
+        await  IsarService().addIsarQuiz(LinkQuizIsar()
             ..courseId = courseId
             ..downloadLink = url
             ..quizId = qId
@@ -460,26 +477,49 @@ class DownloadService with ChangeNotifier {
     );
   }
 
-  checkCompleted() {
+  checkCompleted() async {
     int myNum=tryAgain?numOfAllFiles:InstallationDataHelper().numOfQuizUrls;
-    if (numDownloadFiles + numOfErrorFiles ==myNum) {
-      debugPrint('all downloaded!! ');
-      preferences.setBool('downloadFiles', true);
-      if(!tryAgain) {
-        debugPrint('sending event full');
-        InstallationDataHelper()
-            .eventBusDialogs
-            .fire(InstallationDataHelper().coursesList);
-        InstallationDataHelper().coursesList = [];
-      }
-      else{
-        InstallationDataHelper()
-            .eventBusDialogs.fire('quiz');
+    if (numDownloadFiles + numOfErrorFiles ==myNum ) {
+      if (!didCheckCompleted) {
+        debugPrint('all downloaded!! $myNum $numDownloadFiles $numOfErrorFiles');
+        didCheckCompleted = true;
+        preferences.setBool('downloadFiles', true);
+        //added this condition - coursesNotCompleted when internet stops in middle of
+        // downloading quiz when starts again it will download videos from start
+        List<int> idsNotCompleted;
+        // coursesNotCompleted= await IsarService().checkCoursesNotCompleted(courseIds);
+        idsNotCompleted =
+        await IsarService().checkCoursesNotCompleted(courseIds);
+        for (int id in idsNotCompleted) {
+          debugPrint('idNotCompleted $id');
+        }
+        if (courseIds.isNotEmpty) {
+          debugPrint('courseIds $courseIds');
+          coursesNotCompleted = courseIds.length == idsNotCompleted.length;
+        }
+        else {
+          coursesNotCompleted = idsNotCompleted.isNotEmpty;
+          courseIds = idsNotCompleted;
+        }
+        debugPrint('coursesNotCompleted $coursesNotCompleted');
+        if (!tryAgain || coursesNotCompleted) {
+          // IsarService().updateCourseDownloaded(courseIds);
+          debugPrint('sending event full');
+          InstallationDataHelper()
+              .eventBusDialogs
+              .fire(InstallationDataHelper().coursesList);
+          InstallationDataHelper().coursesList = [];
+        }
+        else {
+          InstallationDataHelper()
+              .eventBusDialogs.fire('quiz');
+        }
       }
     }
+    debugPrint('didCheckCompleted $didCheckCompleted');
   }
 
-  deleteFilesInDirectoryBeforeDownloading() async {
+/*  deleteFilesInDirectoryBeforeDownloading() async {
     Directory dir = await getApplicationSupportDirectory();
     // final targetFile = Directory("${dir.path}/books/$fileName.pdf");
     final targetFile = Directory('${dir.path}/${constants.quizPath}/$quizId');
@@ -487,9 +527,9 @@ class DownloadService with ChangeNotifier {
       targetFile.deleteSync(recursive: true);
     }
     debugPrint('all delete');
-  }
+  }*/
 
-  setTimer() {
+ /* setTimer() {
     if (timer == null || !timer!.isActive) {
       // int minuteToWait = ((numOfAllVideos * 12) / 60).ceil();
       int minuteToWait = 30;
@@ -499,9 +539,9 @@ class DownloadService with ChangeNotifier {
         tryAgainFromStart();
       });
     }
-  }
+  }*/
 
-  checkErrors() async {
+ /* checkErrors() async {
     if (blockLinks.length + numDownloadFiles + errorLinks.length ==
         numOfAllFiles) {
       debugPrint('problemmmmm');
@@ -541,7 +581,7 @@ class DownloadService with ChangeNotifier {
         }
       }
     }
-  }
+  }*/
 
   List<LinkQuizIsar> getAllDownloaded() {
     return isarLinksList

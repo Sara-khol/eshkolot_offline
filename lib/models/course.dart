@@ -20,8 +20,7 @@ class Course {
   // late int serverId = 0;
 
   // @Backlink(to: "course")
-  final subjects = IsarLinks<Subject>();
-
+    final subjects = IsarLinks<Subject>();
 
   @Ignore()
   @Name('subjects')
@@ -58,7 +57,7 @@ class Course {
   @Ignore()
   int currentSteps=0;
   bool isSync=false;
-
+  bool  isSyncNotCompleted=false;
   @Ignore()
   UserCourse? userCourse;
 
@@ -68,6 +67,7 @@ class Course {
   Subject? lastSubject;
   @Ignore()
   Quiz? lastQuestionnaire;
+
 
   Map<String, dynamic> toJson() {
     return {

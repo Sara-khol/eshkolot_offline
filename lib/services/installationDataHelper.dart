@@ -23,7 +23,7 @@ class InstallationDataHelper {
   InstallationDataHelper._privateConstructor();
 
   static final InstallationDataHelper _instance =
-      InstallationDataHelper._privateConstructor();
+  InstallationDataHelper._privateConstructor();
 
   factory InstallationDataHelper() => _instance;
 
@@ -57,7 +57,7 @@ class InstallationDataHelper {
     destDirPath = directory.path;
     //  try {
     final file =
-        File('$destDirPath/${constants.dataPath}/download_software.json');
+    File('$destDirPath/${constants.dataPath}/download_software.json');
     //  final file = await File('$destDirPath/download_software(2).json');
     //  final file = await File('$destDirPath/download_software(7).json');
     final contents = await file.readAsString();
@@ -79,11 +79,11 @@ class InstallationDataHelper {
     Map<String, dynamic> subjects = data['subjects'] as Map<String, dynamic>;
     Map<String, dynamic> lessons = data['lessons'] as Map<String, dynamic>;
     Map<String, dynamic> questionnaires =
-        data['questionnaire'] as Map<String, dynamic>;
-    Map<String, dynamic> questionnairesTest =
-        data['testing_question'] as Map<String, dynamic>;
+    data['questionnaire'] as Map<String, dynamic>;
+    // Map<String, dynamic> questionnairesTest =
+    // data['testing_question'] as Map<String, dynamic>;
     Map<String, dynamic> knowledgeAreas =
-        data['knowledge'] as Map<String, dynamic>;
+    data['knowledge'] as Map<String, dynamic>;
     Map<String, dynamic> learnPaths = data['learnPath'] as Map<String, dynamic>;
     // Map<String, dynamic> learnPaths={} /*= data['learnPath'] as Map<String, dynamic>*/;
 
@@ -151,29 +151,11 @@ class InstallationDataHelper {
             course.subjects.add(subject);
             mySubjects.add(subject);
           }
-          // //todo remove  just for testing
-          // if (course.id == 78407) {
-          //   course.questionnaireIds
-          //       .addAll([66164, 82517, 111897, 128955, 129722]);
-          // }
-
           for (int qId in course.questionnaireIds) {
             var q = questionnaires[qId.toString()];
-            q ??= questionnairesTest[qId.toString()];
             Quiz quiz = Quiz.fromJson(q, qId);
-            // debugPrint('quiz ${quiz.id}');
-            // for(Question question  in quiz.questionnaireList)
-            //   {
-            //     debugPrint('q ${question.question}');
-            //     debugPrint('op ${question.options}');
-            //
-            //   }
             course.questionnaires.add(quiz);
             myQuizzes.add(quiz);
-
-            // Subject1 tryQ = Subject1.fromJson( qId);
-            // course.questionnaires.add(tryQ);
-            // myTries.add(tryQ);
           }
           myCourses.add(course);
         }
@@ -188,7 +170,7 @@ class InstallationDataHelper {
 
         for (int courseId in path.coursesIds) {
           Course? c =
-              myCourses.firstWhereOrNull((element) => element.id == courseId);
+          myCourses.firstWhereOrNull((element) => element.id == courseId);
           //todo is a problem in json file ?
           if (c != null) {
             path.courses.add(c);
@@ -219,6 +201,9 @@ class InstallationDataHelper {
   }
 
   Future<Course> setSyncNewCourse(Map<String, dynamic> data) async {
+    myQuizzes.clear();
+    mySubjects.clear();
+    myLessons.clear();
     late Course course;
     // Map<String, dynamic> sanitizedData = {};
     // data.forEach((key, value) {
@@ -230,15 +215,15 @@ class InstallationDataHelper {
     // });
     Map<String, dynamic> sanitizedData = removeNewlines(data);
     Map<String, dynamic> courses =
-        sanitizedData['courses'] as Map<String, dynamic>;
+    sanitizedData['courses'] as Map<String, dynamic>;
     Map<String, dynamic> subjects =
-        sanitizedData['subjects'] as Map<String, dynamic>;
+    sanitizedData['subjects'] as Map<String, dynamic>;
     Map<String, dynamic> lessons =
-        sanitizedData['lessons'] as Map<String, dynamic>;
+    sanitizedData['lessons'] as Map<String, dynamic>;
     Map<String, dynamic> questionnaires =
-        sanitizedData['questionnaire'] as Map<String, dynamic>;
+    sanitizedData['questionnaire'] as Map<String, dynamic>;
     Map<String, dynamic> knowledgeAreas =
-        sanitizedData['knowledge'] as Map<String, dynamic>;
+    sanitizedData['knowledge'] as Map<String, dynamic>;
 
     int courseId = int.parse(courses.keys.first);
 
@@ -247,6 +232,7 @@ class InstallationDataHelper {
     course.isSync = true;
 
     for (int subjectId in course.subjectIds) {
+      //List<Subject> courseSubjects=[];
       var s = subjects[subjectId.toString()];
       Subject subject = Subject.fromJson(s, subjectId);
 
@@ -256,7 +242,6 @@ class InstallationDataHelper {
 
         for (int qId in lesson.questionnaireIds) {
           var q = questionnaires[qId.toString()];
-          debugPrint('===qId $qId====');
           Quiz quiz = Quiz.fromJson(q, qId);
           lesson.questionnaire.add(quiz);
           myQuizzes.add(quiz);
@@ -270,7 +255,7 @@ class InstallationDataHelper {
 
       for (int qId in subject.questionnaireIds) {
         var q = questionnaires[qId.toString()];
-        debugPrint('===qId $qId====');
+        //debugPrint('===qId $qId====');
         Quiz quiz = Quiz.fromJson(q, qId);
         subject.questionnaire.add(quiz);
         numOfQuizUrls += quiz.quizUrls.length;
@@ -278,22 +263,26 @@ class InstallationDataHelper {
       }
 
       course.subjects.add(subject);
+       //courseSubjects.add(subject);
       mySubjects.add(subject);
     }
-
     for (int qId in course.questionnaireIds) {
       var q = questionnaires[qId.toString()];
-      debugPrint('===qId $qId====');
+      //debugPrint('===qId $qId====');
       Quiz quiz = Quiz.fromJson(q, qId);
       course.questionnaires.add(quiz);
       numOfQuizUrls += quiz.quizUrls.length;
       myQuizzes.add(quiz);
     }
     debugPrint('numOfQuizUrls $numOfQuizUrls');
-    await IsarService().addQuizzes(myQuizzes);
-    await IsarService().addLessons(myLessons);
-    await IsarService().addSubjects(mySubjects);
-    await IsarService().addCourse(course);
+    // await IsarService().addQuizzes(myQuizzes);
+    //  await IsarService().addLessons(myLessons);
+    // await IsarService().addSubjects(mySubjects);
+    //  await IsarService().addCourse(course);
+    await IsarService().addDataOfSyncCourse(quizzes: myQuizzes,
+        course: course,
+        subjects: mySubjects,
+        lessons: myLessons);
 //because there is only one ...
     Map<String, dynamic> k = knowledgeAreas.values.first;
     int knowledgeId = int.parse(knowledgeAreas.keys.first);
@@ -302,7 +291,7 @@ class InstallationDataHelper {
       await IsarService().addKnowledge(knowledge);
     }
 
-    await IsarService().updateUserCourse(course, knowledge);
+    await IsarService().updateUserCourse(course.id, knowledge);
     return course;
   }
 
@@ -353,7 +342,7 @@ class InstallationDataHelper {
     List<dynamic> lessonCompleted = data['lessonCompleted'] as List<dynamic>;
     List<dynamic> subjectCompleted = data['subjectCompleted'] as List<dynamic>;
     List<dynamic> questionCompleted =
-        data['questionCompleted'] as List<dynamic>;
+    data['questionCompleted'] as List<dynamic>;
 
     // questionCompleted.add(33070);
     List<UserCourse> userCourseList = [];
@@ -386,7 +375,8 @@ class InstallationDataHelper {
   Future<bool> setLessonVideosNum(Course course) async {
     var dir = await getApplicationSupportDirectory();
     String courseVideosPath =
-        '${dir.path}${Platform.pathSeparator}${constants.lessonPath}${Platform.pathSeparator}${course.id}';
+        '${dir.path}${Platform.pathSeparator}${constants.lessonPath}${Platform
+        .pathSeparator}${course.id}';
     List<Lesson> updateLessons = [];
     if (await Directory(courseVideosPath).exists()) {
       debugPrint('course.id ${course.id}');
@@ -395,7 +385,9 @@ class InstallationDataHelper {
 
       for (var d in l) {
         String fileName =
-            (d.path.split(Platform.pathSeparator)?.last).split('.')[0];
+        (d.path
+            .split(Platform.pathSeparator)
+            ?.last).split('.')[0];
         //if contains letters
         if (double.tryParse(fileName) == null) {
           fileNames.add(fileName);
@@ -478,10 +470,12 @@ class InstallationDataHelper {
       List<Lesson>? list = await IsarService().getAllLessonsOfCourse(course.id);
       if (list != null) {
         debugPrint(
-            'course.id ${course.id} videos do not exists fill video num with consecutive numbers');
+            'course.id ${course
+                .id} videos do not exists fill video num with consecutive numbers');
         Sentry.addBreadcrumb(Breadcrumb(
             message:
-                'course.id ${course.id} videos do not exists fill video num with consecutive numbers'));
+            'course.id ${course
+                .id} videos do not exists fill video num with consecutive numbers'));
         for (Lesson lesson in list) {
           lesson.videoNum = (i++).toString();
           updateLessons.add(lesson);
@@ -492,10 +486,12 @@ class InstallationDataHelper {
     return false;
   }
 
-  downLoadQuizFiles(List<Course> courses) {
+  downLoadQuizFilesByCourse(List<Course> courses) {
     debugPrint('downLoadQuizFiles==');
     DownloadService().cancelToken = CancelToken();
     DownloadService().tryAgain = false;
+    DownloadService().numDownloadFiles=0;
+    DownloadService().courseIds=courses.map((course) => course.id).toList();
     for (Course course in courses) {
       if (course.questionnaires.isNotEmpty) {
         for (Quiz quiz in course.questionnaires) {
