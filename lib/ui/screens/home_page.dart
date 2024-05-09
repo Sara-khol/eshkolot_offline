@@ -254,30 +254,31 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 40.h),
             // positionsView,
             Expanded(
-                child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                  scrollbars:
-                      isPath ? enableScrollPath : enAbleScrollKnowledge),
-              child: (isPath && enableScrollPath) ||
-                      (!isPath && enAbleScrollKnowledge)
-                  ? Scrollbar(
-                      // thickness:  isPath ? (enableScrollPath?8:0) : enAbleScrollKnowledge?8:0,
+                child: Scrollbar(
+                    controller: isPath
+                        ? pathScrollController
+                        : knowledgeScrollController,
+                    thumbVisibility: true,
+                   // thickness: 7.w,
+                    interactive:null ,
+                    child: SingleChildScrollView(
                       controller: isPath
                           ? pathScrollController
                           : knowledgeScrollController,
-                      thumbVisibility: (isPath && enableScrollPath) ||
-                          (!isPath && enAbleScrollKnowledge),
-
-                      // child: ScrollConfiguration(
-                      //     behavior: ScrollConfiguration.of(context).copyWith(
-                      //         scrollbars:
-                      //             isPath ? enableScrollPath : enAbleScrollKnowledge),
-                      child: mainList(isPath)
-                      //  ]),
-                      // ),
-                      )
-                  : mainList(isPath),
-            )),
+                      child: Padding(
+                          padding: EdgeInsets.only(left: 25.w),
+                          child: Column(
+                              children: List.generate(
+                                  isPath
+                                      ? pathList.length
+                                      : knowledgeCourses.length, (index) {
+                            return isPath
+                                ? pathItem(pathList[index])
+                                : knowledgeItem(
+                                    knowledgeCourses.keys.elementAt(index),
+                                    index);
+                          }))),
+                    ))),
             SizedBox(height: 28.h),
             Visibility(
                 visible: false
@@ -307,38 +308,41 @@ class _HomePageState extends State<HomePage> {
     return Container();
   }
 
-  mainList(bool isPath) {
-    return ListView.builder(
-        controller: isPath ? pathScrollController : knowledgeScrollController,
-        //   shrinkWrap: true,
-        //todo
-        // physics: (isPath ? enableScrollPath : enAbleScrollKnowledge)
-        //     ? AlwaysScrollableScrollPhysics()
-        //     : NeverScrollableScrollPhysics(),
-        /*crossAxisAlignment: CrossAxisAlignment.start, */
-        // children: [
-        //   ListView.builder(
-        shrinkWrap: true,
-        itemCount: isPath ? pathList.length : knowledgeCourses.length,
-        itemBuilder: (context, index) {
-          return VisibilityDetector(
-              key: Key(index.toString()),
-              onVisibilityChanged: (VisibilityInfo info) {
-                if (info.visibleFraction == 1) {
-                  setState(() {
-                    if (index > lastOuterItem) {
-                      lastOuterItem = index;
-                      debugPrint('lastOuterItem $lastOuterItem');
-                    }
-                  });
-                }
-              },
-              child: isPath
-                  ? pathItem(pathList[index])
-                  : knowledgeItem(
-                      knowledgeCourses.keys.elementAt(index), index));
-        });
-  }
+  // mainList(bool isPath) {
+  //   return ListView.builder(
+  //     physics: ClampingScrollPhysics(),
+  //
+  //      controller: isPath ? pathScrollController : knowledgeScrollController,
+  //       //todo
+  //       // physics: (isPath ? enableScrollPath : enAbleScrollKnowledge)
+  //       //     ? AlwaysScrollableScrollPhysics()
+  //       //     : NeverScrollableScrollPhysics(),
+  //       /*crossAxisAlignment: CrossAxisAlignment.start, */
+  //       // children: [
+  //       //   ListView.builder(
+  //     //  shrinkWrap: true,
+  //       itemCount: isPath ? pathList.length : knowledgeCourses.length,
+  //       itemBuilder: (context, index) {
+  //         return /*VisibilityDetector(
+  //             key: Key(index.toString()),
+  //             onVisibilityChanged: (VisibilityInfo info) {
+  //               if (info.visibleFraction == 1) {
+  //                 setState(() {
+  //                   if (index > lastOuterItem) {
+  //                     lastOuterItem = index;
+  //                     debugPrint('lastOuterItem $lastOuterItem');
+  //                   }
+  //                 });
+  //               }
+  //             },
+  //             child:*/ isPath
+  //                 ? pathItem(pathList[index])
+  //                 : knowledgeItem(
+  //                     knowledgeCourses.keys.elementAt(index), index) //)
+  //          ;
+  //       });
+  // }
+
 
   knowledgeItem(Knowledge knowledge, int kIndex) {
     String path = removeHiddenCharsFromPath(
@@ -467,19 +471,16 @@ class _HomePageState extends State<HomePage> {
         SizedBox(height: 2.h),
         ListView.builder(
             shrinkWrap: true,
-            itemCount: path.courses.length,
+            itemCount: path.coursesPath.length,
             itemBuilder: (context, index) {
               Knowledge courseKnowledge = knowledgeCourses.keys.firstWhere(
-                  (k) => k.id == path.courses.elementAt(index).knowledgeId);
+                  (k) => k.id == path.coursesPath.elementAt(index).knowledgeId);
 
               currentColor = courseKnowledge.icon.color != ''
                   ? int.parse(courseKnowledge.icon.color)
                   : -1;
-              return courseItem(
-                  path.courses.elementAt(index),
-                  currentColor,
-                  courseKnowledge.icon.nameIcon,
-                  index,
+              return courseItem(path.coursesPath.elementAt(index), currentColor,
+                  courseKnowledge.icon.nameIcon, index,
                   knowLedgeId: courseKnowledge.id);
             }),
         SizedBox(height: 24.h),
@@ -566,7 +567,7 @@ class _HomePageState extends State<HomePage> {
                               ])))
                 ]),
             displayActionByStatus(
-              //todo
+                //todo
                 userCourse != null ? userCourse.status : Status.start,
                 course,
                 color,

@@ -18,7 +18,7 @@ class LearnPath
   @Name('courses')
  List<int> coursesIds=[];
   // List<int> coursesId=[];
-  final courses = IsarLinks<Course>();
+  final coursesPath = IsarLinks<Course>();
 
 
  factory LearnPath.fromJson(Map<String, dynamic> parsedJson,int pathId) {

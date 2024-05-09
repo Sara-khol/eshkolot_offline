@@ -115,6 +115,13 @@ class IsarService {
     });
   }
 
+  addLearnPath(LearnPath path) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.learnPaths.put(path);
+    });
+  }
+
   addIsarQuiz(LinkQuizIsar linkQuizIsar) async {
     final isar = await db;
     await isar.writeTxn(() async {
@@ -369,7 +376,7 @@ class IsarService {
         }
       }
       for (int pathId in user.pathIds) {
-        LearnPath? path = await getPathById(pathId, isar);
+        LearnPath? path = await getPathById(pathId);
         if (path != null) {
           user.pathList.add(path);
         }
@@ -477,7 +484,7 @@ class IsarService {
             debugPrint('000 444 ${newDataCourse.courseId}');
             debugPrint('course get quiz files');
             c.isSyncNotCompleted = true;
-           updateCourseSyncComplete([c.id],true);
+            updateCourseSyncComplete([c.id], true);
             coursesList.add(c);
           }
 
@@ -513,7 +520,7 @@ class IsarService {
             debugPrint('000 444 ${newDataCourse.courseId}');
             debugPrint('course get quiz files');
             c.isSyncNotCompleted = true;
-           updateCourseSyncComplete([c.id],true);
+            updateCourseSyncComplete([c.id], true);
             coursesList.add(c);
           }
 
@@ -550,14 +557,14 @@ class IsarService {
     //   debugPrint('sending event empty');
     //   InstallationDataHelper().eventBusDialogs.fire('');
     // }
-    bool allNotCompleted=false;
+    bool allNotCompleted = false;
     if (coursesList.isEmpty) {
       debugPrint('sending event empty');
       InstallationDataHelper().eventBusDialogs.fire(allNotCompleted);
     } else {
       InstallationDataHelper().coursesList = coursesList;
       //todo check from isar??
-       allNotCompleted =
+      allNotCompleted =
           coursesList.every((obj) => obj.isSyncNotCompleted == true);
       if (!allNotCompleted) {
         InstallationDataHelper().downLoadQuizFilesByCourse(coursesList);
@@ -587,7 +594,7 @@ class IsarService {
     return knowledge;
   }
 
-  Future<LearnPath?> getPathById(int id, Isar isar) async {
+  Future<LearnPath?> getPathById(int id) async {
     final isar = await db;
     LearnPath? path = await isar.learnPaths.get(id);
     return path;
@@ -683,7 +690,7 @@ class IsarService {
     });
   }
 
-  updateCourseSyncComplete(List<int> ids,bool update) async {
+  updateCourseSyncComplete(List<int> ids, bool update) async {
     final isar = await db;
     Course? course;
     await isar.writeTxn(() async {
@@ -695,18 +702,21 @@ class IsarService {
     });
   }
 
-  Future<List<int>> checkCoursesNotCompleted(List<int> ids) async
-  {
+  Future<List<int>> checkCoursesNotCompleted(List<int> ids) async {
     final isar = await db;
-    if(ids.isEmpty) {
+    if (ids.isEmpty) {
       final result = await isar.courses
-          .filter().isSyncNotCompletedEqualTo(true).idProperty().findAll();
+          .filter()
+          .isSyncNotCompletedEqualTo(true)
+          .idProperty()
+          .findAll();
       return result;
     }
 
     final result = await isar.courses
         .filter()
-        .anyOf(ids, (q, int id) => q.idEqualTo(id)).idProperty()
+        .anyOf(ids, (q, int id) => q.idEqualTo(id))
+        .idProperty()
         .findAll();
 
     // Check if all results have isSyncNotCompleted set to true
@@ -915,5 +925,30 @@ class IsarService {
 
     print('All distinct courseIds: $courseIds');
     return courseIds;
+  }
+
+Future<List<int>>  setPath(LearnPath path) async {
+    final isar = await db;
+    List<int> newCoursesIds = [];
+    for (int courseId in path.coursesIds) {
+      Course? c = await getCourseById(courseId);
+      if (c != null) {
+        // This will automatically handle linking and updating the IsarLinks
+        path.coursesPath.add(c);
+      } else {
+        newCoursesIds.add(courseId);
+      }
+    }
+    _user.pathList.add(path);
+
+    List<int> pList = List.from(_user.pathIds);
+    pList.add(path.id);
+    _user.pathIds = pList;
+
+    await isar.writeTxnSync(() async {
+      isar.learnPaths.putSync(path);
+      isar.users.putSync(_user);
+    });
+    return newCoursesIds;
   }
 }

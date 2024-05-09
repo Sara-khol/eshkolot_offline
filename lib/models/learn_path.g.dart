@@ -50,9 +50,9 @@ const LearnPathSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {
-    r'courses': LinkSchema(
-      id: -7410130054775730576,
-      name: r'courses',
+    r'coursesPath': LinkSchema(
+      id: -7945898579022792261,
+      name: r'coursesPath',
       target: r'Course',
       single: false,
     )
@@ -139,12 +139,13 @@ Id _learnPathGetId(LearnPath object) {
 }
 
 List<IsarLinkBase<dynamic>> _learnPathGetLinks(LearnPath object) {
-  return [object.courses];
+  return [object.coursesPath];
 }
 
 void _learnPathAttach(IsarCollection<dynamic> col, Id id, LearnPath object) {
   object.id = id;
-  object.courses.attach(col, col.isar.collection<Course>(), r'courses', id);
+  object.coursesPath
+      .attach(col, col.isar.collection<Course>(), r'coursesPath', id);
 }
 
 extension LearnPathQueryWhereSort
@@ -848,55 +849,56 @@ extension LearnPathQueryObject
 
 extension LearnPathQueryLinks
     on QueryBuilder<LearnPath, LearnPath, QFilterCondition> {
-  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> courses(
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> coursesPath(
       FilterQuery<Course> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'courses');
+      return query.link(q, r'coursesPath');
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
-      coursesLengthEqualTo(int length) {
+      coursesPathLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition> coursesIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', 0, true, 0, true);
+      return query.linkLength(r'coursesPath', length, true, length, true);
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
-      coursesIsNotEmpty() {
+      coursesPathIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', 0, false, 999999, true);
+      return query.linkLength(r'coursesPath', 0, true, 0, true);
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
-      coursesLengthLessThan(
+      coursesPathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'coursesPath', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
+      coursesPathLengthLessThan(
     int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', 0, true, length, include);
+      return query.linkLength(r'coursesPath', 0, true, length, include);
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
-      coursesLengthGreaterThan(
+      coursesPathLengthGreaterThan(
     int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'courses', length, include, 999999, true);
+      return query.linkLength(r'coursesPath', length, include, 999999, true);
     });
   }
 
   QueryBuilder<LearnPath, LearnPath, QAfterFilterCondition>
-      coursesLengthBetween(
+      coursesPathLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -904,7 +906,7 @@ extension LearnPathQueryLinks
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(
-          r'courses', lower, includeLower, upper, includeUpper);
+          r'coursesPath', lower, includeLower, upper, includeUpper);
     });
   }
 }

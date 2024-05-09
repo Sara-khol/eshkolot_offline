@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:eshkolot_offline/models/course.dart';
+import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/services/download_data_service.dart';
 import 'package:eshkolot_offline/services/installationDataHelper.dart';
+import 'package:eshkolot_offline/services/isar_service.dart';
 import 'package:flutter/cupertino.dart';
 
 class ApiService {
@@ -128,6 +130,39 @@ class ApiService {
       onError();
     }
     return course;
+  }
+
+  getPathCourses({required int id,required Function() onError}) async
+  {
+    // https://dev2.eshkolot.net/wp-json/wp/v2/get_courses_ids_for_learn_path/103471
+    String url='${_baseUrl}get_courses_ids_for_learn_path/$id';
+    debugPrint('url: $url');
+    cancelToken = CancelToken();
+    Response response = await _dio.get(url,cancelToken: cancelToken);
+    if (response.statusCode == 200) {
+      debugPrint('response: ${response.data}');
+      List<int> integerList = response.data.map<int>((item) => int.parse(item.toString())).toList();
+      LearnPath path=LearnPath(coursesIds:integerList,title: 'קבוצה מהסנכרון ',id: id );
+
+      List<int> newCoursesIds=  await IsarService().setPath(path);
+
+      // for (int courseId in path.coursesIds) {
+      //   Course? c =await  IsarService().getCourseById(courseId);
+      //   if (c != null) {
+      //     path.coursesPath.add(c);
+      //   }
+      //   else {
+      //
+      //   }
+      // }
+      // IsarService().addLearnPath(path);
+      return newCoursesIds;
+      // DownloadService().init();
+      // Course course = await InstallationDataHelper().setSyncNewCourse(response.data);
+      // return course;
+    } else {
+      onError();
+    }
   }
 
 }

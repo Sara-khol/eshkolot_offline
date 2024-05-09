@@ -3,7 +3,9 @@ import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/lesson_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/subject_main_page.dart';
+import 'package:eshkolot_offline/ui/screens/course_main/video_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../models/course.dart';
 import '../../../models/quiz.dart';
@@ -55,7 +57,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: 624.h,
+          height: 734.h,
           width: 950.w,
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFE4E6E9)),
@@ -65,23 +67,23 @@ class _CourseMainPageState extends State<CourseMainPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                height: 90.h,
+                height: 45.h,
               ),
-              Image.asset(imagePath, height: 147.h),
+              Image.asset(imagePath, height: 91.h),
               SizedBox(
-                height: 23.h,
+                height: 15.h,
               ),
               Text(widget.course.title,
                   style:
                       TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600)),
               SizedBox(
-                height: 15.h,
+                height: 10.h,
               ),
               Text("התחל מכאן ללמוד ולתרגל את בסיס השפה האנגלית",
                   style:
                       TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
               SizedBox(
-                height: 30.h,
+                height: 15.h,
               ),
               Container(
                 height: 50.h,
@@ -147,87 +149,99 @@ class _CourseMainPageState extends State<CourseMainPage> {
                 ),
               ),
               SizedBox(
-                height: 75.h,
+                height: 20.h,
               ),
+              VideoWidget(videoId: '' ,videoNum: '', fileId: 0,height: 310.h,width: 551.w,),
+              // SizedBox(
+              //   height: 20.h,
+              // ),
               // if (data != null)
               if (lastLesson != null ||
                   lastSubject != null ||
                   lastQuestionnaire != null)
-                ClipRRect(
-                  child: Stack(
-                    children: <Widget>[
-                      Container(
-                        height: 40.h,
-                        decoration: const BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
-                        ),
-                        child: TextButton(
-                            style: TextButton.styleFrom(
-                              alignment: Alignment.center,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.only(left: 50.w, right: 50.w),
-                              textStyle: TextStyle(
-                                  fontSize: 18.sp, fontWeight: FontWeight.w600),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('המשך מהמקום שעצרת $lastTextButton',
-                                    style: TextStyle(
-                                        fontSize: 18.sp,
-                                        fontFamily: 'RAG-Sans')),
-                                SizedBox(width: 4.w),
-                                Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.white,
-                                  size: 15.sp,
-                                )
-                              ],
-                            ),
-                            onPressed: () {
-                              if (!data!.isQuestionnaire) {
-                                currentMainChild?.subjectPickedIndex =
-                                    data!.subjectIndex;
-                                currentMainChild?.lessonPickedIndex =
-                                    data!.lessonIndex;
+                Expanded(
 
-                                currentMainChild?.bodyWidget = LessonWidget(
-                                    lesson: lastLesson!,
-                                    //todo check if works..
-                                    updateComplete:
-                                        currentMainChild.updateCompleteLesson,
-                                    onNext: data!.lessonIndex + 1 <
-                                            lastSubject!.lessons.length
-                                        ? () => currentMainChild.goToNextLesson(
-                                            lastSubject!,
-                                            data!.subjectIndex,
-                                            lastSubject!.lessons.elementAt(
-                                                data!.lessonIndex + 1),
-                                            data!.lessonIndex + 1)
-                                        : null);
-                              } else {
-                                currentMainChild?.questionPickedIndex =
-                                    data!.questionIndex;
-                                currentMainChild?.subjectPickedIndex =
-                                    data!.subjectIndex;
-                                currentMainChild?.lessonPickedIndex =
-                                    data!.lessonIndex;
-                                MainPageChild.of(context)?.bodyWidget =
-                                    QuestionnaireWidget(
-                                  quiz: lastQuestionnaire!,
-                                      onNext: data!.lessonIndex + 1 <
-                                          lastSubject!.lessons.length
-                                          ? () => currentMainChild.goToNextLesson(
-                                          lastSubject!,
-                                          data!.subjectIndex,
-                                          lastSubject!.lessons.elementAt(
-                                              data!.lessonIndex + 1),
-                                          data!.lessonIndex + 1)
-                                          : null,
-                                );
-                              }
-                            }),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ClipRRect(
+                        child: Stack(
+                          children: <Widget>[
+                            Container(
+                              height: 40.h,
+                              decoration: const BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.all(Radius.circular(30)),
+                              ),
+                              child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    alignment: Alignment.center,
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.only(left: 50.w, right: 50.w),
+                                    textStyle: TextStyle(
+                                        fontSize: 18.sp, fontWeight: FontWeight.w600),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('המשך מהמקום שעצרת $lastTextButton',
+                                          style: TextStyle(
+                                              fontSize: 18.sp,
+                                              fontFamily: 'RAG-Sans')),
+                                      SizedBox(width: 4.w),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        color: Colors.white,
+                                        size: 15.sp,
+                                      )
+                                    ],
+                                  ),
+                                  onPressed: () {
+                                    if (!data!.isQuestionnaire) {
+                                      currentMainChild?.subjectPickedIndex =
+                                          data!.subjectIndex;
+                                      currentMainChild?.lessonPickedIndex =
+                                          data!.lessonIndex;
+
+                                      currentMainChild?.bodyWidget = LessonWidget(
+                                          lesson: lastLesson!,
+                                          //todo check if works..
+                                          updateComplete:
+                                              currentMainChild.updateCompleteLesson,
+                                          onNext: data!.lessonIndex + 1 <
+                                                  lastSubject!.lessons.length
+                                              ? () => currentMainChild.goToNextLesson(
+                                                  lastSubject!,
+                                                  data!.subjectIndex,
+                                                  lastSubject!.lessons.elementAt(
+                                                      data!.lessonIndex + 1),
+                                                  data!.lessonIndex + 1)
+                                              : null);
+                                    } else {
+                                      currentMainChild?.questionPickedIndex =
+                                          data!.questionIndex;
+                                      currentMainChild?.subjectPickedIndex =
+                                          data!.subjectIndex;
+                                      currentMainChild?.lessonPickedIndex =
+                                          data!.lessonIndex;
+                                      MainPageChild.of(context)?.bodyWidget =
+                                          QuestionnaireWidget(
+                                        quiz: lastQuestionnaire!,
+                                            onNext: data!.lessonIndex + 1 <
+                                                lastSubject!.lessons.length
+                                                ? () => currentMainChild.goToNextLesson(
+                                                lastSubject!,
+                                                data!.subjectIndex,
+                                                lastSubject!.lessons.elementAt(
+                                                    data!.lessonIndex + 1),
+                                                data!.lessonIndex + 1)
+                                                : null,
+                                      );
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -235,58 +249,67 @@ class _CourseMainPageState extends State<CourseMainPage> {
             ],
           ),
         ),
-        SizedBox(
-          height: 145.h,
-        ),
-        Padding(
-          padding: EdgeInsets.only(left: 242.w),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              height: 40.h,
-              width: 175.w,
-              decoration: BoxDecoration(
-                color: Color(
-                    MainPageChild.of(context)!.widget.knowledgeColor != -1
-                        ? MainPageChild.of(context)!.widget.knowledgeColor
-                        : 0xFF32D489),
-                borderRadius: const BorderRadius.all(Radius.circular(30)),
-              ),
-              child: Center(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    alignment: Alignment.center,
-                    foregroundColor: Colors.white,
-                    //padding: EdgeInsets.only(left: 45.w,right: 45.w,),
-                    textStyle:
-                        TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
-                  ),
-                  onPressed: () {
-                    MainPageChild.of(context)?.bodyWidget = SubjectMainPage(
-                        subjectIndex: 0,
-                        subject: widget.course.subjects.first,
-                        onNext: 1 < widget.course.subjects.length
-                            ? () => MainPageChild.of(context)?.goToNextSubject(
-                                widget.course.subjects.elementAt(1), 1)
-                            : null);
-                    MainPageChild.of(context)?.subjectPickedIndex = 0;
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(' לנושא הראשון',
-                          style: TextStyle(
-                              fontSize: 18.sp, fontFamily: 'RAG-Sans')),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 15.sp,
-                        color: Colors.white,
-                      )
-                    ],
+        // SizedBox(
+        //   height: 100.h,
+        // ),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: 242.w),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
+                    height: 40.h,
+                    width: 175.w,
+                    decoration: BoxDecoration(
+                      color: Color(
+                          MainPageChild.of(context)!.widget.knowledgeColor != -1
+                              ? MainPageChild.of(context)!.widget.knowledgeColor
+                              : 0xFF32D489),
+                      borderRadius: const BorderRadius.all(Radius.circular(30)),
+                    ),
+                    child: Center(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          alignment: Alignment.center,
+                          foregroundColor: Colors.white,
+                          //padding: EdgeInsets.only(left: 45.w,right: 45.w,),
+                          textStyle:
+                              TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                        ),
+                        onPressed: () {
+                          MainPageChild.of(context)?.bodyWidget = SubjectMainPage(
+                              subjectIndex: 0,
+                              subject: widget.course.subjects.first,
+                              onNext: 1 < widget.course.subjects.length
+                                  ? () {
+                                currentMainChild?.goToNextSubject(
+                                      widget.course.subjects.elementAt(1), 1);
+                                  }
+                                  : null);
+                          currentMainChild?.subjectPickedIndex = 0;
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(' לנושא הראשון',
+                                style: TextStyle(
+                                    fontSize: 18.sp, fontFamily: 'RAG-Sans')),
+                            Icon(
+                              Icons.arrow_forward,
+                              size: 15.sp,
+                              color: Colors.white,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ],
@@ -387,7 +410,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
   String setKnowledgeImagePath() {
     switch (MainPageChild.of(context)!.widget.knowLedgeId) {
       case 61: //Physics
-        return 'assets/images/logo_english.jpg';
+        return 'assets/images/logo_english.png';
       case 63: //english
         return 'assets/images/logo_physics.png';
       case 155: //math

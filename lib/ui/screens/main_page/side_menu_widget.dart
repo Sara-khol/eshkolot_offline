@@ -420,7 +420,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
 
   pathItem(LearnPath path, int pIndex) {
     Knowledge courseKnowledge = knowledgeCourses.keys.firstWhere((k) =>
-    k.id == path.courses
+    k.id == path.coursesPath
         .elementAt(pIndex)
         .knowledgeId);
     return Column(
@@ -436,17 +436,17 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                       .of(context)
                       ?.mainWidget = MainPageChild(
                       knowLedgeId: -1,
-                      course: path.courses.first,
+                      course: path.coursesPath.first,
                       knowledgeColor:
                       path.color.isNotEmpty ? int.parse(path.color) : -1);
-                  path.courses.first.isSelected = true;
+                  path.coursesPath.first.isSelected = true;
                   sIndex = 0;
                   //for first time
                   if (lastCourseSelected != null &&
-                      lastCourseSelected != path.courses.first) {
+                      lastCourseSelected != path.coursesPath.first) {
                     lastCourseSelected!.isSelected = false;
                   }
-                  lastCourseSelected = path.courses.first;
+                  lastCourseSelected = path.coursesPath.first;
                 }
               }),
           child: Padding(
@@ -483,10 +483,10 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
           visible: path.isOpen,
           child: ListView.builder(
               shrinkWrap: true,
-              itemCount: path.courses.length,
+              itemCount: path.coursesPath.length,
               itemBuilder: (context, index) {
                 return courseItem(
-                    path.courses.elementAt(index),
+                    path.coursesPath.elementAt(index),
                     path.color.isNotEmpty ? int.parse(path.color) : -1,
                     courseKnowledge.icon.nameIcon,
                     index,
@@ -525,7 +525,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
       }
       if (selectedCourse == null) {
         for (LearnPath path in pathList) {
-          selectedCourse = path.courses
+          selectedCourse = path.coursesPath
               .firstWhereOrNull((element) => element.id == courseId);
           if (selectedCourse != null) {
             selectCourse(selectedCourse);
