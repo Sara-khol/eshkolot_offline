@@ -141,8 +141,11 @@ class ApiService {
     Response response = await _dio.get(url,cancelToken: cancelToken);
     if (response.statusCode == 200) {
       debugPrint('response: ${response.data}');
-      List<int> integerList = response.data.map<int>((item) => int.parse(item.toString())).toList();
-      LearnPath path=LearnPath(coursesIds:integerList,title: 'קבוצה מהסנכרון ',id: id );
+      // List<int> integerList = response.data.map<int>((item) => int.parse(item.toString())).toList();
+      Map<String, dynamic> jsonData = jsonDecode(response.data);
+      LearnPath path=LearnPath.fromJson(jsonData, id);
+     // List<int> integerList = response.data['courses'] as List<int>;
+      //LearnPath path=LearnPath(coursesIds:integerList,title: 'קבוצה מהסנכרון ',id: id );
 
       List<int> newCoursesIds=  await IsarService().setPath(path);
 

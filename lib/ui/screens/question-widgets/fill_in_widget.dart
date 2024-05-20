@@ -39,15 +39,16 @@ class _FillInState extends State<FillIn> {
 
   @override
   void didUpdateWidget(covariant FillIn oldWidget) {
-    // if(oldWidget.question!=widget.question)
-    // {
     widget.questionController.isCorrect = isCorrect;
     widget.questionController.isFilled = isFilled;
-    correctAnswers.clear();
-    myControllers.clear();
-    pointsList.clear();
-    focusNodes.clear();
-    correctHtml = '';
+
+    if(oldWidget.question!=widget.question) {
+      correctAnswers.clear();
+      myControllers.clear();
+      pointsList.clear();
+      focusNodes.clear();
+      correctHtml = '';
+    }
     super.didUpdateWidget(oldWidget);
   }
 

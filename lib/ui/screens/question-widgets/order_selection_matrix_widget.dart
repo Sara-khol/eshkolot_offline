@@ -6,7 +6,7 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 import '../course_main/questionnaire_tab.dart';
 
-class OrderSelectionMatrixWidget extends StatefulWidget {
+class OrderSelectionMatrixWidget extends StatefulWidget  {
   final Question question;
   final QuestionController questionController;
 
@@ -18,8 +18,7 @@ class OrderSelectionMatrixWidget extends StatefulWidget {
       _OrderSelectionMatrixWidgetState();
 }
 
-class _OrderSelectionMatrixWidgetState
-    extends State<OrderSelectionMatrixWidget> {
+class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget> {
   // List<int> maxSimultaneousDrags = [];
   List<String> randomList = [];
   List<String> matrixMatchList = [];
@@ -33,20 +32,26 @@ class _OrderSelectionMatrixWidgetState
   @override
   void initState() {
     initData();
-
+    widget.questionController.isFilled = isFilled;
+    widget.questionController.isCorrect = isCorrect;
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant OrderSelectionMatrixWidget oldWidget) {
-    initData();
+    if(oldWidget.question!=widget.question) {
+      initData();
+    }
+    widget.questionController.isFilled = isFilled;
+    widget.questionController.isCorrect = isCorrect;
     super.didUpdateWidget(oldWidget);
   }
 
+
   initData() {
     isHtml = widget.question.ans!.first.html;
-    widget.questionController.isFilled = isFilled;
-    widget.questionController.isCorrect = isCorrect;
+    // widget.questionController.isFilled = isFilled;
+    // widget.questionController.isCorrect = isCorrect;
     matrixMatchList =
         widget.question.ans!.map((e) => e.matrixMatch ?? '').toList();
     numPointsList =

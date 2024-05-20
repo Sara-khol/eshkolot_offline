@@ -129,91 +129,92 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: myFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            if (!buildCalledYet) {
-              buildCalledYet = true;
-              SchedulerBinding.instance.addPostFrameCallback((_) {
-                setState(() {
-                  showMoreKnowledge =
-                      knowledgeScrollController.position.maxScrollExtent > 0;
-                  showMorePath =
-                      pathScrollController.position.maxScrollExtent > 0;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: FutureBuilder(
+          future: myFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              if (!buildCalledYet) {
+                buildCalledYet = true;
+                SchedulerBinding.instance.addPostFrameCallback((_) {
+                  setState(() {
+                    showMoreKnowledge =
+                        knowledgeScrollController.position.maxScrollExtent > 0;
+                    showMorePath =
+                        pathScrollController.position.maxScrollExtent > 0;
+                  });
                 });
-              });
+              }
+              return Padding(
+                    padding: EdgeInsets.only(
+                        top: 78
+                            .h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
+                    child: Column(
+                      children: [
+                        Center(
+                            child: Text('שלום ${widget.user.name}',
+                                style: TextStyle(
+                                    color: colors.blackColorApp,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 32.sp))),
+                        SizedBox(height: 26.h),
+                        Container(
+                            height: 51.h,
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: colors.blackColorApp, width: 1.h),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(50))),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  topInformation(
+                                      Icons.check,
+                                      'הושלם',
+                                      widget.user.courses
+                                          .where((c) =>
+                                              c.status == Status.synchronized)
+                                          .length),
+                                  Container(
+                                      height: 27.h,
+                                      width: 1.w,
+                                      color: colors.blackColorApp),
+                                  topInformation(
+                                      Icons.refresh,
+                                      'ממתין לסינכרון',
+                                      widget.user.courses
+                                          .where((c) => c.status == Status.finish)
+                                          .length),
+                                  Container(
+                                      height: 27.h,
+                                      width: 1.w,
+                                      color: colors.blackColorApp),
+                                  topInformation(
+                                      Icons.star_outlined,
+                                      'תעודות',
+                                      widget.user.courses
+                                          .where((c) =>
+                                              c.status == Status.synchronized)
+                                          .length),
+                                ])),
+                        SizedBox(height: 35.h),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
+                            children: [
+                              myCoursesWidget(false),
+                              SizedBox(width: 36.w),
+                              myCoursesWidget(true)
+                            ])
+                      ],
+                    ),
+                  );
             }
-            return Scaffold(
-                backgroundColor: Colors.white,
-                body: Padding(
-                  padding: EdgeInsets.only(
-                      top: 78
-                          .h /*, bottom: 160.h*/ /*,right: 132.w,left: 132.w*/),
-                  child: Column(
-                    children: [
-                      Center(
-                          child: Text('שלום ${widget.user.name}',
-                              style: TextStyle(
-                                  color: colors.blackColorApp,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 32.sp))),
-                      SizedBox(height: 26.h),
-                      Container(
-                          height: 51.h,
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: colors.blackColorApp, width: 1.h),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(50))),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                topInformation(
-                                    Icons.check,
-                                    'הושלם',
-                                    widget.user.courses
-                                        .where((c) =>
-                                            c.status == Status.synchronized)
-                                        .length),
-                                Container(
-                                    height: 27.h,
-                                    width: 1.w,
-                                    color: colors.blackColorApp),
-                                topInformation(
-                                    Icons.refresh,
-                                    'ממתין לסינכרון',
-                                    widget.user.courses
-                                        .where((c) => c.status == Status.finish)
-                                        .length),
-                                Container(
-                                    height: 27.h,
-                                    width: 1.w,
-                                    color: colors.blackColorApp),
-                                topInformation(
-                                    Icons.star_outlined,
-                                    'תעודות',
-                                    widget.user.courses
-                                        .where((c) =>
-                                            c.status == Status.synchronized)
-                                        .length),
-                              ])),
-                      SizedBox(height: 35.h),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          // children: [myCoursesWidget(),SizedBox(width: 35.w)/*,myCoursesWidget()*/])
-                          children: [
-                            myCoursesWidget(false),
-                            SizedBox(width: 36.w),
-                            myCoursesWidget(true)
-                          ])
-                    ],
-                  ),
-                ));
-          }
-          return const CircularProgressIndicator();
-        });
+            return const CircularProgressIndicator();
+          }),
+    );
   }
 
   topInformation(IconData iconData, String s, int num) {

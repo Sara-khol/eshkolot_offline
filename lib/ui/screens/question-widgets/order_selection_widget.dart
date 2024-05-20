@@ -1,4 +1,3 @@
-import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,26 +28,29 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
 
   @override
   void initState() {
+    widget.questionController.isFilled = isFilled;
+    widget.questionController.isCorrect = isCorrect;
     initData();
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant OrderSelectionWidget oldWidget) {
-    initData(false);
+    widget.questionController.isFilled = isFilled;
+    widget.questionController.isCorrect = isCorrect;
+    if (oldWidget.question != widget.question) {
+      initData();
+    }
     super.didUpdateWidget(oldWidget);
   }
 
-  initData([bool reset=true]) {
-    widget.questionController.isFilled = isFilled;
-    widget.questionController.isCorrect = isCorrect;
-    if(reset) {
+  initData() {
+    didChange=false;
       randomList.clear();
       for (Answer answer in widget.question.ans!) {
         randomList.add(answer.ans);
       }
       randomList.shuffle();
-    }
   }
 
   @override
@@ -114,7 +116,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
   }
 
   listOfItemsWithAnswer() {
-    bool isOk = isCorrect()==widget.question.points;
+    bool isOk = isCorrect() == widget.question.points;
     return Column(children: [
       SizedBox(height: 25.h),
       HtmlDataWidget(
@@ -207,7 +209,6 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
   }
 
   displayWithAnswers() {
-
     return Padding(
         padding: EdgeInsets.only(top: 20.h), child: listOfItemsWithAnswer());
   }

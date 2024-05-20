@@ -84,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ]),
                                 Container(
                                   width: 690.w,
-                                  height: 331.h,
+                                  height:(isError || isErrorNoCourses) ?342.h:331.h,
                                   margin: EdgeInsets.only(bottom: 36.h),
                                   decoration: BoxDecoration(  color: Colors.white,border: Border.all(color: grey2ColorApp)),
                                   child: Column(

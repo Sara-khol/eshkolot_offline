@@ -250,22 +250,25 @@ class _MainPageChildState extends State<MainPageChild> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      menuWidget(),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            progressBar(),
-            Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 60.h, right: 138.w),
-                  child: _bodyWidget.value,
-                )),
-          ],
-        ),
-      )
-    ]);
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Row(children: [
+        menuWidget(),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              progressBar(),
+              Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 60.h/*, right: 138.w*/),
+                    child: _bodyWidget.value,
+                  )),
+            ],
+          ),
+        )
+      ]),
+    );
   }
 
   Widget progressBar() {

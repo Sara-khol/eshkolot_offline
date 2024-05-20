@@ -12,16 +12,17 @@ class HowToLearn extends StatefulWidget {
 
 class _HowToLearnState extends State<HowToLearn> {
   final Map<String, String> aboutProgram = {
-    'האם צריך להתקין את התוכנה על המחשב, או שאפשר להשתמש דרך האונקי?': 'תשובה',
-    'אם אני מכבה את התוכנה, הנתונים שלמדתי נשמרים אוטמטית?': 'תשובה',
-    'אפשר להתחבר מכמה שמות משתמשים או רק שם משתמש אחד?': 'תשובה',
-    'איך אפשר להוסיף עוד קורסים ונושאים אחרי שכבר רכשתי את האונקי?': 'תשובה',
-    'אפשר להתקין את התוכנה על המחשב? איך?': 'תשובה',
-    'אפשר להעתיק את התוכנה לאונקי אחר? הנתונים ישמרו לי?': 'תשובה'
+    'האם אני צריך להיות מחובר לאשכולות בעת הלמידה?': 'לא. לאחר שהורדת את התוכנה אין צורך להיות מחובר לאתר אשכולות.',
+    'האם צריך להתקין את התוכנה על מחשב או שאפשר ללמוד דרך חיבור לדיסק און קי ?': 'אפשר גם כך וגם כך.',
+    'אם אני מכבה את התוכנה, הנתונים שלמדתי נשמרים אוטמטית?': 'כן. הנתונים נשמרים עבור כל לומד.',
+    'האם אפשר להתחבר עם יותר משם אחד?': 'אפשר להתחבר עם כל המשתמשים שנרשמו איתם ברכישת התוכנה באתר.',
+  //  'איך אפשר להוסיף עוד קורסים ונושאים אחרי שכבר רכשתי את האונקי?': 'תשובה',
+    'איך אפשר להוסיף קורסים נוספים לאחר הורדת התוכנה ?': 'דרך האתר, וכאשר יש רשת בתוכנה הקורס יתווסף בלחיצה על כפתור הסנכרון.',
+    '	האם אפשר להעתיק את התוכנה לדיסק און קי אחר או למחשב נוסף?': 'תשובה'
   };
   final Map<String, String> aboutLearning = {
-    'איך לומדים??': 'תשובה',
-    'מתי לומדים?': 'תשובה',
+    'איך לומדים?': 'מתחברים עם ת.ז של המשתמש המעוניין ללמוד בוחרים את הקורס הרצוי, צופים, מתרגלים ומצליחים.',
+    'מתי לומדים?': 'בכל זמן ומכל התקן עליו מותקנת התוכנה.',
   };
   final Map<String, String> sync = {
     'שאלה 1': 'תשובה',
@@ -40,6 +41,7 @@ class _HowToLearnState extends State<HowToLearn> {
   String title = 'אודות התוכנה';
   Color color = const Color(0xFF000000);
   late ButtonStyle buttonStyle;
+  final ScrollController _controller = ScrollController();
 
   @override
   void initState() {
@@ -263,14 +265,7 @@ class _HowToLearnState extends State<HowToLearn> {
                     height: 17.h,
                   ),
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          setQuestionList(),
-                        ],
-                      ),
-                    ),
+                    child: setQuestionList(),
                   )
                 ],
               ),
@@ -310,19 +305,25 @@ class _HowToLearnState extends State<HowToLearn> {
     for (var item in currentList.keys) {
       isOpen.add(false);
     }
-    return ListView.builder(
-        shrinkWrap: true,
-        itemCount: currentList.length,
-        itemBuilder: (context, index) {
-          return questionItem(
-              currentList.keys.elementAt(index),
-              currentList.values.elementAt(index),
-              index);
-        });
+    return Scrollbar(
+      thumbVisibility: true,
+      controller: _controller,
+      child: ListView.builder(
+          shrinkWrap: true,
+          controller: _controller,
+          itemCount: currentList.length,
+          itemBuilder: (context, index) {
+            return questionItem(
+                currentList.keys.elementAt(index),
+                currentList.values.elementAt(index),
+                index);
+          }),
+    );
   }
 
   questionItem(String question, String answer, int index) {
     return Column(
+     crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           height: 48.h,
@@ -350,13 +351,16 @@ class _HowToLearnState extends State<HowToLearn> {
         ),
         Visibility(
           visible: isOpen[index],
-          child: Padding(
-            padding: EdgeInsets.only(right: 10.w),
-            child: Text(answer),
-          ),
+          child: Text(answer/*,style: TextStyle(fontSize: 18.sp)*/),
+
         )
       ],
     );
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 

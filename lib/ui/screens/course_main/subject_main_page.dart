@@ -122,8 +122,9 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
 
   Widget mainWidget() {
     return Container(
-        width: 950.w,
+        //width: 950.w,
         height: 755.h,
+        margin: EdgeInsets.only(left:242.w,right: 120.w),
         decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFE4E6E9)),
             borderRadius: const BorderRadius.all(Radius.circular(10))),

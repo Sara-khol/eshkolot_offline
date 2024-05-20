@@ -58,7 +58,9 @@ class _CourseMainPageState extends State<CourseMainPage> {
       children: [
         Container(
           height: 734.h,
-          width: 950.w,
+          // width: 950.w,
+          width: double.infinity,
+          margin: EdgeInsets.only(left: 242.w,right: 120.w),
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFE4E6E9)),
             borderRadius: const BorderRadius.all(Radius.circular(10)),

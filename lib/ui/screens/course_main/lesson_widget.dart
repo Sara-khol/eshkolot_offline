@@ -2,6 +2,7 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:eshkolot_offline/ui/screens/course_main/main_page_child.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/video_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -74,7 +75,8 @@ class _LessonWidgetState extends State<LessonWidget> {
         children: [
           Container(
             // height: 624.h,
-            width: 950.w,
+           // width: 950.w,
+            margin: EdgeInsets.only(left:242.w,right: 120.w),
             decoration: BoxDecoration(
                 border: Border.all(color: const Color(0xFFE4E6E9)),
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
@@ -155,6 +157,8 @@ class _LessonWidgetState extends State<LessonWidget> {
                     key: Key(lesson.vimeo.toString()),
                     videoNum: lesson.videoNum,
                     isLesson: true,
+                    height: 515.h,
+                    width: 914.w,
                     fileId: MainPageChild.of(context)!.widget.course.id,
                     videoId: MainPageChild.of(context)!.widget.course.isSync
                         ? lesson.vimeo
@@ -170,8 +174,9 @@ class _LessonWidgetState extends State<LessonWidget> {
           ),
           if (lesson.questionnaire.isNotEmpty)
             Container(
-              width: 950.w,
+             // width: 950.w,
              // height: 66.h,
+              margin: EdgeInsets.only(left:242.w,right: 120.w),
               decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFE4E6E9)),
                   borderRadius: const BorderRadius.all(Radius.circular(10))),
@@ -258,8 +263,10 @@ class _LessonWidgetState extends State<LessonWidget> {
             // height: 62.h,
             height: 60.h,
           ),
-          SizedBox(
-            width: 950.w,
+          Container(
+            margin: EdgeInsets.only(bottom: 20.h ,left: 242.w),
+
+            // width: 950.w,
             child: Row(
               children: [
                 const Spacer(),
@@ -267,7 +274,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                   visible: widget.onNext != null,
                   child: Container(
                     height: 40.h,
-                    margin: EdgeInsets.only(bottom: 20.h /*37.h*/),
+                  //  margin: EdgeInsets.only(bottom: 20.h ,left: 242.w),
                     decoration:  BoxDecoration(
                         borderRadius: const BorderRadius.all(Radius.circular(30)),
                         color: Color( MainPageChild.of(context)!.widget.knowledgeColor != -1

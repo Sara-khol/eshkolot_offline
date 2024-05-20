@@ -15,6 +15,7 @@ class QuestionnaireWidget extends StatefulWidget {
   final Quiz quiz;
   final VoidCallback? onNext;
 
+
   const QuestionnaireWidget({super.key, required this.quiz, this.onNext});
 
   @override
@@ -30,9 +31,11 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
   late List<Question> questionnaires;
   late TabController _tabController;
   late StreamSubscription stream;
+  bool isInitDisplay=true;
 
   @override
   void initState() {
+    isInitDisplay=true;
     questionnaires = widget.quiz.questionList;
     displayWidget = initialDisplay();
     _tabController = TabController(length: 2, vsync: this);
@@ -56,6 +59,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
     questionnaires = widget.quiz.questionList;
     _tabController.animateTo(0);
     displayWidget = initialDisplay();
+    isInitDisplay=true;
     super.didUpdateWidget(oldWidget);
   }
 
@@ -69,7 +73,8 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 950.w,
+     // width: 950.w,
+      margin: EdgeInsets.only(bottom: isInitDisplay? 225.h:50.h,left: 242.w,right: 120.w),
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           border: Border.all(color: const Color(0xFFE4E6E9))),
@@ -210,6 +215,7 @@ class _QuestionnaireWidgetState extends State<QuestionnaireWidget>
                   ),
                   onPressed: () {
                     setState(() {
+                      isInitDisplay=false;
                       for (Question question in widget.quiz.questionList) {
                         question.isFilled = false;
 

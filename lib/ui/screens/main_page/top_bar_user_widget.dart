@@ -16,10 +16,8 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 
 
 class TopBarUserWidget extends StatefulWidget {
-  // final void Function() updateLastPosition;
 
-  const TopBarUserWidget({super.key /*,required this.updateLastPosition*/
-      });
+  const TopBarUserWidget({super.key});
 
   @override
   State<TopBarUserWidget> createState() => _TopBarUserWidgetState();
@@ -54,8 +52,9 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 64.h,
-      decoration: const BoxDecoration(
+      //height: 65.h,
+      decoration:  const BoxDecoration(
+      //  color: colors.blackColorApp,
         border: Border(bottom: BorderSide(color: Color(0xffDCDDE1))),
       ),
       padding: EdgeInsets.only(left: 132.w),
@@ -109,7 +108,8 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                   height: 40.h,
                   width: 154.w,
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
+                    color: colors.blackColorApp,
+                      border: Border.all(color: Colors.white),
                       borderRadius:
                           const BorderRadius.all(Radius.circular(50))),
                   child: Row(
@@ -118,11 +118,12 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                       Icon(
                         Icons.refresh,
                         size: 20.sp,
+                        color: Colors.white,
                       ),
                       Text(
                         '  סינכרון נתונים  ',
                         style: TextStyle(
-                            color: colors.blackColorApp,
+                            color: Colors.white,
                             fontSize: 18.sp, fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -138,8 +139,8 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                 child: Container(
                   height: 40.h,
                   width: 175.w,
-                  decoration:  BoxDecoration(
-                      color: colors.blackColorApp,
+                  decoration:  const BoxDecoration(
+                      color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(50))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -147,12 +148,12 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
                       Icon(
                         Icons.person_outline,
                         size: 20.sp,
-                        color: Colors.white,
+                        color:colors.blackColorApp,
                       ),
                       Text(
                         ' החלפת משתמש  ',
                         style: TextStyle(
-                            color: Colors.white,
+                            color: colors.blackColorApp,
                             fontWeight: FontWeight.w600,
                             fontSize: 18.sp),
                       ),
