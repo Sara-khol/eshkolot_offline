@@ -29,34 +29,37 @@ class _TitleBarWidgetState extends State<TitleBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // height: 29.h,
-      color: const Color(0xff393535),
-      child: WindowTitleBarBox(
-        child: Row(
-          // mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Expanded(child: MoveWindow()),
-            MinimizeWindowButton(colors: buttonColors),
-            appWindow.isMaximized
-                ? RestoreWindowButton(
-                    colors: buttonColors,
-                    onPressed: maximizeOrRestore,
-                  )
-                : MaximizeWindowButton(
-                    colors: buttonColors,
-                    onPressed: maximizeOrRestore,
-                  ),
-            CloseWindowButton(
-                colors: closeButtonColors,
-                onPressed: () {
-                 NetworkConnectivity.instance.stopListeningToConnectivity();
-                  if (widget.updateLastPosition != null) {
-                    widget.updateLastPosition!();
-                  }
-                 appWindow.close();
-                }),
-          ],
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        // height: 29.h,
+        color: const Color(0xff393535),
+        child: WindowTitleBarBox(
+          child: Row(
+            // mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(child: MoveWindow()),
+              MinimizeWindowButton(colors: buttonColors),
+              appWindow.isMaximized
+                  ? RestoreWindowButton(
+                      colors: buttonColors,
+                      onPressed: maximizeOrRestore,
+                    )
+                  : MaximizeWindowButton(
+                      colors: buttonColors,
+                      onPressed: maximizeOrRestore,
+                    ),
+              CloseWindowButton(
+                  colors: closeButtonColors,
+                  onPressed: () {
+                   NetworkConnectivity.instance.stopListeningToConnectivity();
+                    if (widget.updateLastPosition != null) {
+                      widget.updateLastPosition!();
+                    }
+                   appWindow.close();
+                  }),
+            ],
+          ),
         ),
       ),
     );

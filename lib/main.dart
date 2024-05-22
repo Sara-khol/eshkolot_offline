@@ -12,9 +12,13 @@ import 'package:eshkolot_offline/models/subject.dart';
 import 'package:eshkolot_offline/services/localFileHelper.dart';
 import 'package:eshkolot_offline/services/network_check.dart';
 import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
+import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
+import 'package:eshkolot_offline/ui/screens/main_page/top_bar_user_widget.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:path_provider/path_provider.dart';
@@ -265,7 +269,7 @@ class _MyAppState extends State<MyApp> {
                     body: widget.dataWasFilled && didGetVideosCorrect && extractWorked
                         ? const LoginPage()
                         : shwProgress
-                            ? const Center(child: CircularProgressIndicator())
+                            ?  showProgressExtractWidget()
                     // todo disable continue if not all videos files of courses are existed
                             : extractWorked /*&& didGetVideosCorrect*/
                                 ? const LoginPage()
@@ -312,6 +316,28 @@ class _MyAppState extends State<MyApp> {
     shwProgress = false;
     setState(() {});
     return true;
+  }
+
+  showProgressExtractWidget()
+  {
+    return Column(
+      children: [
+        const TitleBarWidget(),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('...מתכונן להפעלת התוכנה, פעולה זו עלולה לקחת כמה דקות', style: TextStyle(
+                  fontWeight: FontWeight.w600,fontSize: 40.sp
+              )),
+              const CircularProgressIndicator(),
+            ],
+          ),
+        ),
+
+      ],
+    );
   }
 
 // void extractZipIsolate(SendPort sendPort) {
