@@ -104,14 +104,15 @@ class ApiService {
   {
     if(!cancelToken.isCancelled) {
       cancelToken.cancel('hhh');
-      debugPrint('ררר');
+      debugPrint('cancelRequests');
     }
   }
 
   Future<Course?> getCourseData(
       {required int id,
      /* required Function() onSuccess,*/
-      required Function() onError}) async {
+      required Function() onError,
+        required bool isSingleInCourse}) async {
     String url = '${_baseUrl}get_course_data/$id';
     //גאומטריה
     // String url = '${_baseUrl}get_course_data/55058';
@@ -122,7 +123,7 @@ class ApiService {
     if (response.statusCode == 200) {
       debugPrint('okkkk');
       DownloadService().init();
-      Course course = await InstallationDataHelper().setSyncNewCourse(response.data);
+      Course course = await InstallationDataHelper().setSyncNewCourse(response.data,isSingleInCourse);
       return course;
       // InstallationDataHelper().eventBusDialogs.fire(course);
       //onSuccess();

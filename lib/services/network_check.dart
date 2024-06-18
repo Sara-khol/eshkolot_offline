@@ -18,16 +18,16 @@ class NetworkConnectivity {
    bool whileDownloading=false;
    late bool isOnline;
    late bool _firstTime;
-  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
-  late  ConnectivityResult result;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  late  List<ConnectivityResult> result;
 
   void initialise() async {
     _firstTime=true;
      result = await _networkConnectivity.checkConnectivity();
     isOnline = result != ConnectivityResult.none ? true : false;
-    _checkStatus(result);
+    _checkStatus(result.first);
     _connectivitySubscription= _networkConnectivity.onConnectivityChanged.listen((result) {
-      _checkStatus(result);
+      _checkStatus(result.first);
     });
 
   }

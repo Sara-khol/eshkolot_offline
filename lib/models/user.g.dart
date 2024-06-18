@@ -85,14 +85,7 @@ const UserSchema = CollectionSchema(
       ],
     )
   },
-  links: {
-    r'learnPathList': LinkSchema(
-      id: 4073396077458915737,
-      name: r'learnPathList',
-      target: r'LearnPath',
-      single: false,
-    )
-  },
+  links: {},
   embeddedSchemas: {
     r'UserCourse': UserCourseSchema,
     r'UserGrade': UserGradeSchema
@@ -241,13 +234,11 @@ Id _userGetId(User object) {
 }
 
 List<IsarLinkBase<dynamic>> _userGetLinks(User object) {
-  return [object.learnPathList];
+  return [];
 }
 
 void _userAttach(IsarCollection<dynamic> col, Id id, User object) {
   object.id = id;
-  object.learnPathList
-      .attach(col, col.isar.collection<LearnPath>(), r'learnPathList', id);
 }
 
 extension UserByIndex on IsarCollection<User> {
@@ -1617,64 +1608,7 @@ extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {
   }
 }
 
-extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {
-  QueryBuilder<User, User, QAfterFilterCondition> learnPathList(
-      FilterQuery<LearnPath> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'learnPathList');
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> learnPathListLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'learnPathList', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> learnPathListIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'learnPathList', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> learnPathListIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'learnPathList', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> learnPathListLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'learnPathList', 0, true, length, include);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition>
-      learnPathListLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'learnPathList', length, include, 999999, true);
-    });
-  }
-
-  QueryBuilder<User, User, QAfterFilterCondition> learnPathListLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(
-          r'learnPathList', lower, includeLower, upper, includeUpper);
-    });
-  }
-}
+extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {}
 
 extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
   QueryBuilder<User, User, QAfterSortBy> sortByName() {
@@ -1874,29 +1808,34 @@ const UserCourseSchema = Schema(
       name: r'isQuestionnaire',
       type: IsarType.bool,
     ),
-    r'lessonStopId': PropertySchema(
+    r'is_single_course': PropertySchema(
       id: 3,
+      name: r'is_single_course',
+      type: IsarType.bool,
+    ),
+    r'lessonStopId': PropertySchema(
+      id: 4,
       name: r'lessonStopId',
       type: IsarType.long,
     ),
     r'progress_percent': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'progress_percent',
       type: IsarType.long,
     ),
     r'questionnaireStopId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'questionnaireStopId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'status',
       type: IsarType.byte,
       enumMap: _UserCoursestatusEnumValueMap,
     ),
     r'subjectStopId': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'subjectStopId',
       type: IsarType.long,
     )
@@ -1926,11 +1865,12 @@ void _userCourseSerialize(
   writer.writeLong(offsets[0], object.courseId);
   writer.writeString(offsets[1], object.diplomaPath);
   writer.writeBool(offsets[2], object.isQuestionnaire);
-  writer.writeLong(offsets[3], object.lessonStopId);
-  writer.writeLong(offsets[4], object.progressPercent);
-  writer.writeLong(offsets[5], object.questionnaireStopId);
-  writer.writeByte(offsets[6], object.status.index);
-  writer.writeLong(offsets[7], object.subjectStopId);
+  writer.writeBool(offsets[3], object.isSingleCourse);
+  writer.writeLong(offsets[4], object.lessonStopId);
+  writer.writeLong(offsets[5], object.progressPercent);
+  writer.writeLong(offsets[6], object.questionnaireStopId);
+  writer.writeByte(offsets[7], object.status.index);
+  writer.writeLong(offsets[8], object.subjectStopId);
 }
 
 UserCourse _userCourseDeserialize(
@@ -1942,14 +1882,15 @@ UserCourse _userCourseDeserialize(
   final object = UserCourse(
     courseId: reader.readLongOrNull(offsets[0]) ?? 0,
     diplomaPath: reader.readStringOrNull(offsets[1]) ?? '',
-    progressPercent: reader.readLongOrNull(offsets[4]) ?? 0,
-    status: _UserCoursestatusValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+    isSingleCourse: reader.readBoolOrNull(offsets[3]) ?? false,
+    progressPercent: reader.readLongOrNull(offsets[5]) ?? 0,
+    status: _UserCoursestatusValueEnumMap[reader.readByteOrNull(offsets[7])] ??
         Status.start,
   );
   object.isQuestionnaire = reader.readBool(offsets[2]);
-  object.lessonStopId = reader.readLong(offsets[3]);
-  object.questionnaireStopId = reader.readLong(offsets[5]);
-  object.subjectStopId = reader.readLong(offsets[7]);
+  object.lessonStopId = reader.readLong(offsets[4]);
+  object.questionnaireStopId = reader.readLong(offsets[6]);
+  object.subjectStopId = reader.readLong(offsets[8]);
   return object;
 }
 
@@ -1967,15 +1908,17 @@ P _userCourseDeserializeProp<P>(
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? false) as P;
     case 4:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 5:
       return (reader.readLong(offset)) as P;
+    case 5:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
       return (_UserCoursestatusValueEnumMap[reader.readByteOrNull(offset)] ??
           Status.start) as P;
-    case 7:
+    case 8:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2192,6 +2135,16 @@ extension UserCourseQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isQuestionnaire',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserCourse, UserCourse, QAfterFilterCondition>
+      isSingleCourseEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'is_single_course',
         value: value,
       ));
     });

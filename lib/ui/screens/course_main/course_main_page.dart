@@ -60,7 +60,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
           height: 734.h,
           // width: 950.w,
           width: double.infinity,
-          margin: EdgeInsets.only(left: 242.w,right: 120.w),
+          margin: EdgeInsets.only(left: 242.w, right: 120.w),
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFE4E6E9)),
             borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -81,7 +81,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
               SizedBox(
                 height: 10.h,
               ),
-              Text("התחל מכאן ללמוד ולתרגל את בסיס השפה האנגלית",
+              Text(widget.course.briefInformation,
                   style:
                       TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
               SizedBox(
@@ -103,7 +103,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     ),
                     SizedBox(width: 7.w),
                     Text(
-                      '${widget.course.countHours} שעות',
+                      '${widget.course.countHours ?? 0} שעות',
                       style: TextStyle(fontSize: 18.sp),
                     ),
                     VerticalDivider(
@@ -117,7 +117,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     ),
                     SizedBox(width: 7.w),
                     Text(
-                      '${widget.course.countLesson} שיעורים',
+                      '${widget.course.countLesson ?? 0} שיעורים',
                       style: TextStyle(fontSize: 18.sp),
                     ),
                     VerticalDivider(
@@ -131,7 +131,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     ),
                     SizedBox(width: 7.w),
                     Text(
-                      '${widget.course.countQuiz} שאלונים',
+                      '${widget.course.countQuiz ?? 0} שאלונים',
                       style: TextStyle(fontSize: 18.sp),
                     ),
                     VerticalDivider(
@@ -145,7 +145,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     ),
                     SizedBox(width: 7.w),
                     Text(
-                        '${widget.course.countEndQuiz} ${widget.course.countEndQuiz == 1 ? 'שאלון מסכם' : 'שאלונים מסכמים'}',
+                        '${widget.course.countEndQuiz ?? 0} ${widget.course.countEndQuiz == 1 ? 'שאלון מסכם' : 'שאלונים מסכמים'}',
                         style: TextStyle(fontSize: 18.sp)),
                   ],
                 ),
@@ -153,7 +153,14 @@ class _CourseMainPageState extends State<CourseMainPage> {
               SizedBox(
                 height: 20.h,
               ),
-              VideoWidget(videoId: '' ,videoNum: '', fileId: 0,height: 310.h,width: 551.w,),
+              VideoWidget(
+                key: Key(widget.course.courseInformationVideo),
+                videoId: widget.course.courseInformationVideo,
+                videoNum: widget.course.courseInformationVideo,
+                fileId: 0,
+                height: 310.h,
+                width: 551.w,
+              ),
               // SizedBox(
               //   height: 20.h,
               // ),
@@ -162,7 +169,6 @@ class _CourseMainPageState extends State<CourseMainPage> {
                   lastSubject != null ||
                   lastQuestionnaire != null)
                 Expanded(
-
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -173,15 +179,18 @@ class _CourseMainPageState extends State<CourseMainPage> {
                               height: 40.h,
                               decoration: const BoxDecoration(
                                 color: Colors.black,
-                                borderRadius: BorderRadius.all(Radius.circular(30)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(30)),
                               ),
                               child: TextButton(
                                   style: TextButton.styleFrom(
                                     alignment: Alignment.center,
                                     foregroundColor: Colors.white,
-                                    padding: EdgeInsets.only(left: 50.w, right: 50.w),
+                                    padding: EdgeInsets.only(
+                                        left: 50.w, right: 50.w),
                                     textStyle: TextStyle(
-                                        fontSize: 18.sp, fontWeight: FontWeight.w600),
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -205,20 +214,26 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                       currentMainChild?.lessonPickedIndex =
                                           data!.lessonIndex;
 
-                                      currentMainChild?.bodyWidget = LessonWidget(
-                                          lesson: lastLesson!,
-                                          //todo check if works..
-                                          updateComplete:
-                                              currentMainChild.updateCompleteLesson,
-                                          onNext: data!.lessonIndex + 1 <
-                                                  lastSubject!.lessons.length
-                                              ? () => currentMainChild.goToNextLesson(
-                                                  lastSubject!,
-                                                  data!.subjectIndex,
-                                                  lastSubject!.lessons.elementAt(
-                                                      data!.lessonIndex + 1),
-                                                  data!.lessonIndex + 1)
-                                              : null);
+                                      currentMainChild?.bodyWidget =
+                                          LessonWidget(
+                                              lesson: lastLesson!,
+                                              //todo check if works..
+                                              updateComplete: currentMainChild
+                                                  .updateCompleteLesson,
+                                              onNext: data!.lessonIndex + 1 <
+                                                      lastSubject!
+                                                          .lessonsList.length
+                                                  ? () => currentMainChild
+                                                      .goToNextLesson(
+                                                          lastSubject!,
+                                                          data!.subjectIndex,
+                                                          lastSubject!
+                                                              .lessonsList
+                                                              .elementAt(data!
+                                                                      .lessonIndex +
+                                                                  1),
+                                                          data!.lessonIndex + 1)
+                                                  : null);
                                     } else {
                                       currentMainChild?.questionPickedIndex =
                                           data!.questionIndex;
@@ -229,15 +244,18 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                       MainPageChild.of(context)?.bodyWidget =
                                           QuestionnaireWidget(
                                         quiz: lastQuestionnaire!,
-                                            onNext: data!.lessonIndex + 1 <
-                                                lastSubject!.lessons.length
-                                                ? () => currentMainChild.goToNextLesson(
-                                                lastSubject!,
-                                                data!.subjectIndex,
-                                                lastSubject!.lessons.elementAt(
-                                                    data!.lessonIndex + 1),
-                                                data!.lessonIndex + 1)
-                                                : null,
+                                        onNext: data!.lessonIndex + 1 <
+                                                lastSubject!.lessonsList.length
+                                            ? () => currentMainChild
+                                                .goToNextLesson(
+                                                    lastSubject!,
+                                                    data!.subjectIndex,
+                                                    lastSubject!.lessonsList
+                                                        .elementAt(
+                                                            data!.lessonIndex +
+                                                                1),
+                                                    data!.lessonIndex + 1)
+                                            : null,
                                       );
                                     }
                                   }),
@@ -278,19 +296,22 @@ class _CourseMainPageState extends State<CourseMainPage> {
                           alignment: Alignment.center,
                           foregroundColor: Colors.white,
                           //padding: EdgeInsets.only(left: 45.w,right: 45.w,),
-                          textStyle:
-                              TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                          textStyle: TextStyle(
+                              fontSize: 18.sp, fontWeight: FontWeight.w600),
                         ),
                         onPressed: () {
-                          MainPageChild.of(context)?.bodyWidget = SubjectMainPage(
-                              subjectIndex: 0,
-                              subject: widget.course.subjects.first,
-                              onNext: 1 < widget.course.subjects.length
-                                  ? () {
-                                currentMainChild?.goToNextSubject(
-                                      widget.course.subjects.elementAt(1), 1);
-                                  }
-                                  : null);
+                          MainPageChild.of(context)?.bodyWidget =
+                              SubjectMainPage(
+                                  subjectIndex: 0,
+                                  subject: widget.course.subjects.first,
+                                  onNext: 1 < widget.course.subjects.length
+                                      ? () {
+                                          currentMainChild?.goToNextSubject(
+                                              widget.course.subjects
+                                                  .elementAt(1),
+                                              1);
+                                        }
+                                      : null);
                           currentMainChild?.subjectPickedIndex = 0;
                         },
                         child: Row(
@@ -343,10 +364,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
       // data!.subjectStopId != 0 ? widget.course.subjects.firstWhere((s) =>
       // s.id == data!.subjectStopId) : null;
       if (data!.lessonStopId != 0) {
-        for (int i = 0; i < lastSubject!.lessons.length; i++) {
-          if (lastSubject!.lessons.elementAt(i).lessonId ==
+        for (int i = 0; i < lastSubject!.lessonsList.length; i++) {
+          if (lastSubject!.lessonsList.elementAt(i).lessonId ==
               data!.lessonStopId) {
-            lastLesson = lastSubject!.lessons.elementAt(i);
+            lastLesson = lastSubject!.lessonsList.elementAt(i);
             data!.lessonIndex = i;
             break;
           }

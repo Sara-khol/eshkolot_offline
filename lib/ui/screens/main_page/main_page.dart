@@ -106,6 +106,7 @@ class _MainPageState extends State<MainPage> {
               child: Row(children: [
             Visibility(
               visible: isOpenMenu,
+              maintainState: true,
               child: SideMenuWidget(myUser: widget.user),
             ),
             Expanded(child: /*Column(children: [Expanded(child:*/ _mainWidget/*)])*/)

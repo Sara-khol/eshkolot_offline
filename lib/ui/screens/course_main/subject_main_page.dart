@@ -192,7 +192,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                         padding: EdgeInsets.only(
                             top: 20.h, bottom: 40.h, right: 42.w),
                         child: Text(
-                          'בנושא זה ${currentSubject.lessons.length} שיעורים, בהצלחה בלמידה!',
+                          'בנושא זה ${currentSubject.lessonsList.length} שיעורים, בהצלחה בלמידה!',
                           style: TextStyle( color: colors.blackColorApp,
                               fontSize: 20.sp, fontWeight: FontWeight.w600),
                         ),
@@ -202,7 +202,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                         child: Row(
                           children: [
                             Text(
-                              '${(currentStep / totalSteps * 100).toInt()}% הושלמו',
+                        totalSteps!=0?'${(currentStep / totalSteps * 100).toInt()}% הושלמו':'0',
                               style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w600,
@@ -226,11 +226,11 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                       ),
                       ListView.builder(
                         padding: EdgeInsets.only(left: 65.w),
-                        itemCount: currentSubject.lessons.length,
+                        itemCount: currentSubject.lessonsList.length,
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           Lesson currentLesson =
-                              currentSubject.lessons.elementAt(index);
+                              currentSubject.lessonsList.elementAt(index);
                           return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -277,7 +277,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                   currentSubject.questionnaire
                                                       .isEmpty &&
                                                   index ==
-                                                      currentSubject.lessons
+                                                      currentSubject.lessonsList
                                                               .length -
                                                           1),
                                           SizedBox(
@@ -298,7 +298,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                      // tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                   ),
                                                   onPressed: () => goToLesson(index),
-                                                child:Text( currentSubject.lessons
+                                                child:Text( currentSubject.lessonsList
                                                     .elementAt(index)
                                                     .name,
                                                     style: TextStyle(
@@ -364,7 +364,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                                 .length -
                                                             1 &&
                                                     index ==
-                                                        currentSubject.lessons
+                                                        currentSubject.lessonsList
                                                                 .length -
                                                             1 &&
                                                     currentSubject.questionnaire
@@ -394,7 +394,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                                                 });
                                           }),
                                     if (index ==
-                                        currentSubject.lessons.length - 1)
+                                        currentSubject.lessonsList.length - 1)
                                       Divider(
                                           indent: 50.w,
                                           height: 0,
@@ -544,7 +544,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
     totalSteps = 0;
     currentStep = 0;
     // totalSteps+=subject.lessons.length;
-    for (Lesson lesson in currentSubject.lessons) {
+    for (Lesson lesson in currentSubject.lessonsList) {
       totalSteps++;
       if (lesson.isCompletedCurrentUser) {
         currentStep++;
@@ -565,7 +565,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
   goToLesson(int index)
   {
     setState(() {
-      debugPrint(currentSubject.lessons
+      debugPrint(currentSubject.lessonsList
           .elementAt(index)
           .name);
       currentMainChild
@@ -577,18 +577,18 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
       currentMainChild?.bodyWidget = LessonWidget(
           updateComplete: currentMainChild
               .updateCompleteLesson,
-          lesson: currentSubject.lessons
+          lesson: currentSubject.lessonsList
               .elementAt(index),
           onNext: index + 1 <
               currentSubject
-                  .lessons
+                  .lessonsList
                   .length
               ? () => currentMainChild.goToNextLesson(
               currentSubject,
               widget
                   .subjectIndex,
               currentSubject
-                  .lessons
+                  .lessonsList
                   .elementAt(index + 1),
               index + 1)
               : null);

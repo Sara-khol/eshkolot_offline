@@ -118,6 +118,7 @@ class _HomePageState extends State<HomePage> {
       debugPrint('event listen');
       User user = IsarService().getCurrentUser();
       knowledgeCourses = user.knowledgeCoursesMap;
+      pathList = widget.user.pathList;
       if (mounted) {
         //   await initDirectory();
         setState(() {});
@@ -346,9 +347,11 @@ class _HomePageState extends State<HomePage> {
 
 
   knowledgeItem(Knowledge knowledge, int kIndex) {
+
     String path = removeHiddenCharsFromPath(
         '${dir.path}/icons/${knowledge.icon.nameIcon}');
-    return Column(
+
+    return knowledgeCourses.values.elementAt(kIndex).isNotEmpty? Column(
       children: [
         Row(
           children: [
@@ -432,7 +435,7 @@ class _HomePageState extends State<HomePage> {
             }),
         SizedBox(height: 24.h),
       ],
-    );
+    ):Container();
   }
 
   String removeHiddenCharsFromPath(String path) {
@@ -473,7 +476,8 @@ class _HomePageState extends State<HomePage> {
         ListView.builder(
             shrinkWrap: true,
             itemCount: path.coursesPath.length,
-            itemBuilder: (context, index) {
+            itemBuilder: (context, index)  {
+              // Knowledge? courseKnowledge =  await  IsarService().getKnowledgeById(path.coursesPath.elementAt(index).knowledgeId);
               Knowledge courseKnowledge = knowledgeCourses.keys.firstWhere(
                   (k) => k.id == path.coursesPath.elementAt(index).knowledgeId);
 
@@ -736,9 +740,9 @@ class _HomePageState extends State<HomePage> {
       // data!.subjectStopId != 0 ? widget.course.subjects.firstWhere((s) =>
       // s.id == data!.subjectStopId) : null;
       if (data.lessonStopId != 0) {
-        for (int i = 0; i < lastSubject!.lessons.length; i++) {
-          if (lastSubject.lessons.elementAt(i).lessonId == data.lessonStopId) {
-            lastLesson = lastSubject.lessons.elementAt(i);
+        for (int i = 0; i < lastSubject!.lessonsList.length; i++) {
+          if (lastSubject.lessonsList.elementAt(i).lessonId == data.lessonStopId) {
+            lastLesson = lastSubject.lessonsList.elementAt(i);
             data.lessonIndex = i;
             break;
           }

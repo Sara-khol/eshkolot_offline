@@ -33,36 +33,34 @@ dependencies:
     sdk: flutter
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
-  path_provider: ^2.0.12
-  flutter_platform_alert: ^0.4.0
-  oktoast: ^3.3.1
+  path_provider: ^2.1.3
+  flutter_platform_alert: ^0.5.1
+  oktoast: ^3.4.0
   carousel_slider: ^4.2.1
-  dio: ^5.1.1
-  json_annotation: ^4.8.0
-  flutter_draggable_gridview: ^0.0.7
+  dio: ^5.4.3+1
+  json_annotation: ^4.9.0
+  flutter_draggable_gridview: ^0.0.12
   drag_and_drop_lists: ^0.3.3
-  dart_vlc: ^0.4.0
-  flutter_screenutil: ^5.8.1
-  provider: ^6.0.5
-  url_launcher: ^6.1.9
-  scrollable_positioned_list: ^0.3.5
-  visibility_detector: ^0.3.3
-  bitsdojo_window: ^0.1.5
-  archive: ^3.4.9
-  tar: ^1.0.2
-  connectivity_plus: ^4.0.1
+#  dart_vlc: ^0.4.0
+  media_kit_video: ^1.2.4
+  media_kit: ^1.1.10
+  media_kit_libs_video: ^1.0.4
+  flutter_screenutil: ^5.9.1
+  provider: ^6.1.2
+  url_launcher: ^6.2.6
+  scrollable_positioned_list: ^0.3.8
+  visibility_detector: ^0.4.0+2
+  bitsdojo_window: ^0.1.6
+  archive: ^3.6.0
+  tar: ^1.0.5
+  connectivity_plus: ^6.0.3
   flutter_widget_from_html_core: ^0.14.11
 #  flutter_html: ^3.0.0-alpha.3
-  audioplayers: ^4.1.0
-  flutter_svg: ^2.0.7
+  audioplayers: ^6.0.0
+  flutter_svg: ^2.0.10+1
   html: ^0.15.4
   event_bus: ^2.0.0
-  syncfusion_flutter_pdfviewer: 21.2.3
-
-
-
-
-
+  syncfusion_flutter_pdfviewer: ^23.1.39
 
 
   window_size:
@@ -76,19 +74,16 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  dotted_border: ^2.0.0+3
-  font_awesome_flutter: ^10.3.0
-  percent_indicator: ^4.2.2
-  permission_handler: ^10.2.0
-  sentry_flutter: ^7.5.1
-  sentry_dio: ^7.5.1
+  cupertino_icons: ^1.0.8
+  dotted_border: ^2.1.0
+  font_awesome_flutter: ^10.7.0
+  percent_indicator: ^4.2.3
+  permission_handler: ^11.3.1
+  sentry_flutter: ^8.2.0
+  sentry_dio: ^8.2.0
 #  sentry: ^7.5.1
 #  sentry_logging: ^7.5.1
-  shared_preferences: ^2.1.1
-
-
-
+  shared_preferences: ^2.2.3
 
 #msix_config:
 #  display_name: Eshkolot Offline
@@ -112,14 +107,32 @@ dependencies:
 #  #  capabilities: internetClient, location, microphone, webcam
 
 
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  isar_generator: ^3.0.5
+  isar_generator: ^3.1.0+1
   build_runner: ^2.3.3
   json_serializable: ^6.5.4
+#  flutter_launcher_icons: ^0.13.1
+#
+#flutter_launcher_icons:
+##  android: "launcher_icon"
+#  ##  ios: true
+#  ##  image_path: "assets/icon/app_icon.png"
+#  ##  min_sdk_android: 21 # android min sdk min:16, default 21
+#  ##  web:
+#  ##    generate: true
+#  ##    image_path: "path/to/image.png"
+#  ##    background_color: "#hexcode"
+#  ##    theme_color: "#hexcode"
+#  ##    macos:
+#  ##      generate: true
+#  ##      image_path: "path/to/image.png"
+#  windows:
+#    generate: true
+#    image_path: "assets/images/app_icon.png"
+#    icon_size: 48 # min:48, max:256, default: 48
+
 
 
 
@@ -184,3 +197,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+

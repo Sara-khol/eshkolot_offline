@@ -137,7 +137,7 @@ class InstallationDataHelper {
                 lesson.questionnaire.add(quiz);
                 myQuizzes.add(quiz);
               }
-              subject.lessons.add(lesson);
+              subject.lessonsList.add(lesson);
               myLessons.add(lesson);
             }
 
@@ -163,7 +163,7 @@ class InstallationDataHelper {
         return userCourse;
       }).toList();
 
-      List<dynamic> userPathIds = user['pathIds'] as List<dynamic>;
+      List<dynamic> userPathIds = user['pathIds']==null?[]:user['pathIds'] as List<dynamic>;
       //check if path already existed
       myPathList.addAll(userPathIds.map((pId) {
         var p = learnPaths[pId.toString()];
@@ -201,7 +201,7 @@ class InstallationDataHelper {
     // }
   }
 
-  Future<Course> setSyncNewCourse(Map<String, dynamic> data) async {
+  Future<Course> setSyncNewCourse(Map<String, dynamic> data,bool isSingleInCourse) async {
     myQuizzes.clear();
     mySubjects.clear();
     myLessons.clear();
@@ -250,7 +250,7 @@ class InstallationDataHelper {
           // await DownloadService()
           //     .downloadQuizFiles(quiz.quizUrls, quiz.id, courseId);
         }
-        subject.lessons.add(lesson);
+        subject.lessonsList.add(lesson);
         myLessons.add(lesson);
       }
 
@@ -289,11 +289,11 @@ class InstallationDataHelper {
     Map<String, dynamic> k = knowledgeAreas.values.first;
     int knowledgeId = int.parse(knowledgeAreas.keys.first);
     Knowledge knowledge = Knowledge.fromJson(k, knowledgeId);
-    if (!await IsarService().isKnowledgeExist(knowledgeId)) {
+    if (await IsarService().getKnowledgeById(knowledgeId)==null) {
       await IsarService().addKnowledge(knowledge);
     }
 
-    await IsarService().updateUserCourse(course.id, knowledge);
+    await IsarService().updateUserCourse(course.id, knowledge,isSingleInCourse);
     return course;
   }
 
@@ -357,7 +357,6 @@ class InstallationDataHelper {
       userCourseList.add(uc);
     }
 
-    bool getVideos = await IsarService().updateCourseData(userCourseList);
     for (var idPath in pathIds) {
       LearnPath? path = await IsarService().getPathById(idPath);
       if (path == null) {
@@ -366,6 +365,9 @@ class InstallationDataHelper {
 
       }
     }
+
+    bool getVideos = await IsarService().updateCourseData(userCourseList);
+
     debugPrint('after getting course $getVideos');
     for (int lessonId in lessonCompleted) {
       await IsarService().updateLessonCompleted(lessonId,
@@ -513,7 +515,7 @@ class InstallationDataHelper {
                 .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
           }
         }
-        for (Lesson lesson in subject.lessons) {
+        for (Lesson lesson in subject.lessonsList) {
           if (lesson.questionnaire.isNotEmpty) {
             for (Quiz quiz in lesson.questionnaire) {
               DownloadService()

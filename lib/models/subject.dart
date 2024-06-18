@@ -30,7 +30,7 @@ class Subject {
   @Name('questionnaire')
   late List<dynamic> questionnaireIds = [];
 
-  final lessons = IsarLinks<Lesson>();
+  final lessonsList = IsarLinks<Lesson>();
    // List<Questionnaire>? questionnaires;
   final questionnaire = IsarLinks<Quiz>();
 
@@ -45,7 +45,7 @@ class Subject {
       time:parsedJson['time'],
       lessonsIds: parsedJson['lessons'],
       questionnaireIds: parsedJson['questionnaire'],
-      subjectId:subjectId ,
+      subjectId:subjectId,
     );
   }
 

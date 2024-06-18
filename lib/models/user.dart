@@ -21,7 +21,7 @@ class User {
   {};
 
 
-  final learnPathList = IsarLinks<LearnPath>();
+
 
 
   List<int> pathIds = [];
@@ -55,6 +55,9 @@ class UserCourse {
   @Name('progress_percent')
   late int progressPercent;
 
+  @Name('is_single_course')
+  late bool isSingleCourse;
+
   late int lessonStopId = 0;
   late int subjectStopId = 0;
   late int questionnaireStopId = 0;
@@ -68,17 +71,12 @@ class UserCourse {
   late int questionIndex = -1;
 
 
-  void setComputedPropertyFromJson(Map<String, dynamic> json) {
-    courseId = json['courseId'] as int;
-    diplomaPath = json['diplomaPath'] as String;
-    statusJson = json['status'] as String;
-    progressPercent = json['progress_percent'] as int;
-    status = stringToStatusType1(statusJson);
-  }
+
 
 
   UserCourse(
       {this.courseId=0,  this.status=Status.start,
+        this.isSingleCourse=false,
         this.statusJson='',
          this.progressPercent=0,  this.diplomaPath=''});
 
@@ -91,6 +89,7 @@ class UserCourse {
         diplomaPath: json['diplomaPath'] as String,
         statusJson: json['status'] as String,
         progressPercent: json['progress_percent'] as int,
+        isSingleCourse: json['is_single_course']==null?false:json['is_single_course'] as bool,
         status: status);
   }
 
@@ -104,7 +103,8 @@ Map<String, dynamic> toJson() {
     'lessonStopId': 0,
     'subjectStopId': 0,
     'questionnaireStopId': 0,
-    'isQuestionnaire': false
+    'isQuestionnaire': false,
+    'is_single_course': isSingleCourse
   };
 }
 

@@ -39,6 +39,11 @@ class Course {
   late String? countQuiz;
   late String? countEndQuiz;
 
+  @Name('brief_information')
+  late String briefInformation;
+
+  late String courseInformationVideo;
+
   // @Name('knowledge_num')
   late String? knowledgeNum;
   bool isDownLoadData=false;
@@ -81,6 +86,8 @@ class Course {
       'countEndQuiz': countEndQuiz,
       'knowledgeNum': knowledgeNum,
        'vimeoId': vimeoId,
+       'brief_information': briefInformation,
+       'courseInformationVideo': courseInformationVideo,
     };
   }
 
@@ -96,7 +103,9 @@ class Course {
     this.countHours,
     this.countLesson,
     this.countEndQuiz,
-    this.countQuiz
+    this.countQuiz,
+    this.briefInformation='',
+    this.courseInformationVideo=''
   });
 
   factory Course.fromJson(Map<String, dynamic> parsedJson,int courseId) {
@@ -104,13 +113,15 @@ class Course {
         title: parsedJson['title'],
         subjectIds: parsedJson['subjects'],
         knowledgeId: parsedJson['knowledge'],
-        questionnaireIds: parsedJson['questionnaire'],
+        questionnaireIds: parsedJson['questionnaire']??[],
         countHours: parsedJson['countHours'],
         countLesson: parsedJson['countLesson'],
         countQuiz: parsedJson['countQuiz'],
         countEndQuiz: parsedJson['countEndQuiz'],
         knowledgeNum: parsedJson['knowledge_num'],
-        vimeoId: parsedJson['vimeoId']??'',
+         briefInformation: parsedJson['brief_information']??'',
+        courseInformationVideo: parsedJson['courseInformationVideo']??'',
+         vimeoId: parsedJson['vimeoId']??'',
         // serverId: courseId,
         id: courseId,
     );

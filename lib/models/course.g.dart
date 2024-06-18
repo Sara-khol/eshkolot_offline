@@ -17,58 +17,68 @@ const CourseSchema = CollectionSchema(
   name: r'Course',
   id: -5832084671214696602,
   properties: {
-    r'countEndQuiz': PropertySchema(
+    r'brief_information': PropertySchema(
       id: 0,
+      name: r'brief_information',
+      type: IsarType.string,
+    ),
+    r'countEndQuiz': PropertySchema(
+      id: 1,
       name: r'countEndQuiz',
       type: IsarType.string,
     ),
     r'countHours': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'countHours',
       type: IsarType.string,
     ),
     r'countLesson': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'countLesson',
       type: IsarType.string,
     ),
     r'countQuiz': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'countQuiz',
       type: IsarType.string,
     ),
+    r'courseInformationVideo': PropertySchema(
+      id: 5,
+      name: r'courseInformationVideo',
+      type: IsarType.string,
+    ),
     r'isDownLoadData': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'isDownLoadData',
       type: IsarType.bool,
     ),
     r'isSync': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'isSync',
       type: IsarType.bool,
     ),
     r'isSyncNotCompleted': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'isSyncNotCompleted',
       type: IsarType.bool,
     ),
     r'knowledgeId': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'knowledgeId',
       type: IsarType.long,
     ),
     r'knowledgeNum': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'knowledgeNum',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'title',
       type: IsarType.string,
     ),
     r'vimeoId': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'vimeoId',
       type: IsarType.string,
     )
@@ -106,6 +116,7 @@ int _courseEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.briefInformation.length * 3;
   {
     final value = object.countEndQuiz;
     if (value != null) {
@@ -130,6 +141,7 @@ int _courseEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.courseInformationVideo.length * 3;
   {
     final value = object.knowledgeNum;
     if (value != null) {
@@ -147,17 +159,19 @@ void _courseSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.countEndQuiz);
-  writer.writeString(offsets[1], object.countHours);
-  writer.writeString(offsets[2], object.countLesson);
-  writer.writeString(offsets[3], object.countQuiz);
-  writer.writeBool(offsets[4], object.isDownLoadData);
-  writer.writeBool(offsets[5], object.isSync);
-  writer.writeBool(offsets[6], object.isSyncNotCompleted);
-  writer.writeLong(offsets[7], object.knowledgeId);
-  writer.writeString(offsets[8], object.knowledgeNum);
-  writer.writeString(offsets[9], object.title);
-  writer.writeString(offsets[10], object.vimeoId);
+  writer.writeString(offsets[0], object.briefInformation);
+  writer.writeString(offsets[1], object.countEndQuiz);
+  writer.writeString(offsets[2], object.countHours);
+  writer.writeString(offsets[3], object.countLesson);
+  writer.writeString(offsets[4], object.countQuiz);
+  writer.writeString(offsets[5], object.courseInformationVideo);
+  writer.writeBool(offsets[6], object.isDownLoadData);
+  writer.writeBool(offsets[7], object.isSync);
+  writer.writeBool(offsets[8], object.isSyncNotCompleted);
+  writer.writeLong(offsets[9], object.knowledgeId);
+  writer.writeString(offsets[10], object.knowledgeNum);
+  writer.writeString(offsets[11], object.title);
+  writer.writeString(offsets[12], object.vimeoId);
 }
 
 Course _courseDeserialize(
@@ -167,19 +181,21 @@ Course _courseDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Course(
-    countEndQuiz: reader.readStringOrNull(offsets[0]),
-    countHours: reader.readStringOrNull(offsets[1]),
-    countLesson: reader.readStringOrNull(offsets[2]),
-    countQuiz: reader.readStringOrNull(offsets[3]),
+    briefInformation: reader.readStringOrNull(offsets[0]) ?? '',
+    countEndQuiz: reader.readStringOrNull(offsets[1]),
+    countHours: reader.readStringOrNull(offsets[2]),
+    countLesson: reader.readStringOrNull(offsets[3]),
+    countQuiz: reader.readStringOrNull(offsets[4]),
+    courseInformationVideo: reader.readStringOrNull(offsets[5]) ?? '',
     id: id,
-    knowledgeId: reader.readLongOrNull(offsets[7]),
-    knowledgeNum: reader.readStringOrNull(offsets[8]),
-    title: reader.readStringOrNull(offsets[9]) ?? '',
-    vimeoId: reader.readStringOrNull(offsets[10]) ?? '',
+    knowledgeId: reader.readLongOrNull(offsets[9]),
+    knowledgeNum: reader.readStringOrNull(offsets[10]),
+    title: reader.readStringOrNull(offsets[11]) ?? '',
+    vimeoId: reader.readStringOrNull(offsets[12]) ?? '',
   );
-  object.isDownLoadData = reader.readBool(offsets[4]);
-  object.isSync = reader.readBool(offsets[5]);
-  object.isSyncNotCompleted = reader.readBool(offsets[6]);
+  object.isDownLoadData = reader.readBool(offsets[6]);
+  object.isSync = reader.readBool(offsets[7]);
+  object.isSyncNotCompleted = reader.readBool(offsets[8]);
   return object;
 }
 
@@ -191,7 +207,7 @@ P _courseDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
@@ -199,18 +215,22 @@ P _courseDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 6:
       return (reader.readBool(offset)) as P;
     case 7:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 9:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 10:
+      return (reader.readStringOrNull(offset)) as P;
+    case 11:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 12:
       return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -308,6 +328,140 @@ extension CourseQueryWhere on QueryBuilder<Course, Course, QWhereClause> {
 }
 
 extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
+  QueryBuilder<Course, Course, QAfterFilterCondition> briefInformationEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'brief_information',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      briefInformationGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'brief_information',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> briefInformationLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'brief_information',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> briefInformationBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'brief_information',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      briefInformationStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'brief_information',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> briefInformationEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'brief_information',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> briefInformationContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'brief_information',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition> briefInformationMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'brief_information',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      briefInformationIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'brief_information',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      briefInformationIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'brief_information',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterFilterCondition> countEndQuizIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -887,6 +1041,144 @@ extension CourseQueryFilter on QueryBuilder<Course, Course, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'countQuiz',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'courseInformationVideo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'courseInformationVideo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'courseInformationVideo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'courseInformationVideo',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'courseInformationVideo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'courseInformationVideo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoContains(String value,
+          {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'courseInformationVideo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoMatches(String pattern,
+          {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'courseInformationVideo',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'courseInformationVideo',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterFilterCondition>
+      courseInformationVideoIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'courseInformationVideo',
         value: '',
       ));
     });
@@ -1571,6 +1863,18 @@ extension CourseQueryLinks on QueryBuilder<Course, Course, QFilterCondition> {
 }
 
 extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
+  QueryBuilder<Course, Course, QAfterSortBy> sortByBriefInformation() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'brief_information', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByBriefInformationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'brief_information', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> sortByCountEndQuiz() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countEndQuiz', Sort.asc);
@@ -1616,6 +1920,19 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
   QueryBuilder<Course, Course, QAfterSortBy> sortByCountQuizDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countQuiz', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> sortByCourseInformationVideo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseInformationVideo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy>
+      sortByCourseInformationVideoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseInformationVideo', Sort.desc);
     });
   }
 
@@ -1705,6 +2022,18 @@ extension CourseQuerySortBy on QueryBuilder<Course, Course, QSortBy> {
 }
 
 extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
+  QueryBuilder<Course, Course, QAfterSortBy> thenByBriefInformation() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'brief_information', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByBriefInformationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'brief_information', Sort.desc);
+    });
+  }
+
   QueryBuilder<Course, Course, QAfterSortBy> thenByCountEndQuiz() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countEndQuiz', Sort.asc);
@@ -1750,6 +2079,19 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
   QueryBuilder<Course, Course, QAfterSortBy> thenByCountQuizDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countQuiz', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy> thenByCourseInformationVideo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseInformationVideo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Course, Course, QAfterSortBy>
+      thenByCourseInformationVideoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseInformationVideo', Sort.desc);
     });
   }
 
@@ -1851,6 +2193,14 @@ extension CourseQuerySortThenBy on QueryBuilder<Course, Course, QSortThenBy> {
 }
 
 extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
+  QueryBuilder<Course, Course, QDistinct> distinctByBriefInformation(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'brief_information',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Course, Course, QDistinct> distinctByCountEndQuiz(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1876,6 +2226,14 @@ extension CourseQueryWhereDistinct on QueryBuilder<Course, Course, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'countQuiz', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Course, Course, QDistinct> distinctByCourseInformationVideo(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'courseInformationVideo',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -1932,6 +2290,12 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Course, String, QQueryOperations> briefInformationProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'brief_information');
+    });
+  }
+
   QueryBuilder<Course, String?, QQueryOperations> countEndQuizProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'countEndQuiz');
@@ -1953,6 +2317,13 @@ extension CourseQueryProperty on QueryBuilder<Course, Course, QQueryProperty> {
   QueryBuilder<Course, String?, QQueryOperations> countQuizProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'countQuiz');
+    });
+  }
+
+  QueryBuilder<Course, String, QQueryOperations>
+      courseInformationVideoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'courseInformationVideo');
     });
   }
 

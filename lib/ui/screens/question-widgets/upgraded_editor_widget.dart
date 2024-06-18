@@ -27,8 +27,9 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
   List<int> pointsList = [];
 
   List<FocusNode> focusNodes = [];
-  late double myWidth;
-  late double myHeight;
+  late double myWidth=700;
+  late double myHeight=700;
+  // final GlobalKey _containerKey = GlobalKey();
 
   @override
   void initState() {
@@ -36,8 +37,21 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     setPositionItems();
     widget.questionController.isCorrect = isCorrect;
     widget.questionController.isFilled = isFilled;
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _getContainerConstraints();
+    // });
     super.initState();
   }
+
+  // void _getContainerConstraints() {
+  //   final RenderBox renderBox = _containerKey.currentContext?.findRenderObject() as RenderBox;
+  //   final Size size = renderBox.size;
+  //   setState(() {
+  //     // You can now use the size to update your widget's state
+  //     setPositionItems(size.width);
+  //     print('Width: ${size.width}, Height: ${size.height}');
+  //   });
+  // }
 
   @override
   void didUpdateWidget(covariant UpgradedEditorWidget oldWidget) {
@@ -46,14 +60,16 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     focusNodes.clear();
     pointsList.clear();
     customData = widget.question.moreData!;
-    setPositionItems();
+   setPositionItems();
     widget.questionController.isCorrect = isCorrect;
     widget.questionController.isFilled = isFilled;
-
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _getContainerConstraints();
+    // });
     super.didUpdateWidget(oldWidget);
   }
 
-  setPositionItems() {
+  setPositionItems(/*double width*/) {
     positionedItems.clear();
     Widget myTextField = Container();
     if (double.parse(customData.customQuizQuestionsWidth) < 300) {
@@ -150,12 +166,26 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
             child: field.type == 'image'
                 //image
                 ? field.defaultValue.isNotEmpty
-                    ? SizedBox(
+                    ?  /*  (itemWidth.w > width) ?Container(
+                      width: width,
+                        height: itemHeight.h,
+                        child: HtmlDataWidget(
+                            '<img  src="${field.defaultValue.substring(field.defaultValue.lastIndexOf('/'), field.defaultValue.length)}" alt=""  />',
+                            quizId: widget.question.quizId),
+                      ):*/
+            Container(
+                width: itemWidth.w,
+                height: itemHeight.h,
+                child: HtmlDataWidget(
+                    '<img  src="${field.defaultValue.substring(field.defaultValue.lastIndexOf('/'), field.defaultValue.length)}" alt=""  />',
+                    quizId: widget.question.quizId),)
+
+                /*SizedBox(
                         width: itemWidth.w,
                         height: itemHeight.h,
                         child: Image.network(
                           field.defaultValue,
-                        ))
+                        ))*/
                     : SizedBox()
                 : field.editable.isEmpty
                     ?
@@ -202,9 +232,15 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
           SizedBox(
               width: myWidth,
               height: myHeight,
-              child: Stack(
-                // children: displayAnswers?positionedItemsAnswers:positionedItems,
-                children: positionedItems,
+              child: LayoutBuilder(
+                builder:  (context, constraints) {
+                  if (myWidth > constraints.maxWidth)
+                  debugPrint('fffff');
+                  return Stack(
+                    // children: displayAnswers?positionedItemsAnswers:positionedItems,
+                    children: positionedItems,
+                  );
+                }
               ))
         ]));
 
@@ -227,7 +263,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
   }
 
   Widget buildQAnswers() {
-    bool isOk = isCorrect() ==widget.question.points;
+    bool isOk = isCorrect() == widget.question.points;
     return Padding(
         //padding: const EdgeInsets.all(100),
         padding: EdgeInsets.only(top: 25.h),
@@ -391,7 +427,6 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     return true;
   }
 
-
   int isCorrect() {
     debugPrint('list points $pointsList');
     calculateTotalPoints();
@@ -419,15 +454,14 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     }
   }
 
-  calculateTotalPoints()
-  {
-    int totalPoints=0;
-    for(int i in pointsList)
-      {
-        totalPoints+=i;
-      }
-    debugPrint('totalPoints original: ${widget.question.points} calculate: $totalPoints');
-    widget.question.points=totalPoints;
+  calculateTotalPoints() {
+    int totalPoints = 0;
+    for (int i in pointsList) {
+      totalPoints += i;
+    }
+    debugPrint(
+        'totalPoints original: ${widget.question.points} calculate: $totalPoints');
+    widget.question.points = totalPoints;
   }
 
   @override

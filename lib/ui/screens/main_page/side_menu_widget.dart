@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../models/course.dart';
@@ -192,9 +193,9 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                                     shrinkWrap: true,
                                     itemCount: knowledgeCourses.length,
                                     itemBuilder: (context, index) {
-                                      return knowledgeItem(
+                                      return knowledgeCourses.values.elementAt(index).isNotEmpty? knowledgeItem(
                                           knowledgeCourses.keys.elementAt(index),
-                                          index);
+                                          index):Container();
                                     }),
                                 SizedBox(height: 31.h),
                                 Divider(height: 1.h, color: colors.grey1ColorApp),
@@ -222,22 +223,50 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                           ),
                         ),
                         Divider(height: 1.h, color: colors.grey1ColorApp),
-                        SizedBox(
-                          height: 70.h,
-                          child: Row(
-                            children: [
-                              Padding(
-                                  padding: EdgeInsets.only(left: 15.w, right: 24.w),
-                                  child: const Icon(Icons.question_mark,
-                                      color: Color(0xffC8C9CE))),
-                              Text(
-                                'צריך עזרה ?',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 18.sp,
-                                    color: Colors.white),
-                              )
-                            ],
+                         GestureDetector(
+                           onTap: (){
+                             // showDialog(
+                             //   context: context,
+                             //   builder: (BuildContext context) {
+                             //     return AlertDialog(
+                             //       title: Center(child: Text("?צריך עזרה")),
+                             //       content: Column(
+                             //         mainAxisSize:MainAxisSize.min ,
+                             //         children: [
+                             //           Text("ליצירת קשר פנו לכתובת המייל ",style: TextStyle(fontSize: 25.sp),),
+                             //           SelectableText("ss@ss.com",style: TextStyle(fontSize: 25.sp)),
+                             //
+                             //         ],
+                             //       ),
+                             //       actions: [
+                             //         TextButton(
+                             //           child: Text("סגור"),
+                             //           onPressed: () {
+                             //             Navigator.of(context).pop();
+                             //           },
+                             //         )
+                             //       ],
+                             //     );
+                             //   },
+                             // );
+                           },
+                          child: SizedBox(
+                            height: 70.h,
+                            child: Row(
+                              children: [
+                                Padding(
+                                    padding: EdgeInsets.only(left: 15.w, right: 24.w),
+                                    child: const Icon(Icons.question_mark,
+                                        color: Color(0xffC8C9CE))),
+                                Text(
+                                  'צריך עזרה ?',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 18.sp,
+                                      color: Colors.white),
+                                )
+                              ],
+                            ),
                           ),
                         )
                       ],

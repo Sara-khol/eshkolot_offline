@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:dart_vlc/dart_vlc.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as constants;
-
 
 class VideoWidget extends StatefulWidget {
   final String? videoId;
@@ -30,10 +30,19 @@ class VideoWidget extends StatefulWidget {
 
 class _VideoWidgetState extends State<VideoWidget>
     with AutomaticKeepAliveClientMixin {
-  bool? videoExists = true;
-  Player? player;
+  bool videoExists = false;
+
+  //Player? player;
 
   bool intendedRebuild = false;
+
+  // // Create a [Player] to control playback.
+  // late final player = Player();
+  // // Create a [VideoController] to handle video output from [Player].
+  // late final controller = VideoController(player);
+  late Player player;
+  late VideoController controller;
+  late Future myFuture;
 
   @override
   void initState() {
@@ -45,71 +54,77 @@ class _VideoWidgetState extends State<VideoWidget>
     //   //todo so remove...
     //   setState(() {});
     // });
-    videoInit();
+    myFuture = videoInit();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return videoExists != null && player != null
-        ? videoExists!
-            ? Video(
-                player: player,
-                height: widget.height==0||widget.height>515?515.h:widget.height,
-                width: widget.width==0||widget.width>914?914.w:widget.width,
-                scale: 1.0,
-                // default
-                showControls: true,
-              )
-            : Container(
-                height: widget.height==0?515.h:widget.height,
-                width: widget.width==0?914.w:widget.width,
-                decoration:
-                    BoxDecoration(border: Border.all(color: Colors.black38)),
-                child: Center(
-                  child: Text('הוידאו לא קיים\nעקב בעיה של חסימה',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 25.sp)),
-                ),
-              )
-        : const CircularProgressIndicator();
+    return FutureBuilder(
+      future: myFuture,
+      builder: (context, s) {
+        if (s.hasData) {
+          return
+               videoExists
+                  ? SizedBox(
+                      height: widget.height == 0 || widget.height > 515
+                          ? 515.h
+                          : widget.height,
+                      width: widget.width == 0 || widget.width > 914
+                          ? 914.w
+                          : widget.width,
+                      child: Video(controller: controller),
+                    )
+                  : Container(
+                      height: widget.height == 0 ? 515.h : widget.height,
+                      width: widget.width == 0 ? 914.w : widget.width,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black38)),
+                      child: Center(
+                        child: Text('הוידאו לא קיים\nעקב בעיה של חסימה',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 25.sp)),
+                      ),
+                    );
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 
-  videoInit() async {
+ Future<bool>  videoInit() async {
     if (widget.videoId != null) {
       var dir =
           await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
       String path =
           '${dir.path}/${widget.isLesson ? constants.lessonPath : constants.quizPath}/${widget.fileId}/${widget.videoId}.mp4';
-     debugPrint('path $path');
+      debugPrint('path $path');
       File file = File(path);
       videoExists = await file.exists();
-
-      player = Player(
-          //id: widget.isQuiz ? widget.fileId : int.parse(widget.vimoeId!),
-          id: widget.fileId,
-          videoDimensions: const VideoDimensions(640, 360));
       debugPrint(' videoInit videoId ${widget.videoId}');
 
-      if (videoExists!) {
-        final myFile = Media.file(file);
-        player!.open(myFile, autoStart: false);
+      if (videoExists) {
+        player = Player();
+        controller = VideoController(player);
+        // final myFile = Media.file(file);
+        // player.open(myFile, autoStart: false);
+        player.open(Media(path), play: false);
       }
       debugPrint('videoExists  $videoExists');
       setState(() {});
     } else {
       videoExists = false;
-      setState(() {});
+      // setState(() {});
     }
+    return videoExists;
   }
 
   @override
   void dispose() {
-    if (player != null) {
-      player!.dispose();
-      player!.stop();
+    if(videoExists) {
+      player.dispose();
     }
     super.dispose();
   }

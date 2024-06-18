@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:eshkolot_offline/models/knowledge.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/models/lesson.dart';
@@ -355,16 +357,20 @@ class IsarService {
       }
       user.courses.sort((a, b) => a.courseId.compareTo(b.courseId));
       for (UserCourse userCourse in user.courses) {
-        Course? c = await getCourseById(userCourse.courseId);
-        if (c != null && c.knowledgeId != null) {
-          for (var entry in user.knowledgeCoursesMap.entries) {
-            Knowledge knowledge = entry.key;
-            if (knowledge.id == c.knowledgeId) {
-              user.knowledgeCoursesMap[knowledge]?.add(c);
+        if(userCourse.isSingleCourse) {
+          Course? c = await getCourseById(userCourse.courseId);
+          if (c != null && c.knowledgeId != null) {
+            for (var entry in user.knowledgeCoursesMap.entries) {
+              Knowledge knowledge = entry.key;
+              if (knowledge.id == c.knowledgeId) {
+                user.knowledgeCoursesMap[knowledge]?.add(c);
+              }
             }
           }
         }
       }
+     // user.knowledgeCoursesMap.removeWhere((knowledge, courses) => courses.isEmpty);
+
       // Sorting courses by course.id for each knowledge entry in the map
       user.knowledgeCoursesMap.forEach((knowledge, courses) {
         courses.sort((a, b) => a.id.compareTo(b.id));
@@ -508,7 +514,7 @@ class IsarService {
 
           // getVideos = true;
           Course? course = await ApiService().getCourseData(
-              id: newDataCourse.courseId, /*onSuccess: (){},*/ onError: () {});
+              id: newDataCourse.courseId, /*onSuccess: (){},*/ onError: () {},isSingleInCourse: newDataCourse.isSingleCourse);
           if (course != null) {
             // debugPrint('course.isDownLoadData true');
             // course.isDownLoadData = true;
@@ -533,8 +539,14 @@ class IsarService {
             _user.knowledgeIds = kList;
             if (knowledge != null) {
               //  user.knowledgeIds.add(knowledgeId);
-              debugPrint('add knowledge ${c.knowledgeId!}');
-              _user.knowledgeCoursesMap[knowledge] = [c];
+              debugPrint('add knowledge1 ${c.knowledgeId!}');
+              if(newDataCourse.isSingleCourse) {
+                _user.knowledgeCoursesMap[knowledge] = [c];
+              }
+              else{
+                debugPrint('add knowledge without course');
+                _user.knowledgeCoursesMap[knowledge];
+              }
             }
           } else {
             debugPrint('update knowledge ${c.knowledgeId!}');
@@ -547,7 +559,13 @@ class IsarService {
         courses.add(newDataCourse);
         _user.courses = courses;
       }
+
     }
+ for(UserCourse userCourse in _user.courses) {
+  Course? ccourse = await getCourseById(userCourse.courseId);
+  await updateLearnPath(ccourse!);
+}
+
 
     //todo ?????
     // if (coursesList.isNotEmpty) {
@@ -866,16 +884,11 @@ class IsarService {
     return course != null;
   }
 
-  // Check if a course with a specific ID exists
-  Future<bool> isKnowledgeExist(int kId) async {
-    final isar = await db;
 
-    Knowledge? knowledge =
-        await isar.knowledges.where().idEqualTo(kId).findFirst();
-    return knowledge != null;
-  }
 
-  updateUserCourse(int courseId, Knowledge knowledge) async {
+
+  updateUserCourse(int courseId, Knowledge knowledge,bool isSingleCourse) async {
+    debugPrint('updateUserCourse===');
     final isar = await db;
     //get the course direct from isar so all the items will be in right order
     Course? course = await getCourseById(courseId);
@@ -889,29 +902,66 @@ class IsarService {
 
         //  user.knowledgeIds.add(knowledgeId);
         debugPrint('add knowledge ${knowledge.id}');
-        _user.knowledgeCoursesMap[knowledge] = [course!];
+     if(isSingleCourse) {
+       _user.knowledgeCoursesMap[knowledge] = [course!];
+     }
+     else
+       {
+         _user.knowledgeCoursesMap[knowledge] = [];
+       // aa(course!);
+       }
       } else {
-        Knowledge findK = _user.knowledgeCoursesMap.keys
-            .firstWhere((element) => element.id == knowledge.id);
-        _user.knowledgeCoursesMap[findK]?.add(course!);
+        if(isSingleCourse) {
+          Knowledge findK = _user.knowledgeCoursesMap.keys
+              .firstWhere((element) => element.id == knowledge.id);
+          _user.knowledgeCoursesMap[findK]?.add(course!);
+        }
+        else
+          {
+           // aa(course!);
+          }
       }
-      //
-      // //todo not supposed to exist added for checking meanwhile
-      // if (user.courses.firstWhereOrNull((c) => course.id == c.courseId) ==
-      //     null) {
-      //   //todo get correct data from service api
-      //   UserCourse newUserCourse = UserCourse()
-      //     ..courseId = course.id
-      //     ..status = Status.start
-      //     ..progressPercent = 0;
-      //
-      //   List<UserCourse> courses = List.from(user.courses);
-      //   courses.add(newUserCourse);
-      //   user.courses = courses;
-      // }
-      // user.courses.add(newUserCourse);
       await isar.users.put(_user);
     });
+
+    // Call the aa function outside of the transaction
+    // if (!isSingleCourse || (_user.knowledgeCoursesMap[knowledge]?.contains(course) ?? false)) {
+    //   updateLearnPath(course!);
+ //   }
+  }
+
+  updateLearnPath(Course course) async
+  {
+    debugPrint('updateLearnPath==');
+    final isar = await db;
+    for(int pathId in _user.pathIds) {
+      LearnPath? path = await getPathById(pathId);
+      if (path != null) {
+        bool isPathUpdate=false;
+        if(path.coursesIds.contains(course.id) && !path.coursesPath.contains(course))
+          {
+            isPathUpdate=true;
+            path.coursesPath.add(course);
+            debugPrint('learnPath ${path.id} course ${course.id} ${course.title}');
+          }
+        // for (int pId in path.coursesIds)
+        //   {
+        //     if(course.id==pId)
+        //       {
+        //         isPathUpdate=true;
+        //         path.coursesPath.add(course);
+        //         debugPrint('learnPath ${path.id} course ${course.id} ${course.title}');
+        //       }
+        //   }
+        if(isPathUpdate)
+          {
+            await isar.writeTxnSync(() async {
+              isar.learnPaths.putSync(path);
+            });
+          }
+
+      }
+    }
   }
 
   Future<List<int>> getAllCourseIds() async {
@@ -944,6 +994,7 @@ Future<List<int>>  setPath(LearnPath path) async {
     List<int> pList = List.from(_user.pathIds);
     pList.add(path.id);
     _user.pathIds = pList;
+    debugPrint('_user.pathIds ${_user.pathIds}');
 
     await isar.writeTxnSync(() async {
       isar.learnPaths.putSync(path);

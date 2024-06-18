@@ -81,12 +81,12 @@ class _MainPageChildState extends State<MainPageChild> {
             _bodyWidget = ValueNotifier(
                 LessonWidget(lesson: widget.course.lastLesson!,
                   onNext: widget.course.userCourse!.lessonIndex + 1 <
-                      widget.course.lastSubject!.lessons.length
+                      widget.course.lastSubject!.lessonsList.length
                       ? () =>
                       goToNextLesson(
                           widget.course.lastSubject!,
                           widget.course.userCourse!.subjectIndex,
-                          widget.course.lastSubject!.lessons.elementAt(
+                          widget.course.lastSubject!.lessonsList.elementAt(
                               widget.course.userCourse!.lessonIndex + 1),
                           widget.course.userCourse!.lessonIndex + 1)
                       : widget.course.userCourse!.subjectIndex + 1 <
@@ -98,7 +98,7 @@ class _MainPageChildState extends State<MainPageChild> {
                           widget.course.subjects
                               .elementAt(
                               widget.course.userCourse!.subjectIndex + 1)
-                              .lessons
+                              .lessonsList
                               .elementAt(
                               0),
                           0) : null,
@@ -145,13 +145,13 @@ class _MainPageChildState extends State<MainPageChild> {
         _bodyWidget.value = LessonWidget(
           lesson: _currentCourse.subjects
               .elementAt(subjectPickedIndex)
-              .lessons
+              .lessonsList
               .elementAt(lessonPickedIndex),
           updateComplete: updateCompleteLesson,
           onNext: lessonPickedIndex + 1 <
               _currentCourse.subjects
                   .elementAt(subjectPickedIndex)
-                  .lessons
+                  .lessonsList
                   .length
               ? () =>
               goToNextLesson(
@@ -159,7 +159,7 @@ class _MainPageChildState extends State<MainPageChild> {
                   subjectPickedIndex,
                   _currentCourse.subjects
                       .elementAt(subjectPickedIndex)
-                      .lessons
+                      .lessonsList
                       .elementAt(lessonPickedIndex + 1),
                   lessonPickedIndex + 1)
               : null,
@@ -170,7 +170,7 @@ class _MainPageChildState extends State<MainPageChild> {
           Subject currentSubject =
           _currentCourse.subjects.elementAt(subjectPickedIndex);
           if (lessonPickedIndex != -1) {
-            currentQuiz = currentSubject.lessons
+            currentQuiz = currentSubject.lessonsList
                 .elementAt(lessonPickedIndex)
                 .questionnaire
                 .elementAt(questionPickedIndex);
@@ -225,7 +225,7 @@ class _MainPageChildState extends State<MainPageChild> {
     currentStep = 0;
     for (Subject subject in _currentCourse.subjects) {
       // totalSteps+=subject.lessons.length;
-      for (Lesson lesson in subject.lessons) {
+      for (Lesson lesson in subject.lessonsList) {
         totalSteps++;
         if (lesson.isCompletedCurrentUser) {
           currentStep++;
@@ -395,10 +395,10 @@ class _MainPageChildState extends State<MainPageChild> {
                                                   child: ListView.builder(
                                                     shrinkWrap: true,
                                                     itemCount: currentSubject
-                                                        .lessons.length,
+                                                        .lessonsList.length,
                                                     itemBuilder: (ctx, lIndex) {
                                                       Lesson currentLesson =
-                                                      currentSubject.lessons
+                                                      currentSubject.lessonsList
                                                           .elementAt(lIndex);
                                                       return Center(
                                                           child: Column(
@@ -416,7 +416,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                           .isEmpty &&
                                                                       lIndex ==
                                                                           currentSubject
-                                                                              .lessons
+                                                                              .lessonsList
                                                                               .length -
                                                                               1,
                                                                   lIndex,
@@ -441,7 +441,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                           .value =
                                                                           LessonWidget(
                                                                             lesson: currentSubject
-                                                                                .lessons
+                                                                                .lessonsList
                                                                                 .elementAt(
                                                                                 lessonPickedIndex),
                                                                             updateComplete:
@@ -449,14 +449,14 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                             onNext: lessonPickedIndex +
                                                                                 1 <
                                                                                 currentSubject
-                                                                                    .lessons
+                                                                                    .lessonsList
                                                                                     .length
                                                                                 ? () =>
                                                                                 goToNextLesson(
                                                                                     currentSubject,
                                                                                     subjectPickedIndex,
                                                                                     currentSubject
-                                                                                        .lessons
+                                                                                        .lessonsList
                                                                                         .elementAt(
                                                                                         lessonPickedIndex +
                                                                                             1),
@@ -496,7 +496,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                                                                   1 &&
                                                                               lIndex ==
                                                                                   currentSubject
-                                                                                      .lessons
+                                                                                      .lessonsList
                                                                                       .length -
                                                                                       1 &&
                                                                               currentSubject
@@ -742,9 +742,9 @@ class _MainPageChildState extends State<MainPageChild> {
     return currentSubject.isCompletedCurrentUser
         ? Icon(Icons.check_circle,
         color: colors.lightGreen1ColorApp, size: 22.sp)
-        : currentSubject.lessons
+        : currentSubject.lessonsList
         .any((lesson) => lesson.isCompletedCurrentUser) ||
-        currentSubject.lessons.any((lesson) =>
+        currentSubject.lessonsList.any((lesson) =>
         lesson.isCompletedCurrentUser ||
             lesson.questionnaire
                 .any((q) => q.isCompletedCurrentUser)) ||
@@ -765,7 +765,8 @@ class _MainPageChildState extends State<MainPageChild> {
       VoidCallback onPress) {
     //todo remove sizebox because text can be long and there is no space,
     //but when doing that can not see VerticalDivider in stack
-    return SizedBox(
+    return Container(
+      color: Colors.white,
       height: 50.h,
       child: Row(
         children: [
@@ -792,6 +793,7 @@ class _MainPageChildState extends State<MainPageChild> {
           SizedBox(width: 11.w),
           Expanded(
             child: Material(
+              color: Colors.white,
               child: Container(
                   margin: EdgeInsets.only(left: 20.w),
                   padding: EdgeInsets.only(
@@ -902,20 +904,22 @@ class _MainPageChildState extends State<MainPageChild> {
                     if (_bodyWidget.value is LessonWidget) {
                       Subject mySubject =
                       _currentCourse.subjects.elementAt(subjectPickedIndex);
+                      updateCompleteLesson(mySubject.lessonsList.elementAt(lessonPickedIndex).lessonId);
                       lessonPickedIndex = lessonPickedIndex + 1;
                       _bodyWidget.value = LessonWidget(
-                        lesson: mySubject.lessons.elementAt(lessonPickedIndex),
+                        lesson: mySubject.lessonsList.elementAt(lessonPickedIndex),
                         updateComplete: updateCompleteLesson,
-                        onNext: lessonPickedIndex + 1 < mySubject.lessons.length
+                        onNext: lessonPickedIndex + 1 < mySubject.lessonsList.length
                             ? () =>
                             goToNextLesson(
                                 mySubject,
                                 subjectPickedIndex,
-                                mySubject.lessons
+                                mySubject.lessonsList
                                     .elementAt(lessonPickedIndex + 1),
                                 lessonPickedIndex + 1)
                             : null,
                       );
+
                     } else {
                       {
                         lastSubjectPickedIndex = subjectPickedIndex;
@@ -995,7 +999,7 @@ class _MainPageChildState extends State<MainPageChild> {
               } else {
                 qId = course.subjects
                     .elementAt(saveSubjectIndex)
-                    .lessons
+                    .lessonsList
                     .elementAt(lessonPickedIndex)
                     .questionnaire
                     .elementAt(saveQIndex)
@@ -1014,7 +1018,7 @@ class _MainPageChildState extends State<MainPageChild> {
             ..lessonStopId = lessonPickedIndex != -1
                 ? course.subjects
                 .elementAt(saveSubjectIndex)
-                .lessons
+                .lessonsList
                 .elementAt(lessonPickedIndex)
                 .lessonId
                 : 0
@@ -1048,10 +1052,10 @@ class _MainPageChildState extends State<MainPageChild> {
       _bodyWidget.value = LessonWidget(
           lesson: currentLesson,
           updateComplete: updateCompleteLesson,
-          onNext: nextIndex < currentSubject.lessons.length
+          onNext: nextIndex < currentSubject.lessonsList.length
               ? () =>
               goToNextLesson(currentSubject, subjectIndex,
-                  currentSubject.lessons.elementAt(nextIndex), nextIndex)
+                  currentSubject.lessonsList.elementAt(nextIndex), nextIndex)
               : null);
     });
   }
@@ -1080,10 +1084,10 @@ class _MainPageChildState extends State<MainPageChild> {
   updateCompleteLesson(int lessonId) async {
     Subject currentSubject =
     _currentCourse.subjects.elementAt(subjectPickedIndex);
-    if (!currentSubject.lessons
+    if (!currentSubject.lessonsList
         .elementAt(lessonPickedIndex)
         .isCompletedCurrentUser) {
-      currentSubject.lessons
+      currentSubject.lessonsList
           .elementAt(lessonPickedIndex)
           .isCompletedCurrentUser = true;
       await IsarService().updateLessonCompleted(lessonId, updateUser: true);
@@ -1096,7 +1100,7 @@ class _MainPageChildState extends State<MainPageChild> {
   checkSubjectCompleted(Subject currentSubject) {
     //if all lessons and quizs in subject are completed set subject as completed
     if (!currentSubject.isCompletedCurrentUser &&
-        currentSubject.lessons.every((l) =>
+        currentSubject.lessonsList.every((l) =>
         l.isCompletedCurrentUser &&
             l.questionnaire.every((q) => q.isCompletedCurrentUser)) &&
         currentSubject.questionnaire.every((q) => q.isCompletedCurrentUser)) {
@@ -1132,12 +1136,12 @@ class _MainPageChildState extends State<MainPageChild> {
       Subject currentSubject =
       _currentCourse.subjects.elementAt(subjectPickedIndex);
       if (lessonPickedIndex != -1) {
-        if (!currentSubject.lessons
+        if (!currentSubject.lessonsList
             .elementAt(lessonPickedIndex)
             .questionnaire
             .elementAt(questionPickedIndex)
             .isCompletedCurrentUser) {
-          currentSubject.lessons
+          currentSubject.lessonsList
               .elementAt(lessonPickedIndex)
               .questionnaire
               .elementAt(questionPickedIndex)
@@ -1145,19 +1149,19 @@ class _MainPageChildState extends State<MainPageChild> {
           numUpdate++;
 
           //check if all quizs in lessons are completed
-          if (currentSubject.lessons
+          if (currentSubject.lessonsList
               .elementAt(lessonPickedIndex)
               .questionnaire
               .every((e) => e.isCompletedCurrentUser)) {
             //quiz of lesson
-            if (!currentSubject.lessons
+            if (!currentSubject.lessonsList
                 .elementAt(lessonPickedIndex)
                 .isCompletedCurrentUser) {
-              currentSubject.lessons
+              currentSubject.lessonsList
                   .elementAt(lessonPickedIndex)
                   .isCompletedCurrentUser = true;
               numUpdate++;
-              lessonId = currentSubject.lessons
+              lessonId = currentSubject.lessonsList
                   .elementAt(lessonPickedIndex)
                   .lessonId;
             }
@@ -1229,7 +1233,7 @@ class _MainPageChildState extends State<MainPageChild> {
           doShowNext = lessonPickedIndex + 1 <
               _currentCourse.subjects
                   .elementAt(subjectPickedIndex)
-                  .lessons
+                  .lessonsList
                   .length;
         }
         break;

@@ -9,10 +9,12 @@
 #include <audioplayers_windows/audioplayers_windows_plugin.h>
 #include <bitsdojo_window_windows/bitsdojo_window_plugin.h>
 #include <connectivity_plus/connectivity_plus_windows_plugin.h>
-#include <dart_vlc/dart_vlc_plugin.h>
 #include <flutter_platform_alert/flutter_platform_alert_plugin.h>
 #include <isar_flutter_libs/isar_flutter_libs_plugin.h>
+#include <media_kit_libs_windows_video/media_kit_libs_windows_video_plugin_c_api.h>
+#include <media_kit_video/media_kit_video_plugin_c_api.h>
 #include <permission_handler_windows/permission_handler_windows_plugin.h>
+#include <screen_brightness_windows/screen_brightness_windows_plugin.h>
 #include <sentry_flutter/sentry_flutter_plugin.h>
 #include <syncfusion_pdfviewer_windows/syncfusion_pdfviewer_windows_plugin.h>
 #include <url_launcher_windows/url_launcher_windows.h>
@@ -25,14 +27,18 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("BitsdojoWindowPlugin"));
   ConnectivityPlusWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("ConnectivityPlusWindowsPlugin"));
-  DartVlcPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("DartVlcPlugin"));
   FlutterPlatformAlertPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterPlatformAlertPlugin"));
   IsarFlutterLibsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("IsarFlutterLibsPlugin"));
+  MediaKitLibsWindowsVideoPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("MediaKitLibsWindowsVideoPluginCApi"));
+  MediaKitVideoPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("MediaKitVideoPluginCApi"));
   PermissionHandlerWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("PermissionHandlerWindowsPlugin"));
+  ScreenBrightnessWindowsPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("ScreenBrightnessWindowsPlugin"));
   SentryFlutterPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("SentryFlutterPlugin"));
   SyncfusionPdfviewerWindowsPluginRegisterWithRegistrar(

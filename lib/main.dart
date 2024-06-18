@@ -4,7 +4,6 @@ import 'dart:isolate';
 
 import 'package:archive/archive_io.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dart_vlc/dart_vlc.dart';
 import 'package:eshkolot_offline/models/learn_path.dart';
 import 'package:eshkolot_offline/services/installationDataHelper.dart';
 import 'package:eshkolot_offline/services/isar_service.dart';
@@ -33,13 +32,14 @@ import 'dart:convert';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
+import 'package:media_kit/media_kit.dart';                      // Provides [Player], [Media], [Playlist] etc.
 
 
 Future<void> main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    FutureOr<SentryEvent?> beforeSend(SentryEvent event, {Hint? hint}) async {
+    Future<SentryEvent?> beforeSend(SentryEvent event, {Hint? hint}) async {
 // Check internet connectivity
       var connectivityResult = await Connectivity().checkConnectivity();
       // if (connectivityResult == ConnectivityResult.none) {
@@ -68,7 +68,9 @@ Future<void> main() async {
 
         //  options.debug=false;
         // options.beforeBreadcrumb =beforeBreadcrumbCallback;
-        options.beforeSend = beforeSend;
+        options.beforeSend = beforeSend as BeforeSendCallback?;
+
+
 
         // options.maxRequestBodySize = MaxRequestBodySize.small;
         // options.maxResponseBodySize = MaxResponseBodySize.small;
@@ -76,7 +78,9 @@ Future<void> main() async {
       // appRunner: () => runApp(MyApp()),
     );
 
-    DartVLC.initialize();
+   WidgetsFlutterBinding.ensureInitialized();
+    // Necessary initialization for package:media_kit.
+    MediaKit.ensureInitialized();
 
     List<Course> myCourses = [];
 
@@ -209,10 +213,11 @@ class _MyAppState extends State<MyApp> {
   late bool isNetWorkConnection;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   late String destDirPath;
-  late bool shwProgress=false , extractWorked;
+  late bool showProgress=false , extractWorked;
   bool didGetVideosCorrect = false;
   late SharedPreferences preferences;
   late List<Course> courses;
+  bool isLoading= false;
 
   @override
   void initState() {
@@ -223,16 +228,21 @@ class _MyAppState extends State<MyApp> {
       setDataFiles();
     }
     else{
+      showProgress=true;
       getSharedPrefs().then((value) {
         if(!extractWorked) {
           setDataFiles();
         }
-
+        else
+          {
+            showProgress=false;
+          }
         // else if(!didGetVideosCorrect)
         //   {
         //
         //   }
       });
+
 
     }
 
@@ -268,7 +278,7 @@ class _MyAppState extends State<MyApp> {
                     backgroundColor: Colors.white,
                     body: widget.dataWasFilled && didGetVideosCorrect && extractWorked
                         ? const LoginPage()
-                        : shwProgress
+                        : showProgress
                             ?  showProgressExtractWidget()
                     // todo disable continue if not all videos files of courses are existed
                             : extractWorked /*&& didGetVideosCorrect*/
@@ -282,7 +292,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<bool> setDataFiles() async {
     int numOfCourseWithVideos = 0;
-    shwProgress = true;
+    showProgress = true;
     setState(() {});
     preferences = await SharedPreferences.getInstance();
     preferences.setBool('extractWorked', false);
@@ -313,7 +323,7 @@ class _MyAppState extends State<MyApp> {
       debugPrint('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
       await Sentry.captureMessage('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
     }
-    shwProgress = false;
+    showProgress = false;
     setState(() {});
     return true;
   }

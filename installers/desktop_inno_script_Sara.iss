@@ -24,6 +24,7 @@ DisableProgramGroupPage=yes
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\USER\GoAppProjects\eshkolot_offline\installers
 OutputBaseFilename=eshkolot_setup
+SetupIconFile=C:\Users\USER\GoAppProjects\eshkolot_offline\windows\runner\resources\app_icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -38,7 +39,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\bitsdojo_window_windows_plugin.lib"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\connectivity_plus_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\dart_vlc_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\eshkolot_offline.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\eshkolot_offline.exp"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\eshkolot_offline.lib"; DestDir: "{app}"; Flags: ignoreversion
@@ -46,23 +46,26 @@ Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\R
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\isar.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\isar_flutter_libs_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\libvlc.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\libvlccore.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\permission_handler_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\sentry_flutter_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\syncfusion_pdfviewer_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\pdfium.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\audioplayers_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\media_kit_libs_windows_video_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\media_kit_native_event_loop.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\media_kit_video_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\screen_brightness_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\window_size_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\libmpv-2.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
-;Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\data\hihi.json"; DestDir: "{localappdata}"; Flags: ignoreversion recursesubdirs 
 
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}";IconFilename: "C:\Users\USER\GoAppProjects\eshkolot_offline\windows\runner\resources\app_icon.ico"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "C:\Users\USER\GoAppProjects\eshkolot_offline\windows\runner\resources\app_icon.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

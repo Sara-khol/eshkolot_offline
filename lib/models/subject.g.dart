@@ -59,9 +59,9 @@ const SubjectSchema = CollectionSchema(
     )
   },
   links: {
-    r'lessons': LinkSchema(
-      id: 905957421829937577,
-      name: r'lessons',
+    r'lessonsList': LinkSchema(
+      id: 3678992713300022819,
+      name: r'lessonsList',
       target: r'Lesson',
       single: false,
     ),
@@ -143,12 +143,13 @@ Id _subjectGetId(Subject object) {
 }
 
 List<IsarLinkBase<dynamic>> _subjectGetLinks(Subject object) {
-  return [object.lessons, object.questionnaire];
+  return [object.lessonsList, object.questionnaire];
 }
 
 void _subjectAttach(IsarCollection<dynamic> col, Id id, Subject object) {
   object.id = id;
-  object.lessons.attach(col, col.isar.collection<Lesson>(), r'lessons', id);
+  object.lessonsList
+      .attach(col, col.isar.collection<Lesson>(), r'lessonsList', id);
   object.questionnaire
       .attach(col, col.isar.collection<Quiz>(), r'questionnaire', id);
 }
@@ -764,52 +765,55 @@ extension SubjectQueryObject
 
 extension SubjectQueryLinks
     on QueryBuilder<Subject, Subject, QFilterCondition> {
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessons(
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessonsList(
       FilterQuery<Lesson> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'lessons');
-    });
-  }
-
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessonsLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'lessons', length, true, length, true);
-    });
-  }
-
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessonsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'lessons', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessonsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'lessons', 0, false, 999999, true);
-    });
-  }
-
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessonsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'lessons', 0, true, length, include);
+      return query.link(q, r'lessonsList');
     });
   }
 
   QueryBuilder<Subject, Subject, QAfterFilterCondition>
-      lessonsLengthGreaterThan(
+      lessonsListLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'lessonsList', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessonsListIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'lessonsList', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      lessonsListIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'lessonsList', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      lessonsListLengthLessThan(
     int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'lessons', length, include, 999999, true);
+      return query.linkLength(r'lessonsList', 0, true, length, include);
     });
   }
 
-  QueryBuilder<Subject, Subject, QAfterFilterCondition> lessonsLengthBetween(
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      lessonsListLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'lessonsList', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<Subject, Subject, QAfterFilterCondition>
+      lessonsListLengthBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -817,7 +821,7 @@ extension SubjectQueryLinks
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(
-          r'lessons', lower, includeLower, upper, includeUpper);
+          r'lessonsList', lower, includeLower, upper, includeUpper);
     });
   }
 
