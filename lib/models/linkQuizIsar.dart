@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
 
 part 'linkQuizIsar.g.dart';
@@ -12,5 +11,5 @@ class LinkQuizIsar {
   bool isDownload = false;
   late String downloadLink;
   late String name;
-  late bool isBlock;
+   bool isBlock=false;
 }

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../models/course.dart';
@@ -503,8 +502,11 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                       // color:path.color.isNotEmpty? Color(int.parse(path.color)):Colors.indigo,
                     )),
                 SizedBox(width: 12.w),
-                Text(path.title,
-                    style: TextStyle(fontSize: 16.sp, color: Colors.white)),
+                Expanded(
+                  child: Text(overflow:  TextOverflow.ellipsis,
+                      path.title,
+                      style: TextStyle(fontSize: 16.sp, color: Colors.white)),
+                ),
                 const Spacer(),
                 SizedBox(
                     width: 6.w,

@@ -22,7 +22,7 @@ class DownloadService with ChangeNotifier {
   String token = '1234e6802e12410d1130b9fa774d4cd0'; //privet video files
 
   int projectId = 0; //english
-  int quizId = 0; //english
+  //int quizId = 0; //english
   Dio dioDownload = Dio();
   List<LinkQuizIsar> isarLinksList = [];
   int numDownloadFiles = 0, numOfErrorFiles = 0;
@@ -33,6 +33,7 @@ class DownloadService with ChangeNotifier {
   int errorTries = 0;
   List<Course> courses = [];
   int numOfAllFiles = 0;
+  int numOfCourses = 0;
   CancelToken cancelToken = CancelToken();
   late String path;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
@@ -41,7 +42,7 @@ class DownloadService with ChangeNotifier {
   Map _source = {ConnectivityResult.none: false};
 
   // final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
-  late bool isNetWorkConnection;
+  late bool isNetWorkConnection=false;
   bool isDispose = false;
   late StreamSubscription subscription;
   Timer? timer;
@@ -52,6 +53,9 @@ class DownloadService with ChangeNotifier {
   bool  didCheckCompleted=false;
   late SharedPreferences preferences;
   DownloadService._privateConstructor(); // Private constructor for singleton
+
+  bool isCancelled = false;
+  List<CancelToken> cancelTokens = [];
 
   static final DownloadService _instance =
       DownloadService._privateConstructor();
@@ -64,6 +68,7 @@ class DownloadService with ChangeNotifier {
     if (!wasInit) {
       debugPrint("downloadService init");
       didCheckCompleted=false;
+      isCancelled=false;
       // _networkConnectivity.whileDownloading = true;
      // _networkConnectivity.initialise();
        preferences = await SharedPreferences.getInstance();
@@ -79,7 +84,8 @@ class DownloadService with ChangeNotifier {
           isNetWorkConnection = false;
         //  downloadStatus = DownloadStatus.netWorkError;
           notifyListeners();
-          cancelToken.cancel('wwwwwww');
+       //   cancelToken.cancel('wwwwwww');
+          cancelAllDownloads();
 
           debugPrint('no connection so cancel downloading');
           Sentry.addBreadcrumb(
@@ -117,28 +123,102 @@ class DownloadService with ChangeNotifier {
     }
   }
 
-  downloadQuizFiles(List<String> urls, int quizId, int courseId) {
-    //  debugPrint("quizId $quizId length ${urls.length}");
+  // downloadQuizFiles(List<String> urls, int quizId, int courseId) {
+  //   //  debugPrint("quizId $quizId length ${urls.length}");
+  //
+  //   numOfAllFiles = urls.length;
+  //   this.quizId = quizId;
+  //   for (String s in urls) {
+  //     String name = s.substring(s.lastIndexOf('/'), s.length);
+  //     if (/*!name.endsWith('.pdf') &&*/
+  //         /* !name.endsWith('.mp4') &&*/
+  //         !s.contains('player.vimeo.com') /*&& !s.contains('wordpress')*/) {
+  //       isarLinksList.add(LinkQuizIsar()
+  //         ..quizId = quizId
+  //         ..courseId = courseId
+  //         ..name = name
+  //         ..downloadLink = s);
+  //     downloadFile(s, name, quizId, courseId);
+  //
+  //     } else {
+  //       numDownloadFiles++;
+  //     }
+  //   }
+  //  // _downloadInBatches(urls,courseId);
+  // }
 
-    numOfAllFiles = urls.length;
-    this.quizId = quizId;
-    for (String s in urls) {
-      String name = s.substring(s.lastIndexOf('/'), s.length);
-      if (/*!name.endsWith('.pdf') &&*/
-          /* !name.endsWith('.mp4') &&*/
-          !s.contains('player.vimeo.com') /*&& !s.contains('wordpress')*/) {
-        isarLinksList.add(LinkQuizIsar()
-          ..quizId = quizId
-          ..courseId = courseId
-          ..name = name
-          ..downloadLink = s);
-        downloadFile(s, name, quizId, courseId);
-      } else {
-        numDownloadFiles++;
+  downloadQuizFiles(List<CC> urls, int courseId,bool isNewCourse) async {
+    debugPrint('isCancelled $isCancelled');
+    if(!isCancelled) {
+      debugPrint(
+          "courseId $courseId length ${urls.length} isNewCourse $isNewCourse");
+
+      numOfAllFiles = urls.length;
+      List<Future<void>> downloadTasks = [];
+
+      // Limit the number of concurrent downloads
+      const int maxConcurrentDownloads = 100;
+      if (isNewCourse) {
+        for (CC s in urls) {
+          String name = s.url.substring(s.url.lastIndexOf('/'), s.url.length);
+          isarLinksList.add(LinkQuizIsar()
+            ..quizId = s.quizId
+            ..courseId = courseId
+            ..name = name
+            ..downloadLink = s.url);
+          IsarService().addIsarQuiz(LinkQuizIsar()
+            ..quizId = s.quizId
+            ..courseId = courseId
+            ..name = name
+            ..downloadLink = s.url);
+        }
+      }
+      // final Stream<CC> urlStream = Stream.fromIterable(urls);
+      //final StreamSubscription<CC> urlSubscription = urlStream.listen((CC s) async {
+      int urlNum = 0;
+      for (CC s in urls) {
+        urlNum++;
+        String name = s.url.substring(s.url.lastIndexOf('/'), s.url.length);
+
+        CancelToken cancelToken = CancelToken();
+        cancelTokens.add(cancelToken);
+
+        // if (!s.url.contains('player.vimeo.com')) {
+
+        //if(downloadTasks.length<maxConcurrentDownloads || urlNum!=urls.length ) {
+        downloadTasks.add(downloadFile(s.url, name, s.quizId,
+            courseId, cancelToken));
+        //}
+        if (downloadTasks.length == maxConcurrentDownloads ||
+            urlNum == urls.length) {
+          await Future.wait(downloadTasks);
+          debugPrint(
+              'course ${courseId} download ${downloadTasks.length} files ');
+
+          downloadTasks.clear();
+        }
+        // } else {
+        //  numDownloadFiles++;
+        //}
+        if (isCancelled) {
+          break;
+        }
+      }
+
+      if (!isCancelled) {
+        debugPrint('course ${courseId} download finish ');
+
+        downloadTasks.clear();
+
+        await IsarService().updateCourseDownloadFiles(courseId);
+        numOfCourses++;
+        checkCompleted();
+      }
+      else {
+        debugPrint('was canceled!!!');
       }
     }
   }
-
 
   startDownLoadingBlockedLinks(List<LinkQuizIsar> list,
       {bool wasNetWorkProblem = false, bool notify = false}) async {
@@ -170,12 +250,14 @@ class DownloadService with ChangeNotifier {
      // setTimer();
 
       for (LinkQuizIsar l in list) {
+        CancelToken cancelToken = CancelToken();
+        cancelTokens.add(cancelToken);
         if (wasNetWorkProblem) {
           // debugPrint('awaittttttttt');
-          await downloadFile(l.downloadLink, l.name, l.quizId, l.courseId,id: l.id);
+          await downloadFile(l.downloadLink, l.name, l.quizId, l.courseId,cancelToken,id: l.id);
         } else {
           // debugPrint('nooo await');
-          downloadFile(l.downloadLink, l.name, l.quizId, l.courseId,id: l.id);
+          downloadFile(l.downloadLink, l.name, l.quizId, l.courseId,cancelToken,id: l.id);
         }
       }
     }
@@ -188,12 +270,11 @@ class DownloadService with ChangeNotifier {
     }*/
   }
 
-  Future<void> downloadFile(String url, String name, int qId, int courseId,
+  Future<void> downloadFile(String url, String name, int qId, int courseId,CancelToken cancelToken,
       {int id = 0}) async {
     String progress = '';
     var dir =
         await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
-    String path='${dir.path}/${constants.quizPath}/$qId$name';
    // dir = Directory(path);
     // if(!dir.existsSync())
     //   {
@@ -206,19 +287,24 @@ class DownloadService with ChangeNotifier {
       onReceiveProgress: (rec, total) {
         progress = ((rec / total) * 100).toStringAsFixed(0);
       },
-    ).then((_) {
+    ).then((_) async{
       if (name.split('.').last != 'mp4' || progress == '100') {
         numDownloadFiles++;
         debugPrint(
             'name $name qId $qId numDownloadFiles $numDownloadFiles courseId $courseId');
        if(isarLinksList.isNotEmpty) {
-         isarLinksList.firstWhere((iv) => iv.name == name && iv.quizId == qId).isDownload=true;
+         isarLinksList
+             .firstWhere((iv) => iv.name == name && iv.quizId == qId)
+             .isDownload = true;
        }
+         if(id==0) {
+        await  IsarService().updateLinkQuizByName(name,qId);
+         }
        //when downloading again blocked links
        if(id!=0) {
-         IsarService().updateLinkQuiz(id);
+         await IsarService().updateLinkQuiz(id);
        }
-        checkCompleted();
+        if (tryAgain) checkCompleted();
 
 
          // IsarService().updateIsarLinkQuiz(int.parse(name.substring(1)));
@@ -228,21 +314,18 @@ class DownloadService with ChangeNotifier {
       if (e is DioException && CancelToken.isCancel(e)) {
         debugPrint('CancelToken.isCancel');
         numOfErrorFiles++;
-        if (!blockLinks.contains(url)) {
-          blockLinks.add(url);
-        }
-        if (id == 0 || !await IsarService().checkIsarQuizExistes(id)) {
-          IsarService().addIsarQuiz(LinkQuizIsar()
-            ..courseId = courseId
-            ..downloadLink = url
-            ..quizId = qId
-            ..name = name
-            ..isBlock = false
-            ..isDownload = false);
-        }
-        // debugPrint(e.message);
-        // Sentry.addBreadcrumb(
-        //     Breadcrumb(message: e.message, level: SentryLevel.error));
+        // if (!blockLinks.contains(url)) {
+        //   blockLinks.add(url);
+        // }
+        // if (id == 0 || !await IsarService().checkIsarQuizExistes(id)) {
+        //   IsarService().addIsarQuiz(LinkQuizIsar()
+        //     ..courseId = courseId
+        //     ..downloadLink = url
+        //     ..quizId = qId
+        //     ..name = name
+        //     ..isBlock = false
+        //     ..isDownload = false);
+        // }
       } else {
         numOfErrorFiles++;
         if (!blockLinks.contains(url)) {
@@ -269,18 +352,30 @@ class DownloadService with ChangeNotifier {
               Breadcrumb(
                   message: 'erorrrr download quiz file: ${e} quizId: $qId url $url'));
         }
-        checkCompleted();
+       if(tryAgain) checkCompleted();
       }
     }
     );
   }
 
+  void cancelAllDownloads() {
+    debugPrint('cancelAllDownloads');
+    isCancelled = true;
+    for (final cancelToken in cancelTokens) {
+      cancelToken.cancel();
+    }
+    cancelTokens.clear();
+  }
+
   checkCompleted() async {
+
     int myNum=tryAgain?numOfAllFiles:InstallationDataHelper().numOfQuizUrls;
-    if (numDownloadFiles + numOfErrorFiles ==myNum ) {
+    debugPrint('checkCompleted ${numDownloadFiles + numOfErrorFiles} $myNum numOfCourses $numOfCourses numOfCoursesDownloadQuiz ${InstallationDataHelper().numOfCoursesDownloadQuiz}');
+    if (numDownloadFiles + numOfErrorFiles ==myNum && numOfCourses== InstallationDataHelper().numOfCoursesDownloadQuiz) {
       if (!didCheckCompleted) {
         debugPrint('all downloaded!! $myNum $numDownloadFiles $numOfErrorFiles');
         didCheckCompleted = true;
+
         preferences.setBool('downloadFiles', true);
         //added this condition - coursesNotCompleted when internet stops in middle of
         // downloading quiz when starts again it will download videos from start
@@ -404,10 +499,7 @@ class DownloadService with ChangeNotifier {
         await Sentry.captureMessage(
             'my downloading data ok $captureMessageNum');
       }
-      // }
-      //   transaction.finish();
       isDispose = true;
-
       subscription.cancel();
       //makes a problem
       // _networkConnectivity.disposeStream();
@@ -416,6 +508,7 @@ class DownloadService with ChangeNotifier {
       if (timer != null && timer!.isActive) {
         timer!.cancel();
       }
+      cancelAllDownloads();
       super.dispose();
     }
   }

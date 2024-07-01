@@ -18,6 +18,7 @@ import 'package:eshkolot_offline/utils/constants.dart' as constants;
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../models/course.dart';
+import '../models/linkQuizIsar.dart';
 import '../models/user.dart';
 
 class InstallationDataHelper {
@@ -49,6 +50,7 @@ class InstallationDataHelper {
   EventBus eventBusDialogs = EventBus();
 
   int numOfQuizUrls = 0;
+  int numOfCoursesDownloadQuiz=0;
 
   List<Course> coursesList = [];
 
@@ -246,7 +248,7 @@ class InstallationDataHelper {
           Quiz quiz = Quiz.fromJson(q, qId);
           lesson.questionnaire.add(quiz);
           myQuizzes.add(quiz);
-          numOfQuizUrls += quiz.quizUrls.length;
+         // numOfQuizUrls += quiz.quizUrls.length;
           // await DownloadService()
           //     .downloadQuizFiles(quiz.quizUrls, quiz.id, courseId);
         }
@@ -259,7 +261,7 @@ class InstallationDataHelper {
         //debugPrint('===qId $qId====');
         Quiz quiz = Quiz.fromJson(q, qId);
         subject.questionnaire.add(quiz);
-        numOfQuizUrls += quiz.quizUrls.length;
+       // numOfQuizUrls += quiz.quizUrls.length;
         myQuizzes.add(quiz);
       }
 
@@ -272,10 +274,9 @@ class InstallationDataHelper {
       //debugPrint('===qId $qId====');
       Quiz quiz = Quiz.fromJson(q, qId);
       course.questionnaires.add(quiz);
-      numOfQuizUrls += quiz.quizUrls.length;
+    //  numOfQuizUrls += quiz.quizUrls.length;
       myQuizzes.add(quiz);
     }
-    debugPrint('numOfQuizUrls $numOfQuizUrls');
     // await IsarService().addQuizzes(myQuizzes);
     //  await IsarService().addLessons(myLessons);
     // await IsarService().addSubjects(mySubjects);
@@ -495,35 +496,104 @@ class InstallationDataHelper {
     return false;
   }
 
-  downLoadQuizFilesByCourse(List<Course> courses) {
+  downLoadQuizFilesByCourse(List<Course> courses) async {
     debugPrint('downLoadQuizFiles==');
     DownloadService().cancelToken = CancelToken();
     DownloadService().tryAgain = false;
     DownloadService().numDownloadFiles = 0;
+    DownloadService().numOfErrorFiles = 0;
+    DownloadService().numOfCourses = 0;
+    DownloadService().didCheckCompleted = false;
+    DownloadService().isCancelled = false;
     DownloadService().courseIds = courses.map((course) => course.id).toList();
-    for (Course course in courses) {
-      if (course.questionnaires.isNotEmpty) {
-        for (Quiz quiz in course.questionnaires) {
-          DownloadService()
-              .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
-        }
+    numOfQuizUrls=0;
+
+    List<LinkQuizIsar> list=await IsarService().getAllLinksToDownload();
+
+
+    // Use map to extract the courseIds and then convert to a Set to remove duplicates
+
+    List<int> courseIdsLinks = list.map((quiz) => quiz.courseId).toSet().toList();
+    debugPrint('courseIds of links $courseIdsLinks');
+
+    List<int> courseIds =  courses.map((quiz) => quiz.id).toSet().toList();
+    debugPrint('courseIds of courses $courseIds length ${courseIds.length}');
+
+
+    for(int id in courseIdsLinks)
+      {
+        if(!courseIds.contains(id))
+          {
+               courses.add(Course()..id=id..errorLinks=true);
+               debugPrint('course error links $id');
+          }
       }
-      for (Subject subject in course.subjects) {
-        if (subject.questionnaire.isNotEmpty) {
-          for (Quiz quiz in subject.questionnaire) {
-            DownloadService()
-                .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
+    numOfCoursesDownloadQuiz=courses.length;
+    debugPrint('numOfCoursesDownloadQuiz $numOfCoursesDownloadQuiz');
+
+    for (Course course in courses) {
+      List<CC> cc = [];
+      bool isNewCourse=true;
+
+      if(courseIdsLinks.contains(course.id) || course.errorLinks)
+        {
+          isNewCourse=false;
+          // Filter and add items to the cc list
+          for (LinkQuizIsar quiz in list) {
+            if (quiz.courseId == course.id && quiz.isDownload == false) {
+              cc.add(CC(url: quiz.downloadLink, quizId: quiz.quizId));
+            }
           }
         }
-        for (Lesson lesson in subject.lessonsList) {
-          if (lesson.questionnaire.isNotEmpty) {
-            for (Quiz quiz in lesson.questionnaire) {
-              DownloadService()
-                  .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
+      else {
+        if (course.questionnaires.isNotEmpty) {
+          for (Quiz quiz in course.questionnaires) {
+            for (var url in quiz.quizUrls) {
+              cc.add(CC(url: url, quizId: quiz.id));
+            }
+          }
+        }
+        for (Subject subject in course.subjects) {
+          if (subject.questionnaire.isNotEmpty) {
+            for (Quiz quiz in subject.questionnaire) {
+              for (var url in quiz.quizUrls) {
+                cc.add(CC(url: url, quizId: quiz.id));
+              }
+            }
+            //   DownloadService()
+            //       .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
+            // }
+          }
+          for (Lesson lesson in subject.lessonsList) {
+            if (lesson.questionnaire.isNotEmpty) {
+              for (Quiz quiz in lesson.questionnaire) {
+                // DownloadService()
+                //     .downloadQuizFiles(quiz.quizUrls, quiz.id, course.id);
+                for (var url in quiz.quizUrls) {
+                  cc.add(CC(url: url, quizId: quiz.id));
+                }
+              }
             }
           }
         }
       }
-    }
+        numOfQuizUrls+=cc.length;
+      await DownloadService().downloadQuizFiles(cc,course.id,isNewCourse);
+      }
+    debugPrint('numOfQuizUrls $numOfQuizUrls');
+
+   // await IsarService().deleteLinkIsarByIds(idsToRemove);
+    list=await IsarService().getAllLinksToDownload();
+  //  await DownloadService().startDownLoadingBlockedLinks(list);
   }
+
+}
+
+class CC
+{
+ late String url;
+ late int quizId;
+
+ CC({required this.url,required this.quizId});
+
 }

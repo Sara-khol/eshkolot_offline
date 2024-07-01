@@ -27,6 +27,7 @@ class NetworkConnectivity {
     isOnline = result != ConnectivityResult.none ? true : false;
     _checkStatus(result.first);
     _connectivitySubscription= _networkConnectivity.onConnectivityChanged.listen((result) {
+      debugPrint('result $result');
       _checkStatus(result.first);
     });
 
@@ -71,7 +72,7 @@ class NetworkConnectivity {
   }
 
   Future<bool> checkConnectivity() async {
-     if  ( await _networkConnectivity.checkConnectivity() == ConnectivityResult.none) {
+     if  ( (await _networkConnectivity.checkConnectivity()).first == ConnectivityResult.none) {
       return false;
     }
     return true;

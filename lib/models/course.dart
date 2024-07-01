@@ -63,6 +63,7 @@ class Course {
   int currentSteps=0;
   bool isSync=false;
   bool  isSyncNotCompleted=false;
+  bool isDownloadQuiz=false;
   @Ignore()
   UserCourse? userCourse;
 
@@ -72,6 +73,8 @@ class Course {
   Subject? lastSubject;
   @Ignore()
   Quiz? lastQuestionnaire;
+  @Ignore()
+  bool errorLinks=false;
 
 
   Map<String, dynamic> toJson() {

@@ -296,15 +296,18 @@ class VimoeService with ChangeNotifier {
       //   courses = await IsarService().getAllCourses();
       // }
       for (Course course in courses) {
-        debugPrint('ggg ${course.title}');
-        // if (course.serverId > 1000) {
-        // if (course.id == 2567060) {
-        //todo
-        // projectId = course.id == 69 ? 2651706 : int.parse(course.vimeoId);
-        projectId = course.vimeoId != '' ? int.parse(course.vimeoId) : 10390152;
-        courseId = course.id;
-        // projectId = course.vimeoId;
-        await connectToVimoe();
+        if(isNetWorkConnection) {
+          debugPrint('ggg ${course.title}');
+          // if (course.serverId > 1000) {
+          // if (course.id == 2567060) {
+          //todo
+          // projectId = course.id == 69 ? 2651706 : int.parse(course.vimeoId);
+          projectId =
+          course.vimeoId != '' ? int.parse(course.vimeoId) : 10390152;
+          courseId = course.id;
+          // projectId = course.vimeoId;
+          await connectToVimoe();
+        }
         // }
       }
       //todo
@@ -402,7 +405,6 @@ class VimoeService with ChangeNotifier {
         downloadFile(videoIsar.downloadLink, videoIsar.name, videoIsar.courseId);
       }
     }
-    int i = 0;
     for (VimoeVideo v in videoList) {
       //todo change???
       // VimoeFile? download =
@@ -453,7 +455,6 @@ class VimoeService with ChangeNotifier {
 
   startDownLoading(
       {bool wasNetWorkProblem = false, bool notify = false}) async {
-    debugPrint('=====');
     if (isNetWorkConnection) {
       debugPrint('startDownLoading');
       downloadStatus = DownloadStatus.downloading;

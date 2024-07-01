@@ -99,7 +99,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   initState() {
-    debugPrint('initState listen');
 
     knowledgeCourses = widget.user.knowledgeCoursesMap;
     pathList = widget.user.pathList;

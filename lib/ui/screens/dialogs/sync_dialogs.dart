@@ -73,10 +73,7 @@ class _SyncDialogsState extends State<SyncDialogs>
           debugPrint('downloade vimeo');
           vi = await isVideosDownload(true);
           linkList = await isLinksDownload(false);
-          c = event as List<Course>;
-          for (Course course in c) {
-            debugPrint('Course ID: ${course.id}');
-          }
+          c = event;
           if (allDownloadedVideos && allDownloadedLinks) {
             debugPrint('111');
             updateEndDialog();
@@ -84,11 +81,10 @@ class _SyncDialogsState extends State<SyncDialogs>
             debugPrint('222');
 //todo ???
             if (!allDownloadedVideos) {
-              // bool allNotCompleted = vi.every((obj) =>
-              //     obj.isDownload == false && obj.isBlockedOrError == false);
-              // debugPrint('allNotCompleted $allNotCompleted');
-              // debugPrint('333');
-              vimeoStart(newCourse: vi.isEmpty /* || allNotCompleted*/);
+              // vimeoStart(newCourse: vi.isEmpty);
+              //there are courses that were sent so there are yes new courses,
+              // can there be another option ?
+              vimeoStart(newCourse: true, oldLinks: true);
             } else {
               downloadLinksStart();
             }
@@ -174,8 +170,7 @@ class _SyncDialogsState extends State<SyncDialogs>
     allDownloadedLinks =
         await IsarService().checkIfAllLinksAreDownloaded(newCourse);
     if (!allDownloadedLinks) {
-      return IsarService()
-          .getAllLinksToDownload(IsarService().getUserUserCoursesId());
+      return IsarService().getAllLinksToDownload();
     }
 
     return [];
@@ -534,7 +529,7 @@ class _SyncDialogsState extends State<SyncDialogs>
                     borderRadius: BorderRadius.all(Radius.circular(30))),
                 child: TextButton(
                   child: Text(
-                    ' הבנתי, תודה! ',
+                    ' !הבנתי, תודה ',
                     style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -614,7 +609,7 @@ class _SyncDialogsState extends State<SyncDialogs>
                           context.read<VimoeService>().courses = c;
                           context.read<VimoeService>().start(notify: true);
                         } else {
-                          //if did start from videos that were saved and did not go to vimeo will get to here
+                          // if did start from videos that were saved and did not go to vimeo will get to here
                           context.read<VimoeService>().isarVideoList = vi;
                           context
                               .read<VimoeService>()
