@@ -24,7 +24,6 @@ class DownloadService with ChangeNotifier {
   int projectId = 0; //english
   //int quizId = 0; //english
   Dio dioDownload = Dio();
-  List<LinkQuizIsar> isarLinksList = [];
   int numDownloadFiles = 0, numOfErrorFiles = 0;
   late DownloadStatusData downloadStatus, lastDownLoadStatus;
   late String currentLink;
@@ -161,11 +160,6 @@ class DownloadService with ChangeNotifier {
       if (isNewCourse) {
         for (CC s in urls) {
           String name = s.url.substring(s.url.lastIndexOf('/'), s.url.length);
-          isarLinksList.add(LinkQuizIsar()
-            ..quizId = s.quizId
-            ..courseId = courseId
-            ..name = name
-            ..downloadLink = s.url);
           IsarService().addIsarQuiz(LinkQuizIsar()
             ..quizId = s.quizId
             ..courseId = courseId
@@ -292,11 +286,6 @@ class DownloadService with ChangeNotifier {
         numDownloadFiles++;
         debugPrint(
             'name $name qId $qId numDownloadFiles $numDownloadFiles courseId $courseId');
-       if(isarLinksList.isNotEmpty) {
-         isarLinksList
-             .firstWhere((iv) => iv.name == name && iv.quizId == qId)
-             .isDownload = true;
-       }
          if(id==0) {
         await  IsarService().updateLinkQuizByName(name,qId);
          }
@@ -331,15 +320,15 @@ class DownloadService with ChangeNotifier {
         if (!blockLinks.contains(url)) {
           blockLinks.add(url);
         }
-        if (id == 0 || !await IsarService().checkIsarQuizExistes(id)) {
-        await  IsarService().addIsarQuiz(LinkQuizIsar()
-            ..courseId = courseId
-            ..downloadLink = url
-            ..quizId = qId
-            ..name = name
-            ..isBlock = e.message!=null  && e.message.contains('418')
-            ..isDownload = false);
-        }
+        // if (id == 0 || !await IsarService().checkIsarQuizExistes(id)) {
+        // await  IsarService().addIsarQuiz(LinkQuizIsar()
+        //     ..courseId = courseId
+        //     ..downloadLink = url
+        //     ..quizId = qId
+        //     ..name = name
+        //     ..isBlock = e.message!=null  && e.message.contains('418')
+        //     ..isDownload = false);
+        // }
         if (e is DioException &&
             e.message != null &&
             e.message!.contains('418')) {
@@ -475,17 +464,7 @@ class DownloadService with ChangeNotifier {
     }
   }*/
 
-  List<LinkQuizIsar> getAllDownloaded() {
-    return isarLinksList
-        .where((element) => element.isDownload == true)
-        .toList();
-  }
 
-  List<LinkQuizIsar> getAllNotDownloaded() {
-    return isarLinksList
-        .where((element) => element.isDownload == false)
-        .toList();
-  }
 
   @override
   void dispose() async {

@@ -52,10 +52,9 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                             color: blackColorApp),
 
                         //textStyle: TextStyle(fontSize: ScreenUtil().setSp(fontSize.toDouble())),
-                        customWidgetBuilder:(element){
+                        customWidgetBuilder: (element) {
                       return displayWidgetByHtml(element);
-                        }
-                    ));
+                    }));
 
                 // )
               }
@@ -74,7 +73,8 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
   bool containsUnderlineStyle(dynamic element) {
     if (/*element.localName == 'span' &&*/
         element.attributes['style'] != null &&
-        element.attributes['style']!.contains('text-decoration: underline')) {
+            element.attributes['style']!
+                .contains('text-decoration: underline')) {
       return true;
     }
 
@@ -147,7 +147,8 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
       // Create a list to store the child widgets
       List<Widget> childrenWidgets = [];
 
-      bool isUnderlined = element.children.any((child) => containsUnderlineStyle(child));
+      bool isUnderlined =
+          element.children.any((child) => containsUnderlineStyle(child));
 
       for (var childElement in element.children) {
         // Check the type of child element and handle it accordingly
@@ -240,9 +241,20 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
         ? '${appSupportDir!.path}/${Constants.quizPath}/${widget.quizId}/$srcAttribute'
         : '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
     File file = File(path);
+
     if (await file.exists()) {
       debugPrint('truuuuuuuuuu path $path');
       return file;
+      //check if file exists in course file from vimeo
+    } else if (!isLesson) {
+      path =
+          '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
+      File file = File(path);
+      if (await file.exists()) {
+        debugPrint('truuuuuuuuuu path $path');
+        return file;
+      }
+      return null;
     } else {
       return null;
     }
