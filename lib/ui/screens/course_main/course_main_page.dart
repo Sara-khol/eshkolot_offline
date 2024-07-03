@@ -81,9 +81,13 @@ class _CourseMainPageState extends State<CourseMainPage> {
               SizedBox(
                 height: 10.h,
               ),
-              Text(widget.course.briefInformation,
-                  style:
-                      TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
+              Padding(
+                padding:  EdgeInsets.only(right: 50.w,left: 50.w),
+                child: Text(widget.course.briefInformation,
+                    textAlign: TextAlign.center,
+                    style:
+                        TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
+              ),
               SizedBox(
                 height: 15.h,
               ),

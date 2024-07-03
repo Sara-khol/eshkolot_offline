@@ -507,7 +507,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                       path.title,
                       style: TextStyle(fontSize: 16.sp, color: Colors.white)),
                 ),
-                const Spacer(),
+              //  const Spacer(),
                 SizedBox(
                     width: 6.w,
                     height: 6.5.h,

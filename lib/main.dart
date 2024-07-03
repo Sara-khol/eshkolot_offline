@@ -179,7 +179,7 @@ Future<void> main() async {
 
     doWhenWindowReady(() {
       setWindowVisibility(visible: true);
-      setWindowTitle('My Demo');
+      setWindowTitle('אשכולות אופליין');
       // const initialSize = Size(1280, 720);
       // appWindow.minSize = initialSize;
       // appWindow.size = initialSize;
