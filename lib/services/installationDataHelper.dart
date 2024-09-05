@@ -136,6 +136,22 @@ class InstallationDataHelper {
                 var q = questionnaires[qId.toString()];
 
                 Quiz quiz = Quiz.fromJson(q, qId);
+                for(String url in quiz.quizUrls)
+                  {
+                    String name = url.substring(url.lastIndexOf('/') + 1, url.length);
+                    if (!isValidFileName(name)) {
+                      String oldName=name;;
+                      debugPrint("url: $url");
+                      debugPrint("File name is not valid: $name");
+
+                      name = '${removeUnsupportedChars(name)}.png';
+
+                      // Proceed with saving the file
+                      debugPrint("change name: $name");
+
+                      quiz=  changeQuizUsingProblematicFileName(quiz,oldName,name);
+                    }
+                  }
                 lesson.questionnaire.add(quiz);
                 myQuizzes.add(quiz);
               }
@@ -186,6 +202,8 @@ class InstallationDataHelper {
       user['UserCourse'] = userCourses.map((uc) => uc.toJson()).toList();
     }
 
+
+
     // final userCoursesJson = data['users'][0]['UserCourse'] as List<dynamic>;
     // final userCourses = userCoursesJson
     //     .map((courseJson) {
@@ -201,6 +219,44 @@ class InstallationDataHelper {
     //   debugPrint("stack $s");
     //
     // }
+  }
+
+  bool isValidFileName(String fileName) {
+    RegExp regExp = RegExp(r'[<>:"/\\|?*]');
+    return !regExp.hasMatch(fileName);
+  }
+
+  String removeUnsupportedChars(String fileName) {
+    RegExp regExp = RegExp(r'[<>:"/\\|?*]');
+    return fileName.replaceAll(regExp, '_');
+  }
+
+ Quiz changeQuizUsingProblematicFileName(
+      Quiz quiz, String fileName, fixedFileName) {
+   debugPrint('=== iddd ${quiz.id} ===');
+
+    debugPrint('fileName $fileName');
+    debugPrint('fixedFileName $fixedFileName');
+    for (Question question in quiz.questionList) {
+      if (question.question.contains(fileName)) {
+        question.question=  question.question.replaceAll(fileName, fixedFileName);
+        debugPrint('changed!! question ${question.question}');
+
+      }
+      if (question.type == QType.customEditor) {
+        if (question.moreData != null) {
+          for (CustomQuizQuestionsFields f in question.moreData!.quizFields) {
+            if (f.type == 'image' && f.defaultValue.contains(fileName)) {
+              f.defaultValue=  f.defaultValue.replaceAll(fileName, fixedFileName);
+              debugPrint('changed!! defaultValue ${f.defaultValue}');
+
+            }
+          }
+        }
+      }
+    }
+
+    return quiz;
   }
 
   Future<Course> setSyncNewCourse(Map<String, dynamic> data,bool isSingleInCourse) async {

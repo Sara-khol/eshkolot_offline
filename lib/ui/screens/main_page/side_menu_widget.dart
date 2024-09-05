@@ -223,31 +223,32 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                         ),
                         Divider(height: 1.h, color: colors.grey1ColorApp),
                          GestureDetector(
+                           behavior: HitTestBehavior.translucent,
                            onTap: (){
-                             // showDialog(
-                             //   context: context,
-                             //   builder: (BuildContext context) {
-                             //     return AlertDialog(
-                             //       title: Center(child: Text("?צריך עזרה")),
-                             //       content: Column(
-                             //         mainAxisSize:MainAxisSize.min ,
-                             //         children: [
-                             //           Text("ליצירת קשר פנו לכתובת המייל ",style: TextStyle(fontSize: 25.sp),),
-                             //           SelectableText("ss@ss.com",style: TextStyle(fontSize: 25.sp)),
-                             //
-                             //         ],
-                             //       ),
-                             //       actions: [
-                             //         TextButton(
-                             //           child: Text("סגור"),
-                             //           onPressed: () {
-                             //             Navigator.of(context).pop();
-                             //           },
-                             //         )
-                             //       ],
-                             //     );
-                             //   },
-                             // );
+                             showDialog(
+                               context: context,
+                               builder: (BuildContext context) {
+                                 return AlertDialog(
+                                   title: Center(child: Text("?צריך עזרה")),
+                                   content: Column(
+                                     mainAxisSize:MainAxisSize.min ,
+                                     children: [
+                                       Text("ליצירת קשר פנו לכתובת המייל ",style: TextStyle(fontSize: 25.sp),),
+                                       SelectableText("offline@eshkolot.net",style: TextStyle(fontSize: 25.sp)),
+
+                                     ],
+                                   ),
+                                   actions: [
+                                     TextButton(
+                                       child: Text("סגור"),
+                                       onPressed: () {
+                                         Navigator.of(context).pop();
+                                       },
+                                     )
+                                   ],
+                                 );
+                               },
+                             );
                            },
                           child: SizedBox(
                             height: 70.h,

@@ -77,16 +77,16 @@ class _CourseMainPageState extends State<CourseMainPage> {
               ),
               Text(widget.course.title,
                   style:
-                      TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600)),
+                  TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w600)),
               SizedBox(
                 height: 10.h,
               ),
               Padding(
-                padding:  EdgeInsets.only(right: 50.w,left: 50.w),
+                padding: EdgeInsets.only(right: 50.w, left: 50.w),
                 child: Text(widget.course.briefInformation,
                     textAlign: TextAlign.center,
                     style:
-                        TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
+                    TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
               ),
               SizedBox(
                 height: 15.h,
@@ -149,7 +149,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     ),
                     SizedBox(width: 7.w),
                     Text(
-                        '${widget.course.countEndQuiz ?? 0} ${widget.course.countEndQuiz == 1 ? 'שאלון מסכם' : 'שאלונים מסכמים'}',
+                        '${widget.course.countEndQuiz ?? 0} ${widget.course
+                            .countEndQuiz == 1
+                            ? 'שאלון מסכם'
+                            : 'שאלונים מסכמים'}',
                         style: TextStyle(fontSize: 18.sp)),
                   ],
                 ),
@@ -159,11 +162,22 @@ class _CourseMainPageState extends State<CourseMainPage> {
               ),
               VideoWidget(
                 key: Key(widget.course.courseInformationVideo),
-                videoId: widget.course.courseInformationVideo,
-                videoNum: widget.course.courseInformationVideo,
-                fileId: 0,
+                //todo  check
+                videoId: MainPageChild
+                    .of(context)!
+                    .widget
+                    .course
+                    .isSync ? widget.course.courseInformationVideo.isNotEmpty
+                    ? widget.course.courseInformationVideo
+                    : '0' :'0',
+                fileId: MainPageChild
+                    .of(context)!
+                    .widget
+                    .course
+                    .id,
                 height: 310.h,
                 width: 551.w,
+                isLesson: true,
               ),
               // SizedBox(
               //   height: 20.h,
@@ -184,7 +198,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                               decoration: const BoxDecoration(
                                 color: Colors.black,
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(30)),
+                                BorderRadius.all(Radius.circular(30)),
                               ),
                               child: TextButton(
                                   style: TextButton.styleFrom(
@@ -225,18 +239,19 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                               updateComplete: currentMainChild
                                                   .updateCompleteLesson,
                                               onNext: data!.lessonIndex + 1 <
-                                                      lastSubject!
-                                                          .lessonsList.length
-                                                  ? () => currentMainChild
+                                                  lastSubject!
+                                                      .lessonsList.length
+                                                  ? () =>
+                                                  currentMainChild
                                                       .goToNextLesson(
-                                                          lastSubject!,
-                                                          data!.subjectIndex,
-                                                          lastSubject!
-                                                              .lessonsList
-                                                              .elementAt(data!
-                                                                      .lessonIndex +
-                                                                  1),
-                                                          data!.lessonIndex + 1)
+                                                      lastSubject!,
+                                                      data!.subjectIndex,
+                                                      lastSubject!
+                                                          .lessonsList
+                                                          .elementAt(data!
+                                                          .lessonIndex +
+                                                          1),
+                                                      data!.lessonIndex + 1)
                                                   : null);
                                     } else {
                                       currentMainChild?.questionPickedIndex =
@@ -245,22 +260,25 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                           data!.subjectIndex;
                                       currentMainChild?.lessonPickedIndex =
                                           data!.lessonIndex;
-                                      MainPageChild.of(context)?.bodyWidget =
+                                      MainPageChild
+                                          .of(context)
+                                          ?.bodyWidget =
                                           QuestionnaireWidget(
-                                        quiz: lastQuestionnaire!,
-                                        onNext: data!.lessonIndex + 1 <
+                                            quiz: lastQuestionnaire!,
+                                            onNext: data!.lessonIndex + 1 <
                                                 lastSubject!.lessonsList.length
-                                            ? () => currentMainChild
-                                                .goToNextLesson(
+                                                ? () =>
+                                                currentMainChild
+                                                    .goToNextLesson(
                                                     lastSubject!,
                                                     data!.subjectIndex,
                                                     lastSubject!.lessonsList
                                                         .elementAt(
-                                                            data!.lessonIndex +
-                                                                1),
+                                                        data!.lessonIndex +
+                                                            1),
                                                     data!.lessonIndex + 1)
-                                            : null,
-                                      );
+                                                : null,
+                                          );
                                     }
                                   }),
                             ),
@@ -289,8 +307,14 @@ class _CourseMainPageState extends State<CourseMainPage> {
                     width: 175.w,
                     decoration: BoxDecoration(
                       color: Color(
-                          MainPageChild.of(context)!.widget.knowledgeColor != -1
-                              ? MainPageChild.of(context)!.widget.knowledgeColor
+                          MainPageChild
+                              .of(context)!
+                              .widget
+                              .knowledgeColor != -1
+                              ? MainPageChild
+                              .of(context)!
+                              .widget
+                              .knowledgeColor
                               : 0xFF32D489),
                       borderRadius: const BorderRadius.all(Radius.circular(30)),
                     ),
@@ -304,17 +328,19 @@ class _CourseMainPageState extends State<CourseMainPage> {
                               fontSize: 18.sp, fontWeight: FontWeight.w600),
                         ),
                         onPressed: () {
-                          MainPageChild.of(context)?.bodyWidget =
+                          MainPageChild
+                              .of(context)
+                              ?.bodyWidget =
                               SubjectMainPage(
                                   subjectIndex: 0,
                                   subject: widget.course.subjects.first,
                                   onNext: 1 < widget.course.subjects.length
                                       ? () {
-                                          currentMainChild?.goToNextSubject(
-                                              widget.course.subjects
-                                                  .elementAt(1),
-                                              1);
-                                        }
+                                    currentMainChild?.goToNextSubject(
+                                        widget.course.subjects
+                                            .elementAt(1),
+                                        1);
+                                  }
                                       : null);
                           currentMainChild?.subjectPickedIndex = 0;
                         },
@@ -353,7 +379,9 @@ class _CourseMainPageState extends State<CourseMainPage> {
             data!.questionnaireStopId != 0)) {
       if (data!.subjectStopId != 0) {
         for (int i = 0; i < widget.course.subjects.length; i++) {
-          if (widget.course.subjects.elementAt(i).subjectId ==
+          if (widget.course.subjects
+              .elementAt(i)
+              .subjectId ==
               data!.subjectStopId) {
             lastSubject = widget.course.subjects.elementAt(i);
             data!.subjectIndex = i;
@@ -369,7 +397,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
       // s.id == data!.subjectStopId) : null;
       if (data!.lessonStopId != 0) {
         for (int i = 0; i < lastSubject!.lessonsList.length; i++) {
-          if (lastSubject!.lessonsList.elementAt(i).lessonId ==
+          if (lastSubject!
+              .lessonsList
+              .elementAt(i)
+              .lessonId ==
               data!.lessonStopId) {
             lastLesson = lastSubject!.lessonsList.elementAt(i);
             data!.lessonIndex = i;
@@ -393,7 +424,9 @@ class _CourseMainPageState extends State<CourseMainPage> {
           //lastQuestionnaire = widget.course.questionnaires.firstWhere((q) => q.id==data!.questionnaireStopId);
 
           for (int i = 0; i < widget.course.questionnaires.length; i++) {
-            if (widget.course.questionnaires.elementAt(i).id ==
+            if (widget.course.questionnaires
+                .elementAt(i)
+                .id ==
                 data!.questionnaireStopId) {
               lastQuestionnaire = widget.course.questionnaires.elementAt(i);
               data!.questionIndex = i;
@@ -405,7 +438,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
           // lastQuestionnaire = lastSubject!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
 
           for (int i = 0; i < lastSubject!.questionnaire.length; i++) {
-            if (lastSubject!.questionnaire.elementAt(i).id ==
+            if (lastSubject!
+                .questionnaire
+                .elementAt(i)
+                .id ==
                 data!.questionnaireStopId) {
               lastQuestionnaire = lastSubject!.questionnaire.elementAt(i);
               data!.questionIndex = i;
@@ -417,7 +453,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
           // lastQuestionnaire = lastLesson!.questionnaire.firstWhere((q) => q.id==data!.questionnaireStopId);
 
           for (int i = 0; i < lastLesson!.questionnaire.length; i++) {
-            if (lastLesson!.questionnaire.elementAt(i).id ==
+            if (lastLesson!
+                .questionnaire
+                .elementAt(i)
+                .id ==
                 data!.questionnaireStopId) {
               lastQuestionnaire = lastLesson!.questionnaire.elementAt(i);
               data!.questionIndex = i;
@@ -435,7 +474,10 @@ class _CourseMainPageState extends State<CourseMainPage> {
   }
 
   String setKnowledgeImagePath() {
-    switch (MainPageChild.of(context)!.widget.knowLedgeId) {
+    switch (MainPageChild
+        .of(context)!
+        .widget
+        .knowLedgeId) {
       case 61: //Physics
         return 'assets/images/logo_english.png';
       case 63: //english

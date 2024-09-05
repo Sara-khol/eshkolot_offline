@@ -29,6 +29,7 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 
+
 [Languages]
 Name: "hebrew"; MessagesFile: "compiler:Languages\Hebrew.isl"
 
@@ -61,11 +62,15 @@ Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\R
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\libmpv-2.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\USER\GoAppProjects\eshkolot_offline\windows\runner\resources\app_icon.ico"; DestDir: "{app}"; Flags: ignoreversion 
 
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}";IconFilename: "C:\Users\USER\GoAppProjects\eshkolot_offline\windows\runner\resources\app_icon.ico"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "C:\Users\USER\GoAppProjects\eshkolot_offline\windows\runner\resources\app_icon.ico"; Tasks: desktopicon
+ [Icons]
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\app_icon.ico"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\app_icon.ico"; Tasks: desktopicon
+Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\app_icon.ico"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\app_icon.ico"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

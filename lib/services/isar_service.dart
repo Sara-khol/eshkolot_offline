@@ -660,6 +660,22 @@ class IsarService {
     return knowledge;
   }
 
+  Future<Quiz?> getQuizById(int id) async {
+    final isar = await db;
+
+    Quiz? quiz = await isar.quizs.get(id);
+    return quiz;
+  }
+
+  updateQuiz(Quiz q) async
+  {
+    debugPrint('updateQuiz  ${q.id} ${q.title}');
+    final isar = await db;
+    await isar.writeTxnSync(() async {
+      isar.quizs.putSync(q);
+    });
+  }
+
   Future<LearnPath?> getPathById(int id) async {
     final isar = await db;
     LearnPath? path = await isar.learnPaths.get(id);

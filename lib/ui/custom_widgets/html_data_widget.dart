@@ -16,10 +16,11 @@ typedef WidgetCallback = Widget Function(List<String?> s);
 
 class HtmlDataWidget extends StatefulWidget {
   const HtmlDataWidget(this.text,
-      {super.key, required this.quizId, this.onInputWidgetRequested});
+      {super.key, required this.quizId, this.onInputWidgetRequested,  this.textStyle});
 
   final String text;
   final int quizId;
+  final TextStyle? textStyle;
   final WidgetCallback? onInputWidgetRequested;
 
   @override
@@ -46,7 +47,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                 return SelectionArea(
                     focusNode: _focusNode,
                     child: HtmlWidget(convertCustomAudioTags(widget.text),
-                        textStyle: TextStyle(
+                        textStyle:widget.textStyle ?? TextStyle(
                             fontSize: 27.sp /*20.sp*/,
                             fontWeight: FontWeight.w400,
                             color: blackColorApp),
@@ -62,7 +63,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
             })
         : Text(
             widget.text,
-            style: TextStyle(
+            style:widget.textStyle ?? TextStyle(
                 fontSize: /*27.sp*/ 20.sp,
                 fontWeight: FontWeight.w400,
                 color: blackColorApp),
@@ -204,7 +205,6 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                     padding: EdgeInsets.only(bottom: 7.h),
                     child: VideoWidget(
                       isLesson: isLesson,
-                      videoNum: srcAttribute.split('.').first,
                       key: Key(widget.quizId.toString()),
                       videoId: srcAttribute.split('.').first,
                       fileId: !isLesson

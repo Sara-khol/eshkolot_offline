@@ -13,12 +13,10 @@ class VideoWidget extends StatefulWidget {
   final double width;
   final double height;
   final bool isLesson;
-  final String videoNum;
 
   const VideoWidget(
       {super.key,
       required this.videoId,
-      required this.videoNum,
       required this.fileId,
       this.isLesson = false,
       this.width = 0,
@@ -59,6 +57,18 @@ class _VideoWidgetState extends State<VideoWidget>
   }
 
   @override
+  void didUpdateWidget(covariant VideoWidget oldWidget) {
+    if(oldWidget.videoId!=widget.videoId)
+      {
+        if(videoExists) {
+          player.dispose();
+        }
+        myFuture = videoInit();
+      }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder(
@@ -82,7 +92,7 @@ class _VideoWidgetState extends State<VideoWidget>
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black38)),
                       child: Center(
-                        child: Text('הוידאו לא קיים\nעקב בעיה של חסימה',
+                        child: Text(/*'הוידאו לא קיים\nעקב בעיה של חסימה'*/'הוידאו לא קיים',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontWeight: FontWeight.w700, fontSize: 25.sp)),

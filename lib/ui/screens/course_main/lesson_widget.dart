@@ -155,7 +155,6 @@ class _LessonWidgetState extends State<LessonWidget> {
                 /*videoWidget*/
                 VideoWidget(
                     key: Key(lesson.vimeo.toString()),
-                    videoNum: lesson.videoNum,
                     isLesson: true,
                     height: 515.h,
                     width: 914.w,

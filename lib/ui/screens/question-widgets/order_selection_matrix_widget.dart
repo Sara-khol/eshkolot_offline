@@ -227,7 +227,7 @@ class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget>
               color: !displayAnswer ? colors.blackColorApp : isCorrectList[i]
                   ? Colors.white
                   : Colors.red),
-          Text(
+          /*Text(
             isAnswer ? ans[i] : matrixMatchList[i],
             style: TextStyle(
                 fontSize: 20.sp,
@@ -236,7 +236,14 @@ class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget>
                     ? Colors.white
                     : Colors.red),
             textAlign: TextAlign.center,
-          ),
+          ),*/
+          HtmlDataWidget(isAnswer ? ans[i] : matrixMatchList[i], quizId: widget.question.quizId,
+            textStyle: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w400,
+                color: !displayAnswer ? colors.blackColorApp : isCorrectList[i]
+                    ? Colors.white
+                    : Colors.red),)
         ],
       ),
     );
