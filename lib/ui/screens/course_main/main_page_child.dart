@@ -1193,7 +1193,8 @@ class _MainPageChildState extends State<MainPageChild> {
         updateCourseStatus(checkCompleted: true);
       }
     }
-    await IsarService().updateQuizCompleted(quizId, true);
+   // await IsarService().updateQuizCompleted(quizId, true);
+    await IsarService().updateQuizCompleted(quizId,true);
     if (lessonId != null) {
       await IsarService().updateLessonCompleted(lessonId, updateUser: true);
     }

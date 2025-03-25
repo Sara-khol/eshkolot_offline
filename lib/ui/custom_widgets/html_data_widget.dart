@@ -155,12 +155,14 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
         // Check the type of child element and handle it accordingly
         childrenWidgets.add(displayWidgetByHtml(childElement) ?? Container());
       }
-      childrenWidgets.add(Text(element.text,
-          style: TextStyle(
-            fontSize: 27.sp,
-            fontWeight: FontWeight.w800,
-            decoration: isUnderlined ? TextDecoration.underline : null,
-          )));
+      childrenWidgets.add(Expanded(
+        child: Text(element.text,
+            style: TextStyle(
+              fontSize: 27.sp,
+              fontWeight: FontWeight.w800,
+              decoration: isUnderlined ? TextDecoration.underline : null,
+            )),
+      ));
       // Return a widget that contains all the child widgets of <h6>
       return Row(
         crossAxisAlignment: CrossAxisAlignment.center,

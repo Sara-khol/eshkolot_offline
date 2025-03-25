@@ -59,10 +59,7 @@ class IsarService {
     await isar.writeTxn(() => isar.clear());
   }
 
-  Future<void> saveCourse(Course newCourse) async {
-    final isar = await db;
-    isar.writeTxnSync<int>(() => isar.courses.putSync(newCourse));
-  }
+
 
   // Future<void> saveListCoursesFresh(List<Course> coursesList) async
   // {
@@ -671,8 +668,8 @@ class IsarService {
   {
     debugPrint('updateQuiz  ${q.id} ${q.title}');
     final isar = await db;
-    await isar.writeTxnSync(() async {
-      isar.quizs.putSync(q);
+    await isar.writeTxn(() async {
+      isar.quizs.put(q);
     });
   }
 
@@ -830,14 +827,15 @@ class IsarService {
     });
   }
 
-  updateQuizCompleted(int id, [bool updateUser = false]) async {
+  updateQuizCompleted(int id, [ updateQuizCompletedList=false]) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      if (!updateUser) {
+
         Quiz? quiz = await isar.quizs.get(id);
         quiz!.isCompletedCurrentUser = true;
         await isar.quizs.put(quiz);
-      } else {
+
+        if (updateQuizCompletedList) {
         List<int> quizCompletedList = List.from(_user.questionCompleted);
         if (!quizCompletedList.contains(id)) {
           quizCompletedList.add(id);
@@ -883,12 +881,7 @@ class IsarService {
     });
   }
 
-  addCourse(Course course) async {
-    final isar = await db;
-    await isar.writeTxnSync(() async {
-      isar.courses.putSync(course);
-    });
-  }
+
 
   addSubjects(List<Subject> subjects) async {
     final isar = await db;

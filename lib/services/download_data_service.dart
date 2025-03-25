@@ -267,12 +267,12 @@ class DownloadService with ChangeNotifier {
   }
 
   bool isValidFileName(String fileName) {
-    RegExp regExp = RegExp(r'[<>:"/\\|?*]');
+    RegExp regExp = RegExp(r'[<>:"/\\|?*;&]');
     return !regExp.hasMatch(fileName);
   }
 
   String removeUnsupportedChars(String fileName) {
-    RegExp regExp = RegExp(r'[<>:"/\\|?*]');
+    RegExp regExp = RegExp(r'[<>:"/\\|?*;&]');
     return fileName.replaceAll(regExp, '_');
   }
 

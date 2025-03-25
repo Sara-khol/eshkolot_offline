@@ -39,7 +39,7 @@ Future<void> main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    Future<SentryEvent?> beforeSend(SentryEvent event, {Hint? hint}) async {
+    beforeSend(SentryEvent event, {Hint? hint}) async {
 // Check internet connectivity
       var connectivityResult = await Connectivity().checkConnectivity();
       // if (connectivityResult == ConnectivityResult.none) {

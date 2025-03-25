@@ -12,7 +12,8 @@ import 'package:flutter/cupertino.dart';
 
 class ApiService {
   final Dio _dio = Dio();
-  final _baseUrl = 'https://dev2.eshkolot.net/wp-json/wp/v2/';
+  // final _baseUrl = 'https://dev2.eshkolot.net/wp-json/wp/v2/';
+  final _baseUrl = 'https://eshkolot.net/wp-json/wp/v2/';
   // final _baseUrl = 'https://bibilease.quicksolutions.co.il/?rest_route=/wp/v2';
 
   CancelToken cancelToken = CancelToken();
