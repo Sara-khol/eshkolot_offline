@@ -14,6 +14,7 @@ import 'package:sentry_dio/sentry_dio.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/common_funcs.dart';
 import 'installationDataHelper.dart';
 import 'isar_service.dart';
 import 'network_check.dart';
@@ -319,8 +320,8 @@ class DownloadService with ChangeNotifier {
       changeQuizUsingProblematicFileName(quiz!,oldName,name);
     }
 
-    var dir =
-        await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
+    //var dir = await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
+    var dir = await CommonFuncs().getEshkolotWorkingDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
     // dir = Directory(path);
     // if(!dir.existsSync())
     //   {

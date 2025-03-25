@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
+import '../../utils/common_funcs.dart';
 import '../screens/course_main/main_page_child.dart';
 
 typedef WidgetCallback = Widget Function(List<String?> s);
@@ -32,7 +33,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
   final _focusNode = FocusNode();
 
   initDirectory() async {
-    appSupportDir = await getApplicationSupportDirectory();
+    appSupportDir = await CommonFuncs().getEshkolotWorkingDirectory();
     return appSupportDir;
   }
 

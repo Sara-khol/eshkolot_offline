@@ -13,6 +13,7 @@ import 'package:eshkolot_offline/services/network_check.dart';
 import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/top_bar_user_widget.dart';
+import 'package:eshkolot_offline/utils/common_funcs.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -296,12 +297,14 @@ class _MyAppState extends State<MyApp> {
     setState(() {});
     preferences = await SharedPreferences.getInstance();
     preferences.setBool('extractWorked', false);
-    final Directory directory = await getApplicationSupportDirectory();
+    final Directory directory = await CommonFuncs().getEshkolotWorkingDirectory();
     destDirPath = directory.path;
+    //destDirPath = await CommonFuncs().findEshkolotFolderOnUsb();
     extractWorked = await extractZipFileUsingIsolate([
       '$destDirPath/${Constants.quizPath}/',
       '$destDirPath/${Constants.lessonPath}/'
     ]);
+
     if (extractWorked) {
       debugPrint('extractWorked ${courses.length}');
       preferences.setBool('extractWorked', true);
@@ -375,6 +378,18 @@ class _MyAppState extends State<MyApp> {
 //   }
 // }
 }
+
+
+Future<String?> getInstallerSourcePath() async {
+  final exeDir = File(Platform.resolvedExecutable).parent;
+  final file = File('${exeDir.path}/installer_source.txt');
+  if (await file.exists()) {
+    return (await file.readAsString()).trim();
+  }
+  return null;
+}
+
+
 
 Future<bool> extractZipFileUsingIsolate(List<String> extractPath) async {
   ReceivePort receivePort = ReceivePort();

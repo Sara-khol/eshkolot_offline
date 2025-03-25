@@ -15,6 +15,7 @@ import '../../../models/knowledge.dart';
 import '../../../models/learn_path.dart';
 import '../../../services/installationDataHelper.dart';
 import '../../../services/isar_service.dart';
+import '../../../utils/common_funcs.dart';
 import '../home_page.dart';
 import '../how_to_learn.dart';
 import 'main_page.dart';
@@ -283,7 +284,8 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
   }
 
   initDirectory() async {
-    dir = await getApplicationSupportDirectory();
+    //dir = await getApplicationSupportDirectory();
+     dir = await CommonFuncs().getEshkolotWorkingDirectory();
     return dir;
   }
 

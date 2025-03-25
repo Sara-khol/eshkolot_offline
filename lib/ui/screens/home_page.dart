@@ -21,6 +21,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../models/course.dart';
 import '../../models/user.dart';
 import '../../services/isar_service.dart';
+import '../../utils/common_funcs.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -446,7 +447,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   initDirectory() async {
-    dir = await getApplicationSupportDirectory();
+    //dir = await getApplicationSupportDirectory();
+     dir = await CommonFuncs().getEshkolotWorkingDirectory();
     return dir;
   }
 

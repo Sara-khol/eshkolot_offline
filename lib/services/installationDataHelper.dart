@@ -20,6 +20,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import '../models/course.dart';
 import '../models/linkQuizIsar.dart';
 import '../models/user.dart';
+import '../utils/common_funcs.dart';
 
 class InstallationDataHelper {
   InstallationDataHelper._privateConstructor();
@@ -56,7 +57,8 @@ class InstallationDataHelper {
 
   init() async {
     late String destDirPath;
-    final Directory directory = await getApplicationSupportDirectory();
+    //final Directory directory = await getApplicationSupportDirectory();
+    final Directory directory = await CommonFuncs().getEshkolotWorkingDirectory();
     destDirPath = directory.path;
     //  try {
     final file =
@@ -444,7 +446,8 @@ class InstallationDataHelper {
   }
 
   Future<bool> setLessonVideosNum(Course course) async {
-    var dir = await getApplicationSupportDirectory();
+    //var dir = await getApplicationSupportDirectory();
+    var dir = await CommonFuncs().getEshkolotWorkingDirectory();
     String courseVideosPath =
         '${dir.path}${Platform.pathSeparator}${constants.lessonPath}${Platform.pathSeparator}${course.id}';
     List<Lesson> updateLessons = [];
