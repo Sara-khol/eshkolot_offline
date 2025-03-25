@@ -16,6 +16,8 @@ import '../models/course.dart';
 import '../models/subject.dart';
 import 'package:collection/collection.dart';
 
+import '../utils/common_funcs.dart';
+
 class IsarService {
   late Future<Isar> db;
 
@@ -37,7 +39,8 @@ class IsarService {
   }
 
   Future<Isar> openDB() async {
-    final dir = await getApplicationSupportDirectory();
+    //final dir = await getApplicationSupportDirectory();
+    final dir = await CommonFuncs().getEshkolotWorkingDirectory();
     if (Isar.instanceNames.isEmpty) {
       return await Isar.open([
         CourseSchema,

@@ -14,6 +14,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../models/vimoe_download.dart';
 import 'package:collection/src/iterable_extensions.dart';
+import '../utils/common_funcs.dart';
 import 'isar_service.dart';
 import 'network_check.dart';
 
@@ -503,8 +504,8 @@ class VimoeService with ChangeNotifier {
   Future<void> downloadFile(
       String url, String name, int courseId) async {
     String progress = '';
-    var dir =
-        await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
+    //var dir = await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
+    var dir = await CommonFuncs().getEshkolotWorkingDirectory(); //C:\Users\USER\AppData\Roaming\GoApp\eshkolot_offline
     await dioDownload.download(
       url,
       cancelToken: cancelToken,
@@ -549,7 +550,8 @@ class VimoeService with ChangeNotifier {
   }
 
   deleteFilesInDirectoryBeforeDownloading() async {
-    Directory dir = await getApplicationSupportDirectory();
+    //Directory dir = await getApplicationSupportDirectory();
+    Directory dir = await CommonFuncs().getEshkolotWorkingDirectory();
     // final targetFile = Directory("${dir.path}/books/$fileName.pdf");
     final targetFile = Directory('${dir.path}/lessons/$courseId');
     if (targetFile.existsSync()) {

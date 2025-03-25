@@ -7,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as constants;
 
+import '../../../utils/common_funcs.dart';
+
 class VideoWidget extends StatefulWidget {
   final String? videoId;
   final int fileId;
@@ -106,8 +108,8 @@ class _VideoWidgetState extends State<VideoWidget>
 
  Future<bool>  videoInit() async {
     if (widget.videoId != null) {
-      var dir =
-          await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+      //var dir = await getApplicationSupportDirectory(); //C:\Users\USER\AppData\Roaming\com.example\eshkolot_offline
+      Directory dir = await CommonFuncs().getEshkolotWorkingDirectory();
       String path =
           '${dir.path}/${widget.isLesson ? constants.lessonPath : constants.quizPath}/${widget.fileId}/${widget.videoId}.mp4';
       debugPrint('path $path');

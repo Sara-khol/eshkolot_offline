@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
+import '../utils/common_funcs.dart';
+
 class LocalFileHelper {
 
   LocalFileHelper._privateConstructor();
@@ -11,7 +13,8 @@ class LocalFileHelper {
   factory LocalFileHelper() => _instance;
 
    Future<String> get _localPath async {
-    final directory = await getApplicationSupportDirectory();
+    //final directory = await getApplicationSupportDirectory();
+    final directory = await CommonFuncs().getEshkolotWorkingDirectory();
     return directory.path;
   }
 

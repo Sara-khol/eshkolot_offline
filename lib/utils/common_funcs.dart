@@ -1,7 +1,10 @@
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:path_provider/path_provider.dart';
+
 
 class CommonFuncs
 {
@@ -31,4 +34,24 @@ class CommonFuncs
       position: ToastPosition.bottom,
     );
   }
+
+
+
+  Future<Directory> getEshkolotWorkingDirectory() async {
+    const driveLetters = ['D', 'E', 'F', 'G', 'H', 'I'];
+
+    for (String drive in driveLetters) {
+      final path = '$drive:\\installation\\.eshkolot_system';
+      final directory = Directory(path);
+
+      if (await directory.exists()) {
+        return directory;
+      }
+    }
+
+    // fallback ל־AppData
+    return await CommonFuncs().getEshkolotWorkingDirectory();
+  }
+
+
 }
