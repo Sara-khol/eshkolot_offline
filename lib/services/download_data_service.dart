@@ -300,6 +300,7 @@ class DownloadService with ChangeNotifier {
       }
     }
     IsarService().updateQuiz(quiz);
+    IsarService().updateLinkQuizToNewName(fileName,quiz.id,fixedFileName);
   }
 
   Future<void> downloadFile(
@@ -310,8 +311,16 @@ class DownloadService with ChangeNotifier {
     if (!isValidFileName(name)) {
       String oldName=name;;
       debugPrint("File name is not valid: $name");
-
-      name = '${removeUnsupportedChars(name)}.png';
+      //todo saw that can be also mp4 like this
+      //todo https://player.vimeo.com/video/460092361?color=62FFB8&amp;title=0&amp;byline=0&amp;portrait=0
+      //todo  but does not download ok
+      //todo and caused a problem in continuing prossec of downloading new course
+      //todo not sure why??
+      // if(url.contains('vimeo')) {
+      //   name = '${removeUnsupportedChars(name)}.mp4';
+      // } else {
+        name = '${removeUnsupportedChars(name)}.png';
+     // }
 
       // Proceed with saving the file
       debugPrint("change name: $name");

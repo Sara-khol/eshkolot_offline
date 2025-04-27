@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(runner LANGUAGES CXX)
+set(WINDOWS_APP_ICON_RESOURCE "resources/app_icon.ico")
 
 # Define the application target. To change its name, change BINARY_NAME in the
 # top-level CMakeLists.txt, not the value here, or `flutter run` will no longer
@@ -14,6 +15,8 @@ add_executable(${BINARY_NAME} WIN32
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
   "Runner.rc"
   "runner.exe.manifest"
+ ${WINDOWS_APP_ICON_RESOURCE}  # ← הוספת האייקון
+
 )
 
 # Apply the standard set of build settings. This can be removed for applications

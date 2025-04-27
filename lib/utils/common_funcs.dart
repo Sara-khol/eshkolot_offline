@@ -4,10 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:flutter/foundation.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 
 class CommonFuncs
 {
+
+  // Singleton pattern
+  static final CommonFuncs _instance = CommonFuncs._internal();
+
+  factory CommonFuncs() => _instance;
+
+  CommonFuncs._internal();
+
+  Directory? _cachedEshkolotDirectory;
+  bool _isUsb = false;
+
+
   void showMyToast(String message, { int duration = 3}) {
     Widget widget = /*Container(
         margin: EdgeInsets.only(bottom: 80.h),
@@ -35,23 +50,82 @@ class CommonFuncs
     );
   }
 
+  Future<Directory?> findEshkolotDirectoryInDrive(String drive) async {
+    final baseDir = Directory('$drive:\\');
+    try {
+    if (!await baseDir.exists()) return null;
 
+    await for (final entity in baseDir.list()) {
+      if (entity is Directory) {
+        final dirName = entity.path.split('\\').last;
+        final cleaned = cleanDirectoryName(dirName);
 
+        if (cleaned == 'installation') {
+          final innerPath = '${entity.path}\\.eshkolot_system';
+          final innerDir = Directory(innerPath);
+
+          if (await innerDir.exists()) {
+            debugPrint('Found eshkolot folder: ${innerDir.path}');
+            return innerDir;
+          }
+        }
+      }
+    }} catch (e) {
+      debugPrint('Error accessing drive $drive: $e');
+      return null;
+    }
+
+    return null;
+  }
+
+  String removeHiddenCharsFromPath(String path) {
+    // Replace all whitespace characters with empty strings
+    path = path.replaceAll(RegExp(r'\s+'), '');
+
+    // You can add more specific replacements here for other hidden characters if needed.
+    return path;
+  }
+
+  /// Remove invisible/control/RTL characters from directory names
+  String cleanDirectoryName(String name) {
+    return name.replaceAll(RegExp(r'[\x00-\x1F\x7F\u200E\u200F\u202A-\u202E]'), '');
+  }
+
+  /// Main function to get the working directory with caching
   Future<Directory> getEshkolotWorkingDirectory() async {
+  //  debugPrint('getEshkolotWorkingDirectory $_cachedEshkolotDirectory');
+    // ✅ Return cached directory if available
+    if (_cachedEshkolotDirectory != null) {
+      return _cachedEshkolotDirectory!;
+    }
+
     const driveLetters = ['D', 'E', 'F', 'G', 'H', 'I'];
 
     for (String drive in driveLetters) {
-      final path = '$drive:\\installation\\.eshkolot_system';
-      final directory = Directory(path);
+      final dir = await findEshkolotDirectoryInDrive(drive);
+      if (dir != null) {
+        debugPrint('getEshkolotWorkingDirectory new directory$dir');
+        Sentry.addBreadcrumb(Breadcrumb(message: 'getEshkolotWorkingDirectory $dir'));
 
-      if (await directory.exists()) {
-        return directory;
+        _cachedEshkolotDirectory = dir;
+        _isUsb=true;
+        return dir;
       }
     }
 
     // fallback ל־AppData
-    return await CommonFuncs().getEshkolotWorkingDirectory();
+    debugPrint('Did not find USB drive, falling back to app data');
+    final fallback = await getApplicationSupportDirectory();
+    _cachedEshkolotDirectory = fallback;
+    _isUsb=false;
+    return fallback;
   }
 
+  checkIfUsb()
+  {
+    debugPrint('checkIfUsb $_isUsb');
+    return _isUsb;
+  }
 
 }
+

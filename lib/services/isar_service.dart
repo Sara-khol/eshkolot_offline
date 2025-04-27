@@ -39,7 +39,7 @@ class IsarService {
   }
 
   Future<Isar> openDB() async {
-    //final dir = await getApplicationSupportDirectory();
+    // final dir = await getApplicationSupportDirectory();
     final dir = await CommonFuncs().getEshkolotWorkingDirectory();
     if (Isar.instanceNames.isEmpty) {
       return await Isar.open([
@@ -173,6 +173,8 @@ class IsarService {
   }
 
  Future<bool> updateLinkQuizByName(String name, int quizId) async {
+    name= '/$name';
+    debugPrint('updateLinkQuizByName name $name quizId $quizId');
     final isar = await db;
     await isar.writeTxn(() async {
       LinkQuizIsar? linkQuizIsar = await isar.linkQuizIsars
@@ -194,7 +196,31 @@ class IsarService {
     return false;
   }
 
-
+  Future<bool> updateLinkQuizToNewName(String name, int quizId,String newName) async {
+    name= '/$name';
+    debugPrint('updateLinkQuizToNewName name $name quizId $quizId');
+    final isar = await db;
+    await isar.writeTxn(() async {
+      LinkQuizIsar? linkQuizIsar = await isar.linkQuizIsars
+          .filter()
+          .nameEqualTo(name)
+          .and()
+          .quizIdEqualTo(quizId)
+          .findFirst();
+      //linkQuizIsar!.isDownload = true;
+      if(linkQuizIsar!=null) {
+        linkQuizIsar.name='/$newName';
+        await isar.linkQuizIsars.put(linkQuizIsar);
+        // await isar.linkQuizIsars.delete(linkQuizIsar.id);
+        return true;
+      }
+      else {
+        debugPrint('can not delete LinkQuiz name $name quizId $quizId');
+        return false;
+      }
+    });
+    return false;
+  }
 
 
   setExpitedDateToFirstItem(int date) async {
