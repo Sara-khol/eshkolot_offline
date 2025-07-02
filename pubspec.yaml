@@ -56,7 +56,7 @@ dependencies:
   connectivity_plus: ^6.0.3
   flutter_widget_from_html_core: ^0.15.2
 #  flutter_html: ^3.0.0-alpha.3
-  audioplayers: ^6.0.0
+  audioplayers: ^6.5.0
   flutter_svg: ^2.0.10+1
   html: ^0.15.4
   event_bus: ^2.0.0

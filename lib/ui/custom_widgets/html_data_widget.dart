@@ -251,7 +251,8 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
       //check if file exists in course file from vimeo
     } else if (!isLesson) {
       path =
-          '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
+        //  '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
+          '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/${widget.quizId}';
       File file = File(path);
       if (await file.exists()) {
         debugPrint('truuuuuuuuuu path $path');

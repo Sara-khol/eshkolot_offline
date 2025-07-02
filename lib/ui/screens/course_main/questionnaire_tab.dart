@@ -60,7 +60,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             for (int i = 1; i <= widget.quiz.questionList.length; i++) ...[
               GestureDetector(
                 child: Container(
-                  width: 60.w,
+                  width: 70.w,
                   padding: EdgeInsets.all(20.h),
                   decoration: BoxDecoration(
                     shape: BoxShape.rectangle,

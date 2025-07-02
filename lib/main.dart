@@ -328,7 +328,7 @@ class _MyAppState extends State<MyApp> {
             : showProgress
             ?  showProgressExtractWidget()
         // todo disable continue if not all videos files of courses are existed
-            : extractWorked /*&& didGetVideosCorrect*/
+            : extractWorked && didGetVideosCorrect
             ? const LoginPage()
             : Center(
             child: Text(!extractWorked?'ישנה בעיה 1':'ישנה בעיה 2',
@@ -380,9 +380,10 @@ class _MyAppState extends State<MyApp> {
         preferences.setBool('didGetVideosCorrect', false);
         didGetVideosCorrect = false;
       }
-      debugPrint('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
-      await Sentry.captureMessage('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
     }
+    debugPrint('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
+    await Sentry.captureMessage('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
+
     showProgress = false;
     setState(() {});
     return true;

@@ -304,7 +304,8 @@ class VimoeService with ChangeNotifier {
           //todo
           // projectId = course.id == 69 ? 2651706 : int.parse(course.vimeoId);
           projectId =
-          course.vimeoId != '' ? int.parse(course.vimeoId) : 10390152;
+          course.vimeoId != '' ? int.parse(course.vimeoId) : 2651706;
+         // course.vimeoId != '' ? int.parse(course.vimeoId) : 10390152;
           courseId = course.id;
           // projectId = course.vimeoId;
           await connectToVimoe();
