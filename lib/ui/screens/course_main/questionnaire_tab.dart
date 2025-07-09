@@ -341,7 +341,9 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     if (onNextClick(isLast: true)) {
       if (checkAnswers()) {
         // QuestionnaireWidget.of(context)?.setInitialDisplay();
-        MainPageChild.of(context)?.updateCompleteQuiz(widget.quiz.id);
+        if(isGradeOk(quizPoints, totalQuizPoints, widget.quiz.grade1, widget.quiz.grade2)) {
+          MainPageChild.of(context)?.updateCompleteQuiz(widget.quiz.id);
+        }
         QuestionnaireWidget.of(context)?.setEndQuestionnaire(
             statusAnswers: statusAnswers,
             grade1: widget.quiz.grade1,
@@ -362,6 +364,14 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
         //     });
       }
     }
+  }
+
+  bool isGradeOk(int numPoints,int totalPoints,int grade1,int grade2){
+    debugPrint('isGradeOk numPoints $numPoints grade1 $grade1');
+  num  grade =
+        ((numPoints / totalPoints) * 100).round();
+    debugPrint('isGradeOk grade $grade ${grade1>=grade}');
+    return grade1<=grade;
   }
 
   bool checkAnswers() {
