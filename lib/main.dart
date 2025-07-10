@@ -32,10 +32,11 @@ import 'models/knowledge.dart';
 import 'models/lesson.dart';
 import 'models/quiz.dart';
 import 'dart:convert';
+
 // import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
-import 'package:media_kit/media_kit.dart';                      // Provides [Player], [Media], [Playlist] etc.
+import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
 
 class MyRootApp extends StatefulWidget {
   const MyRootApp({super.key});
@@ -45,8 +46,6 @@ class MyRootApp extends StatefulWidget {
 }
 
 class _MyRootAppState extends State<MyRootApp> {
-
-
   @override
   Widget build(BuildContext context) {
     return OKToast(
@@ -72,7 +71,6 @@ class _MyRootAppState extends State<MyRootApp> {
   }
 }
 
-
 class AppLoader extends StatefulWidget {
   const AppLoader({super.key});
 
@@ -82,7 +80,7 @@ class AppLoader extends StatefulWidget {
 
 class _AppLoaderState extends State<AppLoader> {
   bool _initialized = false;
-  List<Course> myCourses=[];
+  List<Course> myCourses = [];
   bool databaseInitialized = false;
 
   @override
@@ -96,9 +94,9 @@ class _AppLoaderState extends State<AppLoader> {
     if (!_initialized) {
       // You can customize this screen however you want
       return const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
 
@@ -121,14 +119,10 @@ class _AppLoaderState extends State<AppLoader> {
     final usbDir = await CommonFuncs().getEshkolotWorkingDirectory();
     final usbPreferences = UsbPreferences(usbDir);
 
-
     databaseInitialized = await checkDatabaseInitialized(preferences);
 
-
     if (!databaseInitialized) {
-
-      if(CommonFuncs().checkIfUsb())
-      {
+      if (CommonFuncs().checkIfUsb()) {
         await usbPreferences.setBool('database_initialized', false);
       }
       //else?? or save no matter
@@ -163,8 +157,7 @@ class _AppLoaderState extends State<AppLoader> {
           paths,
           InstallationDataHelper().data['users'].cast<Map<String, dynamic>>());
       await preferences.setBool('database_initialized', true);
-      if(CommonFuncs().checkIfUsb())
-      {
+      if (CommonFuncs().checkIfUsb()) {
         await usbPreferences.setBool('database_initialized', true);
       }
     } else {
@@ -199,66 +192,61 @@ class _AppLoaderState extends State<AppLoader> {
   }
 
   Future<bool> checkDatabaseInitialized(preferences) async {
-
-  if(CommonFuncs().checkIfUsb()) {
-    Directory dir=  await CommonFuncs().getEshkolotWorkingDirectory();
-    final prefs = UsbPreferences(dir);
-    return !await IsarService().checkIfDBisEmpty() &&
-        (await prefs.getBool('database_initialized') ?? false);
+    if (CommonFuncs().checkIfUsb()) {
+      Directory dir = await CommonFuncs().getEshkolotWorkingDirectory();
+      final prefs = UsbPreferences(dir);
+      return !await IsarService().checkIfDBisEmpty() &&
+          (await prefs.getBool('database_initialized') ?? false);
+    } else {
+      return !await IsarService().checkIfDBisEmpty() &&
+          (preferences.getBool('database_initialized') ?? false);
+    }
   }
-  else {
-    return !await IsarService().checkIfDBisEmpty() &&
-        (preferences.getBool('database_initialized') ?? false);
-  }
-  }
-
 }
 
 Future<void> main() async {
   runZonedGuarded(() async {
-  WidgetsFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
 
+    FutureOr<SentryEvent?> beforeSend(SentryEvent event, Hint hint) async {
+      var connectivityResult = await Connectivity().checkConnectivity();
 
-  FutureOr<SentryEvent?> beforeSend(SentryEvent event, Hint hint) async {
-    var connectivityResult = await Connectivity().checkConnectivity();
+      if (!await NetworkConnectivity.instance.checkConnectivity()) {
+        String eventJson = const JsonEncoder().convert(event.toJson());
+        await LocalFileHelper().writeEvent(eventJson);
+        return null;
+      }
 
-    if (!await NetworkConnectivity.instance.checkConnectivity()) {
-      String eventJson = const JsonEncoder().convert(event.toJson());
-      await LocalFileHelper().writeEvent(eventJson);
-      return null;
+      return event;
     }
 
-    return event;
-  }
-
-  await Sentry.init((options) {
-    options.dsn = kDebugMode
-        ? ''
-        : 'https://0305d132e35b4bfea621838e8aaee3de@o4505141567619072.ingest.sentry.io/4505141614084096';
-    options.tracesSampleRate = 1.0;
-    options.sendDefaultPii = true;
-    options.enablePrintBreadcrumbs = true;
-    options.beforeSend = beforeSend;
-  });
+    await Sentry.init((options) {
+      options.dsn = kDebugMode
+          ? ''
+          : 'https://0305d132e35b4bfea621838e8aaee3de@o4505141567619072.ingest.sentry.io/4505141614084096';
+      options.tracesSampleRate = 1.0;
+      options.sendDefaultPii = true;
+      options.enablePrintBreadcrumbs = true;
+      options.beforeSend = beforeSend;
+    });
 
     runApp(const MyRootApp());
 
- // await Future.delayed(const Duration(milliseconds: 10000));
+    // await Future.delayed(const Duration(milliseconds: 10000));
 
-  doWhenWindowReady(() async {
-    debugPrint('✅ doWhenWindowReady');
+    doWhenWindowReady(() async {
+      debugPrint('✅ doWhenWindowReady');
 
-    setWindowVisibility(visible: true);
+      setWindowVisibility(visible: true);
       setWindowTitle('אשכולות אופליין');
-    // appWindow.show();
-  });
-
+      // appWindow.show();
+    });
   }, (error, stackTrace) {
     print('Error : $error');
     print('StackTrace : $stackTrace');
     Sentry.captureException(error, stackTrace: stackTrace);
-  });}
-
+  });
+}
 
 class MyApp extends StatefulWidget {
   final List<Course> courses;
@@ -279,36 +267,32 @@ class _MyAppState extends State<MyApp> {
   late bool isNetWorkConnection;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   late String destDirPath;
-  late bool showProgress=false , extractWorked;
+  late bool showProgress = false, extractWorked;
   bool didGetVideosCorrect = false;
   late SharedPreferences preferences;
   late List<Course> courses;
-  bool isLoading= false;
-
-
+  bool isLoading = false;
+  bool timeout = false;
 
   @override
   void initState() {
-    courses= widget.courses;
+    courses = widget.courses;
     _networkConnectivity.initialise();
     if (!widget.dataWasFilled) {
       // myFuture =setDataFiles();
       debugPrint('1===setDataFiles');
 
       setDataFiles();
-    }
-    else {
-      showProgress=true;
+    } else {
+      showProgress = true;
       getSharedPrefs().then((value) {
-        if(!extractWorked) {
+        if (!extractWorked) {
           debugPrint('2===setDataFiles extractWorked $extractWorked');
           setDataFiles();
+        } else {
+          showProgress = false;
+          setState(() {});
         }
-        else
-          {
-            showProgress=false;
-            setState(() {});
-          }
         // else if(!didGetVideosCorrect)
         //   {
         //
@@ -319,6 +303,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -326,22 +312,26 @@ class _MyAppState extends State<MyApp> {
         body: widget.dataWasFilled && didGetVideosCorrect && extractWorked
             ? const LoginPage()
             : showProgress
-            ?  showProgressExtractWidget()
-        // todo disable continue if not all videos files of courses are existed
-            : extractWorked && didGetVideosCorrect
-            ? const LoginPage()
-            : Center(
-            child: Text(!extractWorked?'ישנה בעיה 1':'ישנה בעיה 2',
-                style: TextStyle(fontSize: 30.sp))));
+                ? showProgressExtractWidget()
+                // todo disable continue if not all videos files of courses are existed
+                : extractWorked && didGetVideosCorrect
+                    ? const LoginPage()
+                    : Center(
+                        child: !timeout
+                            ? Text(
+                                !extractWorked ? 'ישנה בעיה 1' : 'ישנה בעיה 2',
+                                style: TextStyle(fontSize: 30.sp))
+                            : Text(
+                                'התהליך לוקח מידי הרבה זמן,פנה לתמיכה',
+                                style: TextStyle(fontSize: 30.sp))));
   }
 
   Future<Null> getSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    extractWorked = prefs.getBool("extractWorked")??false;
-    didGetVideosCorrect = prefs.getBool("didGetVideosCorrect")??false;
-    if(courses.isEmpty)
-    {
-      courses=await  IsarService().getAllCourses();
+    extractWorked = prefs.getBool("extractWorked") ?? false;
+    didGetVideosCorrect = prefs.getBool("didGetVideosCorrect") ?? false;
+    if (courses.isEmpty) {
+      courses = await IsarService().getAllCourses();
     }
     setState(() {});
   }
@@ -354,18 +344,19 @@ class _MyAppState extends State<MyApp> {
     preferences = await SharedPreferences.getInstance();
     preferences.setBool('extractWorked', false);
     // final Directory directory = await CommonFuncs().getEshkolotWorkingDirectory();
-    final Directory directory = await CommonFuncs().getEshkolotWorkingDirectory();
+    final Directory directory =
+        await CommonFuncs().getEshkolotWorkingDirectory();
     destDirPath = directory.path;
     //destDirPath = await CommonFuncs().findEshkolotFolderOnUsb();
-    extractWorked = await extractZipFileUsingIsolate([
+    int isolateRes = await extractZipFileUsingIsolate([
       '$destDirPath/${Constants.quizPath}/',
       '$destDirPath/${Constants.lessonPath}/'
     ]);
+    extractWorked = isolateRes == 0;
 
     if (extractWorked) {
       debugPrint('extractWorked ${courses.length}');
       preferences.setBool('extractWorked', true);
-     // await Sentry.captureMessage('extract Worked $extractWorked');
       for (Course course in courses) {
         bool b = await InstallationDataHelper().setLessonVideosNum(course);
         if (b) {
@@ -375,22 +366,28 @@ class _MyAppState extends State<MyApp> {
       if (numOfCourseWithVideos == courses.length) {
         preferences.setBool('didGetVideosCorrect', true);
         didGetVideosCorrect = true;
-      }
-      else{
+      } else {
         preferences.setBool('didGetVideosCorrect', false);
         didGetVideosCorrect = false;
       }
+    } else {
+      if (isolateRes == 1) {
+        debugPrint('isolate timeout');
+        await Sentry.addBreadcrumb(Breadcrumb(message: 'isolate timeout'));
+        timeout = true;
+      }
     }
-    debugPrint('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
-    await Sentry.captureMessage('extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
+    debugPrint(
+        'extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
+    await Sentry.captureMessage(
+        'extractWorked  $extractWorked didGetVideosCorrect $didGetVideosCorrect');
 
     showProgress = false;
     setState(() {});
     return true;
   }
 
-  showProgressExtractWidget()
-  {
+  showProgressExtractWidget() {
     return Column(
       children: [
         const TitleBarWidget(),
@@ -399,14 +396,13 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('...מתכונן להפעלת התוכנה, פעולה זו עלולה לקחת כמה דקות', style: TextStyle(
-                  fontWeight: FontWeight.w600,fontSize: 40.sp
-              )),
+              Text('...מתכונן להפעלת התוכנה, פעולה זו עלולה לקחת כמה דקות',
+                  style:
+                      TextStyle(fontWeight: FontWeight.w600, fontSize: 40.sp)),
               const CircularProgressIndicator(),
             ],
           ),
         ),
-
       ],
     );
   }
@@ -446,31 +442,38 @@ Future<String?> getInstallerSourcePath() async {
   return null;
 }
 
-Future<bool> extractZipFileUsingIsolate(List<String> extractPath) async {
+Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
   ReceivePort receivePort = ReceivePort();
   late Isolate isolate;
   try {
     isolate = await Isolate.spawn(
         extractZipIsolate, [receivePort.sendPort, extractPath]);
 
-    final res = await receivePort.first;
-    debugPrint('result $res');
-    Sentry.addBreadcrumb(Breadcrumb(message:'result from extract $res' ));
+    final res = await receivePort.first.timeout(
+      const Duration(minutes: 15), // משך הזמן המקסימלי להמתנה
+      onTimeout: () {
+        return 'timeout';
+      },
+    );
 
-    // if (res is String) {
-    //   return res == 'finish';
-    // }
-    if (res is String && res == 'finish') {
-      return true;
+    //  final res = await receivePort.first;
+    debugPrint('result $res');
+    Sentry.addBreadcrumb(Breadcrumb(message: 'result from extract $res'));
+
+    if (res is String) {
+      if (res == 'finish')
+        return 0;
+      else if (res == 'timeout') return 1;
     }
-    return false;
+    return 2;
   } on Object {
     debugPrint('isolate failed');
-    return false;
+    return 2;
   } finally {
     //is needed??
     receivePort.close();
-    isolate.kill();
+    // isolate.kill();
+    isolate.kill(priority: Isolate.immediate);
   }
 }
 
@@ -489,6 +492,15 @@ extractZipFile(String path, SendPort sendPort) async {
       String destinationPath = '$path$destinationFolderName';
       // Create the destination folder if it doesn't exist
       Directory(destinationPath).createSync(recursive: true);
+
+      if (zipHasInvalidPaths(zipFilePath)) {
+        final msg = 'ZIP file contains invalid file names: $zipFilePath';
+        debugPrint(msg);
+        // sendPort.send(msg);
+        Sentry.addBreadcrumb(Breadcrumb(message: msg));
+        continue;
+      }
+
       try {
         extractFileToDisk(zipFilePath, destinationPath);
         debugPrint('Zip extraction completed for: $zipFilePath');
@@ -500,63 +512,6 @@ extractZipFile(String path, SendPort sendPort) async {
         Sentry.addBreadcrumb(
             Breadcrumb(message: 'Error extracting zips for path $path: $e'));
       }
-
-
-      /*   // Use an InputFileStream to access the zip file without storing it in memory.
-          final inputStream = InputFileStream(zipFilePath);
-          // Decode the zip from the InputFileStream. The archive will have the contents of the
-          // zip, without having stored the data in memory.
-          final archive = ZipDecoder().decodeBuffer(inputStream);
-         extractArchiveToDisk(archive, destinationPath);*/
-
-      // For all of the entries in the archive
-      /*for (var file in archive.files) {
-            // If it's a file and not a directory
-            if (file.isFile) {
-              // Write the file content to a directory called 'out'.
-              // In practice, you should make sure file.name doesn't include '..' paths
-              // that would put it outside of the extraction directory.
-              // An OutputFileStream will write the data to disk.
-              final outputStream = OutputFileStream('$destinationPath${file.name}');
-              // The writeContent method will decompress the file content directly to disk without
-              // storing the decompressed data in memory.
-              file.writeContent(outputStream);
-              // Make sure to close the output stream so the File is closed.
-              outputStream.close();
-            }
-          }*/
-
-      // Create the destination folder if it doesn't exist
-      //Directory(destinationPath).createSync(recursive: true);
-
-      // // Read the zip file
-      // List<int> bytes = await file.readAsBytes();
-      //
-      // Archive archive =  ZipDecoder().decodeBytes(bytes);
-      // debugPrint('archiveeeeee');
-      // for (ArchiveFile archiveFile in archive) {
-      //   String fileName = archiveFile.name;
-      //
-      //   debugPrint('fileName $fileName');
-      //
-      //   if (archiveFile.isFile) {
-      //     // Get the file content as a List<int>
-      //     List<int> fileData = archiveFile.content as List<int>;
-      //
-      //     // Create the file in the destination folder
-      //     File destinationFile = File('$destinationPath$fileName');
-      //      destinationFile.createSync(recursive: true);
-      //     destinationFile.writeAsBytesSync(fileData);
-      //   } else {
-      //     // If it's a directory, create the directory in the destination folder
-      //     Directory('$destinationPath$fileName').createSync(
-      //         recursive: true);
-      //   }
-      // }
-      //debugPrint('Zip extraction completed for: $zipFilePath');
-      // Sentry.addBreadcrumb(
-      //     Breadcrumb(
-      //         message: 'Zip extraction completed for: $zipFilePath'));
     }
   }
 }
@@ -577,4 +532,27 @@ void extractZipIsolate(List<dynamic> args) async {
     }
   }
   Isolate.exit(sendPort, 'finish');
+}
+
+bool zipHasInvalidPaths(String zipFilePath) {
+  try {
+    final inputStream = InputFileStream(zipFilePath);
+    final archive = ZipDecoder().decodeBuffer(inputStream);
+
+    for (final file in archive.files) {
+      if (_containsInvalidPath(file.name)) {
+        debugPrint('ZIP contains invalid file name: ${file.name}');
+        return true;
+      }
+    }
+  } catch (e) {
+    debugPrint('Failed to scan zip file: $zipFilePath, error: $e');
+    return true; // לשם הזהירות, אם יש שגיאה בקריאה - נניח שה־ZIP לא תקין
+  }
+
+  return false;
+}
+
+bool _containsInvalidPath(String path) {
+  return RegExp(r'[<>:"/\\|?*]').hasMatch(path);
 }
