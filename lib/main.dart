@@ -148,7 +148,7 @@ class _AppLoaderState extends State<AppLoader> {
 
       debugPrint('filling!!');
       Sentry.addBreadcrumb(Breadcrumb(message: 'filling data!!'));
-      await IsarService().initCourses(
+      await IsarService().initData(
           myCourses,
           subjects,
           lessons,
@@ -156,6 +156,7 @@ class _AppLoaderState extends State<AppLoader> {
           knowledgeList,
           paths,
           InstallationDataHelper().data['users'].cast<Map<String, dynamic>>());
+      await IsarService().updateUserType(InstallationDataHelper().data['user_type']);
       await preferences.setBool('database_initialized', true);
       if (CommonFuncs().checkIfUsb()) {
         await usbPreferences.setBool('database_initialized', true);
@@ -461,9 +462,9 @@ Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
     Sentry.addBreadcrumb(Breadcrumb(message: 'result from extract $res'));
 
     if (res is String) {
-      if (res == 'finish')
+      if (res == 'finish') {
         return 0;
-      else if (res == 'timeout') return 1;
+      } else if (res == 'timeout') {return 1;}
     }
     return 2;
   } on Object {

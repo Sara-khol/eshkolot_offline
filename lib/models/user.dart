@@ -12,6 +12,7 @@ class User {
   late String name;
   @Index(unique: true, replace: true, name: 'tz')
   late String tz;
+  late String userType;
 
   List<int> knowledgeIds = [];
 
@@ -158,18 +159,22 @@ Map<String, dynamic> toJson() {
 class UserGrade {
   late int quizId = 0;
   late int percentage = 0;
+  late int score = 0;
 
 
 
 
   UserGrade(
-      {this.quizId=0,  this.percentage=0});
+      {this.quizId=0,  this.percentage=0,this.score=0});
 
 
   Map<String, dynamic> toJson() {
     return {
       'quizId': quizId,
-      'percentage': percentage};
+      'percentage': percentage,
+      'score': score,
+
+    };
   }
 
 

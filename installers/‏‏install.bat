@@ -40,8 +40,13 @@ for /f "tokens=*" %%a in (%TEMP%\driveinfo.txt) do (
 del "%TEMP%\driveinfo.txt"
 
 REM === Set paths ===
-set "fileName=installation.eshkolot"
-set "zipFile=%batFolder%%fileName%"
+REM set "fileName=installation.eshkolot"
+REM set "zipFile=%batFolder%%fileName%"
+
+for /f "delims=" %%f in ('powershell -nologo -noprofile -command ^
+    "Get-ChildItem -Path '%batFolder%' -Filter '*.eshkolot' | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object { $_.FullName }"') do (
+    set "zipFile=%%f"
+)
 
 if "%driveType%"=="Removable" (
     echo ✅ Detected USB

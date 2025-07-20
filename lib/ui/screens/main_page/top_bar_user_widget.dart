@@ -198,7 +198,8 @@ class _TopBarUserWidgetState extends State<TopBarUserWidget>
       'questionCompleted': user.questionCompleted,
       'subjectCompleted': user.subjectCompleted,
       'coursesCompleted': courseCompleted,
-      'percentages': jsonList
+      'percentages': jsonList,
+      'user_type': IsarService().getCurrentUser().userType
     };
    DownloadService().blockLinks=[];
     ApiService().syncData(onSuccess: updateFunc, onError: () {}, jsonMap: map);

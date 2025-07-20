@@ -230,7 +230,7 @@ class _QuestionnaireEndDialogState extends State<QuestionnaireEndDialog> {
 
   saveUserGrade(num grade) async {
     UserGrade userGrade =
-        UserGrade(quizId: widget.qID, percentage: grade as int);
+        UserGrade(quizId: widget.qID, percentage: grade as int,score:numCorrectAnswers );
     await IsarService().updateGrade(userGrade);
   }
 }
