@@ -156,7 +156,8 @@ class _AppLoaderState extends State<AppLoader> {
           knowledgeList,
           paths,
           InstallationDataHelper().data['users'].cast<Map<String, dynamic>>());
-      await IsarService().updateUserType(InstallationDataHelper().data['user_type']);
+      await IsarService().updateUserParentData(InstallationDataHelper().data['user_type'],
+          InstallationDataHelper().data['user_mail']??'');
       await preferences.setBool('database_initialized', true);
       if (CommonFuncs().checkIfUsb()) {
         await usbPreferences.setBool('database_initialized', true);

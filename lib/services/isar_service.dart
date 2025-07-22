@@ -106,11 +106,12 @@ class IsarService {
     });
   }
 
-  updateUserType(String userType) async {
+  updateUserParentData(String userType,String userMail) async {
     final isar = await db;
     List<User> users = await getAllUsers();
     for (User user in users) {
       user.userType = userType;
+      user.userMail = userMail;
 
       await isar.writeTxn(() async {
         await isar.users.put(user);

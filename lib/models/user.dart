@@ -13,6 +13,7 @@ class User {
   @Index(unique: true, replace: true, name: 'tz')
   late String tz;
   late String userType;
+  late String userMail;
 
   List<int> knowledgeIds = [];
 
