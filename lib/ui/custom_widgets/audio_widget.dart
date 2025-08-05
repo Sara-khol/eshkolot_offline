@@ -107,7 +107,7 @@ class _AudioWidgetState extends State<AudioWidget> {
           style: TextStyle(fontSize: 25.sp),
         ),
      Slider(
-         value: double.parse(currentPos.toString()),
+         value: currentPos.clamp(0, maxDuration).toDouble(),
          min: 0,
          max: double.parse(maxDuration.toString()),
          label: currentPostLabel,

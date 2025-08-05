@@ -9,6 +9,8 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'dart:ui' as ui;
+
 
 import '../../utils/common_funcs.dart';
 import '../screens/course_main/main_page_child.dart';
@@ -190,15 +192,34 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
           if (file != null) {
             switch (type) {
               case WidgetType.image:
-                return Image.file(
+                return FutureBuilder<ui.Image>(
+                  future: decodeImageFromFile(file),
+                  builder: (context, imageSnapshot) {
+                    if (imageSnapshot.connectionState == ConnectionState.done &&
+                        imageSnapshot.hasData) {
+                      final image = imageSnapshot.data!;
+                      return SizedBox(
+                        width: image.width.toDouble(),
+                        height: image.height.toDouble(),
+                        child: Image.file(
+                          file,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                        ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }});
+             /*return Image.file(
                   file,
                   fit: BoxFit.contain,
+
                   // height: height != null
                   //     ? int.parse(height.toString()) * 2.w
                   //     : null,
                   // width:
                   //     width != null ? int.parse(width.toString()) * 2.h : null,
-                );
+                );*/
               case WidgetType.audio:
                 return AudioWidget(
                   path: file.path,
@@ -262,6 +283,15 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     } else {
       return null;
     }
+  }
+
+  Future<ui.Image> decodeImageFromFile(File file) async {
+    final bytes = await file.readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    debugPrint('widthhhh  ${frame.image.width.toDouble()}');
+    debugPrint('heightttt  ${frame.image.height.toDouble()}');
+    return frame.image;
   }
 
   String convertCustomAudioTags(String htmlContent) {

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:isar/isar.dart';
 
 part 'quiz.g.dart';
@@ -176,8 +177,8 @@ class MoreData {
 
   MoreData.fromJson(Map<String, dynamic> json) {
     backgroundImageOption = json['background_image_option'] ?? '';
-    customQuizQuestionsHeight = json['custom_quiz_questions_height'];
-    customQuizQuestionsWidth = json['custom_quiz_questions_width'];
+    customQuizQuestionsHeight = json['custom_quiz_questions_height']??'';
+    customQuizQuestionsWidth = json['custom_quiz_questions_width']??'';
     quizFields = json['custom_quiz_questions_fields'] != ''
         ? List<CustomQuizQuestionsFields>.from(
             json['custom_quiz_questions_fields']

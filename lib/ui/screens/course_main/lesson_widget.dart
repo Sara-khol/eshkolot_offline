@@ -102,7 +102,7 @@ class _LessonWidgetState extends State<LessonWidget> {
                     ),
                     Expanded(
                       child: Text(
-                        '${lesson.name} ${lesson.videoNum}',
+                        lesson.name,
                         // overflow:TextOverflow.ellipsis ,
                         style: TextStyle(
                         height: 1,
