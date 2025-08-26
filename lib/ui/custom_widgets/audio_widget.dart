@@ -64,66 +64,70 @@ class _AudioWidgetState extends State<AudioWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        TextButton(
-          // style: TextButton.styleFrom(
-          //   alignment: Alignment.center,
-          //   padding: EdgeInsets.only(left: 0, right: 0),
-          //   textStyle: TextStyle(
-          //       fontSize: 18.sp, fontWeight: FontWeight.w600),
-          // ),
-          onPressed: () async {
-            if (!isPlaying && !audioPlayed) {
-              player.play(DeviceFileSource(widget.path));
-              isPlaying = true;
-              audioPlayed = true;
-            } else if (audioPlayed && !isPlaying) {
-              await player.resume();
-              isPlaying = true;
-              audioPlayed = true;
-            } else {
-              await player.pause();
-              isPlaying = false;
-            }
-          },
+    return Container(
+        decoration: BoxDecoration(border: Border.all(color: Colors.pink.withOpacity(0.5)),
+        borderRadius: BorderRadius.all(Radius.circular(15))),
+      child: Row(
+        children: [
+          TextButton(
+            // style: TextButton.styleFrom(
+            //   alignment: Alignment.center,
+            //   padding: EdgeInsets.only(left: 0, right: 0),
+            //   textStyle: TextStyle(
+            //       fontSize: 18.sp, fontWeight: FontWeight.w600),
+            // ),
+            onPressed: () async {
+              if (!isPlaying && !audioPlayed) {
+                player.play(DeviceFileSource(widget.path));
+                isPlaying = true;
+                audioPlayed = true;
+              } else if (audioPlayed && !isPlaying) {
+                await player.resume();
+                isPlaying = true;
+                audioPlayed = true;
+              } else {
+                await player.pause();
+                isPlaying = false;
+              }
+            },
 
-    child: Center(
-      child: Icon(isPlaying  ? Icons.pause : Icons.play_arrow),
-    ),
-          /*   ElevatedButton.icon(
-                onPressed: () async {
-                  *//* int result =*//* await player.stop();
-                  isPlaying = false;
-                  audioPlayed = false;
-                  currentPos = 0;
-                },
-                icon: Icon(Icons.stop),
-                label: Text("Stop")),*/
-        ),
-        SizedBox(width: 10.w),
-        Text(
-          currentPostLabel,
-          style: TextStyle(fontSize: 25.sp),
-        ),
-     Slider(
-         value: currentPos.clamp(0, maxDuration).toDouble(),
-         min: 0,
-         max: double.parse(maxDuration.toString()),
-         label: currentPostLabel,
-         onChanged: (double value) async {
-           int seekval = value.round();
-           await player.seek(Duration(milliseconds: seekval));
-         }
-     ),
+      child: Center(
+        child: Icon(isPlaying  ? Icons.pause : Icons.play_arrow),
+      ),
+            /*   ElevatedButton.icon(
+                  onPressed: () async {
+                    *//* int result =*//* await player.stop();
+                    isPlaying = false;
+                    audioPlayed = false;
+                    currentPos = 0;
+                  },
+                  icon: Icon(Icons.stop),
+                  label: Text("Stop")),*/
+          ),
+          SizedBox(width: 10.w),
+          Text(
+            currentPostLabel,
+            style: TextStyle(fontSize: 25.sp),
+          ),
+       Slider(
+           value: currentPos.clamp(0, maxDuration).toDouble(),
+           min: 0,
+           max: double.parse(maxDuration.toString()),
+           label: currentPostLabel,
+           onChanged: (double value) async {
+             int seekval = value.round();
+             await player.seek(Duration(milliseconds: seekval));
+           }
+       ),
 
-      /*  Wrap(
-          spacing: 10,
-          children: [*/
+        /*  Wrap(
+            spacing: 10,
+            children: [*/
 
-      //    ],
-    //    )
-      ],
+        //    ],
+      //    )
+        ],
+      ),
     );
   }
 }

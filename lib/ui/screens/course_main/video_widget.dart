@@ -60,7 +60,7 @@ class _VideoWidgetState extends State<VideoWidget>
 
   @override
   void didUpdateWidget(covariant VideoWidget oldWidget) {
-    if(oldWidget.videoId!=widget.videoId)
+    if(oldWidget.videoId!=widget.videoId ||oldWidget.fileId!=widget.fileId)
       {
         if(videoExists) {
           player.dispose();
