@@ -265,7 +265,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                           ?.bodyWidget =
                                           QuestionnaireWidget(
                                             quiz: lastQuestionnaire!,
-                                            onNext: data!.lessonIndex + 1 <
+                                            onNext:lastSubject!=null && data!.lessonIndex + 1 <
                                                 lastSubject!.lessonsList.length
                                                 ? () =>
                                                 currentMainChild

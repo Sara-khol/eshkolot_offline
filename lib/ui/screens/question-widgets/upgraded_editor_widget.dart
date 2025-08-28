@@ -21,6 +21,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
   double increaseSize = 1.5;
   late MoreData customData;
   List<Widget> positionedItems = [];
+  List<Widget> overlayInteractiveItems = [];
 
   late List<String> ans = [];
   List<TextEditingController> myControllers = [];
@@ -71,8 +72,10 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
 
   setPositionItems(/*double width*/) {
     positionedItems.clear();
+    overlayInteractiveItems.clear();
+
     Widget myTextField = Container();
-    if (double.parse(customData.customQuizQuestionsWidth) < 300) {
+    if (double.parse(customData.customQuizQuestionsWidth) <= 300) {
       increaseSize = 3;
     }
     debugPrint('increaseSize $increaseSize');
@@ -87,10 +90,11 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
         double xPosition = double.parse(field.xPosition) * increaseSize;
         double yPosition = double.parse(field.yPosition) * increaseSize;
         double itemWidth =
-            field.width != '' ? double.parse(field.width) * increaseSize : 0;
+        field.width != '' ? double.parse(field.width) * increaseSize : 0;
         double itemHeight =
-            field.height != '' ? double.parse(field.height) * increaseSize : 0;
+        field.height != '' ? double.parse(field.height) * increaseSize : 0;
 
+        // --------- Editable? Put its TextField ONLY in the overlay ----------
         if (field.editable.isNotEmpty) {
           ans.add(field.correctAnswer);
           var textEditingController = TextEditingController();
@@ -98,20 +102,21 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
           myControllers.add(textEditingController);
           focusNodes.add(focusNode);
           pointsList.add(field.points.isNotEmpty ? int.parse(field.points) : 0);
-          myTextField = Container(
-              width: field.maxWidth != ''
-                  ? double.parse(field.maxWidth) * increaseSize.w
-                  : null,
-              // height: 35.h,
-              color: field.background != ''
-                  ? Color(int.parse(field.background))
-                  : null,
-              child: TextField(
-                controller: textEditingController,
-                focusNode: focusNode,
-                buildCounter: null,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: InputDecoration(
+
+          overlayInteractiveItems.add(
+            Positioned(
+              left: xPosition.w,
+              top: yPosition.h,
+              child: SizedBox(
+                width: field.maxWidth != '' ? double.parse(field.maxWidth) *
+                    increaseSize.w : null,
+                height: itemHeight > 0 ? itemHeight.h : null,
+                child: TextField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  buildCounter: null,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
                     isDense: true,
                     contentPadding: EdgeInsets.only(top: 10.h, bottom: 10.h),
                     border: const OutlineInputBorder(),
@@ -121,98 +126,91 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                     focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black),
                     ),
-                    hintText: field.defaultValue),
-                cursorColor:
-                    field.color != '' ? Color(int.parse(field.color)) : null,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                textDirection: field.direction == 'rtl'
-                    ? TextDirection.rtl
-                    : TextDirection.ltr,
-                style: TextStyle(
-                  fontWeight: field.bold.isNotEmpty
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  height: 1,
-                  color:
-                      field.color != '' ? Color(int.parse(field.color)) : null,
-                  fontSize: double.parse(field.fontSize) * increaseSize.sp,
-                  //   decoration: question.txtbox[i].txtdeco,
-
-                  //  color: question.txtbox[i].color,
-                  //backgroundColor: question.txtbox[i].backgroundColor,
-                  // fontWeight: question.txtbox[i].bold
-                  //? FontWeight.bold
-                  //: FontWeight.normal
+                    hintText: field.defaultValue,
+                    // If your colors come as hex strings like "#5956da",
+                    // convert them before using. (Your current code assumes int)
+                  ),
+                  cursorColor: field.color != ''
+                      ? Color(int.parse(field.color))
+                      : null,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  textDirection: field.direction == 'rtl'
+                      ? TextDirection.rtl
+                      : TextDirection.ltr,
+                  style: TextStyle(
+                    fontWeight: field.bold.isNotEmpty
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    height: 1,
+                    color: field.color != ''
+                        ? Color(int.parse(field.color))
+                        : null,
+                    fontSize: double.parse(field.fontSize) * increaseSize.sp,
+                  ),
+                  onEditingComplete: () {
+                    final index = focusNodes.indexOf(focusNode);
+                    if (index < myControllers.length - 1) {
+                      FocusScope.of(context).requestFocus(
+                          focusNodes[index + 1]);
+                    } else {
+                      FocusScope.of(context).requestFocus(focusNodes[0]);
+                    }
+                  },
                 ),
-                onEditingComplete: () {
-                  int index = focusNodes.indexOf(focusNode);
-                  if (index < myControllers.length - 1) {
-                    FocusScope.of(context).requestFocus(focusNodes[index + 1]);
-                  } else {
-                    FocusScope.of(context).requestFocus(focusNodes[0]);
-                  }
-                },
-              ));
+              ),
+            ),
+          );
+
+          continue; // IMPORTANT: do not also add this field to the base layer
         }
+
 
         if (field.type == 'image') {
           debugPrint('image=== ${field.defaultValue}');
         }
 
-        positionedItems.add(Positioned(
+
+
+        // --------- Non-editable: keep in the base layer as-is ----------
+        positionedItems.add(
+          Positioned(
             left: xPosition.w,
             top: yPosition.h,
             child: field.type == 'image'
-                //image
-                ? field.defaultValue.isNotEmpty
-                    ?  /*  (itemWidth.w > width) ?Container(
-                      width: width,
-                        height: itemHeight.h,
-                        child: HtmlDataWidget(
-                            '<img  src="${field.defaultValue.substring(field.defaultValue.lastIndexOf('/'), field.defaultValue.length)}" alt=""  />',
-                            quizId: widget.question.quizId),
-                      ):*/
-            Container(
-                width: itemWidth.w,
-                height: itemHeight.h,
-                child: HtmlDataWidget(
-                    '<img  src="${field.defaultValue.substring(field.defaultValue.lastIndexOf('/'), field.defaultValue.length)}" alt=""  />',
-                    quizId: widget.question.quizId),)
-
-                /*SizedBox(
-                        width: itemWidth.w,
-                        height: itemHeight.h,
-                        child: Image.network(
-                          field.defaultValue,
-                        ))*/
-                    : SizedBox()
-                : field.editable.isEmpty
-                    ?
-                    //text
-                    SizedBox(
-                        width: field.maxWidth != ''
-                            ? double.parse(field.maxWidth) * increaseSize.w
-                            : null,
-                        //goes on top of image and see some white
-                        // color:  field.background != ''
-                        //     ? Color(int.parse(field.background))
-                        //     : null,
-                        child: Text(field.defaultValue,
-                            style: TextStyle(
-                                fontWeight: field.bold.isNotEmpty
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                fontSize: double.parse(field.fontSize) *
-                                    increaseSize.sp,
-                                color: field.color != ''
-                                    ? Color(int.parse(field.color))
-                                    : null),
-                            textDirection: field.direction == 'rtl'
-                                ? TextDirection.rtl
-                                : TextDirection.ltr),
-                      )
-                    : myTextField));
+                ? (field.defaultValue.isNotEmpty
+                ? SizedBox(
+              width: itemWidth.w,
+              height: itemHeight.h,
+              child: HtmlDataWidget(
+                '<img src="${field.defaultValue.substring(
+                    field.defaultValue.lastIndexOf('/'))}" alt=""/>',
+                quizId: widget.question.quizId,
+              ),
+            )
+                : const SizedBox())
+                : SizedBox(
+              width: field.maxWidth != ''
+                  ? double.parse(field.maxWidth) * increaseSize.w
+                  : null,
+              child: Text(
+                field.defaultValue,
+                style: TextStyle(
+                  fontWeight: field.bold.isNotEmpty
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  fontSize: double.parse(field.fontSize) * increaseSize.sp,
+                  color: field.color != ''
+                      ? Color(int.parse(field.color))
+                      : null,
+                ),
+                textDirection: field.direction == 'rtl'
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
+              ),
+            ),
+          ),
+        );
       }
     }
   }
@@ -237,29 +235,22 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                   if (myWidth > constraints.maxWidth)
                   debugPrint('fffff');
                   return Stack(
-                    // children: displayAnswers?positionedItemsAnswers:positionedItems,
-                    children: positionedItems,
+                    children: [
+                      // Base layer: images + static text in the original server order
+                      AbsorbPointer(
+                        absorbing: true, // prevents the hidden/underlayer from stealing focus
+                        child: Stack(children: positionedItems),
+                      ),
+
+                      // Overlay: only the TextFields, drawn last (visible & tappable)
+                      ...overlayInteractiveItems,
+                    ],
                   );
                 }
               ))
         ]));
 
-    // floatingActionButton: FloatingActionButton(
-    //   onPressed: () {
-    //     debugPrint('${question.anss} ${question.ans}');
-    //     showDialog(
-    //       context: context,
-    //       builder: (context) {
-    //         if (listEquals(question.anss, question.ans)) {
-    //           return const AlertDialog(content: Text('Correct'));
-    //         } else {
-    //           return const AlertDialog(content: Text('Incorrect'));
-    //         }
-    //       },
-    //     );
-    //   },
-    //   child: const Icon(Icons.check),
-    // ),
+
   }
 
   Widget buildQAnswers() {
@@ -277,6 +268,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
               width: myWidth,
               height: myHeight,
               child: Stack(
+                clipBehavior: Clip.none,
                 children: setPositionItemsAnswer(),
               )),
           Container(
@@ -297,8 +289,11 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
 
   List<Widget> setPositionItemsAnswer() {
     List<Widget> positionedItemsAnswers = [];
+    final base = <Widget>[];      // images + non-editable text
+    final overlay = <Widget>[];   // the colored answers (on top)
+
     Widget myTextField = Container();
-    if (double.parse(customData.customQuizQuestionsWidth) < 300) {
+    if (double.parse(customData.customQuizQuestionsWidth) <= 300) {
       increaseSize = 3;
     }
     debugPrint('increaseSize $increaseSize');
@@ -308,10 +303,9 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
         double.parse(customData.customQuizQuestionsHeight) * increaseSize.h;
     int i = 0;
     for (var field in customData.quizFields) {
-      if (field.name.isNotEmpty &&
-          field.xPosition.isNotEmpty &&
-          field.yPosition.isNotEmpty) {
-        double xPosition = double.parse(field.xPosition) * increaseSize;
+      if (field.name.isEmpty || field.xPosition.isEmpty || field.yPosition.isEmpty) continue;
+
+      double xPosition = double.parse(field.xPosition) * increaseSize;
         double yPosition = double.parse(field.yPosition) * increaseSize;
         double itemWidth =
             field.width != '' ? double.parse(field.width) * increaseSize : 0;
@@ -369,10 +363,52 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
               //)
             ],
           );
+
+          overlay.add(
+            Positioned(
+              left: xPosition.w,
+              top:  yPosition.h,
+              child: myTextField,
+            ),
+          );
+
           i++;
+          continue; // do NOT also add this to the base layer
         }
 
-        positionedItemsAnswers.add(Positioned(
+      // Non-editable: images / static text -> BASE layer (drawn first, may be opaque)
+      base.add(
+        Positioned(
+          left: xPosition.w,
+          top:  yPosition.h,
+          child: field.type == 'image'
+              ? (field.defaultValue.isNotEmpty
+              ? SizedBox(
+            width:  itemWidth.w > 0 ? itemWidth.w : null,
+            height: itemHeight.h > 0 ? itemHeight.h : null,
+            child: Image.network(field.defaultValue), // or HtmlDataWidget if you need
+          )
+              : const SizedBox())
+              : SizedBox(
+            width: field.maxWidth != ''
+                ? double.parse(field.maxWidth) * increaseSize.w
+                : null,
+            child: Text(
+              field.defaultValue,
+              style: TextStyle(
+                fontWeight: field.bold.isNotEmpty ? FontWeight.bold : FontWeight.normal,
+                fontSize: double.parse(field.fontSize) * increaseSize.sp,
+                color: field.color != '' ? Color(int.parse(field.color)) : null,
+              ),
+              textDirection: field.direction == 'rtl'
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+    /*  positionedItemsAnswers.add(Positioned(
             left: xPosition.w,
             top: yPosition.h,
             child: field.type == 'image'
@@ -410,10 +446,21 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                                 ? TextDirection.rtl
                                 : TextDirection.ltr),
                       )
-                    : myTextField));
-      }
+                    : myTextField));*/
+
+
     }
-    return positionedItemsAnswers;
+
+    // Return as a single list for your existing Stack(children: ...)
+    return [
+      // Base visuals under an AbsorbPointer so they don’t take taps
+      AbsorbPointer(
+        absorbing: true,
+        child: Stack(children: base),
+      ),
+      // Overlay answers (drawn last = visible above opaque images)
+      ...overlay,
+    ];
   }
 
   bool isFilled() {
