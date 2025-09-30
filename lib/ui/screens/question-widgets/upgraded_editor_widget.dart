@@ -81,7 +81,9 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     // 50-100  -> 8
     // 100-300 -> 2
     // >= 300  -> 1.5
-    if (v < 50)  return 10;
+    if (v < 50)  return 9 /*10*/;
+    //when 10 makes 55181 question 11  quiz in גאומטריה מתקדמת א
+    //to cut text
     if (v < 100) return 8;
     if (v < 300) return 2;
     if (v < 400) return 1.5;
