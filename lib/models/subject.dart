@@ -42,9 +42,9 @@ class Subject {
     return Subject(
       // name: parsedJson['name'],
       name: parsedString,
-      time:parsedJson['time'],
+      time:parsedJson['time']??'',
       lessonsIds: parsedJson['lessons'],
-      questionnaireIds: parsedJson['questionnaire'],
+      questionnaireIds: parsedJson['questionnaire']??[],
       subjectId:subjectId,
     );
   }

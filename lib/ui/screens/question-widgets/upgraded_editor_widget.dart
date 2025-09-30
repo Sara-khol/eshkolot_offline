@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
@@ -13,23 +16,32 @@ class UpgradedEditorWidget extends StatefulWidget {
   final Question question;
   final QuestionController questionController;
 
+
   @override
   State<UpgradedEditorWidget> createState() => _UpgradedEditorWidgetState();
 }
 
 class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
-  double increaseSize = 1.5;
+  late double increaseSize ;
   late MoreData customData;
   List<Widget> positionedItems = [];
   List<Widget> overlayInteractiveItems = [];
+
+  // final List<Widget> positionedImages = [];
+  // final List<Widget> positionedTexts  = [];
 
   late List<String> ans = [];
   List<TextEditingController> myControllers = [];
   List<int> pointsList = [];
 
   List<FocusNode> focusNodes = [];
-  late double myWidth=700;
-  late double myHeight=700;
+  late double myWidth = 700;
+  late double myHeight = 700;
+   double kDefaultScale = 1;
+  final ScrollController _hCtrl = ScrollController();
+
+
+
   // final GlobalKey _containerKey = GlobalKey();
 
   @override
@@ -44,15 +56,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     super.initState();
   }
 
-  // void _getContainerConstraints() {
-  //   final RenderBox renderBox = _containerKey.currentContext?.findRenderObject() as RenderBox;
-  //   final Size size = renderBox.size;
-  //   setState(() {
-  //     // You can now use the size to update your widget's state
-  //     setPositionItems(size.width);
-  //     print('Width: ${size.width}, Height: ${size.height}');
-  //   });
-  // }
+
 
   @override
   void didUpdateWidget(covariant UpgradedEditorWidget oldWidget) {
@@ -61,7 +65,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     focusNodes.clear();
     pointsList.clear();
     customData = widget.question.moreData!;
-   setPositionItems();
+    setPositionItems();
     widget.questionController.isCorrect = isCorrect;
     widget.questionController.isFilled = isFilled;
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -70,29 +74,68 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     super.didUpdateWidget(oldWidget);
   }
 
-  setPositionItems(/*double width*/) {
+
+  double _bucketScale(double v) {
+    // Decide scale bucket from a single dimension
+    // v < 50  -> 10
+    // 50-100  -> 8
+    // 100-300 -> 2
+    // >= 300  -> 1.5
+    if (v < 50)  return 10;
+    if (v < 100) return 8;
+    if (v < 300) return 2;
+    if (v < 400) return 1.5;
+    return kDefaultScale;
+  }
+
+  void setIncreaseSize(double baseW, double baseH) {
+    // Use the stricter requirement of width/height
+    final sW = _bucketScale(baseW);
+    final sH = _bucketScale(baseH);
+    increaseSize = math.max(sW, sH); // one final decision
+  }
+
+
+  setPositionItems() {
     positionedItems.clear();
     overlayInteractiveItems.clear();
 
-    Widget myTextField = Container();
-    if (double.parse(customData.customQuizQuestionsWidth) <= 300) {
-      increaseSize = 3;
-    }
+    final baseW = double.parse(customData.customQuizQuestionsWidth);
+    final baseH = double.parse(customData.customQuizQuestionsHeight);
+    debugPrint('baseW $baseW baseH $baseH');
+   setIncreaseSize(baseW, baseH);
+
     debugPrint('increaseSize $increaseSize');
-    myWidth =
-        double.parse(customData.customQuizQuestionsWidth) * increaseSize.w;
-    myHeight =
-        double.parse(customData.customQuizQuestionsHeight) * increaseSize.h;
-    for (var field in customData.quizFields) {
-      if (field.name.isNotEmpty &&
-          field.xPosition.isNotEmpty &&
-          field.yPosition.isNotEmpty) {
-        double xPosition = double.parse(field.xPosition) * increaseSize;
-        double yPosition = double.parse(field.yPosition) * increaseSize;
-        double itemWidth =
-        field.width != '' ? double.parse(field.width) * increaseSize : 0;
-        double itemHeight =
-        field.height != '' ? double.parse(field.height) * increaseSize : 0;
+
+
+    // שילוב שני העולמות: הגדלה + התאמה למסך
+    final sx = increaseSize * ScreenUtil().scaleWidth;
+    final sy = increaseSize * ScreenUtil().scaleHeight;
+    final sf = increaseSize * math.min(ScreenUtil().scaleWidth, ScreenUtil().scaleHeight);
+
+    myWidth  = baseW * sx;
+    myHeight = baseH * sy;
+
+    // myWidth =
+    //     baseW * increaseSize.w;
+    // myHeight =
+    //     baseH * increaseSize.h;
+    for (final field in customData.quizFields) {
+      if (field.name.isEmpty || field.xPosition.isEmpty || field.yPosition.isEmpty) continue;
+
+        // double xPosition = double.parse(field.xPosition) * sx;
+        // double yPosition = double.parse(field.yPosition) * sy;
+        // double itemWidth =
+        //     field.width != '' ? double.parse(field.width) * sx : 0;
+        // double itemHeight =
+        //     field.height != '' ? double.parse(field.height) * sy : 0;
+
+      final x = double.parse(field.xPosition) * sx;
+      final y = double.parse(field.yPosition) * sy;
+      final w = field.width.isNotEmpty  ? double.parse(field.width)  * sx : null;
+      final h = field.height.isNotEmpty ? double.parse(field.height) * sy : null;
+      final maxW = field.maxWidth.isNotEmpty ? double.parse(field.maxWidth) * sx : null;
+      final font =field.fontSize.isNotEmpty? double.parse(field.fontSize) * sf:null;
 
         // --------- Editable? Put its TextField ONLY in the overlay ----------
         if (field.editable.isNotEmpty) {
@@ -102,17 +145,19 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
           myControllers.add(textEditingController);
           focusNodes.add(focusNode);
           pointsList.add(field.points.isNotEmpty ? int.parse(field.points) : 0);
+          final wrapW = maxW ?? math.max(0.0, myWidth - x - 12 * sx); // margin קטן מימין
 
           overlayInteractiveItems.add(
             Positioned(
-              left: xPosition.w,
-              top: yPosition.h,
+              left: x,
+              top: y,
               child: SizedBox(
-                width: field.maxWidth != '' ? double.parse(field.maxWidth) *
-                    increaseSize.w : null,
-                height: itemHeight > 0 ? itemHeight.h : null,
+                width: wrapW,
+                height: h,
                 child: TextField(
                   controller: textEditingController,
+                  scrollPhysics: const NeverScrollableScrollPhysics(), // prevent inner horizontal scroll
+
                   focusNode: focusNode,
                   buildCounter: null,
                   textAlignVertical: TextAlignVertical.center,
@@ -130,90 +175,186 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                     // If your colors come as hex strings like "#5956da",
                     // convert them before using. (Your current code assumes int)
                   ),
-                  cursorColor: field.color != ''
-                      ? Color(int.parse(field.color))
-                      : null,
+                  cursorColor:
+                  field.color != '' ? Color(int.parse(field.color)) : null,
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   textDirection: field.direction == 'rtl'
                       ? TextDirection.rtl
                       : TextDirection.ltr,
+                  strutStyle: const StrutStyle(height: 1.22, forceStrutHeight: true),
+
                   style: TextStyle(
                     fontWeight: field.bold.isNotEmpty
                         ? FontWeight.bold
                         : FontWeight.normal,
-                    height: 1,
+                   // height: 1,
                     color: field.color != ''
                         ? Color(int.parse(field.color))
                         : null,
-                    fontSize: double.parse(field.fontSize) * increaseSize.sp,
+                    fontSize: font,
                   ),
                   onEditingComplete: () {
                     final index = focusNodes.indexOf(focusNode);
                     if (index < myControllers.length - 1) {
-                      FocusScope.of(context).requestFocus(
-                          focusNodes[index + 1]);
+                      FocusScope.of(context)
+                          .requestFocus(focusNodes[index + 1]);
                     } else {
                       FocusScope.of(context).requestFocus(focusNodes[0]);
                     }
                   },
                 ),
               ),
-            ),
+            )
           );
 
-          continue; // IMPORTANT: do not also add this field to the base layer
+          continue;
         }
-
-
-        if (field.type == 'image') {
-          debugPrint('image=== ${field.defaultValue}');
-        }
-
-
 
         // --------- Non-editable: keep in the base layer as-is ----------
-        positionedItems.add(
+Widget myW=  Positioned(
+  left: x,
+  top: y,
+  child: field.type == 'image'
+      ? (field.defaultValue.isNotEmpty
+      ? SizedBox(
+    width: w,
+    height: h,
+    child: HtmlDataWidget(
+      '<img src="${field.defaultValue.substring(field.defaultValue.lastIndexOf('/'))}" alt=""/>',
+      quizId: widget.question.quizId,
+    ),
+  )
+      : const SizedBox())
+      : SizedBox(
+    width:maxW,
+    child: Text(
+      field.defaultValue,
+      style: TextStyle(
+        fontWeight: field.bold.isNotEmpty
+            ? FontWeight.bold
+            : FontWeight.normal,
+        fontSize:
+        font,
+        color: field.color != ''
+            ? Color(int.parse(field.color))
+            : null,
+      ),
+      textDirection: field.direction == 'rtl'
+          ? TextDirection.rtl
+          : TextDirection.ltr,
+    ),
+  ),
+);
+
+      positionedItems.add(myW);
+
+    }
+  }
+
+/*  void setPositionItems1() {
+    positionedItems.clear();
+    overlayInteractiveItems.clear();
+
+    // keep whatever logic sets increaseSize (1.5 / 3 / 10), or set it manually
+    final double scale = increaseSize;
+
+    // ⬅️ scale once here
+    myWidth  = double.parse(customData.customQuizQuestionsWidth)  * scale;
+    myHeight = double.parse(customData.customQuizQuestionsHeight) * scale;
+
+    for (var field in customData.quizFields) {
+      if (field.name.isEmpty || field.xPosition.isEmpty || field.yPosition.isEmpty) continue;
+
+      final double x = double.parse(field.xPosition) * scale;
+      final double y = double.parse(field.yPosition) * scale;
+      final double w = field.width.isNotEmpty  ? double.parse(field.width)  * scale : 0;
+      final double h = field.height.isNotEmpty ? double.parse(field.height) * scale : 0;
+      final double? maxW = field.maxWidth.isNotEmpty ? double.parse(field.maxWidth) * scale : null;
+      final double font =field.fontSize.isNotEmpty? double.parse(field.fontSize) * scale:0;
+
+      if (field.editable.isNotEmpty) {
+        // overlay (TextField)
+        ans.add(field.correctAnswer);
+        final controller = TextEditingController();
+        final focusNode  = FocusNode();
+        myControllers.add(controller);
+        focusNodes.add(focusNode);
+        pointsList.add(field.points.isNotEmpty ? int.parse(field.points) : 0);
+
+        overlayInteractiveItems.add(
           Positioned(
-            left: xPosition.w,
-            top: yPosition.h,
-            child: field.type == 'image'
-                ? (field.defaultValue.isNotEmpty
-                ? SizedBox(
-              width: itemWidth.w,
-              height: itemHeight.h,
-              child: HtmlDataWidget(
-                '<img src="${field.defaultValue.substring(
-                    field.defaultValue.lastIndexOf('/'))}" alt=""/>',
-                quizId: widget.question.quizId,
-              ),
-            )
-                : const SizedBox())
-                : SizedBox(
-              width: field.maxWidth != ''
-                  ? double.parse(field.maxWidth) * increaseSize.w
-                  : null,
-              child: Text(
-                field.defaultValue,
-                style: TextStyle(
-                  fontWeight: field.bold.isNotEmpty
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  fontSize: double.parse(field.fontSize) * increaseSize.sp,
-                  color: field.color != ''
-                      ? Color(int.parse(field.color))
-                      : null,
+            left: x,
+            top:  y,
+            child: SizedBox(
+              width: maxW,
+              height: h > 0 ? h : null,
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                buildCounter: null,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 10),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 0)),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
                 ),
-                textDirection: field.direction == 'rtl'
-                    ? TextDirection.rtl
-                    : TextDirection.ltr,
+                cursorColor: field.color.isNotEmpty ? Color(int.parse(field.color)) : null,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                textDirection: field.direction == 'rtl' ? TextDirection.rtl : TextDirection.ltr,
+                style: TextStyle(
+                  fontWeight: field.bold.isNotEmpty ? FontWeight.bold : FontWeight.normal,
+                  height: 1,
+                  color: field.color.isNotEmpty ? Color(int.parse(field.color)) : null,
+                  fontSize: font, // ⬅️ scaled once
+                ),
+                onEditingComplete: () {
+                  final i = focusNodes.indexOf(focusNode);
+                  FocusScope.of(context).requestFocus(focusNodes[(i + 1) % myControllers.length]);
+                },
               ),
             ),
           ),
         );
+        continue;
       }
+
+      // base layer (non-editable)
+      positionedItems.add(
+        Positioned(
+          left: x,
+          top:  y,
+          child: field.type == 'image'
+              ? (field.defaultValue.isNotEmpty
+              ? SizedBox(
+            width: w,
+            height: h,
+            child: HtmlDataWidget(
+              '<img src="${field.defaultValue.substring(field.defaultValue.lastIndexOf('/'))}" alt=""/>',
+              quizId: widget.question.quizId,
+            ),
+          )
+              : const SizedBox())
+              : SizedBox(
+            width: maxW,
+            child: Text(
+              field.defaultValue,
+              style: TextStyle(
+                fontWeight: field.bold.isNotEmpty ? FontWeight.bold : FontWeight.normal,
+                fontSize: font, // ⬅️ scaled once
+                color: field.color.isNotEmpty ? Color(int.parse(field.color)) : null,
+              ),
+              textDirection: field.direction == 'rtl' ? TextDirection.rtl : TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
     }
-  }
+  }*/
+
 
   //List<String> ans=[];
   @override
@@ -221,36 +362,109 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     return Padding(
         //padding: const EdgeInsets.all(100),
         padding: EdgeInsets.only(top: 25.h),
-        child: Column(children: [
+        child: Column(crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
           HtmlDataWidget(widget.question.question,
               quizId: widget.question.quizId),
           SizedBox(
             height: 35.h,
           ),
-          SizedBox(
-              width: myWidth,
-              height: myHeight,
-              child: LayoutBuilder(
-                builder:  (context, constraints) {
-                  if (myWidth > constraints.maxWidth)
-                  debugPrint('fffff');
-                  return Stack(
-                    children: [
-                      // Base layer: images + static text in the original server order
-                      AbsorbPointer(
-                        absorbing: true, // prevents the hidden/underlayer from stealing focus
-                        child: Stack(children: positionedItems),
-                      ),
+          /*Center(
+            child: Container(
+                width: myWidth,
+                height: myHeight,
+                child: LayoutBuilder(builder: (context, constraints) {
+                  if (myWidth > constraints.maxWidth) debugPrint('fffff');
+                  return Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Base layer: images + static text in the original server order
+                        AbsorbPointer(
+                          absorbing: true,
+                          // prevents the hidden/underlayer from stealing focus
+                          child: Center(child: Stack(alignment: Alignment.center,
+                              children: positionedItems)),
+                        ),
 
-                      // Overlay: only the TextFields, drawn last (visible & tappable)
-                      ...overlayInteractiveItems,
-                    ],
+                        // Overlay: only the TextFields, drawn last (visible & tappable)
+                        ...overlayInteractiveItems,
+                      ],
+                    ),
                   );
-                }
-              ))
+                })),
+          )*/
+              Center(
+                child: buildCanvas() /*SingleChildScrollView( // horizontal
+                  scrollDirection: Axis.horizontal,
+                  // primary: false, // important
+                  // physics: const ClampingScrollPhysics(),
+
+                  child: SizedBox(
+                    width: myWidth,   // already = baseW * increaseSize
+                    height: myHeight, // already = baseH * increaseSize
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.center,
+                      children: [
+                        AbsorbPointer(
+                          absorbing: true,
+                          child: Stack(  clipBehavior: Clip.none,   // ← הוסף/י
+                              alignment: Alignment.center, children: positionedItems),
+                        ),
+                        ...overlayInteractiveItems,
+                      ],
+                    ),
+                  ),
+                )*/,
+              )
         ]));
+  }
 
+  Widget buildCanvas() {
 
+    return SizedBox(
+      height: myHeight, // the canvas height
+      child: Scrollbar(
+        controller: _hCtrl,
+        thumbVisibility: true,          // always show thumb when scrollable
+        trackVisibility: true,          // show track (desktop/web)
+        interactive: true,              // allow dragging the thumb
+        scrollbarOrientation: ScrollbarOrientation.bottom, // put it at the bottom
+        child: ListView(
+          controller: _hCtrl,
+          scrollDirection: Axis.horizontal,
+          physics: const ClampingScrollPhysics(),
+          children: [
+            // GestureDetector to drag the whole canvas when grabbing the image
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onHorizontalDragUpdate: (d) {
+                if (!_hCtrl.hasClients) return;
+                final max = _hCtrl.position.maxScrollExtent;
+                final next = (_hCtrl.offset - d.delta.dx).clamp(0.0, max);
+                _hCtrl.jumpTo(next);
+              },
+              child: SizedBox(
+                width: myWidth,  // <- dynamic canvas width
+                height: myHeight,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // base layer (images/text)
+                    Stack(clipBehavior: Clip.none, children: positionedItems),
+
+                    // overlay inputs
+                    // (Tip: TextField should not scroll itself)
+                    ...overlayInteractiveItems,
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget buildQAnswers() {
@@ -289,126 +503,160 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
 
   List<Widget> setPositionItemsAnswer() {
     List<Widget> positionedItemsAnswers = [];
-    final base = <Widget>[];      // images + non-editable text
-    final overlay = <Widget>[];   // the colored answers (on top)
+
+    final baseW = double.parse(customData.customQuizQuestionsWidth);
+    final baseH = double.parse(customData.customQuizQuestionsHeight);
+
+    final base = <Widget>[]; // images + non-editable text
+    final overlay = <Widget>[]; // the colored answers (on top)
 
     Widget myTextField = Container();
-    if (double.parse(customData.customQuizQuestionsWidth) <= 300) {
-      increaseSize = 3;
+
+    if (baseW < 300 &&
+        baseW > 100) {
+      debugPrint('333');
+
+      increaseSize = 2;
+    } else if (baseW <= 100) {
+      increaseSize = 8;
     }
-    debugPrint('increaseSize $increaseSize');
+
+    if (baseH < 300 &&
+        baseH > 100) {
+      debugPrint('4444');
+
+      increaseSize = 2;
+    } else if (baseH <= 100) {
+      increaseSize = 8;
+    }
+
     myWidth =
-        double.parse(customData.customQuizQuestionsWidth) * increaseSize.w;
+        baseW * increaseSize.w;
+
     myHeight =
-        double.parse(customData.customQuizQuestionsHeight) * increaseSize.h;
+        baseH * increaseSize.h;
     int i = 0;
     for (var field in customData.quizFields) {
-      if (field.name.isEmpty || field.xPosition.isEmpty || field.yPosition.isEmpty) continue;
+      if (field.name.isEmpty ||
+          field.xPosition.isEmpty ||
+          field.yPosition.isEmpty) continue;
 
       double xPosition = double.parse(field.xPosition) * increaseSize;
-        double yPosition = double.parse(field.yPosition) * increaseSize;
-        double itemWidth =
-            field.width != '' ? double.parse(field.width) * increaseSize : 0;
-        double itemHeight =
-            field.height != '' ? double.parse(field.height) * increaseSize : 0;
+      double yPosition = double.parse(field.yPosition) * increaseSize;
+      double itemWidth =
+          field.width != '' ? double.parse(field.width) * increaseSize : 0;
+      double itemHeight =
+          field.height != '' ? double.parse(field.height) * increaseSize : 0;
 
-        if (field.editable.isNotEmpty) {
-          bool isCorrect = myControllers[i].text == ans[i];
+      if (field.editable.isNotEmpty) {
+        bool isCorrect = myControllers[i].text == ans[i];
 
-          myTextField = Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                  width: field.maxWidth != ''
-                      ? double.parse(field.maxWidth) * increaseSize.w
-                      : null,
-                  // height: 35.h,
-                  decoration: BoxDecoration(
-                      color: isCorrect
-                          ? Colors.greenAccent
-                          : Colors.redAccent.withOpacity(0.5),
-                      border: Border.all(
-                          color: isCorrect ? Colors.green : Colors.red)),
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    myControllers[i].text,
-                    style: TextStyle(
-                        fontWeight: field.bold.isNotEmpty
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        height: 1,
-                        color: field.color != ''
-                            ? Color(int.parse(field.color))
-                            : null,
-                        fontSize:
-                            double.parse(field.fontSize) * increaseSize.sp),
-                  )),
-              if (!isCorrect) /* SizedBox(
-                  width: field.maxWidth != ''
-                      ? double.parse(field.maxWidth) * increaseSize.w
-                      : null,
-                  child:*/
-                Text(
-                  '(${ans[i]})',
+        myTextField = Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+                width: field.maxWidth != ''
+                    ? double.parse(field.maxWidth) * increaseSize.w
+                    : null,
+                // height: 35.h,
+                decoration: BoxDecoration(
+                    color: isCorrect
+                        ? Colors.greenAccent
+                        : Colors.redAccent.withOpacity(0.5),
+                    border: Border.all(
+                        color: isCorrect ? Colors.green : Colors.red)),
+                child: Text(
                   textAlign: TextAlign.center,
+                  myControllers[i].text,
                   style: TextStyle(
                       fontWeight: field.bold.isNotEmpty
                           ? FontWeight.bold
                           : FontWeight.normal,
-                      height: 1,
-                      color: blackColorApp,
+                      height: 1.2,
+                      color: field.color != ''
+                          ? Color(int.parse(field.color))
+                          : null,
                       fontSize: double.parse(field.fontSize) * increaseSize.sp),
-                )
-              //)
-            ],
-          );
+                  strutStyle: const StrutStyle(      // ← מבטיח גובה מינימום לשורת הטקסט
+                    height: 1.2,
+                    forceStrutHeight: true,
+                  ),
+                )),
+            if (!isCorrect) /* SizedBox(
+                  width: field.maxWidth != ''
+                      ? double.parse(field.maxWidth) * increaseSize.w
+                      : null,
+                  child:*/
+              Text(
+                '(${ans[i]})',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontWeight: field.bold.isNotEmpty
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    height: 1,
+                    color: blackColorApp,
+                    fontSize: double.parse(field.fontSize) * increaseSize.sp),
+                strutStyle: const StrutStyle(      // ← מבטיח גובה מינימום לשורת הטקסט
+                  height: 1.2,
+                  forceStrutHeight: true,
+                ),
+              )
+            //)
+          ],
+        );
 
-          overlay.add(
-            Positioned(
-              left: xPosition.w,
-              top:  yPosition.h,
-              child: myTextField,
-            ),
-          );
+        overlay.add(
+          Positioned(
+            left: xPosition.w,
+            top: yPosition.h,
+            child: myTextField,
+          ),
+        );
 
-          i++;
-          continue; // do NOT also add this to the base layer
-        }
+       i++;
+        continue; // do NOT also add this to the base layer
+      }
 
       // Non-editable: images / static text -> BASE layer (drawn first, may be opaque)
       base.add(
         Positioned(
           left: xPosition.w,
-          top:  yPosition.h,
+          top: yPosition.h,
           child: field.type == 'image'
               ? (field.defaultValue.isNotEmpty
-              ? SizedBox(
-            width:  itemWidth.w > 0 ? itemWidth.w : null,
-            height: itemHeight.h > 0 ? itemHeight.h : null,
-            child: Image.network(field.defaultValue), // or HtmlDataWidget if you need
-          )
-              : const SizedBox())
+                  ? SizedBox(
+                      width: itemWidth.w > 0 ? itemWidth.w : null,
+                      height: itemHeight.h > 0 ? itemHeight.h : null,
+                      child: Image.network(
+                          field.defaultValue), // or HtmlDataWidget if you need
+                    )
+                  : const SizedBox())
               : SizedBox(
-            width: field.maxWidth != ''
-                ? double.parse(field.maxWidth) * increaseSize.w
-                : null,
-            child: Text(
-              field.defaultValue,
-              style: TextStyle(
-                fontWeight: field.bold.isNotEmpty ? FontWeight.bold : FontWeight.normal,
-                fontSize: double.parse(field.fontSize) * increaseSize.sp,
-                color: field.color != '' ? Color(int.parse(field.color)) : null,
-              ),
-              textDirection: field.direction == 'rtl'
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
-            ),
-          ),
+                  width: field.maxWidth != ''
+                      ? double.parse(field.maxWidth) * increaseSize.w
+                      : null,
+                  child: Text(
+                    field.defaultValue,
+                    style: TextStyle(
+                      fontWeight: field.bold.isNotEmpty
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      fontSize: double.parse(field.fontSize) * increaseSize.sp,
+                      color: field.color != ''
+                          ? Color(int.parse(field.color))
+                          : null,
+                    ),
+                    textDirection: field.direction == 'rtl'
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
+                  ),
+                ),
         ),
       );
 
-    /*  positionedItemsAnswers.add(Positioned(
+      /*  positionedItemsAnswers.add(Positioned(
             left: xPosition.w,
             top: yPosition.h,
             child: field.type == 'image'
@@ -447,8 +695,6 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
                                 : TextDirection.ltr),
                       )
                     : myTextField));*/
-
-
     }
 
     // Return as a single list for your existing Stack(children: ...)

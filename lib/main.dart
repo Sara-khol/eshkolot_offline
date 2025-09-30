@@ -80,6 +80,8 @@ class AppLoader extends StatefulWidget {
 
 class _AppLoaderState extends State<AppLoader> {
   bool _initialized = false;
+  bool _initializeError = false;
+  String errorString='';
   List<Course> myCourses = [];
   bool databaseInitialized = false;
 
@@ -91,11 +93,19 @@ class _AppLoaderState extends State<AppLoader> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_initialized) {
+    if (!_initialized && !_initializeError) {
       // You can customize this screen however you want
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if(!_initialized && _initializeError) {
+      return Scaffold(
+        body: Center(
+          child: Text('ישנה בעיה\n$errorString',textAlign: TextAlign.center,),
         ),
       );
     }
@@ -127,7 +137,19 @@ class _AppLoaderState extends State<AppLoader> {
       }
       //else?? or save no matter
       await preferences.setBool('database_initialized', false);
-      await InstallationDataHelper().init();
+      try {
+        await InstallationDataHelper().init();
+      }
+      catch (e,s) {
+        debugPrint("error!!! $e");
+        debugPrint("stack $s");
+        setState(() {
+          _initializeError = true;
+          errorString=e.toString();
+        // Sentry.addBreadcrumb(Breadcrumb(message: "error!!!"));
+        Sentry.addBreadcrumb(Breadcrumb(message: "error!!! $e" "stack $s"));
+        });
+      }
       await IsarService().cleanDb();
 
       myCourses.addAll(InstallationDataHelper().myCourses);
@@ -450,15 +472,15 @@ Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
   try {
     isolate = await Isolate.spawn(
         extractZipIsolate, [receivePort.sendPort, extractPath]);
+    //
+    // final res = await receivePort.first.timeout(
+    //   const Duration(minutes: 45), // משך הזמן המקסימלי להמתנה
+    //   onTimeout: () {
+    //     return 'timeout';
+    //   },
+    // );
 
-    final res = await receivePort.first.timeout(
-      const Duration(minutes: 15), // משך הזמן המקסימלי להמתנה
-      onTimeout: () {
-        return 'timeout';
-      },
-    );
-
-    //  final res = await receivePort.first;
+     final res = await receivePort.first;
     debugPrint('result $res');
     Sentry.addBreadcrumb(Breadcrumb(message: 'result from extract $res'));
 

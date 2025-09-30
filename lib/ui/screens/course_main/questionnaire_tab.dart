@@ -1,3 +1,4 @@
+import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/questionnaire_widget.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/order_selection_matrix_widget.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/order_selection_widget.dart';
@@ -10,6 +11,7 @@ import 'package:eshkolot_offline/ui/screens/question-widgets/fill_in_widget.dart
 import 'package:eshkolot_offline/ui/screens/question-widgets/free_choice_widget.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/open_question_widget.dart';
 import '../../../utils/common_funcs.dart';
+import '../../../utils/my_colors.dart';
 import '../question-widgets/radio_check_widget.dart';
 import 'main_page_child.dart';
 
@@ -32,6 +34,8 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   late List<Widget> displayAllWithAnswers;
   late List<bool> statusAnswers;
   int quizPoints = 0, totalQuizPoints = 0;
+  final GlobalKey _hintKey = GlobalKey();
+
 
   @override
   void initState() {
@@ -188,6 +192,32 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             // getQuestionnaireByType(widget.questionnaire.elementAt(index)),
             getQuestionnaireByType(
                 widget.quiz.questionList.elementAt(selected - 1)),
+            if(widget.quiz.questionList.elementAt(selected - 1).tip.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  margin: EdgeInsets.only(top: 15.h,bottom: 15.h),
+                  height: 40.h,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(30)),
+                  ),
+                  child: ElevatedButton(
+                    key: _hintKey,
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5956DA)),
+                    child: Text(
+                      "רמז",
+                      style: TextStyle(
+                          color: lightGreen1ColorApp,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18.sp),
+                    ),
+                   onPressed: () => _showHintDialog(widget.quiz.questionList.elementAt(selected - 1).tip),
+                  // onPressed: () => showPopover(widget.quiz.questionList.elementAt(selected - 1).tip,
+
+                  ),
+                ),
+              ),
             SizedBox(height: 20.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -250,6 +280,172 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
       // ),
     );
   }
+
+ /* void _showHintDialog(String tip) {
+    final RenderBox buttonBox =
+    _hintKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset buttonPosition = buttonBox.localToGlobal(Offset.zero);
+    final Size size = buttonBox.size;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent, // keep background clear
+      builder: (BuildContext context) {
+        return Stack(
+          children: [
+            Positioned(
+              left: buttonPosition.dx,
+              top: buttonPosition.dy - 200, // ↓ תיקון ההיסט
+              child:Material(
+                elevation: 10,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 420.w,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "רמז",
+                        style: TextStyle(color:blueColorApp,fontWeight: FontWeight.w600,fontSize: 22.sp),
+                      ),
+                      Container(
+                          width: double.infinity,height: 2.h,color:blueColorApp),
+                      SizedBox(height: 8.h),
+                      Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: HtmlDataWidget(tip, quizId: widget.quiz.id)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }*/
+
+  void _showHintDialog(String tip) {
+    final box = _hintKey.currentContext!.findRenderObject() as RenderBox;
+    final btnOffset = box.localToGlobal(Offset.zero);
+    final btnSize   = box.size;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (_) {
+        final dialogKey = GlobalKey();
+        const dialogWidth = 340.0;
+
+        // Initial guess so it doesn't jump to top: place roughly above.
+        double top  = btnOffset.dy - 120;
+        // ← Align dialog's left edge with button's left edge
+        double left = btnOffset.dx;
+
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final rb = dialogKey.currentContext?.findRenderObject() as RenderBox?;
+              if (rb != null) {
+                final h  = rb.size.height;
+                final sz = MediaQuery.of(ctx).size;
+
+                // Exact placement: directly above button with 10px gap
+                final newTop  = (btnOffset.dy - h - 10).clamp(8.0, sz.height - h - 8.0);
+                // Keep left anchored to the button's left, but clamp if it would overflow right
+                final newLeft = left.clamp(8.0, sz.width - dialogWidth - 8.0);
+
+                if (newTop != top || newLeft != left) {
+                  setState(() { top = newTop.toDouble(); left = newLeft.toDouble(); });
+                }
+              }
+            });
+
+            return Stack(children: [
+              Positioned(
+                top: top,
+                left: left, // ← left-anchored to the button
+                child: Material(
+                  key: dialogKey,
+                  elevation: 10,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: dialogWidth,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "רמז",
+                          style: TextStyle(color:blueColorApp,fontWeight: FontWeight.w600,fontSize: 22.sp),
+                        ),
+                        Container(
+                            width: double.infinity,height: 2.h,color:blueColorApp),
+                        SizedBox(height: 8.h),
+                        Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: HtmlDataWidget(tip, quizId: widget.quiz.id)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ]);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _dialogContent() {
+    return Material(
+      elevation: 10,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              "רמז",
+              style: TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.w600,
+                fontSize: 22,
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 2,
+              color: Colors.blue,
+            ),
+            const SizedBox(height: 8),
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: Text("כאן יופיע הטקסט של הרמז"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   getQuestionnaireByType(Question item) {
     debugPrint('type ${item.type}');

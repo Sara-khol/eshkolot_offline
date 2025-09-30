@@ -65,6 +65,7 @@ class Question {
   late int idQues;
   @Name('more_data')
   late MoreData? moreData;
+  late String tip="";
   @enumerated
   late QType type;
   late int points;
@@ -98,6 +99,7 @@ class Question {
         ? null
         : MoreData.fromJson(json['more_data']);
     points = json['points'];
+    tip = json['tip'];
   }
 
   Question(

@@ -1443,8 +1443,13 @@ const QuestionSchema = Schema(
       name: r'question',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(
+    r'tip': PropertySchema(
       id: 6,
+      name: r'tip',
+      type: IsarType.string,
+    ),
+    r'type': PropertySchema(
+      id: 7,
       name: r'type',
       type: IsarType.byte,
       enumMap: _QuestiontypeEnumValueMap,
@@ -1495,6 +1500,7 @@ int _questionEstimateSize(
     }
   }
   bytesCount += 3 + object.question.length * 3;
+  bytesCount += 3 + object.tip.length * 3;
   return bytesCount;
 }
 
@@ -1520,7 +1526,8 @@ void _questionSerialize(
   writer.writeStringList(offsets[3], object.options);
   writer.writeLong(offsets[4], object.points);
   writer.writeString(offsets[5], object.question);
-  writer.writeByte(offsets[6], object.type.index);
+  writer.writeString(offsets[6], object.tip);
+  writer.writeByte(offsets[7], object.type.index);
 }
 
 Question _questionDeserialize(
@@ -1540,7 +1547,7 @@ Question _questionDeserialize(
     options: reader.readStringList(offsets[3]),
     points: reader.readLongOrNull(offsets[4]) ?? 0,
     question: reader.readStringOrNull(offsets[5]) ?? '',
-    type: _QuestiontypeValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+    type: _QuestiontypeValueEnumMap[reader.readByteOrNull(offsets[7])] ??
         QType.checkbox,
   );
   object.moreData = reader.readObjectOrNull<MoreData>(
@@ -1548,6 +1555,7 @@ Question _questionDeserialize(
     MoreDataSchema.deserialize,
     allOffsets,
   );
+  object.tip = reader.readString(offsets[6]);
   return object;
 }
 
@@ -1580,6 +1588,8 @@ P _questionDeserializeProp<P>(
     case 5:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (_QuestiontypeValueEnumMap[reader.readByteOrNull(offset)] ??
           QType.checkbox) as P;
     default:
@@ -2193,6 +2203,136 @@ extension QuestionQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'question',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tip',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tip',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tip',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tip',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'tip',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'tip',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'tip',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'tip',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tip',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Question, Question, QAfterFilterCondition> tipIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'tip',
         value: '',
       ));
     });

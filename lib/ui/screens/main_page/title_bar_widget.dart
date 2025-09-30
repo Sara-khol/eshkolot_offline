@@ -3,13 +3,21 @@ import 'package:flutter/material.dart';
 
 import '../../../services/network_check.dart';
 
-class TitleBarWidget extends StatefulWidget {
+class TitleBarWidget extends StatefulWidget  implements PreferredSizeWidget{
   final void Function()? updateLastPosition;
 
   const TitleBarWidget({super.key,  this.updateLastPosition});
 
   @override
   State<TitleBarWidget> createState() => _TitleBarWidgetState();
+
+  @override
+  Size get preferredSize {
+    final h = appWindow.titleBarHeight;
+    debugPrint('h $h');
+    return Size.fromHeight(h == 0 ? 32 : h); // fallback height
+  }
+
 }
 
 class _TitleBarWidgetState extends State<TitleBarWidget> {
@@ -27,12 +35,14 @@ class _TitleBarWidgetState extends State<TitleBarWidget> {
       iconNormal: Colors.white,
       iconMouseOver: Colors.white);
 
+
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
-        // height: 29.h,
+        height: widget.preferredSize.height,
         color: const Color(0xff393535),
         child: WindowTitleBarBox(
           child: Row(
