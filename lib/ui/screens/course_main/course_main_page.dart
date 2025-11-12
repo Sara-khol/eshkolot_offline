@@ -69,11 +69,11 @@ class _CourseMainPageState extends State<CourseMainPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                height: 45.h,
+                height: 30.h,
               ),
               Image.asset(imagePath, height: 91.h),
               SizedBox(
-                height: 15.h,
+                height: 5.h,
               ),
               Text(widget.course.title,
                   style:
@@ -81,13 +81,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
               SizedBox(
                 height: 10.h,
               ),
-              Padding(
-                padding: EdgeInsets.only(right: 50.w, left: 50.w),
-                child: Text(widget.course.briefInformation,
-                    textAlign: TextAlign.center,
-                    style:
-                    TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400)),
-              ),
+              buildBriefInfo(),
               SizedBox(
                 height: 15.h,
               ),
@@ -280,6 +274,7 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                                 : null,
                                           );
                                     }
+                                   currentMainChild?.openCurrentSubject();
                                   }),
                             ),
                           ],
@@ -369,6 +364,52 @@ class _CourseMainPageState extends State<CourseMainPage> {
     );
   }
 
+  Widget buildBriefInfo() {
+    final style = TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 50.w),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // מודדים אם הטקסט ייחתך ב-3 שורות
+          final painter = TextPainter(
+            text: TextSpan(text: widget.course.briefInformation, style: style),
+            maxLines: 3,
+            textDirection: Directionality.of(context),
+            ellipsis: '…',
+          )..layout(maxWidth: constraints.maxWidth);
+
+          final isOverflow = painter.didExceedMaxLines;
+
+          final ellipsizedText =  Text(widget.course.briefInformation,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
+              style:
+              TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w400));
+
+          if (!isOverflow) return ellipsizedText;
+
+          // רק אם נחתך – מציגים Tooltip עם ריווח/עיצוב
+          return Tooltip(
+            message: widget.course.briefInformation,
+            padding: const EdgeInsets.all(12),
+            margin:  EdgeInsets.only(right: 600.w,left: 250.w),
+            verticalOffset: 30,
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            textStyle: const TextStyle(color: Colors.white),
+            // אם תרצה הצגה בלחיצה במקום ריחוף במחשב/לחיצה-ארוכה במובייל:
+            // triggerMode: TooltipTriggerMode.tap,
+            child: ellipsizedText,
+          );
+        },
+      ),
+    );
+  }
+
   getLastPositionInCourse({bool refresh = true}) async {
     // debugPrint('getLastPositionInCourse');
     data = IsarService().getUserCourseData(widget.course.id);
@@ -430,6 +471,8 @@ class _CourseMainPageState extends State<CourseMainPage> {
                 data!.questionnaireStopId) {
               lastQuestionnaire = widget.course.questionnaires.elementAt(i);
               data!.questionIndex = i;
+              data!.subjectIndex=-1;
+              data!.lessonIndex=-1;
               break;
             }
           }

@@ -68,6 +68,7 @@ class _AudioWidgetState extends State<AudioWidget> {
         decoration: BoxDecoration(border: Border.all(color: Colors.pink.withOpacity(0.5)),
         borderRadius: BorderRadius.all(Radius.circular(15))),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextButton(
             // style: TextButton.styleFrom(
@@ -92,7 +93,7 @@ class _AudioWidgetState extends State<AudioWidget> {
             },
 
       child: Center(
-        child: Icon(isPlaying  ? Icons.pause : Icons.play_arrow),
+        child: Icon(isPlaying  ? Icons.pause : Icons.play_arrow,size: 30.sp,),
       ),
             /*   ElevatedButton.icon(
                   onPressed: () async {
@@ -109,15 +110,17 @@ class _AudioWidgetState extends State<AudioWidget> {
             currentPostLabel,
             style: TextStyle(fontSize: 25.sp),
           ),
-       Slider(
-           value: currentPos.clamp(0, maxDuration).toDouble(),
-           min: 0,
-           max: double.parse(maxDuration.toString()),
-           label: currentPostLabel,
-           onChanged: (double value) async {
-             int seekval = value.round();
-             await player.seek(Duration(milliseconds: seekval));
-           }
+       Expanded(
+         child: Slider(
+             value: currentPos.clamp(0, maxDuration).toDouble(),
+             min: 0,
+             max: double.parse(maxDuration.toString()),
+             label: currentPostLabel,
+             onChanged: (double value) async {
+               int seekval = value.round();
+               await player.seek(Duration(milliseconds: seekval));
+             }
+         ),
        ),
 
         /*  Wrap(

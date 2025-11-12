@@ -27,6 +27,7 @@ class _FillInState extends State<FillIn> {
   Map<String, TextEditingController> textControllers = {};
   List<FocusNode> focusNodes = [];
   String correctHtml = '';
+  late double maxTextFieldWidth;
 
   @override
   void initState() {
@@ -67,7 +68,6 @@ class _FillInState extends State<FillIn> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('build!!!');
     int i = 0;
     int j = 0;
 
@@ -171,25 +171,16 @@ class _FillInState extends State<FillIn> {
 
   Widget createTextField(
       TextEditingController controller, FocusNode focusNode, int index) {
+    TextStyle textStyle= TextStyle(
+      fontSize: 22.sp,
+    );
+    final double textFieldWidth = calculateMaxWidth(correctAnswers[index], textStyle);
+    debugPrint('textFieldWidth $textFieldWidth');
+    // maxTextFieldWidth=textFieldWidth>maxTextFieldWidth?textFieldWidth:maxTextFieldWidth;
     return InlineCustomWidget(
-      child: /* KeyboardListener(
-          focusNode: FocusNode(), // Use a focus node to capture key events
-          onKeyEvent: ( event) {
-            if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-              FocusScope.of(context).nextFocus();
-              // if (index < myControllers.length - 1) {
-              //   FocusScope.of(context).requestFocus(focusNodes[index + 1]);
-              // } else {
-              //   // If it's the last field, unfocus the current field
-              //  // focusNodes[index].unfocus();
-              // }
-
-            }
-          },
-          child:*/
-          Container(
+      child: Container(
               height: 40.h,
-              width: 200.w,
+              width: textFieldWidth,
               padding: EdgeInsets.only(right: 5.w, left: 5.w),
               alignment: Alignment.center,
               margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
@@ -202,9 +193,7 @@ class _FillInState extends State<FillIn> {
                 textAlign: TextAlign.center,
                 cursorColor: Colors.black,
                 //   maxLines: null, // Allow multiple lines to handle long text without spaces
-                style: TextStyle(
-                  fontSize: 22.sp,
-                ),
+                style:textStyle,
                 decoration: InputDecoration(
                   // isCollapsed: true,
                   border: const OutlineInputBorder(
@@ -225,6 +214,22 @@ class _FillInState extends State<FillIn> {
               )),
     );
   }
+
+  double calculateMaxWidth(List<String> ansList, TextStyle style) {
+    double maxWidth = 0;
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    for (final text in ansList) {
+      textPainter.text = TextSpan(text: text, style: style);
+      textPainter.layout();
+      maxWidth = maxWidth < textPainter.width ? textPainter.width : maxWidth;
+    }
+
+    return maxWidth + 180.w; // add padding/margin
+  }
+
 
   Widget displayItemAnswer(
       List<String> correctAnswer, String displayUserAnswer) {
@@ -295,6 +300,7 @@ class _FillInState extends State<FillIn> {
         return '<input type="text" value="$initialValue" />';
       }
     });
+    //debugPrint('correctHtml $correctHtml');
     return correctHtml;
   }
 

@@ -40,14 +40,12 @@ class _LessonWidgetState extends State<LessonWidget> {
     //   }
     // });
 
-    debugPrint('lesson initState isComplete ${lesson.isCompletedCurrentUser}');
   }
 
   @override
   void didUpdateWidget(covariant LessonWidget oldWidget) {
     lesson = widget.lesson;
-    debugPrint(
-        'lesson didUpdateWidget isComplete ${lesson.isCompletedCurrentUser}');
+
 
     // if (widget.lesson.id != oldWidget.lesson.id) {
     //   player.dispose();

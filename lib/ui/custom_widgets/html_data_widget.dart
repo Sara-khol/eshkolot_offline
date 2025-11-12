@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:eshkolot_offline/ui/custom_widgets/audio_widget.dart';
 import 'package:eshkolot_offline/ui/screens/course_main/video_widget.dart';
@@ -6,6 +7,7 @@ import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -19,12 +21,13 @@ typedef WidgetCallback = Widget Function(List<String?> s);
 
 class HtmlDataWidget extends StatefulWidget {
   const HtmlDataWidget(this.text,
-      {super.key, required this.quizId, this.onInputWidgetRequested,  this.textStyle});
+      {super.key, required this.quizId, this.onInputWidgetRequested,  this.textStyle,this.isImageMatrix=false});
 
   final String text;
   final int quizId;
   final TextStyle? textStyle;
   final WidgetCallback? onInputWidgetRequested;
+  final bool isImageMatrix;
 
   @override
   State<HtmlDataWidget> createState() => _HtmlDataWidgetState();
@@ -41,15 +44,15 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // String s= convertCustomAudioTags(widget.text);
-    return isHTML(widget.text)
+     String s= convertCustomAudioTags(widget.text);
+    return isHTML(s)
         ? FutureBuilder(
             future: initDirectory(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return SelectionArea(
                     focusNode: _focusNode,
-                    child: HtmlWidget(convertCustomAudioTags(widget.text),
+                    child: HtmlWidget( addBreakAfterImgs(convertCustomAudioTags(widget.text)),
                         textStyle:widget.textStyle ?? TextStyle(
                             fontSize: 27.sp /*20.sp*/,
                             fontWeight: FontWeight.w400,
@@ -105,6 +108,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     if (element.localName == 'img') {
       debugPrint('srcAttribute $srcAttribute');
       if (srcAttribute != null) {
+        final img = displayFile(srcAttribute, height, width, WidgetType.image);
         return InlineCustomWidget(
           child: displayFile(srcAttribute, height, width, WidgetType.image),
         );
@@ -144,10 +148,13 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     }
     // Check if any child element has an underline style
     bool isUnderlined = element.children.any((child) =>
-        /*child.localName == 'span' &&*/
+        child.localName == 'span' &&
         child.attributes['style'] != null &&
         child.attributes['style']!.contains('text-decoration: underline'));
-    if (element.localName == 'h6') {
+    if (element.localName == 'h6' ||
+        (element.localName == 'span' && element.parent?.localName == 'h6'))
+    {
+     /* debugPrint('h6 text${element.text}');
       // Create a list to store the child widgets
       List<Widget> childrenWidgets = [];
 
@@ -171,10 +178,152 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: childrenWidgets,
       );
+    }*/
+        List<Widget> rowChildren = [];
+    bool isUnderlined =
+    element.children.any((child) => containsUnderlineStyle(child));
+
+        // קודם נחפש direction ישיר ב־element עצמו
+        String? directionStyle = element.attributes['style'];
+
+        // אם אין direction, נבדוק אם להורה (h6) יש
+        if ((directionStyle == null || !directionStyle.contains('direction')) &&
+            element.parent != null) {
+          directionStyle = element.parent!.attributes['style'];
+        }
+
+        // ברירת מחדל
+        TextDirection textDirection = TextDirection.ltr;
+
+    if (directionStyle != null && directionStyle.contains('rtl')) {
+      textDirection = TextDirection.rtl;
+    } else if (directionStyle != null && directionStyle.contains('ltr')) {
+      textDirection = TextDirection.ltr;
     }
+
+        for (var node in element.nodes) {
+          if (node.nodeType == dom.Node.TEXT_NODE) {
+            // Plain text between inputs
+            rowChildren.add(Text(
+              node.text?.trim() ?? '',
+              textDirection: textDirection,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 27.sp,
+                fontWeight: FontWeight.w800,
+                decoration: isUnderlined ? TextDecoration.underline : null,
+              ),
+            ));
+          } else if (node is dom.Element) {
+            final childWidget = displayWidgetByHtml(node);
+            if (childWidget != null) {
+              rowChildren.add(Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: childWidget,
+              ));
+            }
+          }
+        }
+        return Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 5.w,
+          runSpacing: 0,
+          textDirection: textDirection,
+          children: rowChildren,
+
+        );
+     }
 
     return null;
   }
+
+ /* Widget? displayWidgetByHtml(var element) {
+    final srcAttribute = element.attributes['src'];
+    final width  = element.attributes['width'];
+    final height = element.attributes['height'];
+    final tagName = element.localName;
+
+    if (tagName == 'input' && widget.onInputWidgetRequested != null) {
+      return widget.onInputWidgetRequested!(
+        [element.attributes['value'], element.attributes['dirname']],
+      );
+    }
+
+    // === img: אינליין + ירידת שורה רק אחרי ===
+    if (tagName == 'img') {
+      if (srcAttribute != null) {
+        final img = displayFile(srcAttribute, height, width, WidgetType.image);
+        return InlineCustomWidget(
+          child: _InlineImageThenNewline(img, */
+
+  /*gap: 0*//*),
+        );
+      }
+    }
+
+    if (tagName == 'audio') {
+      if (srcAttribute != null) {
+        return InlineCustomWidget(
+          child: displayFile(srcAttribute, height, width, WidgetType.audio),
+        );
+      }
+      return null;
+    }
+
+    if (tagName == 'iframe') {
+      if (srcAttribute != null) {
+        if (srcAttribute.split('.').last == 'pdf') {
+          return InlineCustomWidget(
+            child: displayFile(srcAttribute, height, width, WidgetType.pdf),
+          );
+        }
+        return InlineCustomWidget(
+          child: displayFile(
+            srcAttribute.split('.').last == 'mp4'
+                ? srcAttribute
+                : '${srcAttribute.split('?').first}.mp4',
+            height,
+            width,
+            WidgetType.video,
+            isLesson: false,
+          ),
+        );
+      }
+    }
+
+    // h6 וכד' – כמו שהיה אצלך
+    bool isUnderlined = element.children.any((child) =>
+    child.attributes['style'] != null &&
+        child.attributes['style']!.contains('text-decoration: underline'));
+
+    if (tagName == 'h6') {
+      final childrenWidgets = <Widget>[];
+      final isUnderlinedLocal =
+      element.children.any((child) => containsUnderlineStyle(child));
+
+      for (var childElement in element.children) {
+        childrenWidgets.add(displayWidgetByHtml(childElement) ?? Container());
+      }
+      childrenWidgets.add(
+        Expanded(
+          child: Text(
+            element.text,
+            style: TextStyle(
+              fontSize: 27.sp,
+              fontWeight: FontWeight.w800,
+              decoration: isUnderlinedLocal ? TextDecoration.underline : null,
+            ),
+          ),
+        ),
+      );
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: childrenWidgets,
+      );
+    }
+
+    return null;
+  }*/
 
   Widget displayFile(
       String srcAttribute, var height, var width, WidgetType type,
@@ -198,9 +347,26 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                     if (imageSnapshot.connectionState == ConnectionState.done &&
                         imageSnapshot.hasData) {
                       final image = imageSnapshot.data!;
+                      if(widget.isImageMatrix) {
+                        final aspect = image.width / image.height;
+
+                        final w = math.min(300.w, image.width.toDouble());
+                        final h = w / aspect;
+                        debugPrint('w: $w h: $h');
+                        return SizedBox(
+                          width: w,
+                          height: h,
+                          child: Image.file(
+                            file,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                          ),
+                        );
+                      }
+
                       return SizedBox(
-                        width: image.width.toDouble(),
-                        height: image.height.toDouble(),
+                        width:widget.isImageMatrix?140.w: image.width.toDouble(),
+                        height:widget.isImageMatrix?140.w: image.height.toDouble(),
                         child: Image.file(
                           file,
                           fit: BoxFit.contain,
@@ -296,13 +462,14 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
   String convertCustomAudioTags(String htmlContent) {
     final RegExp customAudioRegExp = RegExp(
-        r'\[audio\s+mp3="([^"]+)"\]\[\/audio\]',
-        caseSensitive: false,
-        multiLine: false);
+      r'\[audio\s+(?:mp3|src)="([^"]+)"\]\[\/audio\]',
+      caseSensitive: false,
+      multiLine: false,
+    );
 
     return htmlContent.replaceAllMapped(customAudioRegExp, (match) {
       final audioUrl = match.group(1);
-      return '<audio src="$audioUrl" <!--controls-->></audio>';
+      return '<audio src="$audioUrl" controls></audio>';
     });
   }
 
@@ -310,6 +477,13 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     final RegExp htmlRegExp =
         RegExp('<[^>]*>', multiLine: true, caseSensitive: false);
     return htmlRegExp.hasMatch(str);
+  }
+
+  String addBreakAfterImgs(String html) {
+    // תופס <img ...> (כולל self-closing) ומוסיף <br/> אחרי
+    final re = RegExp(r'(<img\b[^>]*>)', caseSensitive: false);
+   return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
+   // return html;
   }
 
   @override

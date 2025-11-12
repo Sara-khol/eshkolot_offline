@@ -15,6 +15,7 @@ import '../../../models/course.dart';
 import '../../../models/lesson.dart';
 import '../../../models/subject.dart';
 import '../../../services/installationDataHelper.dart';
+import '../dialogs/end_course_dialog.dart';
 import 'lesson_widget.dart';
 import 'course_main_page.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
@@ -117,6 +118,7 @@ class _MainPageChildState extends State<MainPageChild> {
           }
           break;
       }
+    openCurrentSubject();
     }
     else {
       _bodyWidget = ValueNotifier(
@@ -632,7 +634,10 @@ class _MainPageChildState extends State<MainPageChild> {
                                               .title,
                                           lessonPickedIndex == -1 &&
                                               subjectPickedIndex == -1 &&
-                                              questionPickedIndex == qIndex,
+                                              questionPickedIndex == qIndex &&
+                                              _bodyWidget
+                                                  .value
+                                              is QuestionnaireWidget,
                                               () =>
                                               setState(() {
                                                 subjectPickedIndex = -1;
@@ -643,6 +648,7 @@ class _MainPageChildState extends State<MainPageChild> {
                                                         quiz: _currentCourse
                                                             .questionnaires
                                                             .elementAt(qIndex));
+                                                debugPrint('onTap lessonPickedIndex $lessonPickedIndex');
                                               })
                                         /* Container(
                                               width: double.infinity,
@@ -755,89 +761,153 @@ class _MainPageChildState extends State<MainPageChild> {
         color: colors.grey2ColorApp, size: 22.sp);
   }
 
-  lessonOrQuestionnaireItem(bool isLesson,
+  Widget lessonOrQuestionnaireItem(
+      bool isLesson,
       bool isLessonCompleted,
       bool isFirst,
       bool isLastLesson,
       int lIndex,
       String name,
       bool isSelect,
-      VoidCallback onPress) {
-    //todo remove sizebox because text can be long and there is no space,
-    //but when doing that can not see VerticalDivider in stack
+      VoidCallback onPress,
+      ) {
+    // Tunables for layout
+    final double lineX = 12.w;        // x position of the vertical line inside the content area
+    final double lineWidth = 3.w;     // width of the vertical line
+    final double statusIconOffset = 5.w; // x position for the status icon over the line
+    final double contentLeftPad = 40.w;   // left padding to clear the line + status icon
+
     return Container(
       color: Colors.white,
-      height: 50.h,
-      child: Row(
-        children: [
-          SizedBox(width: 25.w),
-          Stack(
-              alignment: AlignmentDirectional.center,
-              children: [
-                VerticalDivider(
-                    color: isLessonCompleted
-                        ? colors.lightGreen1ColorApp
-                        : colors.grey2ColorApp,
-                    thickness: 3.w,
-                    indent: /*lIndex == 0 && isLesson*/ isFirst ? 25.h : null,
-                    endIndent: isLastLesson ? 20.h : null),
-                //currentSubject.lessons.isNotEmpty &&
-                isLessonCompleted
-                    ? Icon(
-                  Icons.check_circle,
-                  color: colors.lightGreen1ColorApp,
-                  size: 20.sp,
-                )
-                    : circleNotCompletedIcon()
-              ]),
-          SizedBox(width: 11.w),
-          Expanded(
-            child: Material(
-              color: Colors.white,
-              child: Container(
-                  margin: EdgeInsets.only(left: 20.w),
-                  padding: EdgeInsets.only(
-                      right: 20.w, left: 7.w, top: 7.h, bottom: 4.h),
-                  //  dense: true,
-                  // visualDensity: const VisualDensity(vertical: -4),
-                  decoration: BoxDecoration(color:
-                  isSelect ? colors.grey2ColorApp : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20.0)),
-
-                  // contentPadding:
-                  //EdgeInsets.only(right: 20.h, /*bottom: 20.h, */left: 20.h),
-                  // hoverColor: colors.grey2ColorApp,
-                  child: GestureDetector(
-                    onTap: onPress,
-                    child: Row(
-                      children: [
-                        Icon(
-                          isLesson
-                              ? Icons.videocam_outlined
-                              : lIndex == -1
-                              ? Icons.star_outline
-                              : Icons.create_outlined,
-                          size: 22.sp,
-                          color: Colors.black,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(width: 25.w),
+            // Expanded content with a background Stack drawing the timeline line + status icon.
+            Expanded(
+              child: Material(
+                color: Colors.white,
+                child: Stack(
+                  children: [
+                    // --- Background vertical line that always matches content height ---
+                    Positioned.fill(
+                      // keep left inset so the line is not glued to the very edge
+                      right: lineX,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          // emulate indent/endIndent with top/bottom margins
+                          margin: EdgeInsets.only(
+                            top: isFirst ? 25.h : 0,
+                            bottom: isLastLesson ? 20.h : 0,
+                          ),
+                          width: lineWidth,
+                          color: isLessonCompleted
+                              ? colors.lightGreen1ColorApp
+                              : colors.grey2ColorApp,
                         ),
-                        SizedBox(width: 14.w),
-                        Expanded (
-                          child: Text(name,
-                              // overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  height: 1,
-                                  fontWeight: isLesson
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  fontSize: 16.sp)),
-                        ),
-                      ],
+                      ),
                     ),
-                  )),
+
+                    // --- Status icon centered vertically over the line ---
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: statusIconOffset),
+                          child: isLessonCompleted
+                              ? buildCompletedIcon(context)
+                              : circleNotCompletedIcon(),
+                        ),
+                      ),
+                  ),
+
+                    // --- Foreground tappable content (icon + text), padded to clear the line+status icon ---
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: contentLeftPad,
+                        left: 20.w,
+                        top: 7.h,
+                        bottom: 4.h,
+                      ),
+                      child: GestureDetector(
+                        onTap: onPress,
+                        child: Container(
+                          padding: EdgeInsets.all(10.h),
+                          decoration: BoxDecoration(
+                            color: isSelect ? colors.grey2ColorApp : Colors.transparent,
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // type icon
+                              Padding(
+                                padding: EdgeInsets.only(left: 7.w, right: 14.w, top: 2.h),
+                                child: Icon(
+                                  isLesson
+                                      ? Icons.videocam_outlined
+                                      : (lIndex == -1
+                                      ? Icons.star_outline
+                                      : Icons.create_outlined),
+                                  size: 22.sp,
+                                  color: Colors.black,
+                                ),
+                              ),
+
+                              // text that wraps naturally
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  // do NOT set ellipsis to allow wrap
+                                  style: TextStyle(
+                                    height: 1,
+                                    fontWeight: isLesson ? FontWeight.w600 : FontWeight.w400,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget buildCompletedIcon(BuildContext context) {
+    final bg = Theme.of(context).scaffoldBackgroundColor; // או Colors.white
+
+
+    final double maskSize = 24.w; // אפשר גם 24.w אם תרצה רספונסיבי
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Opaque mask to hide the vertical line underneath
+        Container(
+          width: 15.sp,
+          height: 15.sp,
+          decoration: BoxDecoration(
+            color: bg,
+            shape: BoxShape.circle,
+          ),
+        ),
+        Icon(
+          Icons.check_circle,
+          color: colors.lightGreen1ColorApp,
+          size: 20.sp,
+        ),
+      ],
     );
   }
 
@@ -953,7 +1023,6 @@ class _MainPageChildState extends State<MainPageChild> {
 
   saveLastUserPosition({bool refresh = false}) async {
     debugPrint('saveLastUserPosition');
-
     if (_lastBodyWidget != null) {
       if ((_bodyWidget.value is! QuestionnaireWidget &&
           _bodyWidget.value is! LessonWidget) ||
@@ -973,6 +1042,7 @@ class _MainPageChildState extends State<MainPageChild> {
           } else {
             saveSubjectIndex = lastSubjectPickedIndex;
             debugPrint('222 saveSubjectIndex $saveSubjectIndex');
+
           }
 
           int saveQIndex = lastQuestionPickedIndex != -1
@@ -1081,6 +1151,17 @@ class _MainPageChildState extends State<MainPageChild> {
     progressPercent = ((currentStep / totalSteps) * 100).round();
   }
 
+  openCurrentSubject() {
+    if(subjectPickedIndex>-1) {
+      _currentCourse.subjects
+          .elementAt(subjectPickedIndex)
+          .isTapped = true;
+      setState(() {
+
+      });
+    }
+  }
+
   updateCompleteLesson(int lessonId) async {
     Subject currentSubject =
     _currentCourse.subjects.elementAt(subjectPickedIndex);
@@ -1120,6 +1201,7 @@ class _MainPageChildState extends State<MainPageChild> {
           userCourse?.status != Status.finish) {
         if (_currentCourse.subjects.every((s) => s.isCompletedCurrentUser)) {
           await IsarService().updateCourse(_currentCourse.id, true);
+          showEndCourseDialog(widget.course.title);
         }
       }
     } else if (updateMiddle) {
@@ -1202,6 +1284,17 @@ class _MainPageChildState extends State<MainPageChild> {
       updateSteps(numUpdate: numUpdate);
       setState(() {});
     }
+  }
+
+  showEndCourseDialog(String courseName)
+  {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // מונע סגירה בלחיצה מחוץ לחלון (לא חובה)
+      builder: (BuildContext context) {
+        return EndCourseDialog(courseName: courseName);
+      },
+    );
   }
 
   @override

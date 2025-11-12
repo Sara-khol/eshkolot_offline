@@ -7,23 +7,21 @@ echo Detecting installer location and starting setup...
 echo ==========================================
 echo.
 
-setlocal enabledelayedexpansion
+setlocal EnableExtensions EnableDelayedExpansion
 
-REM === Lock file to prevent multiple instances ===
+REM ===========================
+REM Soft lock: only clean stale lock, do not block
+REM ===========================
 set "lockFile=%TEMP%\eshkolot_install.lock"
 if exist "%lockFile%" (
-    tasklist | find /i "eshkolot_setup.exe" >nul
-    if %errorlevel%==0 (
-        echo ⚠️ Installer is already running!
-        echo If this is a mistake, delete: %lockFile%
-        pause
-        exit /b
-    ) else (
-        echo ℹ️ Lock file found, but no app is running – cleaning up...
-        del "%lockFile%"
-    )
+    echo ℹ️ Lock file found from a previous run – cleaning up...
+    del /f /q "%lockFile%" 2>nul
 )
 echo Installing... > "%lockFile%"
+
+REM Ensure we always remove the lock on any exit
+REM Use a common cleanup label
+set "EXIT_CODE=0"
 
 REM === Get current drive & folder ===
 set "batDrive=%~d0"

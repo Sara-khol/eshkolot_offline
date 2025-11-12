@@ -32,6 +32,8 @@ import 'models/knowledge.dart';
 import 'models/lesson.dart';
 import 'models/quiz.dart';
 import 'dart:convert';
+import 'package:path/path.dart' as p;
+
 
 // import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
@@ -105,7 +107,17 @@ class _AppLoaderState extends State<AppLoader> {
     if(!_initialized && _initializeError) {
       return Scaffold(
         body: Center(
-          child: Text('ישנה בעיה\n$errorString',textAlign: TextAlign.center,),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('ישנה בעיה\n$errorString',textAlign: TextAlign.center,),
+             // SizedBox(height: 20.h),
+              // ElevatedButton(onPressed: (){
+              //   Navigator.pushReplacement(context,
+              //       MaterialPageRoute(builder: (context) => const LoginPage()));},
+              //     child: Text('המשך בכל זאת'))
+            ],
+          ),
         ),
       );
     }
@@ -342,9 +354,22 @@ class _MyAppState extends State<MyApp> {
                     ? const LoginPage()
                     : Center(
                         child: !timeout
-                            ? Text(
-                                !extractWorked ? 'ישנה בעיה 1' : 'ישנה בעיה 2',
-                                style: TextStyle(fontSize: 30.sp))
+                            ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                    ':שגיאה',
+                                    style: TextStyle(fontSize: 30.sp)),
+                                Text(
+                                    !extractWorked ? 'לא כל הקבצים חולצו כראוי' : 'חסר סרטונים של קורס אחד לפחות',
+                                    style: TextStyle(fontSize: 30.sp)),
+                                SizedBox(height: 20.h),
+                                ElevatedButton(onPressed: (){
+                                  Navigator.pushReplacement(context,
+                                      MaterialPageRoute(builder: (context) => const LoginPage()));},
+                                    child: Text('למעבר לתוכנה בכל זאת'))
+                              ],
+                            )
                             : Text(
                                 'התהליך לוקח מידי הרבה זמן,פנה לתמיכה',
                                 style: TextStyle(fontSize: 30.sp))));
@@ -457,14 +482,7 @@ class _MyAppState extends State<MyApp> {
 // }
 }
 
-Future<String?> getInstallerSourcePath() async {
-  final exeDir = File(Platform.resolvedExecutable).parent;
-  final file = File('${exeDir.path}/installer_source.txt');
-  if (await file.exists()) {
-    return (await file.readAsString()).trim();
-  }
-  return null;
-}
+
 
 Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
   ReceivePort receivePort = ReceivePort();
@@ -472,15 +490,15 @@ Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
   try {
     isolate = await Isolate.spawn(
         extractZipIsolate, [receivePort.sendPort, extractPath]);
-    //
-    // final res = await receivePort.first.timeout(
-    //   const Duration(minutes: 45), // משך הזמן המקסימלי להמתנה
-    //   onTimeout: () {
-    //     return 'timeout';
-    //   },
-    // );
 
-     final res = await receivePort.first;
+    final res = await receivePort.first.timeout(
+      const Duration(hours: 4), // משך הזמן המקסימלי להמתנה
+      onTimeout: () {
+        return 'timeout';
+      },
+    );
+
+  //   final res = await receivePort.first;
     debugPrint('result $res');
     Sentry.addBreadcrumb(Breadcrumb(message: 'result from extract $res'));
 
@@ -501,7 +519,7 @@ Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
   }
 }
 
-extractZipFile(String path, SendPort sendPort) async {
+extractZipFile1(String path, SendPort sendPort) async {
   // Get a list of files in the "lessons" folder
   List<FileSystemEntity> pathFiles = Directory(path).listSync();
 
@@ -517,13 +535,14 @@ extractZipFile(String path, SendPort sendPort) async {
       // Create the destination folder if it doesn't exist
       Directory(destinationPath).createSync(recursive: true);
 
-      if (zipHasInvalidPaths(zipFilePath)) {
-        final msg = 'ZIP file contains invalid file names: $zipFilePath';
-        debugPrint(msg);
-        // sendPort.send(msg);
-        Sentry.addBreadcrumb(Breadcrumb(message: msg));
-        continue;
-      }
+      zipHasInvalidPaths(zipFilePath);
+      // if (zipHasInvalidPaths(zipFilePath)) {
+      //   final msg = 'ZIP file contains invalid file names: $zipFilePath';
+      //   debugPrint(msg);
+      //   // sendPort.send(msg);
+      //   Sentry.addBreadcrumb(Breadcrumb(message: msg));
+      //   continue;
+      // }
 
       try {
         extractFileToDisk(zipFilePath, destinationPath);
@@ -540,24 +559,6 @@ extractZipFile(String path, SendPort sendPort) async {
   }
 }
 
-void extractZipIsolate(List<dynamic> args) async {
-  SendPort sendPort = args[0];
-  List<String> extractPaths = args[1];
-
-  for (String path in extractPaths) {
-    try {
-      debugPrint('path $path');
-      await extractZipFile(path, sendPort);
-    } catch (e) {
-      sendPort.send('Error extracting zips for path $path: $e');
-      debugPrint('Error extracting zips for path $path: $e');
-      Sentry.addBreadcrumb(
-          Breadcrumb(message: 'Error extracting zips for path $path: $e'));
-    }
-  }
-  Isolate.exit(sendPort, 'finish');
-}
-
 bool zipHasInvalidPaths(String zipFilePath) {
   try {
     final inputStream = InputFileStream(zipFilePath);
@@ -565,7 +566,10 @@ bool zipHasInvalidPaths(String zipFilePath) {
 
     for (final file in archive.files) {
       if (_containsInvalidPath(file.name)) {
-        debugPrint('ZIP contains invalid file name: ${file.name}');
+        String msg='ZIP contains invalid file name: ${file.name}';
+        debugPrint(msg);
+        Sentry.addBreadcrumb(Breadcrumb(message: msg));
+        archive.files.remove(file);
         return true;
       }
     }
@@ -577,6 +581,131 @@ bool zipHasInvalidPaths(String zipFilePath) {
   return false;
 }
 
-bool _containsInvalidPath(String path) {
-  return RegExp(r'[<>:"/\\|?*]').hasMatch(path);
+bool _containsInvalidPath(String name) {
+  // Normalize separators to forward slash
+  final normalized = name.replaceAll(r'\', '/');
+
+  // Split into segments and check for any segment that's exactly ".."
+  final parts = normalized.split('/');
+  for (final seg in parts) {
+    if (seg == '..') return true; // path traversal attempt
+    if (seg.isEmpty) continue;
+    // also check for illegal characters in each segment:
+    if (RegExp(r'[<>:"/\\|?*\x00-\x1F]').hasMatch(seg)) return true;
+  }
+
+  return false;
 }
+
+void _extractZipSkippingInvalid({
+  required String zipFilePath,
+  required String destinationPath,
+  required void Function(String msg) send,
+}) {
+  InputFileStream? input;
+  try {
+    input = InputFileStream(zipFilePath);
+    final original = ZipDecoder().decodeBuffer(input);
+
+    // Build a new Archive containing only valid entries
+    final cleaned = Archive();
+    int skipped = 0;
+
+    for (final entry in original.files) {
+      final originalName = entry.name;
+
+      if (_containsInvalidPath(originalName)) {
+        debugPrint('invalid $originalName');
+        skipped++;
+        ('⚠️ Skipping invalid entry: ${entry.name}');
+        continue;
+      }
+
+      // נרמול מפרידים ובניית נתיב יעד חוצה-פלטפורמות
+      final relNormalized = originalName.replaceAll(r'\', '/');
+      final parts = relNormalized.split('/').where((s) => s.isNotEmpty).toList();
+      final outPath = p.joinAll([destinationPath, ...parts]);
+      // Keep the entry as-is (no renaming)
+      cleaned.addFile(entry);
+
+
+      if (entry.isFile) {
+        // יוצרים תיקיית אב, ואז כותבים בסטרימינג (ללא טעינה לזיכרון)
+        Directory(p.dirname(outPath)).createSync(recursive: true);
+        final out = OutputFileStream(outPath);
+        try {
+          entry.writeContent(out);
+        } finally {
+          out.close();
+        }
+        //written++;
+      } else {
+        // רשומת תיקייה
+        Directory(outPath).createSync(recursive: true);
+        //dirs++;
+      }
+
+    }
+
+    // // Ensure destination exists
+    // Directory(destinationPath).createSync(recursive: true);
+    //
+    // // Extract remaining files
+    // extractArchiveToDisk(cleaned, destinationPath);
+
+    debugPrint('✅ Zip extracted: $zipFilePath (skipped: $skipped)');
+  } catch (e) {
+    send('❌ Error extracting "$zipFilePath": $e');
+   // sendPort.send('Error extracting zips for path $path: $e');
+    debugPrint('Error extracting zips for path $zipFilePath: $e');
+    Sentry.addBreadcrumb(
+        Breadcrumb(message: 'Error extracting zips for path $zipFilePath: $e'));
+  } finally {
+    input?.close();
+  }
+}
+
+Future<void> extractZipFile(String path, SendPort sendPort) async {
+  // List ZIP files in the given directory
+  final pathFiles = Directory(path).listSync();
+
+  for (final file in pathFiles) {
+    if (file is! File) continue;
+    if (!file.path.toLowerCase().endsWith('.zip')) continue;
+
+    final zipFilePath = file.path;
+
+    // Build destination folder safely across platforms
+    final baseName = p.basenameWithoutExtension(zipFilePath);
+    final destinationPath = p.join(path, baseName);
+
+    try {
+      _extractZipSkippingInvalid(
+        zipFilePath: zipFilePath,
+        destinationPath: destinationPath,
+        send: (msg) => sendPort.send(msg),
+      );
+    } catch (e) {
+      sendPort.send('❌ Error extracting "$zipFilePath": $e');
+      // continue to next zip
+    }
+  }
+}
+
+void extractZipIsolate(List<dynamic> args) async {
+  final SendPort sendPort = args[0];
+  final List<String> extractPaths = args[1];
+
+  for (final path in extractPaths) {
+    try {
+      await extractZipFile(path, sendPort);
+    } catch (e) {
+      debugPrint('Error extracting zips for path $path: $e');
+      Sentry.addBreadcrumb(
+          Breadcrumb(message: 'Error extracting zips for path $path: $e'));
+      sendPort.send('❌ Error extracting zips for path $path: $e');
+    }
+  }
+  Isolate.exit(sendPort, 'finish');
+}
+

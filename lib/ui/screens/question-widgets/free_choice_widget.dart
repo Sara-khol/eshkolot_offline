@@ -11,7 +11,7 @@ class FreeChoice extends StatefulWidget {
  final Question question;
  final QuestionController questionController;
 
- const FreeChoice(this.question,{super.key, required this.questionController,});
+ const FreeChoice(this.question,{super.key, required this.questionController});
 
   @override
   State<FreeChoice> createState() => _FreeChoiceState();
@@ -20,7 +20,7 @@ class FreeChoice extends StatefulWidget {
 
 class _FreeChoiceState extends State<FreeChoice> {
 
-  final myController = TextEditingController();
+  TextEditingController myController = TextEditingController();
   late List<String> ansList;
 
   @override
@@ -30,6 +30,7 @@ class _FreeChoiceState extends State<FreeChoice> {
     debugPrint(widget.question.ans!.first.ans);
     widget.question.ans!.first.ans=  widget.question.ans!.first.ans.replaceAll('\$\$', '\$');
     ansList = widget.question.ans!.first.ans.split('\$');
+    myController = TextEditingController();
     super.initState();
   }
 
@@ -53,33 +54,49 @@ class _FreeChoiceState extends State<FreeChoice> {
     super.dispose();
   }
 
+  double calculateMaxWidth(List<String> ansList, TextStyle style) {
+    double maxWidth = 0;
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    for (final text in ansList) {
+      textPainter.text = TextSpan(text: text, style: style);
+      textPainter.layout();
+      maxWidth = maxWidth < textPainter.width ? textPainter.width : maxWidth;
+    }
+
+    return maxWidth + 180.w; // add padding/margin
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         HtmlDataWidget(widget.question.question,quizId: widget.question.quizId,),
+        SizedBox(height: 10.h,),
         createTextField(myController)
       ],
     );
   }
 
   Widget createTextField(TextEditingController controller) {
+
+    final textStyle = TextStyle(fontSize: 22.sp, height: 1);
+
+    final double textFieldWidth = calculateMaxWidth(ansList, textStyle);
     return Container(
         padding: const EdgeInsets.only(right: 5, left: 5),
           // margin: EdgeInsets.only(bottom: 5),
-        width: 80,
+        width: textFieldWidth,
         height: 50.h,
         child: TextField(
             controller: controller,
-
-
             obscureText: false,
             textAlignVertical: TextAlignVertical.center,
-
-
             cursorColor:  Colors.black,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 22.sp,height: 1),
+            textAlign:isHebrew(ansList.first)?TextAlign.right: TextAlign.left,
+            style: textStyle,
             decoration: InputDecoration(
               border:  OutlineInputBorder(
                   borderSide: BorderSide(color: blackColorApp)),
@@ -88,6 +105,12 @@ class _FreeChoiceState extends State<FreeChoice> {
               contentPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 15 ),
               isDense: true,
             )));
+  }
+
+  // פונקציה שבודקת אם יש עברית במחרוזת
+  bool isHebrew(String text) {
+    final hebrewRegex = RegExp(r'[\u0590-\u05FF]');
+    return hebrewRegex.hasMatch(text);
   }
 
   buildWithAnswers()

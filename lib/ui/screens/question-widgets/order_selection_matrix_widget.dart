@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
 import 'package:flutter/material.dart';
@@ -72,8 +76,19 @@ class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget>
 
   @override
   Widget build(BuildContext context) {
+
+    final textStyle = TextStyle(
+      color: colors.blackColorApp,
+      fontSize: 27.sp,
+      fontWeight: FontWeight.w400,
+    );
+
+    // חישוב הרוחב המקסימלי של כל הטקסטים
+    final maxTextWidth = isHtml
+        ?400.w: getMaxTextWidth(randomList, textStyle, 400.w);
+    debugPrint('isHtml $isHtml maxTextWidth $maxTextWidth');
+
     return Column(
-      // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(height: 25.h),
         HtmlDataWidget(
@@ -108,94 +123,102 @@ class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget>
         for (int i = 0; i < randomList.length; i++) ...[
           Padding(
             padding: EdgeInsets.only(bottom: 12.h),
-            child: Container(
-              // height:isHtml?110.h: 75.h,
-              margin: EdgeInsets.only(right: 2.w, left: 2.w),
-              decoration: ShapeDecoration(
-                color: const Color(0xFFFCFCFF),
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                    width: 1.w,
-                    strokeAlign: BorderSide.strokeAlignOutside,
-                    color: const Color(0xFFE5E4F6),
+            child: IntrinsicHeight(
+              child: Container(
+                // height:isHtml?110.h: 75.h,
+                margin: EdgeInsets.only(right: 2.w, left: 2.w),
+                decoration: ShapeDecoration(
+                  color: const Color(0xFFFCFCFF),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      width: 1.w,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                      color: const Color(0xFFE5E4F6),
+                    ),
+                    borderRadius: BorderRadius.circular(3),
                   ),
-                  borderRadius: BorderRadius.circular(3),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 140.w,
-                    padding: EdgeInsets.all(10.h),
-                    child: Center(
-                      child: isHtml
-                          ? HtmlDataWidget(randomList[i],
-                          quizId: widget.question.quizId)
-                          : Text(
-                        randomList[i],
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: colors.blackColorApp,
-                          fontSize: 27.sp,
-                          fontWeight: FontWeight.w400,
-                          // height: 22,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      //width: 140.w,
+                      //width:randomList[i].contains('<img')?  150.w:maxTextWidth + 10.w,
+                      width:isHtml ?maxTextWidth: maxTextWidth + 10.w,
+                      padding: EdgeInsets.all(10.h),
+                      child: Center(
+                        child: isHtml
+                            ? HtmlDataWidget(randomList[i],
+                            quizId: widget.question.quizId,isImageMatrix:randomList[i].contains('<img'))
+                            : Text(
+                          randomList[i],
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          maxLines: 3,
+                          overflow: TextOverflow.visible,
+                          style: TextStyle(
+                            color: colors.blackColorApp,
+                            fontSize: 27.sp,
+                            fontWeight: FontWeight.w400,
+                            // height: 22,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: isHtml ? 95.h : 60.h,
-                      padding: EdgeInsets.only(
-                          top: 7.h, bottom: 7.h, right: 10.h, left: 10.h),
-                      decoration: BoxDecoration(
-                        // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),
-                          border: Border(
-                            right: BorderSide(
-                              width: 1.w,
-                              color: const Color(0xFFE5E4F6),
-                            ),
-                          )),
-                      child: DragTarget<String>(
-                        builder: (BuildContext context, List<dynamic> accepted,
-                            List<dynamic> rejected) {
-                          return
-                            // ans[i] != ''
-                            //   ? dragWidget(i, isAnswer: true)
-                            //   : Container();
-
-                            Draggable<String>(
-                              // maxSimultaneousDrags: maxSimultaneousDrags[i],
-                              // Data is the value this Draggable stores.
-                              data: ans[i],
-                              feedback: Material(
-                                child: dragWidget(i, isAnswer: true),
+                    Expanded(
+                      child: Container(
+                      // height: isHtml ? 95.h : 60.h,
+                        padding: EdgeInsets.only(
+                         top: 7.h, bottom: 7.h, right: 10.h, left: 10.h),
+                        decoration: BoxDecoration(
+                          // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),
+                            border: Border(
+                              right: BorderSide(
+                                width: 1.w,
+                                color: const Color(0xFFE5E4F6),
                               ),
-                              childWhenDragging: dragWidget(
-                                  i, changeBackground: true, isAnswer: true),
-                              child: /* dragWidget(i)*/
-                              ans[i] != ''
-                                  ? dragWidget(i, isAnswer: true)
-                                  : Container(),
-                            );
-                        },
-                        onAccept: (data) {
-                          debugPrint(data);
-                          // ans.remove(data);
+                            )),
+                        child: DragTarget<String>(
+                          builder: (BuildContext context, List<dynamic> accepted,
+                              List<dynamic> rejected) {
+                            return
+                              // ans[i] != ''
+                              //   ? dragWidget(i, isAnswer: true)
+                              //   : Container();
 
-                          setState(() {
-                            if (ans.contains(data)) {
-                              ans [ans.indexOf(data)] = '';
-                            }
-                            ans[i] = data;
-                          });
-                          debugPrint('=====$i=======');
-                          debugPrint('data $data ');
-                        },
+                              Draggable<String>(
+                                // maxSimultaneousDrags: maxSimultaneousDrags[i],
+                                // Data is the value this Draggable stores.
+                                data: ans[i],
+                                feedback: Material(
+                                  child: dragWidget(i, isAnswer: true),
+                                ),
+                                childWhenDragging: dragWidget(
+                                    i, changeBackground: true, isAnswer: true),
+                                child: /* dragWidget(i)*/
+                                ans[i] != ''
+                                    ? dragWidget(i, isAnswer: true)
+                                    : Container(),
+                              );
+                          },
+                          onAccept: (data) {
+                            debugPrint(data);
+                            // ans.remove(data);
+
+                            setState(() {
+                              if (ans.contains(data)) {
+                                ans [ans.indexOf(data)] = '';
+                              }
+                              ans[i] = data;
+                            });
+                            debugPrint('=====$i=======');
+                            debugPrint('data $data ');
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           )
@@ -203,6 +226,23 @@ class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget>
       ],
     );
   }
+
+  double getMaxTextWidth(List<String> texts, TextStyle style, double maxAllowedWidth) {
+    debugPrint('getMaxTextWidth getMaxTextWidth $texts');
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    double maxWidth = 0;
+    for (var text in texts) {
+      painter.text = TextSpan(text: text, style: style);
+      painter.layout(); // מודד את הרוחב של הטקסט
+      if (painter.width > maxWidth) maxWidth = painter.width;
+    }
+
+    // לא לעבור את הרוחב המותר
+    return maxWidth > maxAllowedWidth ? maxAllowedWidth : maxWidth;
+  }
+
 
   Widget dragWidget(int i,
       {bool changeBackground = false, bool isAnswer = false, displayAnswer = false}) {
@@ -227,6 +267,7 @@ class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget>
               color: !displayAnswer ? colors.blackColorApp : isCorrectList[i]
                   ? Colors.white
                   : Colors.red),
+          SizedBox(width: 5.w,),
           /*Text(
             isAnswer ? ans[i] : matrixMatchList[i],
             style: TextStyle(
@@ -237,13 +278,15 @@ class _OrderSelectionMatrixWidgetState extends State<OrderSelectionMatrixWidget>
                     : Colors.red),
             textAlign: TextAlign.center,
           ),*/
-          HtmlDataWidget(isAnswer ? ans[i] : matrixMatchList[i], quizId: widget.question.quizId,
-            textStyle: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w400,
-                color: !displayAnswer ? colors.blackColorApp : isCorrectList[i]
-                    ? Colors.white
-                    : Colors.red),)
+          Flexible(
+            child: HtmlDataWidget(isAnswer ? ans[i] : matrixMatchList[i], quizId: widget.question.quizId,
+              textStyle: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w400,
+                  color: !displayAnswer ? colors.blackColorApp : isCorrectList[i]
+                      ? Colors.white
+                      : Colors.red)),
+          )
         ],
       ),
     );
