@@ -20,7 +20,6 @@ if exist "%lockFile%" (
 echo Installing... > "%lockFile%"
 
 REM Ensure we always remove the lock on any exit
-REM Use a common cleanup label
 set "EXIT_CODE=0"
 
 REM === Get current drive & folder ===
@@ -64,8 +63,64 @@ echo zipFile = [%zipFile%]
 echo destinationFolder = [%destinationFolder%]
 echo.
 
+echo ============================
+echo Checking disk space...
+echo ============================
+
+REM --- Detect free disk space in a stable way (no PowerShell needed) ---
+for /f "tokens=3" %%A in ('dir "%batDrive%\" ^| find "bytes free"') do set freeSpace=%%A
+
+if "%freeSpace%"=="" (
+    echo ERROR: Could not detect free disk space.
+    pause
+    exit /b
+)
+
+echo freeSpace=%freeSpace%
+
+REM --- Get ZIP size (64-bit safe, PowerShell OK here) ---
+for /f "usebackq" %%A in (`
+    powershell -NoProfile -Command ^
+    "(Get-Item '%zipFile%').Length"
+`) do set "zipSize=%%A"
+
+if "%zipSize%"=="" (
+    echo ERROR: Could not read ZIP size!
+    pause
+    exit /b
+)
+
+echo zipSize=%zipSize%
+
+REM --- Required space = ZIP × 1.2 ---
+for /f "usebackq" %%A in (`
+    powershell -NoProfile -Command ^
+    "[int64](%zipSize% * 1.2)"
+`) do set "requiredSpace=%%A"
+
+echo requiredSpace=%requiredSpace%
+
+REM --- Compare using PowerShell 
+
+ REM Remove commas from freeSpace
+ set freeSpaceClean=%freeSpace:,=%
+
+ for /f %%A in ('
+    powershell -NoProfile -Command "exit ([int64]%freeSpaceClean% -lt [int64]%requiredSpace%)"
+ ') do set psCheck=%%A
+
+if errorlevel 1 (
+    echo ERROR: Not enough disk space!
+    echo Free: %freeSpace%
+    echo Required: %requiredSpace%
+    pause
+    exit /b
+)
+
+echo Disk space OK
+
 REM === Always reset destination folder ===
-echo 🧹 Cleaning destination folder...
+echo  Cleaning destination folder...
 if exist "%destinationFolder%" (
     rmdir /s /q "%destinationFolder%"
 )

@@ -293,32 +293,41 @@ class VimoeService with ChangeNotifier {
 
 
       if (notify) notifyListeners();
-      // if (courses.isEmpty) {
-      //   courses = await IsarService().getAllCourses();
-      // }
+      bool isCourse=false;
       for (Course course in courses) {
-        if(isNetWorkConnection) {
-          debugPrint('ggg ${course.title}');
-          // if (course.serverId > 1000) {
-          // if (course.id == 2567060) {
-          //todo
-          // projectId = course.id == 69 ? 2651706 : int.parse(course.vimeoId);
-          projectId =
-          course.vimeoId != '' ? int.parse(course.vimeoId) : 2651706;
-         // course.vimeoId != '' ? int.parse(course.vimeoId) : 10390152;
-          courseId = course.id;
-          // projectId = course.vimeoId;
-          await connectToVimoe();
+        if(course.vimeoId.isNotEmpty) {
+          if (isNetWorkConnection) {
+            debugPrint('ggg ${course.title}');
+            // if (course.serverId > 1000) {
+            // if (course.id == 2567060) {
+            //todo
+            // projectId = course.id == 69 ? 2651706 : int.parse(course.vimeoId);
+            projectId =
+            course.vimeoId != '' ? int.parse(course.vimeoId) : 2651706;
+            // course.vimeoId != '' ? int.parse(course.vimeoId) : 10390152;
+            courseId = course.id;
+            isCourse=true;
+            // projectId = course.vimeoId;
+            await connectToVimoe();
+          }
         }
-        // }
+        else{
+          debugPrint('vimeo id is empty for course ${course.title} ${course.id}');
+          Sentry.captureMessage('vimeo id is empty for course ${course.title} ${course.id}');
+        }
       }
       //todo
       // if ((courses.length > 1) ||
       //     (numOfAllVideos == 0 && courses.length == 1)) {
-      if (isNetWorkConnection) next();
-      // } else {
-      //   debugPrint('?????');
-      // }
+      if (isNetWorkConnection && isCourse) {
+        next();
+      } else
+        {
+          if(!isCourse) {
+            downloadStatus = DownloadStatus.vimeoError;
+            lastDownLoadStatus = DownloadStatus.vimeoError;
+          }
+        }
     } else {
       downloadStatus = DownloadStatus.netWorkError;
       lastDownLoadStatus = DownloadStatus.netWorkError;
@@ -712,6 +721,7 @@ enum DownloadStatus {
   downloading,
   downloaded,
   error,
+  vimeoError,
   netWorkError,
   // allDownloaded
 }

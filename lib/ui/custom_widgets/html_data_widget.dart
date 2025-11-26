@@ -125,7 +125,17 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
       // }
       return null;
     }
-    if (element.localName == 'iframe') {
+    if (element.localName == 'iframe'||element.localName == 'video' || element.localName == 'source') {
+      String? src = element.attributes['src'];
+
+      // אם זה <source> בתוך <video>, ננסה לקחת מההורה
+      if (src == null && element.parent?.localName == 'video') {
+        src = element.parent?.children
+            .firstWhere((child) => child.localName == 'source',
+            orElse: () => element)
+            .attributes['src'];
+      }
+
       if (srcAttribute != null) {
         if (srcAttribute.split('.').last == 'pdf') {
           return InlineCustomWidget(

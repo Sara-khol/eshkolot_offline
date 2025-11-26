@@ -35,6 +35,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as p;
 
 
+
+
 // import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
@@ -310,6 +312,7 @@ class _MyAppState extends State<MyApp> {
   bool isLoading = false;
   bool timeout = false;
 
+
   @override
   void initState() {
     courses = widget.courses;
@@ -338,8 +341,6 @@ class _MyAppState extends State<MyApp> {
 
     super.initState();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -375,6 +376,78 @@ class _MyAppState extends State<MyApp> {
                                 style: TextStyle(fontSize: 30.sp))));
   }
 
+  /// Returns available space (in bytes) of the disk where [path] is located.
+  /// Returns null if cannot determine.
+  Future<int?> getAvailableDiskSpace(String path) async {
+    try {
+      final dir = Directory(path);
+
+      if (!dir.existsSync()) {
+        await dir.create(recursive: true);
+      }
+
+      final result = await Process.run(
+        Platform.isWindows ? 'wmic' : 'df',
+        Platform.isWindows
+            ? ['logicaldisk', 'where', "DeviceID='${path[0].toUpperCase()}:'", 'get', 'FreeSpace']
+            : ['-k', path],
+      );
+
+      final output = result.stdout.toString();
+
+      if (Platform.isWindows) {
+        // Example: "FreeSpace\n1234567890\n"
+        final lines = output.split(RegExp(r'\s+')).where((s) => s.trim().isNotEmpty).toList();
+        if (lines.length >= 2) {
+          return int.tryParse(lines[1]);
+        }
+      } else {
+        // Example: Filesystem   1K-blocks     Used Available Use% Mounted on
+        //          /dev/sda1     30408756 12345678 18000000  41% /
+        final parts = output.split(RegExp(r'\s+'));
+        if (parts.length > 10) {
+          final availableKB = int.tryParse(parts[10]);
+          return availableKB != null ? availableKB * 1024 : null;
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<int> calculateTotalZipSize(List<String> folders) async {
+    int total = 0;
+
+    for (final folder in folders) {
+      final dir = Directory(folder);
+      if (!dir.existsSync()) continue;
+
+      for (final file in dir.listSync(recursive: false)) {
+        if (file is File && file.path.toLowerCase().endsWith('.zip')) {
+          total += await file.length();
+        }
+      }
+    }
+    return total;
+  }
+
+  void deleteZipFiles(List<String> extractPaths) {
+    for (final path in extractPaths) {
+      final directory = Directory(path);
+      if (!directory.existsSync()) continue;
+
+      for (final file in directory.listSync()) {
+        if (file is File && file.path.toLowerCase().endsWith('.zip')) {
+          try {
+            file.deleteSync();
+            debugPrint('Deleted zip: ${file.path}');
+          } catch (e) {
+            debugPrint('❌ Failed to delete zip: $e');
+          }
+        }
+      }
+    }
+  }
+
   Future<Null> getSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     extractWorked = prefs.getBool("extractWorked") ?? false;
@@ -396,7 +469,32 @@ class _MyAppState extends State<MyApp> {
     final Directory directory =
         await CommonFuncs().getEshkolotWorkingDirectory();
     destDirPath = directory.path;
-    //destDirPath = await CommonFuncs().findEshkolotFolderOnUsb();
+
+    final hasSpace = await hasEnoughSpaceForExtraction(
+      zipFolders: [
+        '$destDirPath/${Constants.quizPath}/',
+        '$destDirPath/${Constants.lessonPath}/',
+      ],
+      targetPath: destDirPath,
+    );
+
+    if (!hasSpace) {
+      await Sentry.captureMessage(
+          'no space on disk for extraction');
+      showProgress = false;
+      await showDialog(
+        context: context,
+        builder: (_) => const AlertDialog(
+          title: Text("שגיאת מקום בדיסק",  textDirection: TextDirection.rtl),
+          content: Text( "אין מספיק מקום כדי לחלץ את הקבצים",  textDirection: TextDirection.rtl),
+
+        ),
+      );
+      setState(() {});
+      return false;
+    }
+
+
     int isolateRes = await extractZipFileUsingIsolate([
       '$destDirPath/${Constants.quizPath}/',
       '$destDirPath/${Constants.lessonPath}/'
@@ -406,6 +504,7 @@ class _MyAppState extends State<MyApp> {
     if (extractWorked) {
       debugPrint('extractWorked ${courses.length}');
       preferences.setBool('extractWorked', true);
+
       for (Course course in courses) {
         bool b = await InstallationDataHelper().setLessonVideosNum(course);
         if (b) {
@@ -436,6 +535,8 @@ class _MyAppState extends State<MyApp> {
     return true;
   }
 
+
+
   showProgressExtractWidget() {
     return Column(
       children: [
@@ -448,6 +549,11 @@ class _MyAppState extends State<MyApp> {
               Text('...מתכונן להפעלת התוכנה, פעולה זו עלולה לקחת כמה דקות',
                   style:
                       TextStyle(fontWeight: FontWeight.w600, fontSize: 40.sp)),
+           /*   Text('מחולץ ZIP $extractedZips מתוך $totalZips'),
+              LinearProgressIndicator(
+                value: totalZips == 0 ? null : extractedZips / totalZips,
+                minHeight: 15,
+              ),*/
               const CircularProgressIndicator(),
             ],
           ),
@@ -456,42 +562,101 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-// void extractZipIsolate(SendPort sendPort) {
-//   ReceivePort receivePort = ReceivePort();
-//   sendPort.send(receivePort.sendPort);
-//
-//   receivePort.listen((dynamic message) {
-//     if (message is String) {
-//       extractZipFile(message);
-//     }
-//   });
-// }
 
-// Future<void> extractZipFileUsingIsolate(String extractPath) async {
-//   try {
-//     ReceivePort receivePort = ReceivePort();
-//     await Isolate.spawn(extractZipIsolate, receivePort.sendPort);
-//
-//     SendPort sendPort = await receivePort.first;
-//
-//     sendPort.send(extractPath);
-//   } catch (e) {
-//     debugPrint('Error extracting zips: $e');
-//     Sentry.addBreadcrumb(Breadcrumb(message: 'Error extracting zips: $e'));
-//   }
-// }
+  Future<int> calculateZipTotalSize(List<String> folders) async {
+    int total = 0;
+
+    for (final folder in folders) {
+      final dir = Directory(folder);
+      if (!dir.existsSync()) continue;
+
+      for (final file in dir.listSync(followLinks: false)) {
+        if (file is File && file.path.toLowerCase().endsWith('.zip')) {
+          total += await file.length();
+        }
+      }
+    }
+    return total; // bytes
+  }
+
+  Future<bool> hasEnoughSpaceForExtraction({
+    required List<String> zipFolders,
+    required String targetPath,
+    int reserveBytes = 500 * 1024 * 1024, // רזרבה מומלצת 500MB
+  }) async {
+
+    // 1. כמה מקום פנוי יש
+    final freeBytes = await getAvailableDiskSpace(targetPath);
+    debugPrint('freeBytes $freeBytes');
+    if (freeBytes == null) return true; // לא ידוע – נותנים להתקדם
+
+    // 2. כמה שוקלים כל הזיפים
+    final zipBytes = await calculateZipTotalSize(zipFolders);
+    debugPrint('zipBytes $zipBytes');
+    if (zipBytes == 0) return true; // אין ZIP – אין מה לחשב
+
+    // 3. הערכת גודל החילוץ
+    final expectedExtractSize = zipBytes * 2;
+    debugPrint('expectedExtractSize $expectedExtractSize');
+
+
+    // 4. בלי הזיפים לאחר המחיקה
+    final effectiveFree = freeBytes + zipBytes;
+    debugPrint('effectiveFree $effectiveFree');
+
+
+    return effectiveFree >= expectedExtractSize + reserveBytes;
+  }
+
+
+
+  Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
+    ReceivePort receivePort = ReceivePort();
+    late Isolate isolate;
+    try {
+      isolate = await Isolate.spawn(
+          extractZipIsolate, [receivePort.sendPort, extractPath]);
+
+      String? finalResult;
+      final completer = Completer<String>();
+
+      // 🟦 שומעים על כל ההודעות מה-isolate
+      late StreamSubscription sub;
+      sub = receivePort.listen((msg) {
+        if (msg is String) {
+
+          // ---- Finish ----
+          if (msg == 'finish') {
+            finalResult = 'finish';
+            completer.complete('finish');
+          }
+        }
+      });
+
+      // 🟦 timeout
+      final result = await completer.future.timeout(
+        const Duration(hours: 4),
+        onTimeout: () => 'timeout',
+      );
+
+      await sub.cancel(); // חובה!
+      return result == 'finish'
+          ? 0
+          : result == 'timeout'
+          ? 1
+          : 2;
+    } catch (e) {
+      debugPrint("isolate failed: $e");
+      return 2;
+    } finally {
+      receivePort.close();
+      isolate.kill(priority: Isolate.immediate);
+    }
+  }
 }
 
 
-
-Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
-  ReceivePort receivePort = ReceivePort();
-  late Isolate isolate;
-  try {
-    isolate = await Isolate.spawn(
-        extractZipIsolate, [receivePort.sendPort, extractPath]);
-
-    final res = await receivePort.first.timeout(
+/*  final res = await receivePort.first.timeout(
       const Duration(hours: 4), // משך הזמן המקסימלי להמתנה
       onTimeout: () {
         return 'timeout';
@@ -503,6 +668,8 @@ Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
     Sentry.addBreadcrumb(Breadcrumb(message: 'result from extract $res'));
 
     if (res is String) {
+
+
       if (res == 'finish') {
         return 0;
       } else if (res == 'timeout') {return 1;}
@@ -516,70 +683,9 @@ Future<int> extractZipFileUsingIsolate(List<String> extractPath) async {
     receivePort.close();
     // isolate.kill();
     isolate.kill(priority: Isolate.immediate);
-  }
-}
+  }}*/
 
-extractZipFile1(String path, SendPort sendPort) async {
-  // Get a list of files in the "lessons" folder
-  List<FileSystemEntity> pathFiles = Directory(path).listSync();
 
-  for (FileSystemEntity file in pathFiles) {
-    if (file is File && file.path.endsWith('.zip')) {
-      // Extract each zip file
-      String zipFilePath = file.path;
-
-      // Create the destination folder based on the zip file's name
-      String destinationFolderName =
-          file.path.split('/').last.replaceAll('.zip', '');
-      String destinationPath = '$path$destinationFolderName';
-      // Create the destination folder if it doesn't exist
-      Directory(destinationPath).createSync(recursive: true);
-
-      zipHasInvalidPaths(zipFilePath);
-      // if (zipHasInvalidPaths(zipFilePath)) {
-      //   final msg = 'ZIP file contains invalid file names: $zipFilePath';
-      //   debugPrint(msg);
-      //   // sendPort.send(msg);
-      //   Sentry.addBreadcrumb(Breadcrumb(message: msg));
-      //   continue;
-      // }
-
-      try {
-        extractFileToDisk(zipFilePath, destinationPath);
-        debugPrint('Zip extraction completed for: $zipFilePath');
-        Sentry.addBreadcrumb(
-            Breadcrumb(message: 'Zip extraction completed for: $zipFilePath'));
-      } catch (e) {
-        sendPort.send('Error extracting zips for path $path: $e');
-        debugPrint('Error extracting zips for path $path: $e');
-        Sentry.addBreadcrumb(
-            Breadcrumb(message: 'Error extracting zips for path $path: $e'));
-      }
-    }
-  }
-}
-
-bool zipHasInvalidPaths(String zipFilePath) {
-  try {
-    final inputStream = InputFileStream(zipFilePath);
-    final archive = ZipDecoder().decodeBuffer(inputStream);
-
-    for (final file in archive.files) {
-      if (_containsInvalidPath(file.name)) {
-        String msg='ZIP contains invalid file name: ${file.name}';
-        debugPrint(msg);
-        Sentry.addBreadcrumb(Breadcrumb(message: msg));
-        archive.files.remove(file);
-        return true;
-      }
-    }
-  } catch (e) {
-    debugPrint('Failed to scan zip file: $zipFilePath, error: $e');
-    return true; // לשם הזהירות, אם יש שגיאה בקריאה - נניח שה־ZIP לא תקין
-  }
-
-  return false;
-}
 
 bool _containsInvalidPath(String name) {
   // Normalize separators to forward slash
@@ -666,12 +772,24 @@ void _extractZipSkippingInvalid({
 }
 
 Future<void> extractZipFile(String path, SendPort sendPort) async {
+  int totalZips = 0;
+  int extractedZips = 0;
+
   // List ZIP files in the given directory
   final pathFiles = Directory(path).listSync();
 
-  for (final file in pathFiles) {
-    if (file is! File) continue;
-    if (!file.path.toLowerCase().endsWith('.zip')) continue;
+  final zipFiles = pathFiles
+      .where((f) => f is File && f.path.toLowerCase().endsWith('.zip'))
+      .toList();
+
+  totalZips += zipFiles.length;     // ← ספירת ZIPים
+  sendPort.send("TOTAL_ZIPS:$totalZips");
+
+
+
+  for (final file in zipFiles) {
+    // if (file is! File) continue;
+    // if (!file.path.toLowerCase().endsWith('.zip')) continue;
 
     final zipFilePath = file.path;
 
@@ -685,6 +803,18 @@ Future<void> extractZipFile(String path, SendPort sendPort) async {
         destinationPath: destinationPath,
         send: (msg) => sendPort.send(msg),
       );
+
+      try {
+        await Future.delayed(Duration(milliseconds: 30)); // fix for Windows
+        File(zipFilePath).deleteSync();
+      } catch (e) {
+        debugPrint("Failed deleting ZIP: $e");
+      }
+
+      // 3️⃣ Update progress
+      extractedZips++;
+      sendPort.send("PROGRESS:$extractedZips/$totalZips");
+
     } catch (e) {
       sendPort.send('❌ Error extracting "$zipFilePath": $e');
       // continue to next zip

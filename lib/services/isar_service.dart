@@ -186,7 +186,7 @@ class IsarService {
 
   Future<bool> updateLinkQuizByName(String name, int quizId) async {
     name = '/$name';
-    debugPrint('updateLinkQuizByName name $name quizId $quizId');
+   // debugPrint('updateLinkQuizByName name $name quizId $quizId');
     final isar = await db;
     await isar.writeTxn(() async {
       LinkQuizIsar? linkQuizIsar = await isar.linkQuizIsars

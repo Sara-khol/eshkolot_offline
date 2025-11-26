@@ -274,6 +274,9 @@ class _SyncDialogsState extends State<SyncDialogs>
               } else if (vimoeResult.downloadStatus == DownloadStatus.error) {
                 return showErrorDialog(context, isBlockedLinks: false);
               }
+              else if (vimoeResult.downloadStatus == DownloadStatus.vimeoError) {
+                return showErrorDialog(context, isBlockedLinks: false,vimeoError: true);
+              }
               return showSyncWidget();
             });
           }
@@ -549,7 +552,7 @@ class _SyncDialogsState extends State<SyncDialogs>
   }
 
   showErrorDialog(BuildContext context,
-      {bool isBlockedLinks = true, bool isVimeo = true}) {
+      {bool isBlockedLinks = true, bool isVimeo = true,bool vimeoError = false,}) {
     updateDownloadCourses();
     return SizedBox(
       height: 640.h,
@@ -563,6 +566,10 @@ class _SyncDialogsState extends State<SyncDialogs>
                 height: 51.h,
               ),
               const Center(child: Text('!ישנה בעיה')),
+              if (vimeoError)
+                const Center(
+                    child:
+                    Text(' ריק , לא הייתה אפשרות להוריד את הסרטונים vimeoId ')),
               if (isBlockedLinks)
                 const Center(
                     child:

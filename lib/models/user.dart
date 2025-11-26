@@ -146,7 +146,8 @@ Map<String, dynamic> toJson() {
         status = Status.middle;
         break;
       default:
-        throw Exception('Invalid Status type: $value');
+        // throw Exception('Invalid Status type: $value');
+        status = Status.start;
     }
     if (status == Status.finish && diplomaPath.isNotEmpty) {
       status = Status.synchronized;
