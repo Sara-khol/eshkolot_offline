@@ -59,14 +59,15 @@ class CommonFuncs
       if (entity is Directory) {
         final dirName = entity.path.split('\\').last;
         final cleaned = cleanDirectoryName(dirName);
+        debugPrint('cleaned $cleaned');
+        if (cleaned == '.eshkolot_system') {
+          // final innerPath = '${entity.path}\\.eshkolot_system';
+          // final innerDir = Directory(innerPath);
+           final myDir = Directory(entity.path);
 
-        if (cleaned == 'installation') {
-          final innerPath = '${entity.path}\\.eshkolot_system';
-          final innerDir = Directory(innerPath);
-
-          if (await innerDir.exists()) {
-            debugPrint('Found eshkolot folder: ${innerDir.path}');
-            return innerDir;
+          if (await myDir.exists()) {
+            debugPrint('Found eshkolot folder: ${myDir.path}');
+            return myDir;
           }
         }
       }

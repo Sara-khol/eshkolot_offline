@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "אשכולות אופליין"
-#define MyAppVersion "1.2"
+#define MyAppVersion "1.3"
 #define MyAppPublisher "GoApp"
 #define MyAppURL "https://eshkolot.net/"
 #define MyAppExeName "eshkolot_offline.exe"
