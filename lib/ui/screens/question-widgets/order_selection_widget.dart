@@ -88,7 +88,9 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
           key: Key(widget.question.ans![i].ans),
           index: i,
           child: Container(
-            height: 60.h,
+            constraints: BoxConstraints(
+              minHeight: 60.h, // מינימום 60
+            ),
             padding: EdgeInsets.only(right: 15.w, left: 15.w),
             margin: EdgeInsets.only(right: 2.w, left: 2.w, bottom: 12.h),
             decoration: ShapeDecoration(
@@ -106,7 +108,7 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(randomList[i], style: TextStyle(fontSize: 20.sp)),
+                HtmlDataWidget(randomList[i],quizId: widget.question.quizId,textStyle: TextStyle(fontSize: 20.sp)),
               ],
             ),
           ),
@@ -127,7 +129,9 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
       Column(children: [
         for (int i = 0; i < randomList.length; i++) ...[
           Container(
-            height: 60.h,
+            constraints: BoxConstraints(
+              minHeight: 60.h,
+            ),
             width: double.infinity,
             padding: EdgeInsets.only(right: 15.w, left: 15.w),
             margin: EdgeInsets.only(right: 2.w, left: 2.w, bottom: 12.h),
@@ -150,8 +154,9 @@ class _OrderSelectionWidgetState extends State<OrderSelectionWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.question.ans![i].ans,
-                    style: TextStyle(
+                HtmlDataWidget(widget.question.ans![i].ans,
+                    quizId: widget.question.quizId,
+                    textStyle: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w500,
                         color: randomList[i] == widget.question.ans![i].ans

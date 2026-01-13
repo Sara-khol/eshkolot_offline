@@ -110,7 +110,8 @@ class _AudioWidgetState extends State<AudioWidget> {
             currentPostLabel,
             style: TextStyle(fontSize: 25.sp),
           ),
-       Expanded(
+       Flexible(
+         fit: FlexFit.loose,
          child: Slider(
              value: currentPos.clamp(0, maxDuration).toDouble(),
              min: 0,

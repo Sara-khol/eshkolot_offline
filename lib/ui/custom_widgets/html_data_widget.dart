@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:html_unescape/html_unescape.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -52,7 +53,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
               if (snapshot.hasData) {
                 return SelectionArea(
                     focusNode: _focusNode,
-                    child: HtmlWidget( addBreakAfterImgs(convertCustomAudioTags(widget.text)),
+                    child: HtmlWidget(HtmlUnescape().convert(addBreakAfterImgs(convertCustomAudioTags(widget.text))),
                         textStyle:widget.textStyle ?? TextStyle(
                             fontSize: 27.sp /*20.sp*/,
                             fontWeight: FontWeight.w400,
@@ -70,7 +71,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
         : Text(
             widget.text,
             style:widget.textStyle ?? TextStyle(
-                fontSize: /*27.sp*/ 20.sp,
+                fontSize: 27.sp/*20.sp*/ ,
                 fontWeight: FontWeight.w400,
                 color: blackColorApp),
             textAlign: TextAlign.right,
@@ -360,27 +361,27 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                       if(widget.isImageMatrix) {
                         final aspect = image.width / image.height;
 
-                        final w = math.min(300.w, image.width.toDouble());
+                        final w = math.min(200.w, image.width.toDouble());
                         final h = w / aspect;
                         debugPrint('w: $w h: $h');
-                        return SizedBox(
-                          width: w,
-                          height: h,
-                          child: Image.file(
+                        return  SizedBox(
+                            width: w,
+                            height: h,
+                            child:
+                              Image.file(
+                                file,
+                                fit: BoxFit.contain,
+                                filterQuality: FilterQuality.high,
+                            ),
+                        );
+                      }
+                      return SizedBox(
+                        width: image.width.toDouble(),
+                        height: image.height.toDouble(),
+                        child:Image.file(
                             file,
                             fit: BoxFit.contain,
                             filterQuality: FilterQuality.high,
-                          ),
-                        );
-                      }
-
-                      return SizedBox(
-                        width:widget.isImageMatrix?140.w: image.width.toDouble(),
-                        height:widget.isImageMatrix?140.w: image.height.toDouble(),
-                        child: Image.file(
-                          file,
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
                         ),
                       );
                     } else {
@@ -443,7 +444,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     File file = File(path);
 
     if (await file.exists()) {
-      debugPrint('truuuuuuuuuu path $path');
+      debugPrint('yesss path $path');
       return file;
       //check if file exists in course file from vimeo
     } else if (!isLesson) {
@@ -465,8 +466,8 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     final bytes = await file.readAsBytes();
     final codec = await ui.instantiateImageCodec(bytes);
     final frame = await codec.getNextFrame();
-    debugPrint('widthhhh  ${frame.image.width.toDouble()}');
-    debugPrint('heightttt  ${frame.image.height.toDouble()}');
+    // debugPrint('widthhhh  ${frame.image.width.toDouble()}');
+    // debugPrint('heightttt  ${frame.image.height.toDouble()}');
     return frame.image;
   }
 
@@ -491,7 +492,11 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
   String addBreakAfterImgs(String html) {
     // תופס <img ...> (כולל self-closing) ומוסיף <br/> אחרי
-    final re = RegExp(r'(<img\b[^>]*>)', caseSensitive: false);
+   // final re = RegExp(r'(<img\b[^>]*>)', caseSensitive: false);
+    final re = RegExp(
+      r'(<img\b[^>]*>)(?!\s*<br\s*/?>)',
+      caseSensitive: false,
+    );
    return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
    // return html;
   }
@@ -504,3 +509,4 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 }
 
 enum WidgetType { image, audio, video, pdf }
+

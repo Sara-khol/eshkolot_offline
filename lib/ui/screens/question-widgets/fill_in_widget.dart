@@ -180,7 +180,7 @@ class _FillInState extends State<FillIn> {
     return InlineCustomWidget(
       child: Container(
               height: 40.h,
-              width: textFieldWidth,
+              width: 160.w,
               padding: EdgeInsets.only(right: 5.w, left: 5.w),
               alignment: Alignment.center,
               margin: EdgeInsets.only(top: 10.h, bottom: 10.h),

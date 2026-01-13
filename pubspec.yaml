@@ -63,6 +63,8 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^30.1.41
 #  window_manager: ^0.4.3
   msix: ^3.16.10
+  html_unescape: ^2.0.0
+
 
 
 

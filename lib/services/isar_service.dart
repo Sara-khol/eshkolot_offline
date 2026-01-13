@@ -887,7 +887,10 @@ class IsarService {
 
   Future<List<Lesson>?> getAllLessonsOfCourse(int courseId) async {
     final isar = await db;
-    return isar.lessons.where().courseIdEqualTo(courseId).findAll();
+    final raw= isar.lessons.where().courseIdEqualTo(courseId).findAll();
+    final list = (await raw).toList();
+    list.sort((a, b) => a.id.compareTo(b.id));
+    return list;
   }
 
   updateGrade(UserGrade userGrade) async {

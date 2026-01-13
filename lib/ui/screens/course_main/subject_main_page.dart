@@ -14,9 +14,9 @@ import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 class SubjectMainPage extends StatefulWidget {
   const SubjectMainPage(
       {super.key,
-      required this.subject,
-      required this.subjectIndex,
-      required this.onNext});
+        required this.subject,
+        required this.subjectIndex,
+        required this.onNext});
 
   final Subject subject;
   final int subjectIndex;
@@ -34,18 +34,23 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
 
   late var currentMainChild;
   late StreamSubscription stream;
-
+  // Tunables for layout
+  late double lineX ;        // x position of the vertical line inside the content area
+  late double lineWidth ;     // width of the vertical line
+  late double statusIconOffset ; // x position for the status icon over the line
+  late double contentLeftPad ;   // left padding to clear the line + status icon
 
   @override
   void initState() {
+
     currentSubject=widget.subject;
     setSteps();
-   stream= InstallationDataHelper().eventBusSubjectPage.on().listen((event) {
+    stream= InstallationDataHelper().eventBusSubjectPage.on().listen((event) {
       Subject subject=event as Subject;
-       currentSubject=subject;
-       if(mounted) {
-         setState(() {});
-       }
+      currentSubject=subject;
+      if(mounted) {
+        setState(() {});
+      }
     });
     super.initState();
     //bodyWidget=mainWidget();
@@ -89,7 +94,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                   foregroundColor: Colors.white,
                   //padding: EdgeInsets.only(left: 45.w,right: 45.w,),
                   textStyle:
-                      TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                  TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
                 ),
                 onPressed: () {
                   widget.onNext!();
@@ -101,7 +106,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                       Text(
                         '    לנושא הבא ',
                         style:
-                            TextStyle(fontSize: 18.sp, fontFamily: 'RAG-Sans'),
+                        TextStyle(fontSize: 18.sp, fontFamily: 'RAG-Sans'),
                         textAlign: TextAlign.center,
                       ),
                       Icon(
@@ -121,8 +126,13 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
   }
 
   Widget mainWidget() {
+    lineX = 12.w;        // x position of the vertical line inside the content area
+    lineWidth = 3.w;     // width of the vertical line
+    statusIconOffset = 5.w;
+    contentLeftPad = 55.w;
+
     return Container(
-        //width: 950.w,
+      //width: 950.w,
         height: 755.h,
         margin: EdgeInsets.only(left:242.w,right: 120.w),
         decoration: BoxDecoration(
@@ -144,7 +154,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                               child: Text(
                                 currentSubject.name,
                                 style: TextStyle(
-                                  color: colors.blackColorApp,
+                                    color: colors.blackColorApp,
                                     fontSize: 36.sp,
                                     fontWeight: FontWeight.w600),
                               ),
@@ -202,7 +212,7 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                         child: Row(
                           children: [
                             Text(
-                        totalSteps!=0?'${(currentStep / totalSteps * 100).toInt()}% הושלמו':'0',
+                              totalSteps!=0?'${(currentStep / totalSteps * 100).toInt()}% הושלמו':'0',
                               style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w600,
@@ -230,178 +240,178 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           Lesson currentLesson =
-                              currentSubject.lessonsList.elementAt(index);
-                          return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 31.h,
-                                  width: 31.w,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: const Color(0xFF2D2828), width: 1.w),
+                          currentSubject.lessonsList.elementAt(index);
+                          return Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(top: 10.w),
+                                    height: 31.h,
+                                    width: 31.w,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: const Color(0xFF2D2828), width: 1.w),
+                                    ),
+                                    child: Center(
+                                        child: Text("${index + 1}.",
+                                            style: TextStyle(
+                                                color: colors.blackColorApp,
+                                                fontSize: 16.sp,
+                                                fontFamily: 'RAG-Sans'))),
                                   ),
-                                  child: Center(
-                                      child: Text("${index + 1}.",
-                                          style: TextStyle(
-                                              color: colors.blackColorApp,
-                                              fontSize: 16.sp,
-                                              fontFamily: 'RAG-Sans'))),
-                                ),
-                                SizedBox(width: 30.w),
-                                Expanded(
-                                    child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Divider(
-                                        indent: 50.w,
-                                        height: 0,
-                                        color: colors.grey2ColorApp),
-                                    SizedBox(
-                                      height: 37.h,
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                  SizedBox(width: 30.w),
+                                  Expanded(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          progressIcon(
-                                              index,
-                                              true,
-                                              // widget.subject.lessons
-                                              //     .elementAt(index)
-                                              //     .isCompletedCurrentUser,
-                                              currentLesson
-                                                  .isCompletedCurrentUser,
-                                              currentLesson
-                                                      .questionnaire.isEmpty &&
-                                                  currentSubject.questionnaire
-                                                      .isEmpty &&
-                                                  index ==
-                                                      currentSubject.lessonsList
-                                                              .length -
-                                                          1),
-                                          SizedBox(
-                                            width: 35.w,
-                                          ),
-                                          Icon(
-                                            Icons.videocam_outlined,
-                                            size: 13.sp,
-                                          ),
-                                          SizedBox(width: 14.h),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.centerRight,
-                                              child: TextButton(
-                                                  style: TextButton.styleFrom(
-                                                       padding: EdgeInsets.only(right: 15.w,left: 15.w,top: 5.h,bottom: 5.h),
-                                                      minimumSize: Size.zero,
-                                                     // tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                                  ),
-                                                  onPressed: () => goToLesson(index),
-                                                child:Text( currentSubject.lessonsList
-                                                    .elementAt(index)
-                                                    .name,
-                                                    style: TextStyle(
-                                                      color: colors.blackColorApp,
-                                                      fontSize: 16.sp,
-                                                      fontWeight: FontWeight.w600,
-                                                    ))),
-                                            ),
-                                          ),
-                                       //   const Spacer(),
-                                          Container(
-                                            height: 20.h,
-                                            decoration: const BoxDecoration(
-                                              color: Color(0xFFF4F4F3),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10)),
-                                            ),
-                                            child: TextButton(
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    '  לצפיה בשיעור ',
-                                                    style: TextStyle(
-                                                        fontSize: 12.sp,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: colors.blackColorApp),
-                                                  ),
-                                                  Icon(
-                                                    Icons.arrow_forward,
-                                                    size: 10.sp,
-                                                    color:  colors.blackColorApp,
-                                                  )
-                                                ],
-                                              ),
-                                        onPressed: () => goToLesson(index),
-
-                                    ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (currentLesson.questionnaire.isNotEmpty)
-                                      ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: currentLesson
-                                              .questionnaire.length,
-                                          itemBuilder: (ctx, qIndex) {
-                                            return displayQuestion(
-                                                subjectIndex: index,
-                                                qIndex: qIndex,
-                                                isCompleted: currentLesson
-                                                    .questionnaire
-                                                    .elementAt(qIndex)
+                                          Divider(
+                                              indent: 50.w,
+                                              height: 0,
+                                              color: colors.grey2ColorApp),
+                                            itemListWidgets(index,
+                                                true,
+                                                currentLesson
                                                     .isCompletedCurrentUser,
-                                                name: currentLesson
-                                                    .questionnaire
-                                                    .elementAt(qIndex)
-                                                    .title,
-                                                isLast: qIndex ==
-                                                        currentLesson
-                                                                .questionnaire
-                                                                .length -
-                                                            1 &&
+                                                currentLesson
+                                                    .questionnaire.isEmpty &&
+                                                    currentSubject.questionnaire
+                                                        .isEmpty &&
                                                     index ==
                                                         currentSubject.lessonsList
-                                                                .length -
-                                                            1 &&
-                                                    currentSubject.questionnaire
-                                                        .isEmpty,
-                                                onPress: () {
-                                                  setState(() {
+                                                            .length -
+                                                            1,
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                  right: contentLeftPad,
+                                                  top:currentLesson.questionnaire
+                                                      .isEmpty?20.h:15.h,
+                                                  bottom: currentLesson.questionnaire
+                                                      .isEmpty?20.h:15.h,
+                                                ),
+                                                child: Row(    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                  Icon(
+                                                    Icons.videocam_outlined,
+                                                    size: 13.sp,
+                                                  ),
+                                                  SizedBox(width: 14.h),
+                                                  Expanded(
+                                                    child: Align(
+                                                      alignment: Alignment.centerRight,
+                                                      child: TextButton(
+                                                          style: TextButton.styleFrom(
+                                                            padding: EdgeInsets.only(right: 15.w,left: 15.w,top: 5.h,bottom: 5.h),
+                                                            minimumSize: Size.zero,
+                                                            // tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                          ),
+                                                          onPressed: () => goToLesson(index),
+                                                          child:Text( currentSubject.lessonsList
+                                                              .elementAt(index)
+                                                              .name,
+                                                              style: TextStyle(
+                                                                color: colors.blackColorApp,
+                                                                fontSize: 16.sp,
+                                                                fontWeight: FontWeight.w600,
+                                                              ))),
+                                                    ),
+                                                  ),
+                                                  //   const Spacer(),
+                                                  Container(
+                                                    height: 20.h,
+                                                    decoration: const BoxDecoration(
+                                                      color: Color(0xFFF4F4F3),
+                                                      borderRadius: BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                    ),
+                                                    child: TextButton(
+                                                      child: Row(
+                                                        children: [
+                                                          Text(
+                                                            '  לצפיה בשיעור ',
+                                                            style: TextStyle(
+                                                                fontSize: 12.sp,
+                                                                fontWeight:
+                                                                FontWeight.w600,
+                                                                color: colors.blackColorApp),
+                                                          ),
+                                                          Icon(
+                                                            Icons.arrow_forward,
+                                                            size: 10.sp,
+                                                            color:  colors.blackColorApp,
+                                                          )
+                                                        ],
+                                                      ),
+                                                      onPressed: () => goToLesson(index),
 
-                                                    currentMainChild
-                                                            ?.lessonPickedIndex =
-                                                        index;
-                                                    currentMainChild
-                                                        ?.subjectPickedIndex =
-                                                        widget.subjectIndex;
-                                                    currentMainChild
-                                                            ?.lastSubjectPickedIndex =
-                                                        widget.subjectIndex;
-                                                    currentMainChild
-                                                        ?.questionPickedIndex = qIndex;
-                                                    MainPageChild.of(context)
-                                                            ?.bodyWidget =
-                                                        QuestionnaireWidget(
-                                                            quiz: currentLesson
-                                                                .questionnaire
-                                                                .elementAt(
-                                                                    qIndex));
-                                                  });
-                                                });
-                                          }),
-                                    if (index ==
-                                        currentSubject.lessonsList.length - 1)
-                                      Divider(
-                                          indent: 50.w,
-                                          height: 0,
-                                          color: colors.grey2ColorApp)
-                                  ],
-                                )),
-                              ]);
+                                                    ),
+                                                  ),
+                                                ]),
+                                              )),
+                                          if (currentLesson.questionnaire.isNotEmpty)
+                                            ListView.builder(
+                                                shrinkWrap: true,
+                                                itemCount: currentLesson
+                                                    .questionnaire.length,
+                                                itemBuilder: (ctx, qIndex) {
+                                                  return displayQuestion(
+                                                      subjectIndex: index,
+                                                      qIndex: qIndex,
+                                                      isCompleted: currentLesson
+                                                          .questionnaire
+                                                          .elementAt(qIndex)
+                                                          .isCompletedCurrentUser,
+                                                      name: currentLesson
+                                                          .questionnaire
+                                                          .elementAt(qIndex)
+                                                          .title,
+                                                      isLast: qIndex ==
+                                                          currentLesson
+                                                              .questionnaire
+                                                              .length -
+                                                              1 &&
+                                                          index ==
+                                                              currentSubject.lessonsList
+                                                                  .length -
+                                                                  1 &&
+                                                          currentSubject.questionnaire
+                                                              .isEmpty,
+                                                      onPress: () {
+                                                        setState(() {
+
+                                                          currentMainChild
+                                                              ?.lessonPickedIndex =
+                                                              index;
+                                                          currentMainChild
+                                                              ?.subjectPickedIndex =
+                                                              widget.subjectIndex;
+                                                          currentMainChild
+                                                              ?.lastSubjectPickedIndex =
+                                                              widget.subjectIndex;
+                                                          currentMainChild
+                                                              ?.questionPickedIndex = qIndex;
+                                                          MainPageChild.of(context)
+                                                              ?.bodyWidget =
+                                                              QuestionnaireWidget(
+                                                                  quiz: currentLesson
+                                                                      .questionnaire
+                                                                      .elementAt(
+                                                                      qIndex));
+                                                        });
+                                                      });
+                                                }),
+                                          if (index ==
+                                              currentSubject.lessonsList.length - 1)
+                                            Divider(
+                                                indent: 50.w,
+                                                height: 0,
+                                                color: colors.grey2ColorApp)
+                                        ],
+                                      )),
+                                ]),
+                          );
                         },
                       ),
                       if (currentSubject.questionnaire.isNotEmpty)
@@ -436,109 +446,153 @@ class _SubjectMainPageState extends State<SubjectMainPage> {
                     ]))));
   }
 
-  progressIcon(int index, bool isLesson, bool isCompleted, bool isLast) {
-    return Stack(
-      alignment: AlignmentDirectional.center,
-      children: [
-        VerticalDivider(
-            color: isCompleted ? const Color(0xFF62FFB8) : colors.grey2ColorApp,
-            thickness: 3.w,
-            indent: index == 0 && isLesson ? 25.h : null,
-            endIndent: isLast ? 20.h : null),
-        isCompleted
-            ? Icon(
-                Icons.check_circle,
-                color: const Color(0xFF62FFB8),
-                size: 20.sp,
-              )
-            : Container(
-                height: 18.h,
-                width: 18.w,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: colors.grey2ColorApp, width: 3.w),
-                    color: const Color(0xFFFAFAFA)),
-              ),
-
-      ],
-    );
+ itemListWidgets(int index, bool isLesson, bool isCompleted, bool isLast,endWidget)
+  {
+    return Stack(children: [
+      Positioned.fill(
+        // keep left inset so the line is not glued to the very edge
+        right: lineX,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            // emulate indent/endIndent with top/bottom margins
+            margin: EdgeInsets.only(
+              top: index == 0 && isLesson ? 25.h : 0,
+              bottom:isLast ? 20.h : 0,
+            ),
+            width: lineWidth,
+            color: isCompleted
+                ? colors.lightGreen1ColorApp
+                : colors.grey2ColorApp,
+          ),
+        ),
+      ),
+      Positioned.fill(
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: EdgeInsets.only(right: statusIconOffset),
+            child:  isCompleted
+                ? buildCompletedIcon(context)
+                : circleNotCompletedIcon(),
+          ),
+        ),
+      ),
+    endWidget]);
   }
+
+
 
   displayQuestion(
       {required int subjectIndex,
-      required int qIndex,
-      required String name,
-      required bool isCompleted,
-      required bool isLast,
-      required VoidCallback onPress}) {
-    return SizedBox(
-      height: 37.h,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          progressIcon(subjectIndex, false, isCompleted, isLast),
-          SizedBox(
-            width: 35.w,
-          ),
-          Icon(
-            Icons.create_outlined,
-            size: 13.sp,
-          ),
-          SizedBox(width: 14.h),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
+        required int qIndex,
+        required String name,
+        required bool isCompleted,
+        required bool isLast,
+        required VoidCallback onPress}) {
+
+    return
+      itemListWidgets(subjectIndex, false, isCompleted, isLast, Padding(
+      padding: EdgeInsets.only(
+        right: contentLeftPad,
+        top: 5.h,
+        bottom: 5.h,
+      ),
+      child: Row(children: [
+        Icon(
+          Icons.create_outlined,
+          size: 13.sp,
+        ),
+        SizedBox(width: 14.h),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
                 onPressed: (){
                   onPress();
                 },
-               style: TextButton.styleFrom(
-              padding: EdgeInsets.only(right: 15.w,left: 15.w,top: 5.h,bottom: 5.h),
-                      minimumSize: Size.zero,
-              ),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.only(right: 15.w,left: 15.w,top: 5.h,bottom: 5.h),
+                  minimumSize: Size.zero,
+                ),
                 child: Text(
                   name,
                   style: TextStyle( color: colors.blackColorApp,fontSize: 16.sp),
                 )),
-            ),
           ),
-         // const Spacer(),
-          Container(
-            height: 20.h,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF4F4F3),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            child: TextButton(
-              child: Row(
-                children: [
-                  Text(
-                    '  לתרגול ',
-                    style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
+        ),
+        // const Spacer(),
+        Container(
+          height: 20.h,
+          decoration: const BoxDecoration(
+            color: Color(0xFFF4F4F3),
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: TextButton(
+            child: Row(
+              children: [
+                Text(
+                  '  לתרגול ',
+                  style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
                       color: colors.blackColorApp),
-                  ),
-                  Icon(
+                ),
+                Icon(
                     Icons.arrow_forward,
                     size: 10.sp,
-                      color: colors.blackColorApp
-                  )
-                ],
-              ),
-              onPressed: () {
-                onPress();
-              },
+                    color: colors.blackColorApp
+                )
+              ],
             ),
+            onPressed: () {
+              onPress();
+            },
           ),
-        ],
-      ),
+        ),
+      ],),
+    ));
+
+  }
+
+  Widget buildCompletedIcon(BuildContext context) {
+    final bg = Theme.of(context).scaffoldBackgroundColor; // או Colors.white
+
+
+    final double maskSize = 24.w; // אפשר גם 24.w אם תרצה רספונסיבי
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Opaque mask to hide the vertical line underneath
+        Container(
+          width: 15.sp,
+          height: 15.sp,
+          decoration: BoxDecoration(
+            color: bg,
+            shape: BoxShape.circle,
+          ),
+        ),
+        Icon(
+          Icons.check_circle,
+          color: colors.lightGreen1ColorApp,
+          size: 20.sp,
+        ),
+      ],
     );
   }
 
-  // backToSubject(Subject subject) {
-  //   MainPageChild.of(context)?.bodyWidget = SubjectMainPage(subject: subject);
-  // }
+  circleNotCompletedIcon() {
+    return Container(
+      height: 18.h,
+      width: 18.w,
+      decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: colors.grey2ColorApp, width: 3.w),
+          color: const Color(0xFFFAFAFA)),
+    );
+  }
+
 
   setSteps() async {
     totalSteps = 0;

@@ -13,7 +13,7 @@ import '../services/download_data_service.dart';
 
 class SyncManager {
   static Future<void> sync(BuildContext appContext) async {
-    if (await NetworkConnectivity.instance.checkConnectivity()) {
+    if (await NetworkConnectivity.instance.isOnlineStable()) {
       await _syncFunc(appContext);
       if (!appContext.mounted) return;
       showDialog(

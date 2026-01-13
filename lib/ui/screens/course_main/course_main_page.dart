@@ -207,10 +207,16 @@ class _CourseMainPageState extends State<CourseMainPage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text('המשך מהמקום שעצרת $lastTextButton',
-                                          style: TextStyle(
-                                              fontSize: 18.sp,
-                                              fontFamily: 'RAG-Sans')),
+                                      Flexible(
+                                        child: Text('המשך מהמקום שעצרת $lastTextButton',
+                                            maxLines: 1,
+                                            overflow:TextOverflow.ellipsis ,
+                                            softWrap: true,
+
+                                            style: TextStyle(
+                                                fontSize: 18.sp,
+                                                fontFamily: 'RAG-Sans')),
+                                      ),
                                       SizedBox(width: 4.w),
                                       Icon(
                                         Icons.arrow_forward,

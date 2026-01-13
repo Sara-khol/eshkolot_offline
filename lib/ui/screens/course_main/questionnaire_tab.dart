@@ -6,6 +6,7 @@ import 'package:eshkolot_offline/ui/screens/question-widgets/upgraded_editor_wid
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:html_unescape/html_unescape.dart';
 import '../../../models/quiz.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/fill_in_widget.dart';
 import 'package:eshkolot_offline/ui/screens/question-widgets/free_choice_widget.dart';
@@ -35,6 +36,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   late List<bool> statusAnswers;
   int quizPoints = 0, totalQuizPoints = 0;
   final GlobalKey _hintKey = GlobalKey();
+  final ScrollController _pageScrollController = ScrollController();
 
 
   @override
@@ -55,6 +57,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      controller: _pageScrollController,
       child: Column(children: <Widget>[
         SizedBox(
           height: 60.h,
@@ -192,11 +195,11 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
             // getQuestionnaireByType(widget.questionnaire.elementAt(index)),
             getQuestionnaireByType(
                 widget.quiz.questionList.elementAt(selected - 1)),
-            if(widget.quiz.questionList.elementAt(selected - 1).tip.isNotEmpty)
+            if (widget.quiz.questionList.elementAt(selected - 1).tip.isNotEmpty)
               Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  margin: EdgeInsets.only(top: 15.h,bottom: 15.h),
+                  margin: EdgeInsets.only(top: 15.h, bottom: 15.h),
                   height: 40.h,
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -212,9 +215,9 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                           fontWeight: FontWeight.w600,
                           fontSize: 18.sp),
                     ),
-                   onPressed: () => _showHintDialog(widget.quiz.questionList.elementAt(selected - 1).tip),
-                  // onPressed: () => showPopover(widget.quiz.questionList.elementAt(selected - 1).tip,
-
+                    onPressed: () => _showHintDialog(
+                        widget.quiz.questionList.elementAt(selected - 1).tip),
+                    // onPressed: () => showPopover(widget.quiz.questionList.elementAt(selected - 1).tip,
                   ),
                 ),
               ),
@@ -281,7 +284,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     );
   }
 
- /* void _showHintDialog(String tip) {
+  /* void _showHintDialog(String tip) {
     final RenderBox buttonBox =
     _hintKey.currentContext!.findRenderObject() as RenderBox;
     final Offset buttonPosition = buttonBox.localToGlobal(Offset.zero);
@@ -334,7 +337,7 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
   void _showHintDialog(String tip) {
     final box = _hintKey.currentContext!.findRenderObject() as RenderBox;
     final btnOffset = box.localToGlobal(Offset.zero);
-    final btnSize   = box.size;
+    final btnSize = box.size;
 
     showDialog(
       context: context,
@@ -344,25 +347,30 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
         const dialogWidth = 340.0;
 
         // Initial guess so it doesn't jump to top: place roughly above.
-        double top  = btnOffset.dy - 120;
+        double top = btnOffset.dy - 120;
         // ← Align dialog's left edge with button's left edge
         double left = btnOffset.dx;
 
         return StatefulBuilder(
           builder: (ctx, setState) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              final rb = dialogKey.currentContext?.findRenderObject() as RenderBox?;
+              final rb =
+                  dialogKey.currentContext?.findRenderObject() as RenderBox?;
               if (rb != null) {
-                final h  = rb.size.height;
+                final h = rb.size.height;
                 final sz = MediaQuery.of(ctx).size;
 
                 // Exact placement: directly above button with 10px gap
-                final newTop  = (btnOffset.dy - h - 10).clamp(8.0, sz.height - h - 8.0);
+                final newTop =
+                    (btnOffset.dy - h - 10).clamp(8.0, sz.height - h - 8.0);
                 // Keep left anchored to the button's left, but clamp if it would overflow right
                 final newLeft = left.clamp(8.0, sz.width - dialogWidth - 8.0);
 
                 if (newTop != top || newLeft != left) {
-                  setState(() { top = newTop.toDouble(); left = newLeft.toDouble(); });
+                  setState(() {
+                    top = newTop.toDouble();
+                    left = newLeft.toDouble();
+                  });
                 }
               }
             });
@@ -388,10 +396,15 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
                       children: [
                         Text(
                           "רמז",
-                          style: TextStyle(color:blueColorApp,fontWeight: FontWeight.w600,fontSize: 22.sp),
+                          style: TextStyle(
+                              color: blueColorApp,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 22.sp),
                         ),
                         Container(
-                            width: double.infinity,height: 2.h,color:blueColorApp),
+                            width: double.infinity,
+                            height: 2.h,
+                            color: blueColorApp),
                         SizedBox(height: 8.h),
                         Directionality(
                             textDirection: TextDirection.rtl,
@@ -446,7 +459,6 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     );
   }
 
-
   getQuestionnaireByType(Question item) {
     debugPrint('type ${item.type}');
     myQController = QuestionController();
@@ -490,11 +502,23 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
       }
 
       displayAllWithAnswers[index] =
-          myQController.displayWithAnswers ?? const Text('problem');
+          // myQController.displayWithAnswers ?? const Text('problem');
+          myQController.displayWithAnswers ??
+              (myQController.answerSnapshotCustomEditor != null
+                  ? buildAnswerCanvasFromSnapshot(
+                      myQController.answerSnapshotCustomEditor!)
+                  : const Text('problem'));
       if (!isLast) {
         setState(() {
           index++;
           selected++;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_pageScrollController.hasClients) {
+              _pageScrollController.jumpTo(0);
+            }
+          });
+
         });
       }
       // else
@@ -537,7 +561,8 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     if (onNextClick(isLast: true)) {
       if (checkAnswers()) {
         // QuestionnaireWidget.of(context)?.setInitialDisplay();
-        if(isGradeOk(quizPoints, totalQuizPoints, widget.quiz.grade1, widget.quiz.grade2)) {
+        if (isGradeOk(quizPoints, totalQuizPoints, widget.quiz.grade1,
+            widget.quiz.grade2)) {
           MainPageChild.of(context)?.updateCompleteQuiz(widget.quiz.id);
         }
         QuestionnaireWidget.of(context)?.setEndQuestionnaire(
@@ -562,12 +587,11 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     }
   }
 
-  bool isGradeOk(int numPoints,int totalPoints,int grade1,int grade2){
+  bool isGradeOk(int numPoints, int totalPoints, int grade1, int grade2) {
     debugPrint('isGradeOk numPoints $numPoints grade1 $grade1');
-  num  grade =
-        ((numPoints / totalPoints) * 100).round();
-    debugPrint('isGradeOk grade $grade ${grade1>=grade}');
-    return grade1<=grade;
+    num grade = ((numPoints / totalPoints) * 100).round();
+    debugPrint('isGradeOk grade $grade ${grade1 >= grade}');
+    return grade1 <= grade;
   }
 
   bool checkAnswers() {
@@ -597,27 +621,166 @@ class _QuestionnaireTabState extends State<QuestionnaireTab> {
     super.didChangeDependencies();
   }
 
-// @override
-// void dispose() {
-//   debugPrint('fff restartQ $restartQ');
-//   for (Question question in widget.quiz.questionList) {
-//     // for (Answer answer in question.ans!)
-//     //   {
-//     //     debugPrint('=====');
-//     //     debugPrint('${answer.ans} isSelected ${answer.isSelected} isCorrect ${answer.isCorrect}');
-//     //   }
-//   }
-//   if(restartQ) {
-//     for (Question question in widget.quiz.questionList) {
-//       question.setAllAnswersToFalse();
-//     }
-//   }
-//   super.dispose();
-// }
+  Widget buildAnswerCanvasFromSnapshot(AnswerSnapshot snap) {
+    final List<Widget> backgroundFields = [];
+    final List<Widget> baseFields = [];
+    final List<Widget> answerBoxes = [];
+    final List<Widget> correctTexts = [];
+
+    return Padding(
+      padding: EdgeInsets.only(top: 25.h),
+      child: Column(
+        children: [
+          HtmlDataWidget(snap.question, quizId: snap.questionId),
+          SizedBox(
+            height: 35.h,
+          ),
+          LayoutBuilder(builder: (context, constraints) {
+            final scale = constraints.maxWidth / snap.baseWidth;
+            backgroundFields.clear();
+            baseFields.clear();
+            correctTexts.clear();
+            answerBoxes.clear();
+            for (final f in snap.baseFields) {
+              if (f.type == 'image') {
+                backgroundFields.add(Positioned(
+                    left: f.x * scale,
+                    top: f.y * scale,
+                    child: f.value.isNotEmpty
+                        ? SizedBox(
+                            width: f.width != null ? f.width! * scale : null,
+                            height: f.height != null ? f.height! * scale : null,
+                            child: HtmlDataWidget(
+                              '<img src="${f.value.substring(f.value.lastIndexOf('/'))}" alt=""/>',
+                              quizId: snap.questionId,
+                            ),
+                          )
+                        : const SizedBox()));
+              } else {
+                baseFields.add(Positioned(
+                  left: f.x * scale,
+                  top: f.y * scale,
+                  child: SizedBox(
+                    width: f.width != null ? f.width! * scale : null,
+                    child: Text(
+                      HtmlUnescape().convert(f.value),
+                      textDirection: f.direction,
+                      style: TextStyle(
+                        fontSize:
+                            f.fontSize != null ? f.fontSize! * scale : null,
+                        fontWeight:
+                            f.bold ? FontWeight.bold : FontWeight.normal,
+                        color: f.color ?? blackColorApp,
+                      ),
+                    ),
+                  ),
+                ));
+              }
+            }
+            for (final f in snap.answerFields) {
+              answerBoxes.add(Positioned(
+                left: f.x * scale,
+                top: f.y * scale,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    // opaque base so nothing shows through
+                    border: Border.all(
+                        color: f.isCorrect ? Colors.green : Colors.red),
+                  ),
+                  child: Container(
+                    width: f.width * scale,
+                    height: f.height * scale,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: f.isCorrect
+                          ? Colors.greenAccent
+                          : Colors.redAccent.withOpacity(0.4),
+                      border: Border.all(
+                        color: f.isCorrect ? Colors.green : Colors.red,
+                      ),
+                    ),
+                    child: Text(
+                      f.userAnswer,
+                      textAlign: TextAlign.center,
+                      textDirection: f.direction,
+                      style: TextStyle(
+                        fontSize: f.fontSize * scale,
+                        fontWeight:
+                            f.bold ? FontWeight.bold : FontWeight.normal,
+                        color: f.color ?? blackColorApp,
+                        height: 1,
+                      ),
+                      textHeightBehavior: const TextHeightBehavior(
+                        applyHeightToFirstAscent: false,
+                        applyHeightToLastDescent: false,
+                      ),
+                    ),
+                  ),
+                ),
+              ));
+              if (!f.isCorrect) {
+                correctTexts.add(Positioned(
+                    left: f.x * scale,
+                    top: (f.y + f.height) * scale,
+                    width: f.width * scale,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 0),
+                      child: IntrinsicWidth(
+                        child: Text(
+                          '(${f.correctAnswer})',
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.visible,
+                          textAlign: TextAlign.center,
+                          textDirection: f.direction,
+                          style: TextStyle(
+                              height: 1,
+                              fontWeight: FontWeight.bold,
+                              color: blackColorApp),
+                          textHeightBehavior: const TextHeightBehavior(
+                            applyHeightToFirstAscent: false,
+                            applyHeightToLastDescent: false,
+                          ),
+                        ),
+                      ),
+                    )));
+              }
+            }
+            return SizedBox(
+                width: snap.baseWidth * scale,
+                height: snap.baseHeight * scale,
+                child: Stack(clipBehavior: Clip.none, children: [
+                  ...backgroundFields,
+                  ...baseFields,
+                  ...answerBoxes,
+                  ...correctTexts
+                ]));
+          }),
+          Container(
+            height: 80.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: snap.isCorrect
+                    ? Colors.greenAccent.withOpacity(0.5)
+                    : Colors.redAccent.withOpacity(0.5)),
+            child: Center(
+                child: Text(
+              snap.isCorrect
+                  ? 'תשובה נכונה!'
+                  : 'אחת או יותר מהתשובות לא נכונות',
+              style: TextStyle(fontSize: 20.sp),
+            )),
+          )
+        ],
+      ),
+    );
+  }
 }
 
 class QuestionController {
   bool Function()? isFilled;
   int Function()? isCorrect;
   Widget? displayWithAnswers;
+  AnswerSnapshot? answerSnapshotCustomEditor;
 }

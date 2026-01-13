@@ -249,7 +249,7 @@ Future<void> main() async {
     FutureOr<SentryEvent?> beforeSend(SentryEvent event, Hint hint) async {
       var connectivityResult = await Connectivity().checkConnectivity();
 
-      if (!await NetworkConnectivity.instance.checkConnectivity()) {
+      if (!await NetworkConnectivity.instance.isOnlineStable()) {
         String eventJson = const JsonEncoder().convert(event.toJson());
         await LocalFileHelper().writeEvent(eventJson);
         return null;
@@ -484,10 +484,24 @@ class _MyAppState extends State<MyApp> {
       showProgress = false;
       await showDialog(
         context: context,
-        builder: (_) => const AlertDialog(
-          title: Text("שגיאת מקום בדיסק",  textDirection: TextDirection.rtl),
-          content: Text( "אין מספיק מקום כדי לחלץ את הקבצים",  textDirection: TextDirection.rtl),
-
+        barrierDismissible: false, // אי אפשר לצאת בלחיצה בחוץ
+        builder: (_) => AlertDialog(
+          title: const Text("שגיאת מקום בדיסק",  textDirection: TextDirection.rtl),
+          content: const Text( "אין מספיק מקום כדי לחלץ את הקבצים",  textDirection: TextDirection.rtl),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  // יציאה מהאפליקציה
+                  exit(0);
+                },
+                child: const Text(
+                  "צא מהתוכנה",
+                  textDirection: TextDirection.rtl,
+                ),
+              ),
+            ),
+          ],
         ),
       );
       setState(() {});

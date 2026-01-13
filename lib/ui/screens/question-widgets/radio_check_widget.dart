@@ -110,26 +110,40 @@ class _RadioCheckState extends State<RadioCheck> {
                                   ? Colors.blue
                                   : Colors.transparent))
                   : null,
-              child: RadioListTile<String?>(
-                // title: Text(ans.ans,style: TextStyle(fontSize: 27.sp),),
-                title: HtmlDataWidget(
-                  ans.ans,
-                  quizId: item.quizId,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  highlightColor: Colors.transparent,     // no click highlight
+                  splashColor: Colors.transparent,        // no ripple
+                  focusColor: Colors.transparent,   // no selected bg
+                  listTileTheme: ListTileThemeData(
+                    selectedTileColor: Colors.transparent, // no selected bg
+                    tileColor: Colors.transparent,         // no static bg
+                  ),
                 ),
+                child: RadioListTile<String?>(
+                  // title: Text(ans.ans,style: TextStyle(fontSize: 27.sp),),
+                  title: InkWell(
+                    onTap: (){},
+                    child: HtmlDataWidget(
+                      ans.ans,
+                      quizId: item.quizId,
+                    ),
+                  ),
 
-                value: ans.ans,
-                groupValue: _character,
-                onChanged: displayAnswer
-                    ? null
-                    : (value) {
-                        setState(() {
-                          _character = value!;
-                          item.ans!
-                              .firstWhereOrNull((element) => element.isSelected)
-                              ?.isSelected = false;
-                          ans.isSelected = true;
-                        });
-                      },
+                  value: ans.ans,
+                  groupValue: _character,
+                  onChanged: displayAnswer
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _character = value!;
+                            item.ans!
+                                .firstWhereOrNull((element) => element.isSelected)
+                                ?.isSelected = false;
+                            ans.isSelected = true;
+                          });
+                        },
+                ),
               ),
             ),
           ],

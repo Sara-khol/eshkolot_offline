@@ -35,9 +35,9 @@ class Course {
   late int? knowledgeId;
 
   late String? countHours;
-  late String? countLesson;
-  late String? countQuiz;
-  late String? countEndQuiz;
+  late int? countLesson;
+  late int? countQuiz;
+  late int? countEndQuiz;
 
   @Name('brief_information')
   late String briefInformation;

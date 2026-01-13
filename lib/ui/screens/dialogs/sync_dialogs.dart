@@ -150,7 +150,7 @@ class _SyncDialogsState extends State<SyncDialogs>
   Future<List<VideoIsar>> isVideosDownload(bool newCourse) async {
     debugPrint('===isVideosDownload===');
     // isNetWorkConnection = await checkConnectivity();
-    isNetWorkConnection = await _networkConnectivity.checkConnectivity();
+    isNetWorkConnection = await _networkConnectivity.isOnlineStable();
 
     allDownloadedVideos =
         await IsarService().checkIfAllVideosAreDownloaded(newCourse);
@@ -165,7 +165,7 @@ class _SyncDialogsState extends State<SyncDialogs>
   Future<List<LinkQuizIsar>> isLinksDownload(bool newCourse) async {
     debugPrint('isLinksDownload');
     // isNetWorkConnection = await checkConnectivity();
-    isNetWorkConnection = await _networkConnectivity.checkConnectivity();
+    isNetWorkConnection = await _networkConnectivity.isOnlineStable();
 
     allDownloadedLinks =
         await IsarService().checkIfAllLinksAreDownloaded(newCourse);
