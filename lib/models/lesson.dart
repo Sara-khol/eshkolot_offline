@@ -27,6 +27,8 @@ class Lesson {
   @Name('vimoe')
   String? vimeo = '';
 
+  String textContent='';
+
   String time;
   String videoNum;
   @Index()
@@ -38,6 +40,7 @@ class Lesson {
      // this.id = 0,
       this.vimeo = '',
       this.time = '',
+        this.textContent='',
       this.videoNum = '',
         this.lessonId=0,
       this.questionnaireIds = const [],
@@ -50,6 +53,7 @@ class Lesson {
     return Lesson(
       // name:parsedJson['name'],
       name: parsedString,
+      textContent:parsedJson['textContent'] ?? '',
       questionnaireIds: parsedJson['questionnaire'],
      // id: lessonId,
       lessonId: lessonId,

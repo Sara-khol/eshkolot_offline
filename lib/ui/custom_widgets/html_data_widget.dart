@@ -6,13 +6,14 @@ import 'package:eshkolot_offline/ui/screens/course_main/video_widget.dart';
 import 'package:eshkolot_offline/utils/my_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html_unescape/html_unescape.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'dart:ui' as ui;
+import 'package:html/parser.dart' as html_parser;
 
 
 import '../../utils/common_funcs.dart';
@@ -45,55 +46,48 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
   @override
   Widget build(BuildContext context) {
-     String s= convertCustomAudioTags(widget.text);
+    String s= convertCustomAudioTags(widget.text);
+  // debugPrint('html: $s');
     return isHTML(s)
         ? FutureBuilder(
-            future: initDirectory(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return SelectionArea(
-                    focusNode: _focusNode,
-                    child: HtmlWidget(HtmlUnescape().convert(addBreakAfterImgs(convertCustomAudioTags(widget.text))),
-                        textStyle:widget.textStyle ?? TextStyle(
-                            fontSize: 27.sp /*20.sp*/,
-                            fontWeight: FontWeight.w400,
-                            color: blackColorApp),
+        future: initDirectory(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final raw = HtmlUnescape().convert(addBreakAfterImgs(convertCustomAudioTags(widget.text)));
+            final fixed = normalizeInputImgBlock(normalizeStrongWrappedImgInput(raw));
+            debugPrint('html: $fixed');
+            return SelectionArea(
+                focusNode: _focusNode,
+               child: HtmlWidget(fixed,
+                    textStyle:widget.textStyle ?? TextStyle(
+                        fontSize: 27.sp /*20.sp*/,
+                        fontWeight: FontWeight.w400,
+                        color: blackColorApp),
 
-                        //textStyle: TextStyle(fontSize: ScreenUtil().setSp(fontSize.toDouble())),
-                        customWidgetBuilder: (element) {
+                    //textStyle: TextStyle(fontSize: ScreenUtil().setSp(fontSize.toDouble())),
+                    customWidgetBuilder: (element) {
                       return displayWidgetByHtml(element);
                     }));
 
-                // )
-              }
-              return const CircularProgressIndicator();
-            })
+            // )
+          }
+          return const CircularProgressIndicator();
+        })
         : Text(
-            widget.text,
-            style:widget.textStyle ?? TextStyle(
-                fontSize: 27.sp/*20.sp*/ ,
-                fontWeight: FontWeight.w400,
-                color: blackColorApp),
-            textAlign: TextAlign.right,
-          );
+      widget.text,
+      style:widget.textStyle ?? TextStyle(
+          fontSize: 27.sp/*20.sp*/ ,
+          fontWeight: FontWeight.w400,
+          color: blackColorApp),
+      textAlign: TextAlign.right,
+    );
   }
 
-  bool containsUnderlineStyle(dynamic element) {
-    if (/*element.localName == 'span' &&*/
-        element.attributes['style'] != null &&
-            element.attributes['style']!
-                .contains('text-decoration: underline')) {
-      return true;
-    }
 
-    if (element.children.isEmpty) {
-      return false;
-    }
-
-    return element.children.any((child) => containsUnderlineStyle(child));
-  }
 
   Widget? displayWidgetByHtml(var element) {
+    if (element is! dom.Element) return null;
+
     final srcAttribute = element.attributes['src'];
     final width = element.attributes['width'];
     final height = element.attributes['height'];
@@ -101,18 +95,202 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     final fontWeightAttribute = element.attributes['font-weight'];
     final tagName = element.localName;
 
-    if (element.localName == 'input' && widget.onInputWidgetRequested != null) {
-      debugPrint('onInputWidgetRequested ${element.attributes['value']}');
-      return widget.onInputWidgetRequested!(
-          [element.attributes['value'], element.attributes['dirname']]);
-    }
-    if (element.localName == 'img') {
-      debugPrint('srcAttribute $srcAttribute');
-      if (srcAttribute != null) {
-        final img = displayFile(srcAttribute, height, width, WidgetType.image);
-        return InlineCustomWidget(
-          child: displayFile(srcAttribute, height, width, WidgetType.image),
+
+try{
+    if (element.localName == 'span' &&
+        element.attributes['data-layout'] == 'pair' &&
+        widget.onInputWidgetRequested != null) {
+
+      final inputVal = element.attributes['data-input'];
+      final answer   = element.attributes['data-answer'];
+      final order    = element.attributes['data-order'];
+
+      if (inputVal == null) return null;
+
+      final imgs = element.querySelectorAll('img');
+
+      // 🔍 בדיקה אם יש direction:ltr באחד ההורים
+      bool isLtr = false;
+      dom.Element? p = element.parent;
+      while (p != null) {
+        final style = p.attributes['style'];
+        if (style != null && style.contains('direction: ltr')) {
+          isLtr = true;
+          break;
+        }
+        p = p.parent;
+      }
+
+      final inputWidget = widget.onInputWidgetRequested!([inputVal, answer]);
+
+      final imageWidgets = imgs.asMap().entries.map((entry) {
+        final index = entry.key;
+        final img = entry.value;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (index > 0) SizedBox(width: 20.w),
+            displayFile(
+              img.attributes['src']!,
+              img.attributes['height'],
+              img.attributes['width'],
+              WidgetType.image,
+            ),
+          ],
         );
+      }).toList();
+
+      final children = <Widget>[];
+
+      // סדר לפי data-order
+      if (order == 'img-first') {
+        children.add(SizedBox(width: 20.w),);
+        children.addAll(imageWidgets);
+        children.add(SizedBox(width: 6.w));
+        children.add(inputWidget);
+      } else {
+        children.add(inputWidget);
+        children.add(SizedBox(width: 6.w));
+        children.addAll(imageWidgets);
+        children.add(SizedBox(width: 20.w),);
+
+      }
+
+      return InlineCustomWidget(
+        child: Directionality(
+          textDirection: isLtr ? TextDirection.ltr : TextDirection.rtl,
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 0,
+            children: children,
+          ),
+        ),
+      );
+    }
+
+
+    /*   if (element.localName == 'span' &&
+        element.attributes['data-layout'] == 'pair' &&
+        widget.onInputWidgetRequested != null) {
+
+      final inputVal = element.attributes['data-input'];
+      final answer   = element.attributes['data-answer'];
+      final order    = element.attributes['data-order']; // input-first / img-first
+
+      debugPrint('answer $answer');
+
+      if (inputVal == null) return null;
+
+      final imgs = element.querySelectorAll('img');
+
+      // בונים את הווידג'טים
+      final inputWidget = widget.onInputWidgetRequested!([inputVal, answer]);
+
+      final imageWidgets = imgs.asMap().entries.map((entry) {
+        final index = entry.key;
+        final img = entry.value;
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (index > 0) SizedBox(width: 20.w), // רווח בין תמונות
+            displayFile(
+              img.attributes['src']!,
+              img.attributes['height'],
+              img.attributes['width'],
+              WidgetType.image,
+            ),
+          ],
+        );
+      }).toList();
+
+      // לפי הסדר מה-HTML
+      final children = <Widget>[];
+
+      if (order == 'img-first') {
+        children.add( SizedBox(width: 20.w));
+        children.addAll(imageWidgets);
+        children.add(SizedBox(width: 6.w));
+        children.add(inputWidget);
+      } else {
+        // ברירת מחדל: input-first
+        children.add(inputWidget);
+        children.add(SizedBox(width: 6.w));
+        children.addAll(imageWidgets);
+      }
+
+      return InlineCustomWidget(
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 0,
+          children: children,
+        ),
+      );
+    }*/
+
+
+
+    if (element.localName == 'span' &&
+        element.attributes['data-layout'] == 'triple' &&
+        widget.onInputWidgetRequested != null) {
+
+      final inputVal = element.attributes['data-input'];
+      final answer   = element.attributes['data-answer'];
+
+      if (inputVal == null) return null;
+
+      final imgs = element.querySelectorAll('img');
+
+      return InlineCustomWidget(
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6.w,
+          children: [
+            // תמונה(ות) לפני
+            if (imgs.isNotEmpty) displayFile(
+              imgs.first.attributes['src']!,
+              imgs.first.attributes['height'],
+              imgs.first.attributes['width'],
+              WidgetType.image,
+            ),
+
+            // האינפוט באמצע
+            widget.onInputWidgetRequested!([inputVal, answer]),
+
+            // שאר התמונות אחרי
+            ...imgs.skip(1).map((img) => displayFile(
+              img.attributes['src']!,
+              img.attributes['height'],
+              img.attributes['width'],
+              WidgetType.image,
+            )),
+          ],
+        ),
+      );
+    }
+
+    if (element.localName == 'span' &&
+        element.attributes.containsKey('data-input') &&
+        widget.onInputWidgetRequested != null) {
+      final value = element.attributes['data-input'];
+      final answer = element.attributes['data-answer'];
+
+      return InlineCustomWidget(
+        child: widget.onInputWidgetRequested!([value, answer]),
+      );
+    }
+    }catch(e,s)
+{
+  debugPrint('error $e');
+  debugPrint(s.toString());
+}
+    if (element.localName == 'img') {
+      // debugPrint('srcAttribute $srcAttribute');
+      if (srcAttribute != null) {
+          return InlineCustomWidget(
+            child: displayFile(srcAttribute, height, width, WidgetType.image,
+                alt: element.attributes['alt']),
+          );
       }
     }
     if (element.localName == 'audio') {
@@ -157,191 +335,29 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
         // }
       }
     }
-    // Check if any child element has an underline style
-    bool isUnderlined = element.children.any((child) =>
-        child.localName == 'span' &&
-        child.attributes['style'] != null &&
-        child.attributes['style']!.contains('text-decoration: underline'));
-    if (element.localName == 'h6' ||
-        (element.localName == 'span' && element.parent?.localName == 'h6'))
-    {
-     /* debugPrint('h6 text${element.text}');
-      // Create a list to store the child widgets
-      List<Widget> childrenWidgets = [];
 
-      bool isUnderlined =
-          element.children.any((child) => containsUnderlineStyle(child));
-
-      for (var childElement in element.children) {
-        // Check the type of child element and handle it accordingly
-        childrenWidgets.add(displayWidgetByHtml(childElement) ?? Container());
-      }
-      childrenWidgets.add(Expanded(
-        child: Text(element.text,
-            style: TextStyle(
-              fontSize: 27.sp,
-              fontWeight: FontWeight.w800,
-              decoration: isUnderlined ? TextDecoration.underline : null,
-            )),
-      ));
-      // Return a widget that contains all the child widgets of <h6>
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: childrenWidgets,
-      );
-    }*/
-        List<Widget> rowChildren = [];
-    bool isUnderlined =
-    element.children.any((child) => containsUnderlineStyle(child));
-
-        // קודם נחפש direction ישיר ב־element עצמו
-        String? directionStyle = element.attributes['style'];
-
-        // אם אין direction, נבדוק אם להורה (h6) יש
-        if ((directionStyle == null || !directionStyle.contains('direction')) &&
-            element.parent != null) {
-          directionStyle = element.parent!.attributes['style'];
-        }
-
-        // ברירת מחדל
-        TextDirection textDirection = TextDirection.ltr;
-
-    if (directionStyle != null && directionStyle.contains('rtl')) {
-      textDirection = TextDirection.rtl;
-    } else if (directionStyle != null && directionStyle.contains('ltr')) {
-      textDirection = TextDirection.ltr;
-    }
-
-        for (var node in element.nodes) {
-          if (node.nodeType == dom.Node.TEXT_NODE) {
-            // Plain text between inputs
-            rowChildren.add(Text(
-              node.text?.trim() ?? '',
-              textDirection: textDirection,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 27.sp,
-                fontWeight: FontWeight.w800,
-                decoration: isUnderlined ? TextDecoration.underline : null,
-              ),
-            ));
-          } else if (node is dom.Element) {
-            final childWidget = displayWidgetByHtml(node);
-            if (childWidget != null) {
-              rowChildren.add(Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                child: childWidget,
-              ));
-            }
-          }
-        }
-        return Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 5.w,
-          runSpacing: 0,
-          textDirection: textDirection,
-          children: rowChildren,
-
-        );
-     }
 
     return null;
   }
 
- /* Widget? displayWidgetByHtml(var element) {
-    final srcAttribute = element.attributes['src'];
-    final width  = element.attributes['width'];
-    final height = element.attributes['height'];
-    final tagName = element.localName;
 
-    if (tagName == 'input' && widget.onInputWidgetRequested != null) {
-      return widget.onInputWidgetRequested!(
-        [element.attributes['value'], element.attributes['dirname']],
-      );
-    }
-
-    // === img: אינליין + ירידת שורה רק אחרי ===
-    if (tagName == 'img') {
-      if (srcAttribute != null) {
-        final img = displayFile(srcAttribute, height, width, WidgetType.image);
-        return InlineCustomWidget(
-          child: _InlineImageThenNewline(img, */
-
-  /*gap: 0*//*),
-        );
-      }
-    }
-
-    if (tagName == 'audio') {
-      if (srcAttribute != null) {
-        return InlineCustomWidget(
-          child: displayFile(srcAttribute, height, width, WidgetType.audio),
-        );
-      }
-      return null;
-    }
-
-    if (tagName == 'iframe') {
-      if (srcAttribute != null) {
-        if (srcAttribute.split('.').last == 'pdf') {
-          return InlineCustomWidget(
-            child: displayFile(srcAttribute, height, width, WidgetType.pdf),
-          );
-        }
-        return InlineCustomWidget(
-          child: displayFile(
-            srcAttribute.split('.').last == 'mp4'
-                ? srcAttribute
-                : '${srcAttribute.split('?').first}.mp4',
-            height,
-            width,
-            WidgetType.video,
-            isLesson: false,
-          ),
-        );
-      }
-    }
-
-    // h6 וכד' – כמו שהיה אצלך
-    bool isUnderlined = element.children.any((child) =>
-    child.attributes['style'] != null &&
-        child.attributes['style']!.contains('text-decoration: underline'));
-
-    if (tagName == 'h6') {
-      final childrenWidgets = <Widget>[];
-      final isUnderlinedLocal =
-      element.children.any((child) => containsUnderlineStyle(child));
-
-      for (var childElement in element.children) {
-        childrenWidgets.add(displayWidgetByHtml(childElement) ?? Container());
-      }
-      childrenWidgets.add(
-        Expanded(
-          child: Text(
-            element.text,
-            style: TextStyle(
-              fontSize: 27.sp,
-              fontWeight: FontWeight.w800,
-              decoration: isUnderlinedLocal ? TextDecoration.underline : null,
-            ),
-          ),
-        ),
-      );
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: childrenWidgets,
-      );
-    }
-
-    return null;
-  }*/
 
   Widget displayFile(
       String srcAttribute, var height, var width, WidgetType type,
-      {isLesson = false}) {
+      {isLesson = false,String? alt=''}) {
+    String src=srcAttribute;
+    if(alt!=null && alt.isNotEmpty)
+      {
+        final cleanAlt = alt.trim();
+
+        if (cleanAlt.isNotEmpty && cleanAlt != '/' && cleanAlt != 'null') {
+          src += cleanAlt;
+          debugPrint('src $src');
+        }
+      }
     return FutureBuilder<File?>(
       // future: getCurrentFile(srcAttribute),
-      future: getCurrentFile(srcAttribute.split('/').last, isLesson),
+      future: getCurrentFile(src.split('/').last, isLesson),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator(); // Show a loading indicator
@@ -352,42 +368,61 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
           if (file != null) {
             switch (type) {
               case WidgetType.image:
-                return FutureBuilder<ui.Image>(
-                  future: decodeImageFromFile(file),
-                  builder: (context, imageSnapshot) {
-                    if (imageSnapshot.connectionState == ConnectionState.done &&
-                        imageSnapshot.hasData) {
-                      final image = imageSnapshot.data!;
-                      if(widget.isImageMatrix) {
-                        final aspect = image.width / image.height;
+                bool isSvg = src.toLowerCase().endsWith('.svg');
+                if (isSvg) {
+                  return SizedBox(
+                    width: double.tryParse(width ?? '') ?? 200.w,
+                    height: double.tryParse(height ?? '') ?? 200.w,
+                    child: SvgPicture.file(
+                      file,
+                      fit: BoxFit.contain,
+                    ),
+                  );
+                }
 
-                        final w = math.min(200.w, image.width.toDouble());
-                        final h = w / aspect;
-                        debugPrint('w: $w h: $h');
-                        return  SizedBox(
+                return FutureBuilder<ui.Image>(
+                    future: decodeImageFromFile(file),
+                    builder: (context, imageSnapshot) {
+                      if (imageSnapshot.connectionState == ConnectionState.done &&
+                          imageSnapshot.hasData) {
+                        final image = imageSnapshot.data!;
+                        if(widget.isImageMatrix) {
+                          final aspect = image.width / image.height;
+
+                          final w = math.min(200.w, image.width.toDouble());
+                          final h = w / aspect;
+                          debugPrint('w: $w h: $h');
+                          return  SizedBox(
                             width: w,
                             height: h,
                             child:
-                              Image.file(
-                                file,
-                                fit: BoxFit.contain,
-                                filterQuality: FilterQuality.high,
+                            Image.file(
+                              file,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
                             ),
-                        );
-                      }
-                      return SizedBox(
-                        width: image.width.toDouble(),
-                        height: image.height.toDouble(),
-                        child:Image.file(
-                            file,
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.high,
-                        ),
-                      );
-                    } else {
-                      return const CircularProgressIndicator();
-                    }});
-             /*return Image.file(
+                          );
+                        }
+
+                          return SizedBox(
+                            // width: image.width.toDouble(),
+                            // height: image.height.toDouble(),
+                            //width:width!=null? double.tryParse(width):image.width.toDouble(),
+                            width: double.tryParse(width ?? '') ??
+                                image.width.toDouble(),
+                            height: double.tryParse(height ?? '') ??
+                                image.height.toDouble(),
+                            child: Image.file(
+                              file,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
+                            ),
+                          );
+
+                      } else {
+                        return const CircularProgressIndicator();
+                      }});
+            /*return Image.file(
                   file,
                   fit: BoxFit.contain,
 
@@ -412,7 +447,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
                           ? widget.quizId
                           : MainPageChild.of(context)!.widget.course.id,
                       width:
-                          width != null ? int.parse(width.toString()).w : 914.w,
+                      width != null ? int.parse(width.toString()).w : 914.w,
                       height: height != null
                           ? int.parse(height.toString()).h
                           : 515.h,
@@ -420,14 +455,14 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
               case WidgetType.pdf:
                 return SizedBox(
                     width:
-                        width != null ? int.parse(width.toString()).w : 100.w,
+                    width != null ? int.parse(width.toString()).w : 100.w,
                     height:
-                        height != null ? int.parse(height.toString()).h : 100.w,
+                    height != null ? int.parse(height.toString()).h : 100.w,
                     child: SfPdfViewer.file(file));
             }
           } else {
             return Text(
-                'No ${type.name} $srcAttribute'); // If the file doesn't exist
+                'No ${type.name} $src'); // If the file doesn't exist
           }
         }
       },
@@ -449,8 +484,8 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
       //check if file exists in course file from vimeo
     } else if (!isLesson) {
       path =
-        //  '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
-          '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/${widget.quizId}';
+      //  '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
+      '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/${widget.quizId}';
       File file = File(path);
       if (await file.exists()) {
         debugPrint('truuuuuuuuuu path $path');
@@ -486,20 +521,140 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
   bool isHTML(String str) {
     final RegExp htmlRegExp =
-        RegExp('<[^>]*>', multiLine: true, caseSensitive: false);
+    RegExp('<[^>]*>', multiLine: true, caseSensitive: false);
     return htmlRegExp.hasMatch(str);
   }
 
   String addBreakAfterImgs(String html) {
     // תופס <img ...> (כולל self-closing) ומוסיף <br/> אחרי
-   // final re = RegExp(r'(<img\b[^>]*>)', caseSensitive: false);
+    // final re = RegExp(r'(<img\b[^>]*>)', caseSensitive: false);
     final re = RegExp(
       r'(<img\b[^>]*>)(?!\s*<br\s*/?>)',
       caseSensitive: false,
     );
-   return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
-   // return html;
+ // return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
+    return html;
   }
+
+  String normalizeStrongWrappedImgInput(String html) {
+    return html.replaceAll(
+      RegExp(
+        r'<strong>\s*(<img\b[^>]*>)\s*({[^}]+})\s*(<img\b[^>]*>)\s*</strong>',
+        caseSensitive: false,
+      ),
+      r'\1<strong>\2</strong>\3',
+    );
+  }
+
+  String normalizeInputImgBlock(String html) {
+
+    String? _getAttr(String spanHtml, String name) {
+      final m = RegExp('$name="([^"]*)"', caseSensitive: false)
+          .firstMatch(spanHtml);
+      return m?.group(1);
+    }
+
+    String _buildSpan({
+      required String? input,
+      String? answer,
+      required String layout,
+      String? order,
+      required String innerHtml,
+    }) {
+      final b = StringBuffer('<span');
+
+      if (input != null)  b.write(' data-input="$input"');
+      if (answer != null) b.write(' data-answer="$answer"');
+      b.write(' data-layout="$layout"');
+      if (order != null)  b.write(' data-order="$order"');
+
+      b.write('>');
+      b.write(innerHtml);
+      b.write('</span>');
+      return b.toString();
+    }
+
+    // ===== מקרה 0: img + span + img  ==> triple =====
+    final reTriple = RegExp(
+      r'(<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)'
+      r'(?:\s*</?(?:strong|b|em)>\s*)*'
+      r'(?:\s*<br\s*/?>\s*)*'
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
+      r'(?:\s*</?(?:strong|b|em)>\s*)*'
+      r'(?:\s*<br\s*/?>\s*)*'
+      r'(<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)',
+      caseSensitive: false,
+    );
+
+    html = html.replaceAllMapped(reTriple, (m) {
+      final img1 = m.group(1)!;
+      final span = m.group(2)!;
+      final img2 = m.group(3)!;
+
+      final input  = _getAttr(span, 'data-input');
+      final answer = _getAttr(span, 'data-answer');
+
+      return _buildSpan(
+        input: input,
+        answer: answer,
+        layout: 'triple',
+        innerHtml: img1 + img2,
+      );
+    });
+
+    // ===== מקרה 1: span ואז תמונות =====
+    final reInputFirst = RegExp(
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
+      r'(?:\s*</?(?:strong|b|em)>\s*)*'
+      r'(?:\s*<br\s*/?>\s*)*'
+      r'((?:\s*<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)+)',
+      caseSensitive: false,
+    );
+
+    html = html.replaceAllMapped(reInputFirst, (m) {
+      final span = m.group(1)!;
+      final imgs = m.group(2)!;
+
+      final input  = _getAttr(span, 'data-input');
+      final answer = _getAttr(span, 'data-answer');
+
+      return _buildSpan(
+        input: input,
+        answer: answer,
+        layout: 'pair',
+        order: 'input-first',
+        innerHtml: imgs,
+      );
+    });
+
+    // ===== מקרה 2: תמונות ואז span =====
+    final reImgFirst = RegExp(
+      r'((?:\s*<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)+)'
+      r'(?:\s*</?(?:strong|b|em)>\s*)*'
+      r'(?:\s*<br\s*/?>\s*)*'
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)',
+      caseSensitive: false,
+    );
+
+    html = html.replaceAllMapped(reImgFirst, (m) {
+      final imgs = m.group(1)!;
+      final span = m.group(2)!;
+
+      final input  = _getAttr(span, 'data-input');
+      final answer = _getAttr(span, 'data-answer');
+
+      return _buildSpan(
+        input: input,
+        answer: answer,
+        layout: 'pair',
+        order: 'img-first',
+        innerHtml: imgs,
+      );
+    });
+
+    return html;
+  }
+
 
   @override
   void dispose() {

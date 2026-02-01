@@ -82,10 +82,9 @@ class _OrderSelectionMatrixWidgetState
       fontSize: 27.sp,
       fontWeight: FontWeight.w400,
     );
-
+    maxTextWidth =  isHtml ? 400.w :getMaxTextWidth(randomList, textStyle);
     // חישוב הרוחב המקסימלי של כל הטקסטים
-    maxTextWidth =
-        isHtml ? 400.w : getMaxTextWidth(randomList, textStyle, 400.w);
+
     debugPrint('isHtml $isHtml maxTextWidth $maxTextWidth');
 
     return Column(
@@ -122,25 +121,24 @@ class _OrderSelectionMatrixWidgetState
         SizedBox(height: 24.h),
         for (int i = 0; i < randomList.length; i++) ...[
           Padding(
-            padding: EdgeInsets.only(bottom: 12.h),
-            child: /*IntrinsicHeight(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: /*IntrinsicHeight(
               child: */
-                Container(
-              // height:isHtml?110.h: 75.h,
-              margin: EdgeInsets.only(right: 2.w, left: 2.w),
-              decoration: ShapeDecoration(
-                color: const Color(0xFFFCFCFF),
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                    width: 1.w,
-                    strokeAlign: BorderSide.strokeAlignOutside,
-                    color: const Color(0xFFE5E4F6),
+                  Container(
+                // height:isHtml?110.h: 75.h,
+                margin: EdgeInsets.only(right: 2.w, left: 2.w),
+                decoration: ShapeDecoration(
+                  color: const Color(0xFFFCFCFF),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      width: 1.w,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                      color: const Color(0xFFE5E4F6),
+                    ),
+                    borderRadius: BorderRadius.circular(3),
                   ),
-                  borderRadius: BorderRadius.circular(3),
                 ),
-              ),
-              child:
-             Row(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ConstrainedBox(
@@ -148,39 +146,45 @@ class _OrderSelectionMatrixWidgetState
                         minHeight: 100.h,
                         // maxWidth:isHtml ?maxTextWidth: maxTextWidth + 10.w,
                       ),
-                      child: Container(
-                        //width: 140.w,
-                        //width:randomList[i].contains('<img')?  150.w:maxTextWidth + 10.w,
-                        width:isHtml ?maxTextWidth: maxTextWidth + 10.w,
-                        padding: EdgeInsets.all(10.h),
-                        child: isHtml
-                            ? HtmlDataWidget(randomList[i],
-                            quizId: widget.question.quizId,isImageMatrix:randomList[i].contains('<img')) : Text(
-                          randomList[i],
-                          textAlign: TextAlign.center,
-                          softWrap: true,
-                          maxLines: 3,
-                          overflow: TextOverflow.visible,
-                          style: TextStyle(
-                            color: colors.blackColorApp,
-                            fontSize: 27.sp,
-                            fontWeight: FontWeight.w400,
-                            // height: 22,
-                          ),
+                      child: Center(
+                        child: Container(
+                          //width: 140.w,
+                          //width:randomList[i].contains('<img')?  150.w:maxTextWidth + 10.w,
+                          width: isHtml ? maxTextWidth :  math.min(maxTextWidth + 20, 400.w)
+                            ,
+                          padding: EdgeInsets.all(10.h),
+                          child: isHtml
+                              ? HtmlDataWidget(randomList[i],
+                                  quizId: widget.question.quizId,
+                                  isImageMatrix: randomList[i].contains('<img'))
+                              : Center(
+                                child: Text(
+                                  randomList[i],
+                                  textAlign: TextAlign.center,
+                                  softWrap: true,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.visible,
+                                  style: TextStyle(
+                                    color: colors.blackColorApp,
+                                    fontSize: 27.sp,
+                                    fontWeight: FontWeight.w400,
+                                    // height: 22,
+                                  ),
+                                ),
+                              ),
                         ),
                       ),
                     ),
-
                     Expanded(
                       child: Container(
                         // height: isHtml ? 95.h : 60.h,
-                        constraints:  BoxConstraints(
+                        constraints: BoxConstraints(
                           minHeight: 100.h, // או מספר אחר שמתאים לך
                         ),
                         padding: EdgeInsets.only(
                             top: 7.h, bottom: 7.h, right: 10.h, left: 10.h),
                         decoration: BoxDecoration(
-                           color:  colors.lightGrey2ColorApp,
+                            color: colors.grey2ColorApp.withOpacity(0.2),
                             border: Border(
                               right: BorderSide(
                                 width: 1.w,
@@ -188,26 +192,26 @@ class _OrderSelectionMatrixWidgetState
                               ),
                             )),
                         child: DragTarget<String>(
-                          builder: (BuildContext context, List<dynamic> accepted,
-                              List<dynamic> rejected) {
+                          builder: (BuildContext context,
+                              List<dynamic> accepted, List<dynamic> rejected) {
                             return
-                              // ans[i] != ''
-                              //   ? dragWidget(i, isAnswer: true)
-                              //   : Container();
+                                // ans[i] != ''
+                                //   ? dragWidget(i, isAnswer: true)
+                                //   : Container();
 
-                              Draggable<String>(
-                                // maxSimultaneousDrags: maxSimultaneousDrags[i],
-                                // Data is the value this Draggable stores.
-                                data: ans[i],
-                                feedback: Material(
-                                  child: dragWidget(i, isAnswer: true),
-                                ),
-                                childWhenDragging: dragWidget(
-                                    i, changeBackground: true, isAnswer: true),
-                                child: ans[i] != ''
-                                    ? dragWidget(i, isAnswer: true)
-                                    : Container(),
-                              );
+                                Draggable<String>(
+                              // maxSimultaneousDrags: maxSimultaneousDrags[i],
+                              // Data is the value this Draggable stores.
+                              data: ans[i],
+                              feedback: Material(
+                                child: dragWidget(i, isAnswer: true),
+                              ),
+                              childWhenDragging: dragWidget(i,
+                                  changeBackground: true, isAnswer: true),
+                              child: ans[i] != ''
+                                  ? dragWidget(i, isAnswer: true)
+                                  : Container(),
+                            );
                           },
                           onAccept: (data) {
                             debugPrint(data);
@@ -215,7 +219,7 @@ class _OrderSelectionMatrixWidgetState
 
                             setState(() {
                               if (ans.contains(data)) {
-                                ans [ans.indexOf(data)] = '';
+                                ans[ans.indexOf(data)] = '';
                               }
                               ans[i] = data;
                             });
@@ -227,31 +231,34 @@ class _OrderSelectionMatrixWidgetState
                     ),
                   ],
                 ),
-
-                )
-          ),
+              )),
           //   ),
         ]
       ],
     );
   }
 
-  double getMaxTextWidth(
-      List<String> texts, TextStyle style, double maxAllowedWidth) {
-    debugPrint('getMaxTextWidth getMaxTextWidth $texts');
-    final TextPainter painter = TextPainter(
+
+  double getMaxTextWidth(List<String> texts, TextStyle style) {
+    final painter = TextPainter(
       textDirection: TextDirection.ltr,
+      maxLines: 1,
     );
+
     double maxWidth = 0;
-    for (var text in texts) {
+
+    for (final text in texts) {
       painter.text = TextSpan(text: text, style: style);
-      painter.layout(); // מודד את הרוחב של הטקסט
-      if (painter.width > maxWidth) maxWidth = painter.width;
+      painter.layout(minWidth: 0, maxWidth: double.infinity);
+
+      if (painter.width > maxWidth) {
+        maxWidth = painter.width;
+      }
     }
 
-    // לא לעבור את הרוחב המותר
-    return maxWidth > maxAllowedWidth ? maxAllowedWidth : maxWidth;
+    return maxWidth;
   }
+
 
   Widget dragWidget(int i,
       {bool changeBackground = false,
@@ -298,7 +305,7 @@ class _OrderSelectionMatrixWidgetState
             textAlign: TextAlign.center,
           ),*/
           Flexible(
-            child:HtmlDataWidget(
+            child: HtmlDataWidget(
               isAnswer ? ans[i] : matrixMatchList[i],
               quizId: widget.question.quizId,
               textStyle: TextStyle(
@@ -307,12 +314,12 @@ class _OrderSelectionMatrixWidgetState
                   color: !displayAnswer
                       ? colors.blackColorApp
                       : isCorrectList[i]
-                      ? Colors.white
-                      : Colors.red),
+                          ? Colors.white
+                          : Colors.red),
               isImageMatrix: true,
             ).wrapIf(
               matrixMatchList[i].contains('image'),
-                  (w) => IgnorePointer(child: w),
+              (w) => IgnorePointer(child: w),
             ),
           )
         ],
@@ -375,79 +382,80 @@ class _OrderSelectionMatrixWidgetState
             for (int i = 0; i < randomList.length; i++) ...[
               Padding(
                 padding: EdgeInsets.only(bottom: 12.h),
-                child:/* IntrinsicHeight(
-                  child:*/ Container(
-                    // height:isHtml?110.h: 75.h,
-                    margin: EdgeInsets.only(right: 2.w, left: 2.w),
-                    decoration: ShapeDecoration(
-                      // color: isCorrectList[i]?Colors.greenAccent:const Color(0xFFFCFCFF),
-                      color: const Color(0xFFFCFCFF),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 1.w,
-                          strokeAlign: BorderSide.strokeAlignOutside,
-                          color: isCorrectList[i] ? Colors.green : Colors.red,
-                        ),
-                        borderRadius: BorderRadius.circular(3),
+                child: /* IntrinsicHeight(
+                  child:*/
+                    Container(
+                  // height:isHtml?110.h: 75.h,
+                  margin: EdgeInsets.only(right: 2.w, left: 2.w),
+                  decoration: ShapeDecoration(
+                    // color: isCorrectList[i]?Colors.greenAccent:const Color(0xFFFCFCFF),
+                    color: const Color(0xFFFCFCFF),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        width: 1.w,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                        color: isCorrectList[i] ? Colors.green : Colors.red,
                       ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: 100.h,
-                            // maxWidth:isHtml ?maxTextWidth: maxTextWidth + 10.w,
-                          ),
-                          child: Container(
-                            // color: isCorrectList[i]?Colors.greenAccent:null,
-                            //width: 140.w,
-                            width: isHtml ? maxTextWidth : maxTextWidth + 10.w,
-                            padding: EdgeInsets.all(10.h),
-                            child: Center(
-                              child: isHtml
-                                  ? HtmlDataWidget(randomList[i],
-                                      quizId: widget.question.quizId,
-                                      isImageMatrix:
-                                          randomList[i].contains('<img'))
-                                  : Text(
-                                      randomList[i],
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: colors.blackColorApp,
-                                        fontSize: 27.sp,
-                                        fontWeight: FontWeight.w400,
-                                        // height: 22,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            constraints:  BoxConstraints(
-                              minHeight: 100.h, // או מספר אחר שמתאים לך
-                            ),
-                           // height: isHtml ? 95.h : 60.h,
-                            padding: EdgeInsets.only(
-                                top: 7.h, bottom: 7.h, right: 10.h, left: 10.h),
-                            decoration: BoxDecoration(
-                                // color: isCorrectList[i]?Colors.greenAccent:null,
-                                // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),
-                                border: Border(
-                              right: BorderSide(
-                                width: 1.w,
-                                color: const Color(0xFFE5E4F6),
-                              ),
-                            )),
-                            child: dragWidget(i,
-                                isAnswer: true, displayAnswer: true),
-                          ),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
-              //  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: 100.h,
+                          // maxWidth:isHtml ?maxTextWidth: maxTextWidth + 10.w,
+                        ),
+                        child: Container(
+                          // color: isCorrectList[i]?Colors.greenAccent:null,
+                          //width: 140.w,
+                          width: isHtml ? maxTextWidth : math.min(maxTextWidth + 20, 400.w)
+    ,
+                          padding: EdgeInsets.all(10.h),
+                          child: isHtml
+                              ? HtmlDataWidget(randomList[i],
+                                  quizId: widget.question.quizId,
+                                  isImageMatrix: randomList[i].contains('<img'))
+                              : Text(
+                                randomList[i],
+                                textAlign: TextAlign.center,
+                                softWrap: false,
+                                overflow: TextOverflow.visible,
+                                style: TextStyle(
+                                  color: colors.blackColorApp,
+                                  fontSize: 27.sp,
+                                  fontWeight: FontWeight.w400,
+                                  // height: 22,
+                                ),
+                              ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minHeight: 100.h, // או מספר אחר שמתאים לך
+                          ),
+                          // height: isHtml ? 95.h : 60.h,
+                          padding: EdgeInsets.only(
+                              top: 7.h, bottom: 7.h, right: 10.h, left: 10.h),
+                          decoration: BoxDecoration(
+                              // color: isCorrectList[i]?Colors.greenAccent:null,
+                              // color: isDragging?Colors.yellowAccent:  const Color(0xFFFCFCFF),
+                              border: Border(
+                            right: BorderSide(
+                              width: 1.w,
+                              color: const Color(0xFFE5E4F6),
+                            ),
+                          )),
+                          child: dragWidget(i,
+                              isAnswer: true, displayAnswer: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                //  ),
               )
             ],
             Container(
@@ -476,27 +484,5 @@ extension ConditionalWrap on Widget {
   }
 }
 
-// ------------ Widget למדידת גודל ------------------
-
-class MeasureSize extends StatefulWidget {
-  final Widget child;
-  final ValueChanged<Size> onChange;
-
-  const MeasureSize({super.key, required this.child, required this.onChange});
-
-  @override
-  State<MeasureSize> createState() => _MeasureSizeState();
-}
-
-class _MeasureSizeState extends State<MeasureSize> {
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final RenderBox? box = context.findRenderObject() as RenderBox?;
-      if (box != null) widget.onChange(box.size);
-    });
-    return widget.child;
-  }
-}
 
 

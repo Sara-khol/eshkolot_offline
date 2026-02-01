@@ -37,18 +37,23 @@ const LessonSchema = CollectionSchema(
       name: r'name',
       type: IsarType.string,
     ),
-    r'time': PropertySchema(
+    r'textContent': PropertySchema(
       id: 4,
+      name: r'textContent',
+      type: IsarType.string,
+    ),
+    r'time': PropertySchema(
+      id: 5,
       name: r'time',
       type: IsarType.string,
     ),
     r'videoNum': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'videoNum',
       type: IsarType.string,
     ),
     r'vimoe': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'vimoe',
       type: IsarType.string,
     )
@@ -108,6 +113,7 @@ int _lessonEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.name.length * 3;
+  bytesCount += 3 + object.textContent.length * 3;
   bytesCount += 3 + object.time.length * 3;
   bytesCount += 3 + object.videoNum.length * 3;
   {
@@ -129,9 +135,10 @@ void _lessonSerialize(
   writer.writeBool(offsets[1], object.isCompletedCurrentUser);
   writer.writeLong(offsets[2], object.lessonId);
   writer.writeString(offsets[3], object.name);
-  writer.writeString(offsets[4], object.time);
-  writer.writeString(offsets[5], object.videoNum);
-  writer.writeString(offsets[6], object.vimeo);
+  writer.writeString(offsets[4], object.textContent);
+  writer.writeString(offsets[5], object.time);
+  writer.writeString(offsets[6], object.videoNum);
+  writer.writeString(offsets[7], object.vimeo);
 }
 
 Lesson _lessonDeserialize(
@@ -144,12 +151,13 @@ Lesson _lessonDeserialize(
     courseId: reader.readLongOrNull(offsets[0]) ?? 0,
     lessonId: reader.readLongOrNull(offsets[2]) ?? 0,
     name: reader.readStringOrNull(offsets[3]) ?? '',
-    time: reader.readStringOrNull(offsets[4]) ?? '',
-    videoNum: reader.readStringOrNull(offsets[5]) ?? '',
-    vimeo: reader.readStringOrNull(offsets[6]),
+    time: reader.readStringOrNull(offsets[5]) ?? '',
+    videoNum: reader.readStringOrNull(offsets[6]) ?? '',
+    vimeo: reader.readStringOrNull(offsets[7]),
   );
   object.id = id;
   object.isCompletedCurrentUser = reader.readBool(offsets[1]);
+  object.textContent = reader.readString(offsets[4]);
   return object;
 }
 
@@ -169,10 +177,12 @@ P _lessonDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 4:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readString(offset)) as P;
     case 5:
       return (reader.readStringOrNull(offset) ?? '') as P;
     case 6:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 7:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -816,6 +826,136 @@ extension LessonQueryFilter on QueryBuilder<Lesson, Lesson, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'textContent',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'textContent',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'textContent',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'textContent',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'textContent',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'textContent',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'textContent',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'textContent',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'textContent',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterFilterCondition> textContentIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'textContent',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterFilterCondition> timeEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1336,6 +1476,18 @@ extension LessonQuerySortBy on QueryBuilder<Lesson, Lesson, QSortBy> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByTextContent() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'textContent', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByTextContentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'textContent', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> sortByTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'time', Sort.asc);
@@ -1435,6 +1587,18 @@ extension LessonQuerySortThenBy on QueryBuilder<Lesson, Lesson, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByTextContent() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'textContent', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByTextContentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'textContent', Sort.desc);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QAfterSortBy> thenByTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'time', Sort.asc);
@@ -1498,6 +1662,13 @@ extension LessonQueryWhereDistinct on QueryBuilder<Lesson, Lesson, QDistinct> {
     });
   }
 
+  QueryBuilder<Lesson, Lesson, QDistinct> distinctByTextContent(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'textContent', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Lesson, Lesson, QDistinct> distinctByTime(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1549,6 +1720,12 @@ extension LessonQueryProperty on QueryBuilder<Lesson, Lesson, QQueryProperty> {
   QueryBuilder<Lesson, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<Lesson, String, QQueryOperations> textContentProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'textContent');
     });
   }
 

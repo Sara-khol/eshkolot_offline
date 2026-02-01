@@ -461,10 +461,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
   }
 
   pathItem(LearnPath path, int pIndex) {
-    Knowledge courseKnowledge = knowledgeCourses.keys.firstWhere((k) =>
-    k.id == path.coursesPath
-        .elementAt(pIndex)
-        .knowledgeId);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -474,13 +471,20 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               setState(() {
                 path.isOpen = !path.isOpen;
                 if (path.isOpen) {
+                  Knowledge courseKnowledge = knowledgeCourses.keys.firstWhere((k) =>
+                  k.id == path.coursesPath
+                      .elementAt(0)
+                      .knowledgeId);
+                  int  currentColor = courseKnowledge.icon.color != ''
+                      ? int.parse(courseKnowledge.icon.color)
+                      : -1;
                   MainPage
                       .of(context)
                       ?.mainWidget = MainPageChild(
                       knowLedgeId: -1,
                       course: path.coursesPath.first,
                       knowledgeColor:
-                      path.color.isNotEmpty ? int.parse(path.color) : -1);
+                      currentColor);
                   path.coursesPath.first.isSelected = true;
                   sIndex = 0;
                   //for first time
@@ -530,9 +534,17 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               shrinkWrap: true,
               itemCount: path.coursesPath.length,
               itemBuilder: (context, index) {
+                Knowledge courseKnowledge = knowledgeCourses.keys.firstWhere((k) =>
+                k.id == path.coursesPath
+                    .elementAt(index)
+                    .knowledgeId);
+                int  currentColor = courseKnowledge.icon.color != ''
+                    ? int.parse(courseKnowledge.icon.color)
+                    : -1;
+
                 return courseItem(
                     path.coursesPath.elementAt(index),
-                    path.color.isNotEmpty ? int.parse(path.color) : -1,
+                    currentColor,
                     courseKnowledge.icon.nameIcon,
                     index,
                 knowLedgeId: -1);
@@ -555,7 +567,6 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
 
   updateByOuterEvent(int courseId) {
     sIndex = 0;
-    debugPrint('courseId $courseId');
     if(mounted) {
       setState(() {
       Course? selectedCourse;

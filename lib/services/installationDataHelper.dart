@@ -92,6 +92,11 @@ class InstallationDataHelper {
     Map<String, dynamic> learnPaths = data['learnPath'] as Map<String, dynamic>;
     // Map<String, dynamic> learnPaths={} /*= data['learnPath'] as Map<String, dynamic>*/;
 
+    final Map<int, Subject> subjectsCache = {};
+    final Map<int, Lesson> lessonsCache = {};
+    final Map<int, Quiz> quizzesCache = {};
+
+
     for (var user in users) {
       debugPrint('user ${user['name']}');
       List<dynamic> userKnowledgeIds = user['knowledgeIds'] as List<dynamic>;
@@ -127,17 +132,51 @@ class InstallationDataHelper {
         if (myCourses.firstWhereOrNull((element) => element.id == course.id) ==
             null) {
           for (int subjectId in course.subjectIds) {
-            var s = subjects[subjectId.toString()];
-            Subject subject = Subject.fromJson(s, subjectId);
+// for subject that cam be for two courses
+            Subject subject;
+            if (subjectsCache.containsKey(subjectId)) {
+              subject = subjectsCache[subjectId]!;
+            } else {
+              var s = subjects[subjectId.toString()];
+              subject = Subject.fromJson(s, subjectId);
+              subjectsCache[subjectId] = subject;
+              mySubjects.add(subject);
+            }
+
+
+            // var s = subjects[subjectId.toString()];
+            // Subject subject = Subject.fromJson(s, subjectId);
 
             for (int lessonId in subject.lessonsIds) {
-              var l = lessons[lessonId.toString()];
-              Lesson lesson = Lesson.fromJson(l, lessonId, course.id);
+
+              Lesson lesson;
+              if (lessonsCache.containsKey(lessonId)) {
+                lesson = lessonsCache[lessonId]!;
+              } else {
+                var l = lessons[lessonId.toString()];
+                lesson = Lesson.fromJson(l, lessonId, course.id);
+                lessonsCache[lessonId] = lesson;
+                myLessons.add(lesson);
+              }
+
+
+              // var l = lessons[lessonId.toString()];
+              // Lesson lesson = Lesson.fromJson(l, lessonId, course.id);
 
               for (int qId in lesson.questionnaireIds) {
-                var q = questionnaires[qId.toString()];
+                Quiz quiz;
+                if (quizzesCache.containsKey(qId)) {
+                  quiz = quizzesCache[qId]!;
+                } else {
+                  var q = questionnaires[qId.toString()];
+                  quiz = Quiz.fromJson(q, qId);
+                  quizzesCache[qId] = quiz;
+                  myQuizzes.add(quiz);
+                }
 
-                Quiz quiz = Quiz.fromJson(q, qId);
+                // var q = questionnaires[qId.toString()];
+                //
+                // Quiz quiz = Quiz.fromJson(q, qId);
                 for(String url in quiz.quizUrls)
                   {
                     String name = url.substring(url.lastIndexOf('/') + 1, url.length);
@@ -155,28 +194,46 @@ class InstallationDataHelper {
                     }
                   }
                 lesson.questionnaire.add(quiz);
-                myQuizzes.add(quiz);
+              //  myQuizzes.add(quiz);
               }
               subject.lessonsList.add(lesson);
-              myLessons.add(lesson);
+             // myLessons.add(lesson);
             }
 
             for (int qId in subject.questionnaireIds) {
-              var q = questionnaires[qId.toString()];
-
-              Quiz quiz = Quiz.fromJson(q, qId);
+              Quiz quiz;
+              if (quizzesCache.containsKey(qId)) {
+                quiz = quizzesCache[qId]!;
+              } else {
+                var q = questionnaires[qId.toString()];
+                quiz = Quiz.fromJson(q, qId);
+                quizzesCache[qId] = quiz;
+                myQuizzes.add(quiz);
+              }
+              // var q = questionnaires[qId.toString()];
+              //
+              // Quiz quiz = Quiz.fromJson(q, qId);
               subject.questionnaire.add(quiz);
+             // myQuizzes.add(quiz);
+            }
+            course.subjects.add(subject);
+           // mySubjects.add(subject);
+          }
+          for (int qId in course.questionnaireIds) {
+            Quiz quiz;
+            if (quizzesCache.containsKey(qId)) {
+              quiz = quizzesCache[qId]!;
+            } else {
+              var q = questionnaires[qId.toString()];
+              quiz = Quiz.fromJson(q, qId);
+              quizzesCache[qId] = quiz;
               myQuizzes.add(quiz);
             }
 
-            course.subjects.add(subject);
-            mySubjects.add(subject);
-          }
-          for (int qId in course.questionnaireIds) {
-            var q = questionnaires[qId.toString()];
-            Quiz quiz = Quiz.fromJson(q, qId);
+            // var q = questionnaires[qId.toString()];
+            // Quiz quiz = Quiz.fromJson(q, qId);
             course.questionnaires.add(quiz);
-            myQuizzes.add(quiz);
+            // myQuizzes.add(quiz);
           }
           myCourses.add(course);
         }

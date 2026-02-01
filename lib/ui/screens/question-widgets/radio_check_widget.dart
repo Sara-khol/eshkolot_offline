@@ -94,9 +94,12 @@ class _RadioCheckState extends State<RadioCheck> {
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Align(
-              alignment: Alignment.centerRight,
-              child: HtmlDataWidget(item.question, quizId: item.quizId)),
+          Container(
+            margin: EdgeInsets.only(right: 10.w),
+            child: Align(
+                alignment: Alignment.centerRight,
+                child: HtmlDataWidget(item.question, quizId: item.quizId)),
+          ),
           SizedBox(height: 30.h),
           for (var ans in item.ans!) ...[
             Container(

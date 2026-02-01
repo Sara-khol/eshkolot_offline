@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../models/lesson.dart';
+import '../../custom_widgets/html_data_widget.dart';
 
 class LessonWidget extends StatefulWidget {
   final Lesson lesson;
@@ -33,6 +34,9 @@ class _LessonWidgetState extends State<LessonWidget> {
   void initState() {
     super.initState();
     lesson = widget.lesson;
+   //  lesson.textContent= '<p>כל הכבוד! סיימת את לימוד נושא עבר פשוט.</p><p>רגע לפני התרגול המסכם – אנו ממליצים לך לחזור על נושאי הלימוד: באמצעות מעבר על התרגולים שבנושא ו/או באמצעות בסיס הידע ב ;לשונית חומרי הלמידה. בהצלחה!</p>';
+   // lesson.vimeo= '';
+  debugPrint('textContent ${lesson.textContent}');
     // InstallationDataHelper().eventBusLessonPage.on().listen((event) {
     //   lesson.isCompletedCurrentUser=event as bool;
     //   if(mounted) {
@@ -45,8 +49,6 @@ class _LessonWidgetState extends State<LessonWidget> {
   @override
   void didUpdateWidget(covariant LessonWidget oldWidget) {
     lesson = widget.lesson;
-
-
     // if (widget.lesson.id != oldWidget.lesson.id) {
     //   player.dispose();
     //   player = Player(id: widget.lesson.id);
@@ -63,251 +65,268 @@ class _LessonWidgetState extends State<LessonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return bodyWidget();
+    if(lesson.vimeo==null || lesson.vimeo!.isEmpty) {
+      return bodyWidget();
+    }
+    else
+      {
+        return SingleChildScrollView(child: bodyWidget());
+      }
   }
 
   Widget bodyWidget() {
-    return SingleChildScrollView(
-      child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          // height: 624.h,
+         // width: 950.w,
+          margin: EdgeInsets.only(left:242.w,right: 120.w),
+          decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFE4E6E9)),
+              borderRadius: const BorderRadius.all(Radius.circular(10))),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 32.h,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 19.w,
+                  ),
+                  Icon(
+                    Icons.videocam,
+                    size: 28.sp,
+                  ),
+                  SizedBox(
+                    width: 23.w,
+                  ),
+                  Expanded(
+                    child: Text(
+                      lesson.name,
+                      // overflow:TextOverflow.ellipsis ,
+                      style: TextStyle(
+                      height: 1,
+                          fontSize: 36.sp, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  // SizedBox(
+                  //   width: 32.w,
+                  // ),
+                  Icon(
+                    Icons.access_time,
+                    size: 15.sp,
+                  ),
+                  SizedBox(
+                    width: 7.w,
+                  ),
+                  Text(
+                    widget.lesson.time,
+                    style: TextStyle(
+                        fontSize: 16.sp, color: colors.blackColorApp),
+                  ),
+                  SizedBox(width: 10.w),
+                  Container(
+                      height: 20.h,
+                      width: 70.w,
+                      decoration: BoxDecoration(
+                          color: lesson.isCompletedCurrentUser
+                              ? colors.lightGreen2ColorApp
+                              : colors.lightBlueColorApp,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10))),
+                      child: Center(
+                        child: Text(
+                          lesson.isCompletedCurrentUser ? 'הושלם' : 'בלמידה',
+                          //  textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 13.sp,
+                              color: colors.blackColorApp,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      )),
+                  SizedBox(
+                    width: 18.w,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 22.h,
+              ),
+              if(lesson.vimeo!=null && lesson.vimeo!.isNotEmpty)
+              VideoWidget(
+                  key: Key(lesson.vimeo.toString()),
+                  isLesson: true,
+                  height: 515.h,
+                  width: 914.w,
+                  fileId: MainPageChild.of(context)!.widget.course.id,
+                  videoId: MainPageChild.of(context)!.widget.course.isSync
+                      ? lesson.vimeo
+                      : lesson.videoNum),
+                SizedBox(
+                height: 21.h,
+              )
+            ],
+          ),
+        ),
+        if(lesson.textContent.isNotEmpty /*&& (lesson.vimeo==null || lesson.vimeo!.isEmpty)*/)
+        SizedBox(
+          height: 50.h,
+        ),
+        if(lesson.textContent.isNotEmpty)
+          Container(margin: EdgeInsets.only(left:242.w,right: 120.w),
+              child: HtmlDataWidget(lesson.textContent, quizId: -1)),
+        if(lesson.textContent.isNotEmpty /*&& (lesson.vimeo==null || lesson.vimeo!.isEmpty)*/)
+          SizedBox(
+            height: 20.h,
+          ),
+        SizedBox(
+          height: 17.h,
+        ),
+     if(lesson.vimeo==null || lesson.vimeo!.isEmpty)
+     Spacer(),
+        if (lesson.questionnaire.isNotEmpty)
           Container(
-            // height: 624.h,
            // width: 950.w,
+           // height: 66.h,
             margin: EdgeInsets.only(left:242.w,right: 120.w),
             decoration: BoxDecoration(
                 border: Border.all(color: const Color(0xFFE4E6E9)),
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 32.h,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 19.w,
-                    ),
-                    Icon(
-                      Icons.videocam,
-                      size: 28.sp,
-                    ),
-                    SizedBox(
-                      width: 23.w,
-                    ),
-                    Expanded(
-                      child: Text(
-                        lesson.name,
-                        // overflow:TextOverflow.ellipsis ,
-                        style: TextStyle(
-                        height: 1,
-                            fontSize: 36.sp, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    // SizedBox(
-                    //   width: 32.w,
-                    // ),
-                    Icon(
-                      Icons.access_time,
-                      size: 15.sp,
-                    ),
-                    SizedBox(
-                      width: 7.w,
-                    ),
-                    Text(
-                      widget.lesson.time,
-                      style: TextStyle(
-                          fontSize: 16.sp, color: colors.blackColorApp),
-                    ),
-                    SizedBox(width: 10.w),
-                    Container(
-                        height: 20.h,
-                        width: 70.w,
-                        decoration: BoxDecoration(
-                            color: lesson.isCompletedCurrentUser
-                                ? colors.lightGreen2ColorApp
-                                : colors.lightBlueColorApp,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
-                        child: Center(
-                          child: Text(
-                            lesson.isCompletedCurrentUser ? 'הושלם' : 'בלמידה',
-                            //  textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 13.sp,
-                                color: colors.blackColorApp,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        )),
-                    SizedBox(
-                      width: 18.w,
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 22.h,
-                ),
-                /*videoWidget*/
-                VideoWidget(
-                    key: Key(lesson.vimeo.toString()),
-                    isLesson: true,
-                    height: 515.h,
-                    width: 914.w,
-                    fileId: MainPageChild.of(context)!.widget.course.id,
-                    videoId: MainPageChild.of(context)!.widget.course.isSync
-                        ? lesson.vimeo
-                        : lesson.videoNum),
-                SizedBox(
-                  height: 21.h,
-                )
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 17.h,
-          ),
-          if (lesson.questionnaire.isNotEmpty)
-            Container(
-             // width: 950.w,
-             // height: 66.h,
-              margin: EdgeInsets.only(left:242.w,right: 120.w),
-              decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE4E6E9)),
-                  borderRadius: const BorderRadius.all(Radius.circular(10))),
-              child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: lesson.questionnaire.length,
-                  itemBuilder: (ctx, qIndex) {
-                    return Container(
-                      padding: EdgeInsets.only(left: 18.w, right: 18.w),
-                      height: 66.h,
-                      width: 950.w,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.create,
-                            size: 19.sp,
-                          ),
-                          SizedBox(
-                            width: 33.w,
-                          ),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () =>goToQuiz(qIndex),
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
-                                  minimumSize: Size.zero,
-                                  textStyle: TextStyle(fontFamily: 'RAG-Sans')
-                              ),
-                                child: Text(
-
-                                  lesson.questionnaire.elementAt(qIndex).title,
-                                  style: TextStyle(
-                                      overflow: TextOverflow.ellipsis,
-                                      color: colors.blackColorApp,
-                                      fontSize: 22.sp, fontWeight: FontWeight.w600),
-                                )),
-                            ),
-                          ),
-                         // Spacer(),
-                          SizedBox(width: 65.w),
-                          Icon(Icons.access_time, size: 14.sp),
-                          Text(
-                            "  30 דק'  ",
-                            style: TextStyle(fontSize: 16.sp),
-                          ),
-                          //  Spacer(),
-                          SizedBox(width: 10.w),
-                          Container(
-                            height: 20.h,
-                            //width: 70.w,
-                            decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10)),
-                                color: Color(0xFFF4F4F3)),
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: lesson.questionnaire.length,
+                itemBuilder: (ctx, qIndex) {
+                  return Container(
+                    padding: EdgeInsets.only(left: 18.w, right: 18.w),
+                    height: 66.h,
+                    width: 950.w,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.create,
+                          size: 19.sp,
+                        ),
+                        SizedBox(
+                          width: 33.w,
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
                             child: TextButton(
-                              child: Row(
-                                children: [
-                                  Text(
-                                    '  לתרגול ',
-                                    style: TextStyle(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF2D2828)),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: 10.sp,
-                                    color: const Color(0xFF2D2828),
-                                  )
-                                ],
-                              ),
                               onPressed: () =>goToQuiz(qIndex),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.only(right: 5.w,left: 5.w,top: 5.h,bottom: 5.h),
+                                minimumSize: Size.zero,
+                                textStyle: TextStyle(fontFamily: 'RAG-Sans')
                             ),
-                          )
-                        ],
-                      ),
-                    );
-                  }),
-            ),
-          SizedBox(
-            // height: 62.h,
-            height: 60.h,
-          ),
-          Container(
-            margin: EdgeInsets.only(bottom: 20.h ,left: 242.w),
+                              child: Text(
 
-            // width: 950.w,
-            child: Row(
-              children: [
-                const Spacer(),
-                Visibility(
-                  visible: widget.onNext != null,
-                  child: Container(
-                    height: 40.h,
-                  //  margin: EdgeInsets.only(bottom: 20.h ,left: 242.w),
-                    decoration:  BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
-                        color: Color( MainPageChild.of(context)!.widget.knowledgeColor != -1
-                            ? MainPageChild.of(context)!.widget.knowledgeColor
-                            : 0xFF32D489)),
-                    child: TextButton(
-                      child: Row(
-                        children: [
-                          Text(
-                            '  לשיעור הבא ',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600),
+                                lesson.questionnaire.elementAt(qIndex).title,
+                                style: TextStyle(
+                                    overflow: TextOverflow.ellipsis,
+                                    color: colors.blackColorApp,
+                                    fontSize: 22.sp, fontWeight: FontWeight.w600),
+                              )),
                           ),
-                          Icon(
-                            Icons.arrow_forward,
-                            size: 16.sp,
-                            color: Colors.white,
-                          )
-                        ],
-                      ),
-                      onPressed: () async {
-                        // lesson= await IsarService().updateLessonCompleted(lesson.id);
-                        widget.updateComplete(widget.lesson.lessonId);
-                        widget.onNext!();
-                        setState(() {});
-                      },
+                        ),
+                       // Spacer(),
+                        SizedBox(width: 65.w),
+                        Icon(Icons.access_time, size: 14.sp),
+                        Text(
+                          "  30 דק'  ",
+                          style: TextStyle(fontSize: 16.sp),
+                        ),
+                        //  Spacer(),
+                        SizedBox(width: 10.w),
+                        Container(
+                          height: 20.h,
+                          //width: 70.w,
+                          decoration: const BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              color: Color(0xFFF4F4F3)),
+                          child: TextButton(
+                            child: Row(
+                              children: [
+                                Text(
+                                  '  לתרגול ',
+                                  style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF2D2828)),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  size: 10.sp,
+                                  color: const Color(0xFF2D2828),
+                                )
+                              ],
+                            ),
+                            onPressed: () =>goToQuiz(qIndex),
+                          ),
+                        )
+                      ],
                     ),
+                  );
+                }),
+          ),
+        SizedBox(
+          // height: 62.h,
+          height: 60.h,
+        ),
+        Container(
+          margin: EdgeInsets.only(bottom: 20.h ,left: 242.w),
+
+          // width: 950.w,
+          child: Row(
+            children: [
+              const Spacer(),
+              Visibility(
+                visible: widget.onNext != null,
+                child: Container(
+                  height: 40.h,
+                //  margin: EdgeInsets.only(bottom: 20.h ,left: 242.w),
+                  decoration:  BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(30)),
+                      color: Color( MainPageChild.of(context)!.widget.knowledgeColor != -1
+                          ? MainPageChild.of(context)!.widget.knowledgeColor
+                          : 0xFF32D489)),
+                  child: TextButton(
+                    child: Row(
+                      children: [
+                        Text(
+                          '  לשיעור הבא ',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 16.sp,
+                          color: Colors.white,
+                        )
+                      ],
+                    ),
+                    onPressed: () async {
+                      // lesson= await IsarService().updateLessonCompleted(lesson.id);
+                      widget.updateComplete(widget.lesson.lessonId);
+                      widget.onNext!();
+                      setState(() {});
+                    },
                   ),
                 ),
-              ],
-            ),
-          )
-        ],
-      ),
+              ),
+            ],
+          ),
+        )
+      ],
     );
   }
 

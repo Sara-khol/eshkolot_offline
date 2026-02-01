@@ -9,6 +9,8 @@ import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart
 
 import '../../custom_widgets/html_data_widget.dart';
 import '../course_main/questionnaire_tab.dart';
+import 'dart:convert';
+
 
 class FillIn extends StatefulWidget {
   final Question question;
@@ -81,27 +83,36 @@ class _FillInState extends State<FillIn> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: [
-            HtmlDataWidget(
-              widget.question.question,
-              quizId: widget.question
-                  .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
+            Container(
+              margin: EdgeInsets.only(right: 10.w),
+
+              child: HtmlDataWidget(
+                widget.question.question,
+                quizId: widget.question
+                    .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
+              ),
             ),
             SizedBox(
               height: 35.h,
             ),
             Center(
-                child: HtmlDataWidget(
-                    correctHtml.isEmpty
-                        ? replaceCurlyBracesWithTextFields(
-                            widget.question.ans!.first.ans)
-                        : correctHtml,
-                    quizId: widget.question.quizId,
-                    onInputWidgetRequested: (s) {
-              // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
-              // myControllers.add(textEditingController);
-              return createTextField(
-                  myControllers[i++], focusNodes[j++], i - 1);
-            })),
+                child: Container(
+                  margin: EdgeInsets.only(right: 10.w),
+                  child: HtmlDataWidget(
+                      correctHtml.isEmpty
+                         ? replaceCurlyBracesWithTextFields(
+                              widget.question.ans!.first.ans)
+                          : correctHtml
+                  //  '<p><strong>1.&nbsp; &#x200E;<span data-input="8|7"></span> <img src="1A.png" width="133" height="37" />&#x200E;</strong></p>'
+                  /*'<div class="math-row" data-layout="row"> <span class="math-index">1.</span> <span class="math-input" data-input="8|7">□</span> <span class="math-img" data-img="1A.png"></span></div>'*/
+                      ,quizId: widget.question.quizId,
+                      onInputWidgetRequested: (s) {
+                                // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
+                                // myControllers.add(textEditingController);
+                                return createTextField(
+                    myControllers[i++], focusNodes[j++], i - 1);
+                              }),
+                )),
           ]),
     );
   }
@@ -111,28 +122,32 @@ class _FillInState extends State<FillIn> {
     return Padding(
         padding: EdgeInsets.only(top: 25.h),
         child: Column(children: [
-          HtmlDataWidget(
-            widget.question.question,
-            quizId: widget.question
-                .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
+          Container(
+            margin: EdgeInsets.only(right: 10.w),
+            child: HtmlDataWidget(
+              widget.question.question,
+              quizId: widget.question
+                  .quizId, /*style: const TextStyle(fontSize: 30, color: Colors.cyan)*/
+            ),
           ),
           SizedBox(
             height: 35.h,
           ),
-          HtmlDataWidget(
-            replaceCurlyBracesWithTextFields(
-                widget.question.ans!.first.ans, true),
-            quizId: widget.question.quizId,
-            onInputWidgetRequested: (s) {
-              String? value = s[0];
-              List<String> aa = extractStrings(value!.contains('|')
-                  ? value.substring(0, value.indexOf('|'))
-                  : value);
-              String? userInput = s[1];
-              return InlineCustomWidget(
-                child: displayItemAnswer(aa, userInput!),
-              );
-            },
+          Container(
+            margin: EdgeInsets.only(right: 10.w),
+            child: HtmlDataWidget(
+              replaceCurlyBracesWithTextFields(
+                  widget.question.ans!.first.ans, true),
+              quizId: widget.question.quizId,
+              onInputWidgetRequested: (s) {
+                String? value = s[0];
+                List<String> aa = extractStrings(value!.contains('|')
+                    ? value.substring(0, value.indexOf('|'))
+                    : value);
+                String? userInput = s[1];
+                return displayItemAnswer(aa, userInput!);
+              },
+            ),
           ),
 
           // HtmlWidget(
@@ -175,44 +190,41 @@ class _FillInState extends State<FillIn> {
       fontSize: 22.sp,
     );
     final double textFieldWidth = calculateMaxWidth(correctAnswers[index], textStyle);
-    debugPrint('textFieldWidth $textFieldWidth');
     // maxTextFieldWidth=textFieldWidth>maxTextFieldWidth?textFieldWidth:maxTextFieldWidth;
-    return InlineCustomWidget(
-      child: Container(
-              height: 40.h,
-              width: 160.w,
-              padding: EdgeInsets.only(right: 5.w, left: 5.w),
-              alignment: Alignment.center,
-              margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
-              child: TextFormField(
-                textInputAction: TextInputAction.next,
-                obscureText: false,
-                textAlignVertical: TextAlignVertical.center,
-                controller: controller,
-                focusNode: focusNode,
-                textAlign: TextAlign.center,
-                cursorColor: Colors.black,
-                //   maxLines: null, // Allow multiple lines to handle long text without spaces
-                style:textStyle,
-                decoration: InputDecoration(
-                  // isCollapsed: true,
-                  border: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black)),
-                  contentPadding:
-                      EdgeInsets.only(top: 10.h, right: 10.w, left: 10.w),
-                  // isDense: true,
-                ),
-                onEditingComplete: () {
-                  if (index < myControllers.length - 1) {
-                    FocusScope.of(context).requestFocus(focusNodes[index + 1]);
-                  } else {
-                    FocusScope.of(context).requestFocus(focusNodes[0]);
-                  }
-                },
-              )),
-    );
+    return Container(
+            height: 40.h,
+            width: 160.w,
+            padding: EdgeInsets.only(right: 5.w, left: 5.w),
+            alignment: Alignment.center,
+            margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
+            child: TextFormField(
+              textInputAction: TextInputAction.next,
+              obscureText: false,
+              textAlignVertical: TextAlignVertical.center,
+              controller: controller,
+              focusNode: focusNode,
+              textAlign: TextAlign.center,
+              cursorColor: Colors.black,
+              //   maxLines: null, // Allow multiple lines to handle long text without spaces
+              style:textStyle,
+              decoration: InputDecoration(
+                // isCollapsed: true,
+                border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black)),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black)),
+                contentPadding:
+                    EdgeInsets.only(top: 10.h, right: 10.w, left: 10.w),
+                // isDense: true,
+              ),
+              onEditingComplete: () {
+                if (index < myControllers.length - 1) {
+                  FocusScope.of(context).requestFocus(focusNodes[index + 1]);
+                } else {
+                  FocusScope.of(context).requestFocus(focusNodes[0]);
+                }
+              },
+            ));
   }
 
   double calculateMaxWidth(List<String> ansList, TextStyle style) {
@@ -266,11 +278,18 @@ class _FillInState extends State<FillIn> {
                   ? Colors.greenAccent.withOpacity(0.7)
                   : null,
               child: Text(
+                  textDirection:isMathText( correctAnswer.contains(displayUserAnswer)
+                      ? displayUserAnswer
+                      : '($s)') ?TextDirection.ltr:null,
                   correctAnswer.contains(displayUserAnswer)
                       ? displayUserAnswer
                       : '($s)',
                   style: TextStyle(color: blackColorApp)))
         ]));
+  }
+
+  bool isMathText(String s) {
+    return RegExp(r'^[0-9\-\+\.\,\(\)\s]+$').hasMatch(s);
   }
 
   String replaceCurlyBracesWithTextFields(String htmlContent,
@@ -294,10 +313,12 @@ class _FillInState extends State<FillIn> {
       }
       if (displayAnswer) {
         debugPrint(
-            'initialValue $initialValue answer ${myControllers[i].text}');
-        return '<input type="text" value="$initialValue" dirname="${myControllers[i++].text}"  />';
+            'initialValue $initialValue answer ${htmlEscape.convert(myControllers[i].text)}');
+        return '<span data-input="$initialValue" data-answer="${htmlEscape.convert(myControllers[i++].text)}" ></span>';
+       // return '<input type="text" value="$initialValue" dirname="${myControllers[i++].text}"  />';
       } else {
-        return '<input type="text" value="$initialValue" />';
+     // return '<input type="text" value="$initialValue" />';
+       return '<span data-input="$initialValue"></span>';
       }
     });
     //debugPrint('correctHtml $correctHtml');
