@@ -103,8 +103,6 @@ class _FillInState extends State<FillIn> {
                          ? replaceCurlyBracesWithTextFields(
                               widget.question.ans!.first.ans)
                           : correctHtml
-                  //  '<p><strong>1.&nbsp; &#x200E;<span data-input="8|7"></span> <img src="1A.png" width="133" height="37" />&#x200E;</strong></p>'
-                  /*'<div class="math-row" data-layout="row"> <span class="math-index">1.</span> <span class="math-input" data-input="8|7">□</span> <span class="math-img" data-img="1A.png"></span></div>'*/
                       ,quizId: widget.question.quizId,
                       onInputWidgetRequested: (s) {
                                 // var textEditingController = TextEditingController(text: correctAnswers[i++].first );

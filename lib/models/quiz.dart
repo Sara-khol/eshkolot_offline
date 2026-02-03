@@ -226,8 +226,8 @@ class CustomQuizQuestionsFields {
     type = json['type'];
     height = json['height'] ?? '';
     width = json['width'] ?? '';
-    xPosition = json['x_position'];
-    yPosition = json['y_position'];
+    xPosition = json['x_position']?.toString() ?? '';
+    yPosition = json['y_position']?.toString() ?? '';
     maxWidth = json['max_width'] ?? '';
     editable = json['editable'] ?? '';
     correctAnswer = json['correct_answer'] ?? '';

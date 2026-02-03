@@ -53,8 +53,15 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
         future: initDirectory(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final raw = HtmlUnescape().convert(addBreakAfterImgs(convertCustomAudioTags(widget.text)));
-            final fixed = normalizeInputImgBlock(normalizeStrongWrappedImgInput(raw));
+            var raw = HtmlUnescape().convert(convertCustomAudioTags(widget.text));
+            if(widget.quizId==31692)
+            {
+              debugPrint('noDirrrrr');
+              raw = removeDirectionStyle(raw);
+            }
+            final withLines = normalizeLineBreaks(raw);
+
+            final fixed = normalizeNumberedEquationLine(normalizeInputImgBlock(normalizeStrongWrappedImgInput(withLines)));
             debugPrint('html: $fixed');
             return SelectionArea(
                 focusNode: _focusNode,
@@ -532,8 +539,35 @@ try{
       r'(<img\b[^>]*>)(?!\s*<br\s*/?>)',
       caseSensitive: false,
     );
- // return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
+ //return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
     return html;
+  }
+
+  String normalizeLineBreaks(String html) {
+    // 1. מאחדת סוגי אנטרים שונים (\r\n, \r) ל-\n
+    String result = html.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+
+    // 2. ממירה אנטרים ל-<br/>
+    result = result.replaceAll('\n', '<br/>');
+
+    // 3. מבטיחה שתגיות בלוק יגרמו לשורה חדשה
+    // const blockTags = ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+    // for (final tag in blockTags) {
+    //   result = result.replaceAllMapped(
+    //     RegExp('</$tag>', caseSensitive: false),
+    //         (m) => '</$tag><br/>',
+    //   );
+    // }
+
+    return result;
+  }
+
+  String removeDirectionStyle(String html) {
+    // מסיר direction: ltr !important מכל style
+    return html.replaceAll(
+      RegExp(r'direction\s*:\s*ltr\s*!important;?', caseSensitive: false),
+      '',
+    );
   }
 
   String normalizeStrongWrappedImgInput(String html) {
@@ -653,6 +687,39 @@ try{
     });
 
     return html;
+  }
+
+  //for fixing 31692 questionare ,second question 31707 , second line
+  //in אלגברה בסיסית ב 34797
+  String normalizeNumberedEquationLine(String html) {
+    final re = RegExp(
+      r'(<p\b[^>]*>)\s*'
+      r'<strong>\s*(<span\b[^>]*data-input="([^"]+)"[^>]*>\s*</span>)\s*</strong>\s*'
+      r'=\s*'
+      r'(<img\b[^>]*>)\s*'
+      r'<strong>\s*(?:&nbsp;|\s)*\.?(\d+)\s*</strong>\s*'
+      r'(</p>)',
+      caseSensitive: false,
+    );
+
+    return html.replaceAllMapped(re, (m) {
+      final pOpen = m.group(1)!;        // <p ...>
+      final inputSpan = m.group(2)!;    // <span data-input="..."></span>
+      final img = m.group(4)!;          // <img ...>
+      final num = m.group(5)!;          // 2
+      final pClose = m.group(6)!;       // </p>
+
+      // מוסיפים dir=ltr רק אם אין כבר (כדי לא לשבור אחרים)
+      final hasDir = RegExp('\bdir\s*=\s*["\']ltr["\']', caseSensitive: false).hasMatch(pOpen) ||
+          RegExp(r'direction\s*:\s*ltr', caseSensitive: false).hasMatch(pOpen);
+
+      final newPOpen = hasDir
+          ? pOpen
+          : pOpen.replaceFirst(RegExp(r'<p\b', caseSensitive: false), '<p dir="ltr"');
+
+      // סדר חד-משמעי: 2.  img = input
+      return '$newPOpen<strong>$num.</strong> $img = $inputSpan$pClose';
+    });
   }
 
 
