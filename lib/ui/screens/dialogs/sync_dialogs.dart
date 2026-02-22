@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:eshkolot_offline/models/linkQuizIsar.dart';
 import 'package:eshkolot_offline/services/api_service.dart';
 import 'package:eshkolot_offline/services/download_data_service.dart';
@@ -45,7 +44,6 @@ class _SyncDialogsState extends State<SyncDialogs>
 
   late StreamSubscription subscription;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
-  Map _source = {ConnectivityResult.none: false};
   bool onlyOnce = true;
   late StreamSubscription eventSubscription;
 
@@ -123,34 +121,38 @@ class _SyncDialogsState extends State<SyncDialogs>
     super.initState();
   }
 
-  listenToNetWork() {
-    _networkConnectivity.reOpen();
-    subscription = _networkConnectivity.myStream.listen((source) async {
-      _source = source;
-      debugPrint('source11 $_source');
-      if (_source.keys.toList()[0] == ConnectivityResult.none) {
-        onlyOnce = true;
-        isNetWorkConnection = false;
-        lastMainWidget = mainWidget;
-        mainWidget = showOfflineSyncWidget();
-        ApiService().cancelRequests();
 
-        if (mounted) {
-          setState(() {});
-        }
-      } else if (onlyOnce) {
-        isNetWorkConnection = true;
-        onlyOnce = false;
-        Navigator.of(context).pop();
-      }
-    });
+  listenToNetWork() {
+    subscription =
+        NetworkConnectivity.instance.stream.listen((isOnline) {
+
+          if (!isOnline) {
+            onlyOnce = true;
+            isNetWorkConnection = false;
+            lastMainWidget = mainWidget;
+            mainWidget = showOfflineSyncWidget();
+            ApiService().cancelRequests();
+
+            if (mounted) {
+              setState(() {});
+            }
+          } else if (onlyOnce) {
+            isNetWorkConnection = true;
+            onlyOnce = false;
+
+            if (Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
+          }
+        });
   }
+
 
 // todo 1
   Future<List<VideoIsar>> isVideosDownload(bool newCourse) async {
     debugPrint('===isVideosDownload===');
     // isNetWorkConnection = await checkConnectivity();
-    isNetWorkConnection = await _networkConnectivity.isOnlineStable();
+    isNetWorkConnection = await _networkConnectivity.checkNow();
 
     allDownloadedVideos =
         await IsarService().checkIfAllVideosAreDownloaded(newCourse);
@@ -164,8 +166,7 @@ class _SyncDialogsState extends State<SyncDialogs>
 
   Future<List<LinkQuizIsar>> isLinksDownload(bool newCourse) async {
     debugPrint('isLinksDownload');
-    // isNetWorkConnection = await checkConnectivity();
-    isNetWorkConnection = await _networkConnectivity.isOnlineStable();
+    isNetWorkConnection = await _networkConnectivity.checkNow();
 
     allDownloadedLinks =
         await IsarService().checkIfAllLinksAreDownloaded(newCourse);
@@ -698,8 +699,6 @@ class _SyncDialogsState extends State<SyncDialogs>
     debugPrint('jjj dispose');
 
     subscription.cancel();
-    //mmm
-    _networkConnectivity.disposeStream();
     _networkConnectivity.whileDownloading = false;
     ApiService().cancelRequests();
     eventSubscription.cancel();

@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:eshkolot_offline/models/course.dart';
 import 'package:eshkolot_offline/models/videoIsar.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -39,7 +36,7 @@ class VimoeService with ChangeNotifier {
   CancelToken cancelToken = CancelToken();
   late String path;
   bool finishConnectToVimoe = false;
-  Map _source = {ConnectivityResult.none: false};
+  bool _source =false;
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   late bool isNetWorkConnection;
   bool isDispose = false;
@@ -110,10 +107,10 @@ class VimoeService with ChangeNotifier {
     _networkConnectivity.whileDownloading = true;
     //_networkConnectivity.initialise();
 
-    subscription = _networkConnectivity.myStream.listen((source) async {
+    subscription = _networkConnectivity.stream.listen((source) async {
       _source = source;
       debugPrint('source222 $_source');
-      if (_source.keys.toList()[0] == ConnectivityResult.none) {
+      if (!_source) {
         // if (downloadStatus != DownloadStatus.netWorkError) {
         if (timer != null && timer!.isActive) {
           timer!.cancel();
@@ -705,7 +702,7 @@ class VimoeService with ChangeNotifier {
 
       subscription.cancel();
       //makes a problem
-      _networkConnectivity.disposeStream();
+
       _networkConnectivity.whileDownloading = false;
 
       if (timer != null && timer!.isActive) {

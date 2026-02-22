@@ -140,7 +140,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                                     onPressed: () async {
                                       // if (controller.text.isNotEmpty) {
                                       //   if (isEmail(controller.text)) {
-                                      if(await NetworkConnectivity.instance.isOnlineStable()) {
+                                      if(await NetworkConnectivity.instance.checkNow()) {
                                         setState(() {
                                           isLoading = true;
                                         });

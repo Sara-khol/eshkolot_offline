@@ -1,7 +1,6 @@
 import 'dart:async';
 
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:eshkolot_offline/models/course.dart';
 import 'package:eshkolot_offline/models/linkQuizIsar.dart';
@@ -9,7 +8,6 @@ import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:sentry_dio/sentry_dio.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,7 +38,6 @@ class DownloadService with ChangeNotifier {
   final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   List<int> courseIds = [];
 
-  Map _source = {ConnectivityResult.none: false};
 
   // final NetworkConnectivity _networkConnectivity = NetworkConnectivity.instance;
   late bool isNetWorkConnection = false;
@@ -75,11 +72,10 @@ class DownloadService with ChangeNotifier {
       // _networkConnectivity.initialise();
       preferences = await SharedPreferences.getInstance();
 
-      subscription = _networkConnectivity.myStream.listen((source) async {
-        _source = source;
-        debugPrint('source222 $_source');
-        if (_source.keys.toList()[0] == ConnectivityResult.none) {
-          // if (downloadStatus != DownloadStatus.netWorkError) {
+      subscription = _networkConnectivity.stream.listen((isOnline) async {
+
+        if (!isOnline) {
+
           if (timer != null && timer!.isActive) {
             timer!.cancel();
           }
@@ -92,24 +88,42 @@ class DownloadService with ChangeNotifier {
           debugPrint('no connection so cancel downloading');
           Sentry.addBreadcrumb(
               Breadcrumb(message: 'no connection so cancel downloading'));
-          // }
-        } /*else {
-          // if (downloadStatus == DownloadStatus.netWorkError) {
-          downloadStatus = lastDownLoadStatus;
-          notifyListeners();
-          isNetWorkConnection = true;
-          //if in middle to download videos
-
-          debugPrint('jjjj ${getAllDownloaded().map((v) => v.id)}');
-          debugPrint('jjjj ${getAllDownloaded().length}');
-
-          debugPrint('aaaaagain');
-          if (cancelToken.isCancelled) {
-            cancelToken = CancelToken();
-          }
-          startDownLoading(wasNetWorkProblem: true);
-        }*/
-        //}
+        } else {
+          // Online
+        }
+        // debugPrint('source222 $_source');
+        // if (_source.keys.toList()[0] == ConnectivityResult.none) {
+        //   // if (downloadStatus != DownloadStatus.netWorkError) {
+        //   if (timer != null && timer!.isActive) {
+        //     timer!.cancel();
+        //   }
+        //   isNetWorkConnection = false;
+        //   //  downloadStatus = DownloadStatus.netWorkError;
+        //   notifyListeners();
+        //   //   cancelToken.cancel('wwwwwww');
+        //   cancelAllDownloads();
+        //
+        //   debugPrint('no connection so cancel downloading');
+        //   Sentry.addBreadcrumb(
+        //       Breadcrumb(message: 'no connection so cancel downloading'));
+        //   // }
+        // } /*else {
+        //   // if (downloadStatus == DownloadStatus.netWorkError) {
+        //   downloadStatus = lastDownLoadStatus;
+        //   notifyListeners();
+        //   isNetWorkConnection = true;
+        //   //if in middle to download videos
+        //
+        //   debugPrint('jjjj ${getAllDownloaded().map((v) => v.id)}');
+        //   debugPrint('jjjj ${getAllDownloaded().length}');
+        //
+        //   debugPrint('aaaaagain');
+        //   if (cancelToken.isCancelled) {
+        //     cancelToken = CancelToken();
+        //   }
+        //   startDownLoading(wasNetWorkProblem: true);
+        // }*/
+        // //}
       });
 
       coursesNotCompleted = false;

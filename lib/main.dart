@@ -14,7 +14,6 @@ import 'package:eshkolot_offline/services/localFileHelper.dart';
 import 'package:eshkolot_offline/services/network_check.dart';
 import 'package:eshkolot_offline/ui/screens/login/login_page.dart';
 import 'package:eshkolot_offline/ui/screens/main_page/title_bar_widget.dart';
-import 'package:eshkolot_offline/ui/screens/main_page/top_bar_user_widget.dart';
 import 'package:eshkolot_offline/utils/common_funcs.dart';
 import 'package:eshkolot_offline/utils/constants.dart' as Constants;
 import 'package:flutter/cupertino.dart';
@@ -23,7 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_size/window_size.dart';
@@ -39,7 +37,6 @@ import 'package:path/path.dart' as p;
 
 // import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'models/videoIsar.dart';
-import 'package:eshkolot_offline/utils/my_colors.dart' as colors;
 import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
 
 class MyRootApp extends StatefulWidget {
@@ -249,7 +246,7 @@ Future<void> main() async {
     FutureOr<SentryEvent?> beforeSend(SentryEvent event, Hint hint) async {
       var connectivityResult = await Connectivity().checkConnectivity();
 
-      if (!await NetworkConnectivity.instance.isOnlineStable()) {
+      if (!await NetworkConnectivity.instance.checkNow()) {
         String eventJson = const JsonEncoder().convert(event.toJson());
         await LocalFileHelper().writeEvent(eventJson);
         return null;
