@@ -133,7 +133,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
     calHeight = calcFieldHeight(
             fontSize: font??14.0,
             originalFont: double.parse(field.fontSize));
-    debugPrint('calHeight $calHeight');
+    //debugPrint('calHeight $calHeight');
         }
         inputIndex++;
         final int currentIndex = inputIndex;
@@ -150,7 +150,7 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
         overlayInteractiveItems.add(
             Positioned(
               key: ValueKey('q_${widget.question.idQues}_input_$currentIndex'),
-              left: x,
+              left:x,
               top: y,
               child: SizedBox(
                 width: wrapW,
@@ -225,13 +225,16 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
 
       if(field.type=='image')
         {
+          // debugPrint('IMG ${field.name} x=${field.xPosition} y=${field.yPosition} '
+          //     'w=${field.width} h=${field.height}  ->  '
+          //     'sx=$x sy=$y sw=$w sh=$h  scale=$scale  myWidth=$myWidth myHeight=$myHeight');
           backgroundItems.add(Positioned(
-            left: x,
-              top: y,
+              left:  x<0?0:x,
+              top: y<0?0:y,
               child: (field.defaultValue.isNotEmpty
               ? GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: (){
+                onTap: () {
                   debugPrint('details: image');
                   debugPrint('name: ${field.name}');
                   debugPrint('font: ${field.fontSize} $font');
@@ -252,7 +255,8 @@ class _UpgradedEditorWidgetState extends State<UpgradedEditorWidget> {
         }
 else
   {
-    foregroundItems.add(Positioned(  left: x,
+    foregroundItems.add(Positioned(
+        left: x,
         top: y,
         child: SizedBox(
           width:maxW,
@@ -281,8 +285,8 @@ else
           ),
         )));
   }
-      // --------- Non-editable: keep in the base layer as-is ----------
 
+      // --------- Non-editable: keep in the base layer as-is ----------
    //   positionedItems.add(myW);
     }
   //  debugPrint('inputIndex ${inputIndex+1} positionedItems.length ${positionedItems.length}');
@@ -376,9 +380,6 @@ else {
       {
         // debugPrint('constraints: ${constraints.maxWidth}');
         // debugPrint('screen: ${ScreenUtil().screenWidth}');
-
-
-
         final scaleX = constraints.maxWidth / baseW;
         final scaleY = constraints.maxHeight / baseH;
         final scale = constraints.maxWidth / baseW;
@@ -389,49 +390,59 @@ else {
         final canvasH = baseH * scale;
 
 
-        debugPrint('scaleX $scaleX scaleY $scaleY');
-        debugPrint('scale $scale');
+        // debugPrint('scaleX $scaleX scaleY $scaleY');
+        // debugPrint('scale $scale');
+        return  GestureDetector(
+          onTapDown: (details) {
+            final local = details.localPosition;
+
+            final double realX = local.dx / _scale;
+            final double realY = local.dy / _scale;
+
+            debugPrint('Tapped screen: ${local.dx}, ${local.dy}');
+            debugPrint('Tapped logical (0-200 system): $realX , $realY');
+
+          },
+          child: SizedBox(
+                         height: canvasH,
+                        child: SizedBox(
+                          width: canvasW/*myWidth*/,  // <- dynamic canvas width
+                          height: canvasH/*myHeight*/,
+                          child:Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              // ---------- BACKGROUND (תמיד מאחור) ----------
+                              ...backgroundItems,
+
+                              // ---------- CONTENT / ANSWERS ----------
+
+                                ...foregroundItems,
 
 
-        return  SizedBox(
-                       height: canvasH,
-                      child: SizedBox(
-                        width: canvasW/*myWidth*/,  // <- dynamic canvas width
-                        height: canvasH/*myHeight*/,
-                        child:Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // ---------- BACKGROUND (תמיד מאחור) ----------
-                            ...backgroundItems,
+                              // ---------- INPUTS (תמיד מעל הכול) ----------
 
-                            // ---------- CONTENT / ANSWERS ----------
+                                ...overlayInteractiveItems,
+                            ],
+                          )
 
-                              ...foregroundItems,
+                          /*Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              // base layer (images/text)
+                              Stack(clipBehavior: Clip.none,
+                                  children:!isAnswer ?positionedItems:setPositionItemsAnswer(scale)),
 
+                              // overlay inputs
+                              // (Tip: TextField should not scroll itself)
+                             if(!isAnswer) ...overlayInteractiveItems,
+                            ],
+                          ),*/
+                                        //    ),
+                                        //  ),
 
-                            // ---------- INPUTS (תמיד מעל הכול) ----------
-
-                              ...overlayInteractiveItems,
-                          ],
-                        )
-
-                        /*Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // base layer (images/text)
-                            Stack(clipBehavior: Clip.none,
-                                children:!isAnswer ?positionedItems:setPositionItemsAnswer(scale)),
-
-                            // overlay inputs
-                            // (Tip: TextField should not scroll itself)
-                           if(!isAnswer) ...overlayInteractiveItems,
-                          ],
-                        ),*/
-                                      //    ),
-                                      //  ),
-
-                              ),
-                  //  )
+                                ),
+                    //  )
+          ),
         );
       }}
     );

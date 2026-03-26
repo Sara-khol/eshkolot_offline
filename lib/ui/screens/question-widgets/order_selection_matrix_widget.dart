@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'dart:async';
 
 import 'package:eshkolot_offline/models/quiz.dart';
 import 'package:eshkolot_offline/ui/custom_widgets/html_data_widget.dart';
@@ -14,9 +15,14 @@ import '../course_main/questionnaire_tab.dart';
 class OrderSelectionMatrixWidget extends StatefulWidget {
   final Question question;
   final QuestionController questionController;
+  final ScrollController pageScrollController;
+  final GlobalKey pageScrollKey;
+
+
 
   const OrderSelectionMatrixWidget(this.question,
-      {super.key, required this.questionController});
+      {super.key, required this.questionController, required this.pageScrollController, required this.pageScrollKey,
+      });
 
   @override
   State<OrderSelectionMatrixWidget> createState() =>
@@ -24,7 +30,7 @@ class OrderSelectionMatrixWidget extends StatefulWidget {
 }
 
 class _OrderSelectionMatrixWidgetState
-    extends State<OrderSelectionMatrixWidget> {
+    extends State<OrderSelectionMatrixWidget>  {
   // List<int> maxSimultaneousDrags = [];
   List<String> randomList = [];
   List<String> matrixMatchList = [];
@@ -36,6 +42,10 @@ class _OrderSelectionMatrixWidgetState
   bool isDragging = false;
   late bool isHtml;
   late double maxTextWidth;
+
+  Timer? _autoScrollTimer;
+  Offset? _lastGlobalPosition;
+  bool _isDraggingNow = false;
 
   @override
   void initState() {
@@ -106,6 +116,19 @@ class _OrderSelectionMatrixWidgetState
                   ignoring: ans.contains(matrixMatchList[i]),
                   child: Draggable<String>(
                     dragAnchorStrategy: pointerDragAnchorStrategy,
+                    onDragStarted: () {
+                      _isDraggingNow = true;
+                      _startAutoScroll();
+                    },
+                    onDragUpdate: (details) {
+                      _updateDragPosition(details.globalPosition);
+                    },
+                    onDragEnd: (_) {
+                      _stopAutoScroll();
+                    },
+                    onDraggableCanceled: (_, __) {
+                      _stopAutoScroll();
+                    },
                     // Data is the value this Draggable stores.
                     data: matrixMatchList[i],
                     feedback: Material(
@@ -114,6 +137,7 @@ class _OrderSelectionMatrixWidgetState
                     ),
                     childWhenDragging: dragWidget(i, changeBackground: true),
                     child: dragWidget(i),
+
                   ),
                 );
               })),
@@ -203,6 +227,19 @@ class _OrderSelectionMatrixWidgetState
                               // maxSimultaneousDrags: maxSimultaneousDrags[i],
                               // Data is the value this Draggable stores.
                               data: ans[i],
+                                  onDragStarted: () {
+                                    _isDraggingNow = true;
+                                    _startAutoScroll();
+                                  },
+                                  onDragUpdate: (details) {
+                                    _updateDragPosition(details.globalPosition);
+                                  },
+                                  onDragEnd: (_) {
+                                    _stopAutoScroll();
+                                  },
+                                  onDraggableCanceled: (_, __) {
+                                    _stopAutoScroll();
+                                  },
                               feedback: Material(
                                 child: dragWidget(i, isAnswer: true),
                               ),
@@ -476,6 +513,77 @@ class _OrderSelectionMatrixWidgetState
           ],
         ));
   }
+
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!_isDraggingNow || _lastGlobalPosition == null) return;
+      _handleAutoScroll(_lastGlobalPosition!);
+    });
+  }
+
+  void _stopAutoScroll() {
+    _isDraggingNow = false;
+    _lastGlobalPosition = null;
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = null;
+  }
+
+  void _updateDragPosition(Offset globalPosition) {
+    _lastGlobalPosition = globalPosition;
+  }
+
+  void _handleAutoScroll(Offset globalPosition) {
+    final controller = widget.pageScrollController;
+    if (!controller.hasClients) return;
+
+    final scrollContext = widget.pageScrollKey.currentContext;
+    if (scrollContext == null) return;
+
+    final box = scrollContext.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+
+    final scrollTopLeft = box.localToGlobal(Offset.zero);
+    final scrollTop = scrollTopLeft.dy;
+    final scrollHeight = box.size.height;
+    final scrollBottom = scrollTop + scrollHeight;
+
+    const edgeThreshold = 140.0;
+    const maxStep = 28.0;
+
+    double delta = 0;
+
+    if (globalPosition.dy >= scrollTop &&
+        globalPosition.dy < scrollTop + edgeThreshold) {
+      final strength =
+          (scrollTop + edgeThreshold - globalPosition.dy) / edgeThreshold;
+      delta = -maxStep * strength;
+    } else if (globalPosition.dy <= scrollBottom &&
+        globalPosition.dy > scrollBottom - edgeThreshold) {
+      final strength =
+          (globalPosition.dy - (scrollBottom - edgeThreshold)) / edgeThreshold;
+      delta = maxStep * strength;
+    }
+
+    if (delta == 0) return;
+
+    final newOffset = (controller.offset + delta).clamp(
+      controller.position.minScrollExtent,
+      controller.position.maxScrollExtent,
+    );
+
+    if ((newOffset - controller.offset).abs() < 0.5) return;
+
+    controller.jumpTo(newOffset);
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    super.dispose();
+  }
+
 }
 
 extension ConditionalWrap on Widget {
