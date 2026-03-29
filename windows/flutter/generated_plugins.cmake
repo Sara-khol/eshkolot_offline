@@ -14,7 +14,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   sentry_flutter
   syncfusion_pdfviewer_windows
   url_launcher_windows
-  volume_controller
   window_size
 )
 

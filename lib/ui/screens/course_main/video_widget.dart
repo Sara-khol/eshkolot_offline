@@ -58,15 +58,28 @@ class _VideoWidgetState extends State<VideoWidget>
     super.initState();
   }
 
+  // @override
+  // void didUpdateWidget(covariant VideoWidget oldWidget) {
+  //   if(oldWidget.videoId!=widget.videoId ||oldWidget.fileId!=widget.fileId)
+  //     {
+  //       if(videoExists) {
+  //         player.dispose();
+  //       }
+  //       myFuture = videoInit();
+  //     }
+  //   super.didUpdateWidget(oldWidget);
+  // }
+
   @override
   void didUpdateWidget(covariant VideoWidget oldWidget) {
-    if(oldWidget.videoId!=widget.videoId ||oldWidget.fileId!=widget.fileId)
-      {
-        if(videoExists) {
-          player.dispose();
-        }
-        myFuture = videoInit();
-      }
+    if (oldWidget.videoId != widget.videoId ||
+        oldWidget.fileId != widget.fileId) {
+      try {
+        player.dispose();
+      } catch (_) {}
+
+      myFuture = videoInit();
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -125,6 +138,7 @@ class _VideoWidgetState extends State<VideoWidget>
         player.open(Media(path), play: false);
       }
       debugPrint('videoExists  $videoExists');
+      if (!mounted) return videoExists;
       setState(() {});
     } else {
       videoExists = false;
@@ -133,13 +147,23 @@ class _VideoWidgetState extends State<VideoWidget>
     return videoExists;
   }
 
+  // @override
+  // void dispose() {
+  //   if(videoExists) {
+  //     player.dispose();
+  //   }
+  //   super.dispose();
+  // }
+
   @override
   void dispose() {
-    if(videoExists) {
+    try {
       player.dispose();
-    }
+    } catch (_) {}
     super.dispose();
   }
+
+
 
   @override
   bool get wantKeepAlive => true;
