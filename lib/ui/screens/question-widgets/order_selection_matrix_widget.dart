@@ -38,7 +38,8 @@ class _OrderSelectionMatrixWidgetState
   // List<String> correctAnswersList = [];
   List<String> ans = [];
   List<bool> isCorrectList = [];
-  List<int> numPointsList = [];
+ List<int> numPointsList = [];
+  late int numPointsForEachItem;
   bool isDragging = false;
   late bool isHtml;
   late double maxTextWidth;
@@ -71,9 +72,13 @@ class _OrderSelectionMatrixWidgetState
     // widget.questionController.isCorrect = isCorrect;
     matrixMatchList =
         widget.question.ans!.map((e) => e.matrixMatch ?? '').toList();
-    numPointsList = widget.question.ans!.map((e) => e.points ?? 0).toList();
     List<String> correctAnswersList =
-        widget.question.ans!.map((e) => e.ans).toList();
+    widget.question.ans!.map((e) => e.ans).toList();
+    //the points are not always correct ,
+    // so divde all points in item count for each question item
+    numPointsForEachItem=(widget.question.points/correctAnswersList.length).floor(); ;
+    numPointsList = widget.question.ans!.map((e) => e.points ?? 0).toList();
+
     ans = List<String>.generate(correctAnswersList.length, (index) => '');
     isCorrectList =
         List<bool>.generate(correctAnswersList.length, (index) => false);
@@ -382,7 +387,7 @@ class _OrderSelectionMatrixWidgetState
     return ans.every((item) => item.isNotEmpty);
   }
 
-  int isCorrect() {
+/*  int isCorrect() {
     if (widget.question.points > 1) {
       int numPoints = 0;
       for (int i = 0; i < isCorrectList.length; i++) {
@@ -392,6 +397,30 @@ class _OrderSelectionMatrixWidgetState
       }
       return numPoints;
     } else {
+      if (isCorrectList.every((element) => element == true)) {
+        return widget.question.points; //always 1
+      }
+      return 0;
+    }
+  }*/
+
+  int isCorrect() {
+    if (widget.question.points > 1) {
+      int sum = numPointsList.fold(0, (a, b) => a + b);
+      debugPrint('isCorrect $sum');
+        int numPoints = 0;
+        for (int i = 0; i < isCorrectList.length; i++) {
+          if (isCorrectList[i]) {
+            // if question points does not get together to total of sum  points
+            //of each qu item
+            //so each item gets total points divded by number items
+            numPoints +=  widget.question.points != sum?
+              numPointsForEachItem:numPointsList[i];
+          }
+        }
+        return numPoints;
+
+    }else {
       if (isCorrectList.every((element) => element == true)) {
         return widget.question.points; //always 1
       }
