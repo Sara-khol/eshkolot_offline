@@ -302,9 +302,16 @@ class _FillInState extends State<FillIn> {
             : initialValue);
         debugPrint('==== correctAnswers $aa');
         correctAnswers.add(aa);
-        pointsList.add(initialValue.contains('|')
-            ? int.parse(initialValue.split('|')[1])
-            : 0);
+        // pointsList.add(initialValue.contains('|')
+        //     ? int.parse(initialValue.split('|')[1])
+        //     : 0);
+        final parts = initialValue.split('|');
+
+        pointsList.add(
+            parts.length > 1
+                ? int.tryParse(parts[1]) ?? 0
+                : 0
+        );
         var textEditingController = TextEditingController();
         myControllers.add(textEditingController);
         focusNodes.add(FocusNode());

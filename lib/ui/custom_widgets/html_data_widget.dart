@@ -489,18 +489,48 @@ try{
       debugPrint('yesss path $path');
       return file;
       //check if file exists in course file from vimeo
-    } else if (!isLesson) {
-      path =
-      //  '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
-      '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/${widget.quizId}';
-      File file = File(path);
-      if (await file.exists()) {
-        debugPrint('truuuuuuuuuu path $path');
-        return file;
+    } else
+    if (!isLesson && srcAttribute.contains('gif')) {
+
+      final options = buildLatexFileNameOptions(srcAttribute);
+
+      for (final fileName in options) {
+        path= '${appSupportDir!.path}/${Constants.quizPath}/'
+            '${widget.quizId}/$fileName';
+        final file = File(path);
+        if (file.existsSync()) {
+            debugPrint('ffffff path $path');
+            return file;
+        }
+        else
+          {
+            debugPrint('ffffff do not find path $path');
+          }
       }
+
       return null;
-    } else {
-      return null;
+    }
+      else {
+      if (!isLesson) {
+        path =
+        //  '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
+        '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild
+            .of(context)!
+            .widget
+            .course
+            .id}/${widget.quizId}';
+        File file = File(path);
+        if (await file.exists()) {
+          debugPrint('truuuuuuuuuu path $path');
+          return file;
+        }
+        else {
+
+        }
+        return null;
+      } else {
+        return null;
+      }
     }
   }
 
@@ -720,6 +750,39 @@ try{
       // סדר חד-משמעי: 2.  img = input
       return '$newPOpen<strong>$num.</strong> $img = $inputSpan$pClose';
     });
+  }
+
+  List<String> buildLatexFileNameOptions(String input) {
+    String base = input.replaceFirst('gif.latex', '').trim();
+
+    base = base.replaceAll(r'\large', 'large');
+
+    base = base.replaceAll(' ', '&amp;amp_space__');
+
+    base = base.replaceAllMapped(
+      RegExp(r'\\tfrac\{(\d+)\}\{(\d+)\}'),
+          (m) => 'tfrac_${m[1]}__${m[2]}_',
+    );
+
+    base = base.replaceAll(r'\', '');
+
+    final withPng = 'gif.latex_$base.png';
+
+    return {
+      withPng,
+
+      // תיקון נפוץ: להוסיף _ בין מספר לבין tfrac
+      withPng.replaceAllMapped(
+        RegExp(r'(\d)(tfrac_)'),
+            (m) => '${m[1]}_${m[2]}',
+      ),
+
+      // תיקון הפוך: להסיר _ לפני tfrac
+      withPng.replaceAllMapped(
+        RegExp(r'(\d)_(tfrac_)'),
+            (m) => '${m[1]}${m[2]}',
+      ),
+    }.toList();
   }
 
 
