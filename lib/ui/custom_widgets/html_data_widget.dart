@@ -47,7 +47,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
   @override
   Widget build(BuildContext context) {
     String s= convertCustomAudioTags(widget.text);
-  // debugPrint('html: $s');
+    // debugPrint('html: $s');
     return isHTML(s)
         ? FutureBuilder(
         future: initDirectory(),
@@ -61,11 +61,11 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
             }
             final withLines = normalizeLineBreaks(raw);
 
-            final fixed = normalizeNumberedEquationLine(normalizeInputImgBlock(normalizeStrongWrappedImgInput(withLines)));
+            final fixed = restoreRowBreaks(normalizeNumberedEquationLine(normalizeInputImgBlock(normalizeStrongWrappedImgInput(withLines))));
             debugPrint('html: $fixed');
             return SelectionArea(
                 focusNode: _focusNode,
-               child: HtmlWidget(fixed,
+                child: HtmlWidget(fixed,
                     textStyle:widget.textStyle ?? TextStyle(
                         fontSize: 27.sp /*20.sp*/,
                         fontWeight: FontWeight.w400,
@@ -103,80 +103,104 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     final tagName = element.localName;
 
 
-try{
-    if (element.localName == 'span' &&
-        element.attributes['data-layout'] == 'pair' &&
-        widget.onInputWidgetRequested != null) {
+    try{
+      if (element.localName == 'span' &&
+          element.attributes['data-layout'] == 'pair' &&
+          widget.onInputWidgetRequested != null) {
 
-      final inputVal = element.attributes['data-input'];
-      final answer   = element.attributes['data-answer'];
-      final order    = element.attributes['data-order'];
+        final inputVal = element.attributes['data-input'];
+        final answer   = element.attributes['data-answer'];
+        final order    = element.attributes['data-order'];
 
-      if (inputVal == null) return null;
+        if (inputVal == null) return null;
 
-      final imgs = element.querySelectorAll('img');
+        final imgs = element.querySelectorAll('img');
 
-      // 🔍 בדיקה אם יש direction:ltr באחד ההורים
-      bool isLtr = false;
-      dom.Element? p = element.parent;
-      while (p != null) {
-        final style = p.attributes['style'];
-        if (style != null && style.contains('direction: ltr')) {
-          isLtr = true;
-          break;
+        // 🔍 בדיקה אם יש direction:ltr באחד ההורים
+        bool isLtr = false;
+        dom.Element? p = element.parent;
+        while (p != null) {
+          final style = p.attributes['style'];
+          if (style != null && style.contains('direction: ltr')) {
+            isLtr = true;
+            break;
+          }
+          p = p.parent;
         }
-        p = p.parent;
-      }
 
-      final inputWidget = widget.onInputWidgetRequested!([inputVal, answer]);
+        final inputWidget = widget.onInputWidgetRequested!([inputVal, answer]);
 
-      final imageWidgets = imgs.asMap().entries.map((entry) {
-        final index = entry.key;
-        final img = entry.value;
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (index > 0) SizedBox(width: 20.w),
-            displayFile(
-              img.attributes['src']!,
-              img.attributes['height'],
-              img.attributes['width'],
-              WidgetType.image,
+        final imageWidgets = imgs.asMap().entries.map((entry) {
+          final index = entry.key;
+          final img = entry.value;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (index > 0) SizedBox(width: 20.w),
+              displayFile(
+                img.attributes['src']!,
+                img.attributes['height'],
+                img.attributes['width'],
+                WidgetType.image,
+              ),
+            ],
+          );
+        }).toList();
+
+        final children = <Widget>[];
+
+        // סדר לפי data-order
+        // הערה: ה-Wrap תמיד LTR (כדי שה-<br/> בין פריטים יעבוד).
+        // לכן כשהתוכן RTL (!isLtr) צריך להפוך את סדר הילדים ידנית
+        // כדי שה-input יופיע בצד ימין (כמו שהיה עם RTL Wrap).
+        if (order == 'img-first') {
+          if (isLtr) {
+            // LTR: תמונה שמאלה, input ימינה
+            children.add(SizedBox(width: 20.w));
+            children.addAll(imageWidgets);
+            children.add(SizedBox(width: 6.w));
+            children.add(inputWidget);
+          } else {
+            // RTL: input שמאלה, תמונה ימינה
+            children.add(inputWidget);
+            children.add(SizedBox(width: 6.w));
+            children.addAll(imageWidgets);
+            children.add(SizedBox(width: 20.w));
+          }
+        } else {
+          // input-first
+          if (isLtr) {
+            // LTR: input שמאלה, תמונה ימינה
+            children.add(inputWidget);
+            children.add(SizedBox(width: 6.w));
+            children.addAll(imageWidgets);
+            children.add(SizedBox(width: 20.w));
+          } else {
+            // RTL: תמונה שמאלה, input ימינה
+            // כשיש מספר תמונות — הופכים את הסדר:
+            // המקור {input} img1 img2 → קריאה RTL: input ימינה, img1 אחריו, img2 שמאלה
+            // ולכן בתצוגה שמאל←ימין: img2 | img1 | input  (= imageWidgets.reversed)
+            children.add(SizedBox(width: 20.w));
+            children.addAll(imageWidgets.reversed);
+            children.add(SizedBox(width: 6.w));
+            children.add(inputWidget);
+          }
+        }
+
+        return InlineCustomWidget(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 0,
+              children: children,
             ),
-          ],
+          ),
         );
-      }).toList();
-
-      final children = <Widget>[];
-
-      // סדר לפי data-order
-      if (order == 'img-first') {
-        children.add(SizedBox(width: 20.w),);
-        children.addAll(imageWidgets);
-        children.add(SizedBox(width: 6.w));
-        children.add(inputWidget);
-      } else {
-        children.add(inputWidget);
-        children.add(SizedBox(width: 6.w));
-        children.addAll(imageWidgets);
-        children.add(SizedBox(width: 20.w),);
-
       }
 
-      return InlineCustomWidget(
-        child: Directionality(
-          textDirection: isLtr ? TextDirection.ltr : TextDirection.rtl,
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 0,
-            children: children,
-          ),
-        ),
-      );
-    }
 
-
-    /*   if (element.localName == 'span' &&
+      /*   if (element.localName == 'span' &&
         element.attributes['data-layout'] == 'pair' &&
         widget.onInputWidgetRequested != null) {
 
@@ -237,67 +261,149 @@ try{
 
 
 
-    if (element.localName == 'span' &&
-        element.attributes['data-layout'] == 'triple' &&
-        widget.onInputWidgetRequested != null) {
+      // ===== text-between: [INPUT_A] טקסט [INPUT_B] (+ תמונה אופציונלית) =====
+      // מטפל בביטויים כמו {11}√{2} ו-{11}√{2}<img> שהפכו ל-data-layout="text-between"
+      if (element.localName == 'span' &&
+          element.attributes['data-layout'] == 'text-between' &&
+          widget.onInputWidgetRequested != null) {
+        final input1  = element.attributes['data-input1'];
+        final answer1 = element.attributes['data-answer1'];
+        final input2  = element.attributes['data-input2'];
+        final answer2 = element.attributes['data-answer2'];
+        final textContent = element.attributes['data-text'] ?? '';
+        if (input1 == null || input2 == null) return null;
 
-      final inputVal = element.attributes['data-input'];
-      final answer   = element.attributes['data-answer'];
+        // בדיקת isLtr מה-parent (כמו ב-pair)
+        bool isLtr = false;
+        dom.Element? ltrCheck = element.parent;
+        while (ltrCheck != null) {
+          final style = ltrCheck.attributes['style'];
+          if (style != null && style.contains('direction: ltr')) {
+            isLtr = true;
+            break;
+          }
+          ltrCheck = ltrCheck.parent;
+        }
 
-      if (inputVal == null) return null;
+        final inputWidget1 = widget.onInputWidgetRequested!([input1, answer1]);
+        final inputWidget2 = widget.onInputWidgetRequested!([input2, answer2]);
 
-      final imgs = element.querySelectorAll('img');
+        final textPadding = Padding(
+          padding: EdgeInsets.symmetric(horizontal: 6.w),
+          child: Text(textContent,
+              style: widget.textStyle ??
+                  TextStyle(fontSize: 27.sp, fontWeight: FontWeight.w400, color: blackColorApp)),
+        );
 
-      return InlineCustomWidget(
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 6.w,
-          children: [
-            // תמונה(ות) לפני
-            if (imgs.isNotEmpty) displayFile(
-              imgs.first.attributes['src']!,
-              imgs.first.attributes['height'],
-              imgs.first.attributes['width'],
-              WidgetType.image,
+        // האם יש תמונה בתוך ה-span (מגיע מ-{11}√{2}<img>)
+        final imgs = element.querySelectorAll('img');
+
+        if (imgs.isNotEmpty) {
+          // יש תמונה: מרכיבים widget אחד רחב
+          // RTL Row: הילד הראשון מוצב בצד ימין
+          //   children: [input1, √, input2, space, image]
+          //   → input1 ("11") בצד ימין, תמונה בצד שמאל
+          //   ← קריאה RTL (ימין←שמאל): INPUT_11 | √ | INPUT_2 | IMAGE ✓
+          // LTR Row: הילד הראשון מוצב בצד שמאל
+          //   → input1 ("11") בצד שמאל, תמונה בצד ימין ✓
+          final imageWidget = displayFile(
+            imgs.first.attributes['src']!,
+            imgs.first.attributes['height'],
+            imgs.first.attributes['width'],
+            WidgetType.image,
+          );
+          // אותם ילדים — textDirection בלבד קובע ימין/שמאל
+          final rowChildren = <Widget>[
+            inputWidget1, textPadding, inputWidget2,
+            SizedBox(width: 6.w), imageWidget,
+          ];
+          return InlineCustomWidget(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              textDirection: isLtr ? TextDirection.ltr : TextDirection.rtl,
+              children: rowChildren,
             ),
+          );
+        }
 
-            // האינפוט באמצע
-            widget.onInputWidgetRequested!([inputVal, answer]),
+        // אין תמונה — ברירת מחדל: RTL Row
+        // RTL: input1 ימינה, טקסט באמצע, input2 שמאלה
+        return InlineCustomWidget(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            textDirection: TextDirection.rtl,
+            children: [
+              inputWidget1,
+              textPadding,
+              inputWidget2,
+            ],
+          ),
+        );
+      }
 
-            // שאר התמונות אחרי
-            ...imgs.skip(1).map((img) => displayFile(
-              img.attributes['src']!,
-              img.attributes['height'],
-              img.attributes['width'],
-              WidgetType.image,
-            )),
-          ],
-        ),
-      );
-    }
+      if (element.localName == 'span' &&
+          element.attributes['data-layout'] == 'triple' &&
+          widget.onInputWidgetRequested != null) {
 
-    if (element.localName == 'span' &&
-        element.attributes.containsKey('data-input') &&
-        widget.onInputWidgetRequested != null) {
-      final value = element.attributes['data-input'];
-      final answer = element.attributes['data-answer'];
+        final inputVal = element.attributes['data-input'];
+        final answer   = element.attributes['data-answer'];
 
-      return InlineCustomWidget(
-        child: widget.onInputWidgetRequested!([value, answer]),
-      );
-    }
+        if (inputVal == null) return null;
+
+        final imgs = element.querySelectorAll('img');
+
+        return InlineCustomWidget(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6.w,
+            children: [
+              // תמונה(ות) לפני
+              if (imgs.isNotEmpty) displayFile(
+                imgs.first.attributes['src']!,
+                imgs.first.attributes['height'],
+                imgs.first.attributes['width'],
+                WidgetType.image,
+              ),
+
+              // האינפוט באמצע
+              widget.onInputWidgetRequested!([inputVal, answer]),
+
+              // שאר התמונות אחרי
+              ...imgs.skip(1).map((img) => displayFile(
+                img.attributes['src']!,
+                img.attributes['height'],
+                img.attributes['width'],
+                WidgetType.image,
+              )),
+            ],
+          ),
+        );
+      }
+
+      if (element.localName == 'span' &&
+          element.attributes.containsKey('data-input') &&
+          widget.onInputWidgetRequested != null) {
+        final value = element.attributes['data-input'];
+        final answer = element.attributes['data-answer'];
+
+        return InlineCustomWidget(
+          child: widget.onInputWidgetRequested!([value, answer]),
+        );
+      }
     }catch(e,s)
-{
-  debugPrint('error $e');
-  debugPrint(s.toString());
-}
+    {
+      debugPrint('error $e');
+      debugPrint(s.toString());
+    }
     if (element.localName == 'img') {
       // debugPrint('srcAttribute $srcAttribute');
       if (srcAttribute != null) {
-          return InlineCustomWidget(
-            child: displayFile(srcAttribute, height, width, WidgetType.image,
-                alt: element.attributes['alt']),
-          );
+        return InlineCustomWidget(
+          child: displayFile(srcAttribute, height, width, WidgetType.image,
+              alt: element.attributes['alt']),
+        );
       }
     }
     if (element.localName == 'audio') {
@@ -354,14 +460,14 @@ try{
       {isLesson = false,String? alt=''}) {
     String src=srcAttribute;
     if(alt!=null && alt.isNotEmpty)
-      {
-        final cleanAlt = alt.trim();
+    {
+      final cleanAlt = alt.trim();
 
-        if (cleanAlt.isNotEmpty && cleanAlt != '/' && cleanAlt != 'null') {
-          src += cleanAlt;
-          debugPrint('src $src');
-        }
+      if (cleanAlt.isNotEmpty && cleanAlt != '/' && cleanAlt != 'null') {
+        src += cleanAlt;
+        debugPrint('src $src');
       }
+    }
     return FutureBuilder<File?>(
       // future: getCurrentFile(srcAttribute),
       future: getCurrentFile(src.split('/').last, isLesson),
@@ -411,20 +517,20 @@ try{
                           );
                         }
 
-                          return SizedBox(
-                            // width: image.width.toDouble(),
-                            // height: image.height.toDouble(),
-                            //width:width!=null? double.tryParse(width):image.width.toDouble(),
-                            width: double.tryParse(width ?? '') ??
-                                image.width.toDouble(),
-                            height: double.tryParse(height ?? '') ??
-                                image.height.toDouble(),
-                            child: Image.file(
-                              file,
-                              fit: BoxFit.contain,
-                              filterQuality: FilterQuality.high,
-                            ),
-                          );
+                        return SizedBox(
+                          // width: image.width.toDouble(),
+                          // height: image.height.toDouble(),
+                          //width:width!=null? double.tryParse(width):image.width.toDouble(),
+                          width: double.tryParse(width ?? '') ??
+                              image.width.toDouble(),
+                          height: double.tryParse(height ?? '') ??
+                              image.height.toDouble(),
+                          child: Image.file(
+                            file,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                          ),
+                        );
 
                       } else {
                         return const CircularProgressIndicator();
@@ -499,18 +605,18 @@ try{
             '${widget.quizId}/$fileName';
         final file = File(path);
         if (file.existsSync()) {
-            debugPrint('ffffff path $path');
-            return file;
+          debugPrint('ffffff path $path');
+          return file;
         }
         else
-          {
-            debugPrint('ffffff do not find path $path');
-          }
+        {
+          debugPrint('ffffff do not find path $path');
+        }
       }
 
       return null;
     }
-      else {
+    else {
       if (!isLesson) {
         path =
         //  '${appSupportDir!.path}/${Constants.lessonPath}/${MainPageChild.of(context)!.widget.course.id}/$srcAttribute';
@@ -569,7 +675,7 @@ try{
       r'(<img\b[^>]*>)(?!\s*<br\s*/?>)',
       caseSensitive: false,
     );
- //return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
+    //return html.replaceAllMapped(re, (m) => '${m[1]}<br/>');
     return html;
   }
 
@@ -590,6 +696,24 @@ try{
     // }
 
     return result;
+  }
+
+  // מוסיף <br/> בין פריטים עוקבים כדי שכל פריט יופיע בשורה נפרדת.
+  // מטפל בשני מקרים:
+  //   1. </span> לפני <span data-input  (pair / text-between → פריט)
+  //   2. <img/> לפני <span data-input   (תמונה חופשית → פריט, למשל אחרי {11}√{2}<img>)
+  String restoreRowBreaks(String html) {
+    // מקרה 1: </span> ישירות לפני <span data-input
+    html = html.replaceAllMapped(
+      RegExp(r'</span>\s*(?=<span\b[^>]*data-input)', caseSensitive: false),
+      (_) => '</span><br/>',
+    );
+    // מקרה 2: <img .../> ישירות לפני <span data-input
+    html = html.replaceAllMapped(
+      RegExp(r'(<img\b[^>]*/?>)\s*(?=<span\b[^>]*data-input)', caseSensitive: false),
+      (m) => '${m.group(1)!}<br/>',
+    );
+    return html;
   }
 
   String removeDirectionStyle(String html) {
@@ -639,8 +763,10 @@ try{
     }
 
     // ===== מקרה 0: img + span + img  ==> triple =====
+    // (?<!</span>) = לא להתחיל triple כאשר ה-img הראשון בא מיד אחרי </span>
+    // (כלומר: img ששייכת לפריט הקודם — מונע חיבור בין-פריטי שגוי)
     final reTriple = RegExp(
-      r'(<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)'
+      r'(?<!</span>)(<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)'
       r'(?:\s*</?(?:strong|b|em)>\s*)*'
       r'(?:\s*<br\s*/?>\s*)*'
       r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
@@ -666,11 +792,48 @@ try{
       );
     });
 
-    // ===== מקרה 1: span ואז תמונות =====
-    final reInputFirst = RegExp(
+    // ===== מקרה 0.5: span + טקסט (לא HTML) + span  ==>  text-between =====
+    // מזהה {A}TEXT{B} כמו {11}√{2} ועוטף אותם ב-widget אחד שמציג
+    // [INPUT_A] TEXT [INPUT_B] כ-Row מפורש — כך √ תמיד באמצע.
+    // תומך גם ב-{11}√{2}<img> — מוסיף <img> לתוך ה-span כדי שהתמונה
+    // תיכלל באותו widget (widget אחד רחב, לא שני אלמנטים נפרדים).
+    // חייב לרוץ לפני reInputFirst כדי לצרוך את שני ה-spans לפני שהם מתפרדים.
+    final reTextBetween = RegExp(
       r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
+      r'([^<]*[^<\s][^<]*)'  // טקסט ללא תגי HTML: לפחות תו אחד שאינו < ואינו רווח
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
+      r'((?:\s*<br\s*/?>\s*)*<img\b[^>]*>)?',  // תמונה אופציונלית אחרי (גם אם יש <br/> ביניהם)
+      caseSensitive: false,
+    );
+    html = html.replaceAllMapped(reTextBetween, (m) {
+      final span1        = m.group(1)!;
+      final textBetween  = m.group(2)!.trim();
+      final span2        = m.group(3)!;
+      final trailingImg  = m.group(4)?.trim(); // null אם אין תמונה
+      final input1  = _getAttr(span1, 'data-input')  ?? '';
+      final answer1 = _getAttr(span1, 'data-answer');
+      final input2  = _getAttr(span2, 'data-input')  ?? '';
+      final answer2 = _getAttr(span2, 'data-answer');
+      final buf = StringBuffer('<span data-layout="text-between"');
+      buf.write(' data-input1="$input1"');
+      if (answer1 != null) buf.write(' data-answer1="$answer1"');
+      buf.write(' data-input2="$input2"');
+      if (answer2 != null) buf.write(' data-answer2="$answer2"');
+      buf.write(' data-text="${textBetween.replaceAll('"', '&quot;')}"');
+      buf.write('>');
+      if (trailingImg != null) buf.write(trailingImg); // <img> בתוך ה-span
+      buf.write('</span>');
+      return buf.toString();
+    });
+
+    // ===== מקרה 1: span ואז תמונות =====
+    // (?<![^\s>]) = רק כאשר ה-span מגיע אחרי רווח או '>' (תג/תחילת מחרוזת).
+    // מונע pairing של span שמגיע אחרי טקסט כמו √ — כך שני spans עוקבים
+    // (למשל {11}√{2}) נשארים ביחד ולא מופרדים ע"י התמונה.
+    final reInputFirst = RegExp(
+      r'(?<![^\s>])(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
       r'(?:\s*</?(?:strong|b|em)>\s*)*'
-      r'(?:\s*<br\s*/?>\s*)*'
+      r'(?:\s*<br\s*/?>\s*)?'   // לכל היותר <br/> אחד — שני <br/> (שורה ריקה) = פריטים נפרדים
       r'((?:\s*<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)+)',
       caseSensitive: false,
     );
@@ -692,8 +855,10 @@ try{
     });
 
     // ===== מקרה 2: תמונות ואז span =====
+    // (?<!</span>) = אסור ל-img להיות מיד אחרי </span> (כלומר אחרי text-between/pair)
+    // מונע חיבור שגוי של תמונה "חופשית" (שנותרה מביטוי קודם) לפריט הבא.
     final reImgFirst = RegExp(
-      r'((?:\s*<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)+)'
+      r'(?<!</span>)((?:\s*<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)+)'
       r'(?:\s*</?(?:strong|b|em)>\s*)*'
       r'(?:\s*<br\s*/?>\s*)*'
       r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)',
