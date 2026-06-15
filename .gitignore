@@ -42,3 +42,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local HTML-normalization verification scratch tool (not part of the app)
+/trace_html.dart

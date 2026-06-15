@@ -73,19 +73,35 @@ class _FillInState extends State<FillIn> {
     int i = 0;
     int j = 0;
 
+    // יישור נפרד לשאלה ולתשובה — כל אחד לפי הכיוון של עצמו:
+    //   תוכן עם direction: ltr / text-align: left → אנגלית → שמאל.
+    //   אחרת (עברית, או מתמטיקה עם text-align: right) → ימין.
+    // חשוב: בשאלות תרגום השאלה בעברית (ימין) אבל התשובה באנגלית (שמאל) —
+    // ולכן אסור לחשב יישור אחד משולב משניהם.
+    Alignment alignOf(String html) =>
+        (html.contains('text-align: left') || html.contains('direction: ltr'))
+            ? Alignment.centerLeft
+            : Alignment.centerRight;
+    final Alignment qAlign = alignOf(widget.question.question);
+    final Alignment aAlign = alignOf(widget.question.ans?.first.ans ?? '');
+    debugPrint('FILLIN_ALIGN qAlign=$qAlign aAlign=$aAlign '
+        'q="${widget.question.question}" ans="${widget.question.ans?.first.ans}"');
+
     return Padding(
       padding: EdgeInsets.only(top: 25.h),
-      child: /* FocusTraversalGroup(
-          policy: OrderedTraversalPolicy(),
-          child:*/
-          Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+      // SizedBox רוחב-מלא: בלי זה ה-Column מתכווץ לרוחב התוכן וה-Column החיצוני
+      // (questionnaire_tab) ממרכז את כולו.
+      child: SizedBox(
+          width: double.infinity,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: [
             Container(
-              margin: EdgeInsets.only(right: 10.w),
-
+              width: double.infinity,
+              alignment: qAlign,
+              padding: EdgeInsets.only(right: 10.w),
               child: HtmlDataWidget(
                 widget.question.question,
                 quizId: widget.question
@@ -95,23 +111,24 @@ class _FillInState extends State<FillIn> {
             SizedBox(
               height: 35.h,
             ),
-            Center(
-                child: Container(
-                  margin: EdgeInsets.only(right: 10.w),
-                  child: HtmlDataWidget(
-                      correctHtml.isEmpty
-                         ? replaceCurlyBracesWithTextFields(
-                              widget.question.ans!.first.ans)
-                          : correctHtml
-                      ,quizId: widget.question.quizId,
-                      onInputWidgetRequested: (s) {
-                                // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
-                                // myControllers.add(textEditingController);
-                                return createTextField(
-                    myControllers[i++], focusNodes[j++], i - 1);
-                              }),
-                )),
-          ]),
+            Container(
+                width: double.infinity,
+                alignment: aAlign,
+                padding: EdgeInsets.only(right: 10.w),
+                child: HtmlDataWidget(
+                    correctHtml.isEmpty
+                       ? replaceCurlyBracesWithTextFields(
+                            widget.question.ans!.first.ans)
+                        : correctHtml
+                    ,quizId: widget.question.quizId,
+                    onInputWidgetRequested: (s) {
+                              // var textEditingController = TextEditingController(text: correctAnswers[i++].first );
+                              // myControllers.add(textEditingController);
+                              return createTextField(
+                  myControllers[i++], focusNodes[j++], i - 1);
+                            }),
+                ),
+          ])),
     );
   }
 

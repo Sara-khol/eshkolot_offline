@@ -71,11 +71,42 @@ class _FreeChoiceState extends State<FreeChoice> {
 
   @override
   Widget build(BuildContext context) {
+    // היישור נקבע לפי text-align (זה מה ש-text-align אומר!), לא לפי direction.
+    // direction קובע כיוון קריאה (LTR למתמטיקה) — לא יישור בלוק.
+    //   text-align: right → ימין.  text-align: left → שמאל.
+    //   אין text-align → לפי תוכן: אותיות לטיניות בלי עברית → שמאל; אחרת ימין
+    //   (ברירת מחדל ימין, כי האפליקציה עברית; מתמטיקה טהורה ללא אותיות → ימין).
+    final String qHtml = widget.question.question;
+    final String qText = qHtml.replaceAll(RegExp(r'<[^>]*>'), ' '); // בלי תגיות
+    final bool qHasHebrew = isHebrew(qText);
+    final bool qHasLatin = RegExp(r'[a-zA-Z]').hasMatch(qText);
+    final bool qIsLtr;
+    if (qHtml.contains('text-align: right')) {
+      qIsLtr = false;
+    } else if (qHtml.contains('text-align: left')) {
+      qIsLtr = true;
+    } else {
+      qIsLtr = qHasLatin && !qHasHebrew;
+    }
+    final Alignment qAlign =
+        qIsLtr ? Alignment.centerLeft : Alignment.centerRight;
+    final Alignment boxAlign = qAlign;
+    debugPrint('FREECHOICE_ALIGN qAlign=$qAlign boxAlign=$boxAlign '
+        'q="$qHtml" ans0="${ansList.first}"');
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HtmlDataWidget(widget.question.question,quizId: widget.question.quizId,),
+        Container(
+          width: double.infinity,
+          alignment: qAlign,
+          child: HtmlDataWidget(widget.question.question, quizId: widget.question.quizId),
+        ),
         SizedBox(height: 10.h,),
-        createTextField(myController)
+        Container(
+          width: double.infinity,
+          alignment: boxAlign,
+          child: createTextField(myController),
+        ),
       ],
     );
   }

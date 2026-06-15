@@ -59,7 +59,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
               debugPrint('noDirrrrr');
               raw = removeDirectionStyle(raw);
             }
-            final withLines = normalizeLineBreaks(raw);
+            final withLines = normalizeLtrDirToStyle(normalizeValueEqualsImg(normalizeLineBreaks(raw)));
 
             final fixed = restoreRowBreaks(normalizeNumberedEquationLine(normalizeInputImgBlock(normalizeStrongWrappedImgInput(withLines))));
             debugPrint('html: $fixed');
@@ -92,6 +92,90 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
 
 
+  // מרנדר את ילדי פסקת-האלגברה כרשימת widgets *אטומיים* ל-Wrap RTL.
+  // קריטי: pair/triple/text-between מפורקים ל-tokens נפרדים (תיבה, טקסט, תמונה)
+  // ולא נשארים widget אחד — כדי שה-Wrap יוכל לשבור שורה *ביניהם* כמו הדפדפן
+  // (אחרת תיבה "תקועה" בתוך composite לא יורדת לשורה הבאה). הסדר נשמר כמקור;
+  // ה-Wrap עם textDirection: rtl הופך אותו לימין-לשמאל.
+  // חשוב: בקשות הקלט (onInputWidgetRequested → counter) נשארות בסדר המקור.
+  List<Widget> _renderRtlInline(List<dom.Node> nodes) {
+    final out = <Widget>[];
+    final style = widget.textStyle ??
+        TextStyle(fontSize: 27.sp, fontWeight: FontWeight.w400, color: blackColorApp);
+
+    List<dom.Element> imgsIn(dom.Element e) {
+      final r = <dom.Element>[];
+      void walk(dom.Node n) {
+        if (n is dom.Element) {
+          if (n.localName == 'img') r.add(n);
+          for (final c in n.nodes) walk(c);
+        }
+      }
+      walk(e);
+      return r;
+    }
+
+    Widget imgWidget(dom.Element img) => displayFile(img.attributes['src']!,
+        img.attributes['height'], img.attributes['width'], WidgetType.image,
+        alt: img.attributes['alt']);
+
+    Widget? inputWidget(String? val, String? ans) =>
+        widget.onInputWidgetRequested != null
+            ? widget.onInputWidgetRequested!([val, ans])
+            : null;
+
+    void addText(String raw) {
+      var t = raw.replaceAll(RegExp(r'\s+'), ' ').trim();
+      if (t.isEmpty) return;
+      t = t.replaceAllMapped(RegExp(r'\.(\d+)'), (m) => '${m[1]}.'); // ".3"→"3."
+      out.add(Text(t, style: style, textDirection: TextDirection.rtl));
+    }
+
+    for (final node in nodes) {
+      if (node is dom.Element) {
+        final tag = node.localName;
+        final layout = node.attributes['data-layout'];
+        if (tag == 'br') {
+          out.add(const SizedBox(width: double.infinity, height: 0));
+        } else if (tag == 'img') {
+          out.add(imgWidget(node));
+        } else if (tag == 'span' && layout == 'text-between') {
+          final i1 = inputWidget(node.attributes['data-input1'], node.attributes['data-answer1']);
+          final i2 = inputWidget(node.attributes['data-input2'], node.attributes['data-answer2']);
+          if (i1 != null) out.add(i1);
+          addText(node.attributes['data-text'] ?? '');
+          if (i2 != null) out.add(i2);
+          for (final img in imgsIn(node)) out.add(imgWidget(img));
+        } else if (tag == 'span' && layout == 'pair') {
+          final inp = inputWidget(node.attributes['data-input'], node.attributes['data-answer']);
+          final imgs = imgsIn(node);
+          if (node.attributes['data-order'] == 'input-first') {
+            if (inp != null) out.add(inp);
+            for (final img in imgs) out.add(imgWidget(img));
+          } else {
+            for (final img in imgs) out.add(imgWidget(img));
+            if (inp != null) out.add(inp);
+          }
+        } else if (tag == 'span' && layout == 'triple') {
+          final imgs = imgsIn(node);
+          final inp = inputWidget(node.attributes['data-input'], node.attributes['data-answer']);
+          if (imgs.isNotEmpty) out.add(imgWidget(imgs.first));
+          if (inp != null) out.add(inp);
+          for (final img in imgs.skip(1)) out.add(imgWidget(img));
+        } else if (tag == 'span' && node.attributes.containsKey('data-input')) {
+          final inp = inputWidget(node.attributes['data-input'], node.attributes['data-answer']);
+          if (inp != null) out.add(inp);
+        } else {
+          // strong/b/em/span-עיצוב/אחר → רקורסיה לתוכן
+          out.addAll(_renderRtlInline(node.nodes));
+        }
+      } else if (node is dom.Text) {
+        addText(node.text);
+      }
+    }
+    return out;
+  }
+
   Widget? displayWidgetByHtml(var element) {
     if (element is! dom.Element) return null;
 
@@ -102,6 +186,36 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     final fontWeightAttribute = element.attributes['font-weight'];
     final tagName = element.localName;
 
+    // ===== פסקת אלגברה RTL =====
+    // <p style="...text-align: left..."> ללא direction: ltr, שמכילה קלט = תוכן RTL
+    // (עברי/אלגברה) שיושר שמאל. fwfh מרנדר LTR ולא הופך את סדר האלמנטים כמו האתר,
+    // ולכן בונים בעצמנו Wrap עם textDirection: rtl ששולט בסדר. אנגלית מסומנת
+    // direction: ltr ולכן לא נכללת; פסקאות ללא קלט לא נכללות (כדי לצמצם השפעה).
+    if (element.localName == 'p') {
+      final style = element.attributes['style'] ?? '';
+      final isLeft =
+          RegExp(r'text-align:\s*left', caseSensitive: false).hasMatch(style);
+      final hasDirLtr =
+          RegExp(r'direction:\s*ltr', caseSensitive: false).hasMatch(style);
+      final hasInput = element.innerHtml.contains('data-input') ||
+          element.innerHtml.contains('data-layout');
+      if (isLeft && !hasDirLtr && hasInput) {
+        final kids = _renderRtlInline(element.nodes);
+        return Container(
+          width: double.infinity,
+          alignment: Alignment.centerLeft,
+          child: Wrap(
+            textDirection: TextDirection.rtl,
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4.w,
+            runSpacing: 6.h,
+            children: kids,
+          ),
+        );
+      }
+      return null; // שאר ה-<p> → fwfh מטפל כרגיל
+    }
 
     try{
       if (element.localName == 'span' &&
@@ -261,6 +375,78 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
 
 
 
+      // ===== fraction: עמודת מונה / קו / מכנה =====
+      // מוחזר כ-block widget (לא InlineCustomWidget) — מבטיח שורה נפרדת מעל התמונה
+      if (element.localName == 'span' &&
+          element.attributes['data-layout'] == 'fraction' &&
+          widget.onInputWidgetRequested != null) {
+        final input1  = element.attributes['data-input1'];
+        final answer1 = element.attributes['data-answer1'];
+        final input2  = element.attributes['data-input2'];
+        final answer2 = element.attributes['data-answer2'];
+        if (input1 == null || input2 == null) return null;
+
+        final numWidget = widget.onInputWidgetRequested!([input1, answer1]);
+        final denWidget = widget.onInputWidgetRequested!([input2, answer2]);
+
+        // InlineCustomWidget עם <br/> לפני ואחרי (ב-reFraction) = שורה נפרדת
+        return InlineCustomWidget(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              numWidget,
+              Container(
+                width: 140.w,
+                height: 2,
+                color: Colors.black,
+                margin: EdgeInsets.symmetric(vertical: 4.h),
+              ),
+              denWidget,
+            ],
+          ),
+        );
+      }
+
+      // ===== text-bar-stack: INPUT / טקסט-מקפים / INPUT (אנכי) =====
+      // למשל: {6|1} π —————— {7|1}  → Column של שלוש שורות, תמונה כ-block מתחת
+      if (element.localName == 'span' &&
+          element.attributes['data-layout'] == 'text-bar-stack' &&
+          widget.onInputWidgetRequested != null) {
+        final input1  = element.attributes['data-input1'];
+        final answer1 = element.attributes['data-answer1'];
+        final input2  = element.attributes['data-input2'];
+        final answer2 = element.attributes['data-answer2'];
+        final barText = element.attributes['data-bar'] ?? '';
+        if (input1 == null || input2 == null) return null;
+        final inputWidget1 = widget.onInputWidgetRequested!([input1, answer1]);
+        final inputWidget2 = widget.onInputWidgetRequested!([input2, answer2]);
+        final textStyle = widget.textStyle ??
+            TextStyle(fontSize: 27.sp, fontWeight: FontWeight.w400, color: blackColorApp);
+
+        return InlineCustomWidget(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            textDirection: TextDirection.rtl,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(right: 32.w),
+                child: inputWidget1,
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 2.h, bottom: 2.h, right: 16.w),
+                child: Text(barText, style: textStyle),
+              ),
+              Padding(
+                padding: EdgeInsets.only(right: 32.w),
+                child: inputWidget2,
+              ),
+            ],
+          ),
+        );
+      }
+
       // ===== text-between: [INPUT_A] טקסט [INPUT_B] (+ תמונה אופציונלית) =====
       // מטפל בביטויים כמו {11}√{2} ו-{11}√{2}<img> שהפכו ל-data-layout="text-between"
       if (element.localName == 'span' &&
@@ -288,31 +474,24 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
         final inputWidget1 = widget.onInputWidgetRequested!([input1, answer1]);
         final inputWidget2 = widget.onInputWidgetRequested!([input2, answer2]);
 
+        final textStyle = widget.textStyle ??
+            TextStyle(fontSize: 27.sp, fontWeight: FontWeight.w400, color: blackColorApp);
+
         final textPadding = Padding(
           padding: EdgeInsets.symmetric(horizontal: 6.w),
-          child: Text(textContent,
-              style: widget.textStyle ??
-                  TextStyle(fontSize: 27.sp, fontWeight: FontWeight.w400, color: blackColorApp)),
+          child: Text(textContent, style: textStyle),
         );
 
         // האם יש תמונה בתוך ה-span (מגיע מ-{11}√{2}<img>)
         final imgs = element.querySelectorAll('img');
 
         if (imgs.isNotEmpty) {
-          // יש תמונה: מרכיבים widget אחד רחב
-          // RTL Row: הילד הראשון מוצב בצד ימין
-          //   children: [input1, √, input2, space, image]
-          //   → input1 ("11") בצד ימין, תמונה בצד שמאל
-          //   ← קריאה RTL (ימין←שמאל): INPUT_11 | √ | INPUT_2 | IMAGE ✓
-          // LTR Row: הילד הראשון מוצב בצד שמאל
-          //   → input1 ("11") בצד שמאל, תמונה בצד ימין ✓
           final imageWidget = displayFile(
             imgs.first.attributes['src']!,
             imgs.first.attributes['height'],
             imgs.first.attributes['width'],
             WidgetType.image,
           );
-          // אותם ילדים — textDirection בלבד קובע ימין/שמאל
           final rowChildren = <Widget>[
             inputWidget1, textPadding, inputWidget2,
             SizedBox(width: 6.w), imageWidget,
@@ -327,18 +506,13 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
           );
         }
 
-        // אין תמונה — ברירת מחדל: RTL Row
-        // RTL: input1 ימינה, טקסט באמצע, input2 שמאלה
+        // אין תמונה — טקסט קצר (סמל מתמטי): Row פשוט
         return InlineCustomWidget(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
-            textDirection: TextDirection.rtl,
-            children: [
-              inputWidget1,
-              textPadding,
-              inputWidget2,
-            ],
+            textDirection: isLtr ? TextDirection.ltr : TextDirection.rtl,
+            children: [inputWidget1, textPadding, inputWidget2],
           ),
         );
       }
@@ -398,12 +572,20 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
       debugPrint(s.toString());
     }
     if (element.localName == 'img') {
-      // debugPrint('srcAttribute $srcAttribute');
       if (srcAttribute != null) {
-        return InlineCustomWidget(
-          child: displayFile(srcAttribute, height, width, WidgetType.image,
-              alt: element.attributes['alt']),
-        );
+        // תמונות עם גובה ≤50px = inline (נוסחאות / משוואות / סמלים — גם אם רחבות)
+        // תמונות עם גובה >50px = block (איורים / דיאגרמות — שורה נפרדת)
+        // הגיון: משוואה יכולה להיות 320×17, סמל חץ 19×19 — שניהם inline.
+        //        עיגול גיאומטרי 209×196 — block.
+        final h = double.tryParse(height ?? '');
+        final isInline = h != null && h <= 50;
+        final imgWidget = displayFile(srcAttribute, height, width, WidgetType.image,
+            alt: element.attributes['alt']);
+        // תמונות inline (נוסחאות/סמלים) זורמות בשורה. תמונות block (איורים) הן
+        // שורה נפרדת — ב-RTL הן צריכות להיות מיושרות לימין ולא ממורכזות.
+        return isInline
+            ? InlineCustomWidget(child: imgWidget)
+            : Align(alignment: Alignment.centerRight, child: imgWidget);
       }
     }
     if (element.localName == 'audio') {
@@ -699,20 +881,72 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
   }
 
   // מוסיף <br/> בין פריטים עוקבים כדי שכל פריט יופיע בשורה נפרדת.
-  // מטפל בשני מקרים:
-  //   1. </span> לפני <span data-input  (pair / text-between → פריט)
-  //   2. <img/> לפני <span data-input   (תמונה חופשית → פריט, למשל אחרי {11}√{2}<img>)
+  // הגישה: כל </span> או <img/> שאחריהם (אפשר עם טקסט ביניים, ללא תגי HTML)
+  //        מגיע <span data-input — מוסיפים <br/> כדי לשבור שורה לפני הפריט הבא.
+  // זה תופס גם מעבר ישיר ("</span><span>") וגם מעבר דרך טקסט תווית ("</span>מצא... <span>").
   String restoreRowBreaks(String html) {
-    // מקרה 1: </span> ישירות לפני <span data-input
+    // מקרה 0: <strong>N.</strong> או <strong>N. </strong> = מספר שאלה
+    // תופס גם <br> מרובים שלפניהם ומנרמל ל-<br/> יחיד (חוץ מהשאלה הראשונה שלא צריכה <br/>)
+    // דוגמאות: <strong>1.</strong>  /  <strong>1. </strong>  /  <br><br><strong>2.</strong>
+    bool firstQuestion = true;
+    html = html.replaceAllMapped(
+      RegExp(r'(?:<br\s*/?>\s*)*(<strong>\d+\.\s*</strong>)', caseSensitive: false),
+      (m) {
+        if (firstQuestion) {
+          firstQuestion = false;
+          return m.group(1)!;          // שאלה ראשונה — ללא <br/>
+        }
+        return '<br/>${m.group(1)!}';  // שאלות הבאות — בדיוק <br/> אחד, ללא קשר לכמה היו לפני
+      },
+    );
+    // בלוקים של <p style="text-align: left"> זורמים inline (LTR — אלגברה/אנגלית).
+    // אסור להוסיף בהם מעברי שורה היוריסטיים (מקרים 1a/1c/2/3): מעבר שורה אמיתי
+    // חייב להגיע מ-<br> מפורש במקור (ראו [[no-guessing-line-breaks]]).
+    // מסתירים את הבלוקים האלה, מריצים את שאר המקרים, ומשחזרים בסוף.
+    final ltrBlocks = <String>[];
+    html = html.replaceAllMapped(
+      RegExp(r'<p\b[^>]*text-align:\s*left[^>]*>.*?</p>',
+          caseSensitive: false, dotAll: true),
+      (m) {
+        ltrBlocks.add(m.group(0)!);
+        return '@@LTRBLOCK${ltrBlocks.length - 1}@@';
+      },
+    );
+    // מקרה 1a: </span> ישירות (עם רווח בלבד) לפני <span data-input
     html = html.replaceAllMapped(
       RegExp(r'</span>\s*(?=<span\b[^>]*data-input)', caseSensitive: false),
       (_) => '</span><br/>',
     );
-    // מקרה 2: <img .../> ישירות לפני <span data-input
+    // מקרה 1b הוסר — הוסיף <br/> על סמך אורך טקסט (≥10 תווים) שהיא הנחה שרירותית.
+    // אם ה-HTML המקורי לא מכיל \n בין אלמנטים — הם אמורים להיות על אותה שורה.
+    // normalizeLineBreaks כבר מטפל ב-\n → <br/>.
+    // מקרה 1c: </span> + מפריד-סמלים בלבד + <span data-input>
+    // תופס מפרידים כמו " = " בין pair spans (כבר אחרי שreTextBetween צרך סמלים מתמטיים).
+    // המפריד אסור שיכיל אותיות — עברית (א-ת) או אנגלית (a-zA-Z) — כדי לא לשבור
+    // משפטי תוכן: למשל "{Are} the singers ... {are}" באנגלית, או תווית עברית.
+    // רק סמלים/רווחים/מספרים (כמו " = ") מפרידים שתי תיבות לשורות נפרדות.
+    html = html.replaceAllMapped(
+      RegExp(r'</span>([^<א-תa-zA-Z]*)(?=<span\b[^>]*data-input)', caseSensitive: false),
+      (m) => '</span><br/>${m.group(1)}',
+    );
+    // מקרה 2: <img/> ישירות לפני <span data-input
     html = html.replaceAllMapped(
       RegExp(r'(<img\b[^>]*/?>)\s*(?=<span\b[^>]*data-input)', caseSensitive: false),
       (m) => '${m.group(1)!}<br/>',
     );
+    // מקרה 3: <span data-input> ישירות לפני span של קו שבר (id="קו_ארוך_[—]")
+    // מוסיף <br/> בין המונה לקו השבר כדי שהשבר יוצג אנכית: מונה / קו / מכנה
+    html = html.replaceAllMapped(
+      RegExp(
+        r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)\s*(?=<span\b[^>]*id="[^"]*קו_ארוך)',
+        caseSensitive: false,
+      ),
+      (m) => '${m.group(1)!}<br/>',
+    );
+    // שחזור בלוקי ה-LTR שהוסתרו
+    for (int k = 0; k < ltrBlocks.length; k++) {
+      html = html.replaceAll('@@LTRBLOCK$k@@', ltrBlocks[k]);
+    }
     return html;
   }
 
@@ -721,6 +955,49 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     return html.replaceAll(
       RegExp(r'direction\s*:\s*ltr\s*!important;?', caseSensitive: false),
       '',
+    );
+  }
+
+  // מיישר שורות שכתובות הפוך במקור: {קלט} =<img תווית>  →  <img תווית> = {קלט}
+  // כל שאר השאלות כתובות "תווית = קלט" (תמונה ואז קלט). ב-4.3 דווקא ה-a₁/S₉
+  // נכתבו "קלט = תווית" (ערך ואז תמונה) ומחוץ ל-<p dir=ltr>, מה שגרם לתצוגה הפוכה.
+  // ההמרה דטרמיניסטית (לא ניחוש) ומאחדת לכיוון אחד עקבי.
+  String normalizeValueEqualsImg(String html) {
+    return html.replaceAllMapped(
+      RegExp(r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)\s*=\s*(<img\b[^>]*>)',
+          caseSensitive: false),
+      (m) => '${m.group(2)} = ${m.group(1)}',
+    );
+  }
+
+  // <p dir="ltr" ... text-align: left ...> = תוכן אנגלי LTR. fwfh מתעלם מ-dir
+  // attribute ומכבד רק direction ב-style, ובנוסף ה-<p> handler של האלגברה תופס
+  // בטעות בלוקים כאלה (text-align:left + קלט). מוסיפים direction: ltr ל-style כדי:
+  //   (1) ש-fwfh ירנדר LTR, (2) שה-handler לא יתפוס (כי hasDirLtr יהיה true).
+  // לא נוגע באלגברה (אין לה dir) ולא במתמטיקה (text-align:right).
+  String normalizeLtrDirToStyle(String html) {
+    return html.replaceAllMapped(
+      RegExp(r'<p\b([^>]*)>', caseSensitive: false),
+      (m) {
+        final attrs = m.group(1)!;
+        final hasDirLtr =
+            RegExp('''dir\\s*=\\s*["']ltr["']''', caseSensitive: false).hasMatch(attrs);
+        final hasLeft =
+            RegExp(r'text-align:\s*left', caseSensitive: false).hasMatch(attrs);
+        final hasDirectionStyle =
+            RegExp(r'direction:\s*ltr', caseSensitive: false).hasMatch(attrs);
+        if (hasDirLtr && hasLeft && !hasDirectionStyle) {
+          if (RegExp(r'style\s*=', caseSensitive: false).hasMatch(attrs)) {
+            final newAttrs = attrs.replaceFirstMapped(
+              RegExp('style\\s*=\\s*"([^"]*)"', caseSensitive: false),
+              (s) => 'style="${s.group(1)} direction: ltr;"',
+            );
+            return '<p$newAttrs>';
+          }
+          return '<p$attrs style="direction: ltr;">';
+        }
+        return m.group(0)!;
+      },
     );
   }
 
@@ -762,6 +1039,76 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
       return b.toString();
     }
 
+    // ===== מקרה FRACTION: span + קו_ארוך_span(s) + span ==> fraction =====
+    // מזהה {מונה} + <span id="קו_ארוך_[—]">————</span> + {מכנה}
+    // ועוטף אותם ב-data-layout="fraction" → יוצג כ-Column (מונה / קו / מכנה)
+    // חייב לרוץ לפני reInputFirst כדי שהמכנה לא ייצמד לתמונה שאחריו
+    final reFraction = RegExp(
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'   // מונה
+      r'\s*'
+      // קו השבר — span אחד או יותר עם id=קו_ארוך; מאפשר <br/> אחרי כל span
+      r'((?:<span\b[^>]*id="[^"]*קו_ארוך[^"]*"[^>]*>[^<]*</span>(?:\s*<br\s*/?>\s*)*\s*)+)'
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)',   // מכנה
+      caseSensitive: false,
+    );
+
+    html = html.replaceAllMapped(reFraction, (m) {
+      final span1   = m.group(1)!;
+      final span2   = m.group(3)!;
+      final input1  = _getAttr(span1, 'data-input')  ?? '';
+      final answer1 = _getAttr(span1, 'data-answer');
+      final input2  = _getAttr(span2, 'data-input')  ?? '';
+      final answer2 = _getAttr(span2, 'data-answer');
+      final buf = StringBuffer('<span data-layout="fraction"');
+      buf.write(' data-input1="$input1"');
+      if (answer1 != null) buf.write(' data-answer1="$answer1"');
+      buf.write(' data-input2="$input2"');
+      if (answer2 != null) buf.write(' data-answer2="$answer2"');
+      buf.write('></span>');
+      // <br/> לפני ואחרי מבטיחים שורה נפרדת מ-yi. שלפניו ומהתמונה שאחריו
+      return '<br/>${buf.toString()}<br/>';
+    });
+
+    // ===== מקרה TEXT-BAR-STACK: span + טקסט-עם-מקפים + span + img =====
+    // למשל: {6|1} π -------------- <strong><em> </em></strong> {7|1} <img/>
+    // ממיר ל-data-layout="text-bar-stack" + img עצמאי (block)
+    // כך שה-Column מציג INPUT1 / טקסט / INPUT2 אנכית, והתמונה מתחת כ-block.
+    //
+    // גישה: Tempered Greedy Token — (?:(?!<span\b[^>]*data-input).)
+    //   = כל תו שאינו פותח span עם data-input (כלומר: לא חוצה לspan אחר).
+    //   dotAll:true — . מתאים גם לשורות חדשות (אם נותרו אחרי normalizeLineBreaks).
+    //   *? lazy — עוצר ב-span2 בהקדם האפשרי.
+    final reFractionTextBarPair = RegExp(
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'                       // span1 ריק (group1)
+      r'((?:(?!<span\b[^>]*data-input).)*?-{3,}(?:(?!<span\b[^>]*data-input).)*?)' // תוכן עם 3+ מקפים (group2)
+      r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'                       // span2 ריק (group3)
+      r'\s*(<img\b[^>]*/?>)',                                                     // img עצמאי (group4)
+      caseSensitive: false,
+      dotAll: true,
+    );
+    debugPrint('FRAC_BAR_MATCH: ${reFractionTextBarPair.hasMatch(html)}');
+    html = html.replaceAllMapped(reFractionTextBarPair, (m) {
+      // מסיר תגי HTML מהתוכן (כגון <strong><em>...</em></strong>) לקבלת טקסט רגיל
+      final bar = m.group(2)!.replaceAll(RegExp(r'<[^>]+>'), '').trim();
+      debugPrint('reFractionTextBarPair MATCHED: bar="$bar"');
+      final span1  = m.group(1)!;
+      final span2  = m.group(3)!;
+      final imgTag = m.group(4)!;
+      final input1  = _getAttr(span1, 'data-input')  ?? '';
+      final answer1 = _getAttr(span1, 'data-answer');
+      final input2  = _getAttr(span2, 'data-input')  ?? '';
+      final answer2 = _getAttr(span2, 'data-answer');
+      final buf = StringBuffer('<span data-layout="text-bar-stack"');
+      buf.write(' data-input1="${input1.replaceAll('"', '&quot;')}"');
+      if (answer1 != null) buf.write(' data-answer1="${answer1.replaceAll('"', '&quot;')}"');
+      buf.write(' data-bar="${bar.replaceAll('"', '&quot;')}"');
+      buf.write(' data-input2="${input2.replaceAll('"', '&quot;')}"');
+      if (answer2 != null) buf.write(' data-answer2="${answer2.replaceAll('"', '&quot;')}"');
+      buf.write('></span>');
+      buf.write(imgTag);
+      return buf.toString();
+    });
+
     // ===== מקרה 0: img + span + img  ==> triple =====
     // (?<!</span>) = לא להתחיל triple כאשר ה-img הראשון בא מיד אחרי </span>
     // (כלומר: img ששייכת לפריט הקודם — מונע חיבור בין-פריטי שגוי)
@@ -800,7 +1147,7 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     // חייב לרוץ לפני reInputFirst כדי לצרוך את שני ה-spans לפני שהם מתפרדים.
     final reTextBetween = RegExp(
       r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
-      r'([^<]*[^<\s][^<]*)'  // טקסט ללא תגי HTML: לפחות תו אחד שאינו < ואינו רווח
+      r'([^<\r\nא-ת]{1,20})'  // סמל מתמטי קצר בלבד (√ / = / +), ללא עברית ומקסימום 20 תווים
       r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
       r'((?:\s*<br\s*/?>\s*)*<img\b[^>]*>)?',  // תמונה אופציונלית אחרי (גם אם יש <br/> ביניהם)
       caseSensitive: false,
@@ -833,7 +1180,8 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     final reInputFirst = RegExp(
       r'(?<![^\s>])(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)'
       r'(?:\s*</?(?:strong|b|em)>\s*)*'
-      r'(?:\s*<br\s*/?>\s*)?'   // לכל היותר <br/> אחד — שני <br/> (שורה ריקה) = פריטים נפרדים
+      // אין <br/> כאן — אסור לחצות גבול שורה!
+      // {span}<br><img> = span בשורה 1, img תווית של שורה 2 — לא pair אחד
       r'((?:\s*<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)+)',
       caseSensitive: false,
     );
@@ -857,10 +1205,13 @@ class _HtmlDataWidgetState extends State<HtmlDataWidget> {
     // ===== מקרה 2: תמונות ואז span =====
     // (?<!</span>) = אסור ל-img להיות מיד אחרי </span> (כלומר אחרי text-between/pair)
     // מונע חיבור שגוי של תמונה "חופשית" (שנותרה מביטוי קודם) לפריט הבא.
+    // התמונה והקלט חייבים להיות באותה שורה — אסור לחצות <br/>.
+    // (אחרת תמונה בסוף שורה נתפסת ומזווגת לקלט של השורה הבאה — באג הזיווג ב-4.3:
+    //  {656} =<img a1/><br>{1309}... → a1 נחטפה ל-1309 ו-656/s9 נותרו יתומים.)
+    // קבוצת התמונות מאפשרת רק רווחים/strong|b|em ביניהן, ללא <br/>.
     final reImgFirst = RegExp(
-      r'(?<!</span>)((?:\s*<img\b[^>]*>\s*(?:<br\s*/?>\s*)*)+)'
+      r'(?<!</span>)((?:\s*<img\b[^>]*>\s*)+)'
       r'(?:\s*</?(?:strong|b|em)>\s*)*'
-      r'(?:\s*<br\s*/?>\s*)*'
       r'(<span\b[^>]*data-input="[^"]*"[^>]*>\s*</span>)',
       caseSensitive: false,
     );

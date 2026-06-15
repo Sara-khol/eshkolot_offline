@@ -182,8 +182,9 @@ class _OrderSelectionMatrixWidgetState
                           width: isHtml ? maxTextWidth :  math.min(maxTextWidth + 20, 400.w)
                             ,
                           padding: EdgeInsets.all(10.h),
-                          child: isHtml
-                              ? HtmlDataWidget(randomList[i],
+                          child: isHtml || isHtmlContent(randomList[i])
+                              ? HtmlDataWidget(
+                                  '<div style="text-align: center;">${randomList[i]}</div>',
                                   quizId: widget.question.quizId,
                                   isImageMatrix: randomList[i].contains('<img'))
                               : Center(
@@ -301,6 +302,11 @@ class _OrderSelectionMatrixWidgetState
     return maxWidth;
   }
 
+
+  // בדיקה אמיתית אם המחרוזת מכילה תגי HTML (כמו ב-HtmlDataWidget.isHTML).
+  // משלים את ה-flag isHtml (ans.first.html) שלפעמים false למרות שהתוכן הוא HTML.
+  bool isHtmlContent(String s) =>
+      RegExp('<[^>]*>', multiLine: true, caseSensitive: false).hasMatch(s);
 
   Widget dragWidget(int i,
       {bool changeBackground = false,
@@ -479,8 +485,9 @@ class _OrderSelectionMatrixWidgetState
                           width: isHtml ? maxTextWidth : math.min(maxTextWidth + 20, 400.w)
     ,
                           padding: EdgeInsets.all(10.h),
-                          child: isHtml
-                              ? HtmlDataWidget(randomList[i],
+                          child: isHtml || isHtmlContent(randomList[i])
+                              ? HtmlDataWidget(
+                                  '<div style="text-align: center;">${randomList[i]}</div>',
                                   quizId: widget.question.quizId,
                                   isImageMatrix: randomList[i].contains('<img'))
                               : Text(
